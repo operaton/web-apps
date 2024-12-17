@@ -6,8 +6,9 @@ The accompanying web apps for the Operaton BPM system.
 
 You require the following software to run the app
 
-- An up-to-date version of `node.js` 
-- An API for the backend to consume ([example](https://github.com/javahippie/operaton-spring-boot-example))
+- [Preact & Vite Setup](https://preactjs.com/guide/v10/getting-started#create-a-vite-powered-preact-app)
+  - An up-to-date version of `node.js` 
+- An Operaton API for the backend to consume ([example](https://github.com/javahippie/operaton-spring-boot-example))
 
 ## Running the app
 
