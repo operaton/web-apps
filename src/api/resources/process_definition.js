@@ -1,11 +1,10 @@
-import { GET } from '../helper.jsx'
+import { GET, GET_TEXT, POST } from '../helper.jsx'
 
 export const get_process_definitions = (state) =>
   GET('/process-definition/statistics', state, state.api.process.definition.list)
 
 export const get_process_definition_statistics_with_incidents = (state, id) =>
   GET(`/process-definition/${id}/statistics?incidents=true`, state, state.api.process.definition.statistics)
-
 
 export const get_process_definition = (state, id) =>
   GET(`/process-definition/${id}`, state, state.api.process.definition.one)
@@ -21,7 +20,6 @@ export const get_called_process_definitions = (state, definition_id) =>
  */
 export const get_diagram = (state, process_definition_id) =>
   GET(`/process-definition/${process_definition_id}/xml`, state, state.api.process.definition.diagram)
-
 
 /**
  * Fetches statistics and all details for a single process definition
@@ -57,7 +55,29 @@ export const get_diagram = (state, process_definition_id) =>
 export const get_process_definition_by_deployment_id = (state, deployment_id, resource_name) =>
   GET(`/process-definition?deploymentId=${deployment_id}&resourceName=${encodeURIComponent(resource_name)}`, state, state.api.process.definition.one)
 
-    // .then(() => state.api.process.definition.one = state.api.process.definition.one[0])
+// .then(() => state.api.process.definition.one = state.api.process.definition.one[0])
+
+const url_params = () =>
+  new URLSearchParams({
+    latest: true,
+    active: true,
+    startableInTasklist: true,
+    startablePermissionCheck: true,
+    firstResult: 0,
+    maxResults: 15
+  }).toString()
+
+const get_startable_process_definitions = (state) =>
+  GET(`/process-definition?${url_params()}`, state, state.api.process.definition.list)
+
+const get_start_form = (state, processId) =>
+  GET(`/process-definition/${processId}/startForm`, state, state.api.process.definition.start_form)
+
+export const get_rendered_start_form = async (state, id) =>
+  GET_TEXT(`/process-definition/${id}/rendered-form`, state, state.api.process.definition.rendered_form)
+
+export const start_process_submit_form = (state, id, body = {}) =>
+  POST(`/process-definition/${id}/submit-form`, body, state, state.api.process.definition.submit_form)
 
 const process_definition = {
   list: get_process_definitions,
@@ -66,6 +86,10 @@ const process_definition = {
   by_deployment_id: get_process_definition_by_deployment_id,
   diagram: get_diagram,
   statistics: get_process_definition_statistics_with_incidents,
+  list_startable: get_startable_process_definitions,
+  start_form: get_start_form,
+  rendered_start_form: get_rendered_start_form,
+  submit_form: start_process_submit_form
 }
 
 export default process_definition

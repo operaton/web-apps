@@ -117,7 +117,9 @@ const Task = () =>
         <button><Icons.chat_bubble_left /> Comment</button>
       </li>
       <li>
-        <button><Icons.play /> Start Process</button>
+        <a href="/tasks/start" class="button" >
+          <Icons.play />
+          Start Process</a>
       </li>
     </menu>
     <TaskDetails />

@@ -940,3 +940,10 @@ dialog#global-search {
 .c-hand {
   cursor: pointer;
 }
+
+
+/* StartProcessList */
+
+#start-task {
+  padding: var(--spacing-2);
+}

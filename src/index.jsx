@@ -20,6 +20,7 @@ import './css/layout.css'
 import './css/components.css'
 import './css/normalize.css'
 import './css/animation.css'
+import { StartProcessList } from './pages/StartProcessList.jsx'
 
 'use strict'
 
@@ -31,6 +32,8 @@ export function App () {
         <Router>
           <Route path="/" component={Home} />
           <Route path="/tasks" component={TasksPage} />
+          <Route path="/tasks/start" component={StartProcessList} />
+          <Route path="/tasks/start/:id" component={StartProcessList} />
           <Route path="/tasks/:task_id" component={TasksPage} />
           <Route path="/tasks/:task_id/:tab" component={TasksPage} />
           <Route path="/processes" component={ProcessesPage} />
