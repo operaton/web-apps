@@ -78,16 +78,46 @@
 
 #tasks {
 
+
   #task-list {
     display: flex;
+    gap: var(--spacing-1);
     height: 100%;
-    overflow-y: auto;
+    overflow: hidden;
     position: relative;
     overscroll-behavior: none;
     max-height: 100%;
     border-bottom: var(--border);
     border-width: var(--border-width-2);
     box-sizing: border-box;
+
+
+    > div {
+      overflow-y: scroll;
+      height: 100%;
+      box-sizing: content-box;
+      display: flex;
+      flex-direction: column;
+
+      &:last-child {
+        /*width: 100%;*/
+        flex: 1;
+      }
+    }
+
+    table {
+      margin-top: var(--spacing-1);;
+    }
+
+    #task-actions {
+      padding: var(--spacing-1);
+      height: calc(100% - 2 * var(--spacing-1));
+      background-color: var(--background-2);
+
+      > *:first-child {
+        margin-top: 0;
+      }
+    }
 
     tr[aria-selected=true] td {
       background-color: var(--background-2);
