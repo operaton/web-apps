@@ -31,6 +31,9 @@ export function Header () {
   useHotkeys('alt+7', () => route('/admin'))
 
   return <header>
+    <div class="warning">
+      Public Alpha Release – Untested and not ready for production – Share your feedback with an <a href="https://github.com/operaton/web-apps/issues">issue</a> or in the <a href="https://forum.operaton.org/">forum</a>
+    </div>
     <nav id="secondary-navigation">
       <h1 id="logo">
         <a href="/">Operaton&nbsp;BPM</a>

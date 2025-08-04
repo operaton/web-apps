@@ -1,3 +1,16 @@
+/* release warning */
+
+#app > header div.warning {
+  text-align: center;
+  font-style: italic;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+  padding: .2em;
+  background-color: #fff4f2;
+  color: #bb2511;
+}
+
+
 /* tile */
 
 .tile {
@@ -81,7 +94,7 @@
 
   #task-list {
     display: flex;
-    gap: var(--spacing-1);
+    /*gap: var(--spacing-1);*/
     height: 100%;
     overflow: hidden;
     position: relative;
@@ -106,7 +119,9 @@
     }
 
     table {
-      margin-top: var(--spacing-1);;
+      margin-top: var(--spacing-1);
+      margin-left: var(--spacing-1);
+      width: calc(100% - var(--spacing-1));
     }
 
     #task-actions {
@@ -119,16 +134,7 @@
       }
     }
 
-    tr[aria-selected=true] td {
-      background-color: var(--background-2);
 
-      &:first-child {
-        border-radius: var(--border-radius) 0 0 var(--border-radius);
-      }
-      &:last-child {
-        border-radius: 0 var(--border-radius) var(--border-radius) 0;
-      }
-    }
   }
 
   #task-details {
