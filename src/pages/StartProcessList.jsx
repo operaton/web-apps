@@ -12,24 +12,31 @@ const StartProcessList = () => {
 
   void engine_rest.process_definition.list_startable(state)
 
-  if (params.id !== null) {
-    void engine_rest.process_definition.one(state, params.id)
+  if (params.tab !== null) {
+    void engine_rest.process_definition.one(state, params.tab)
   }
 
-  return <main id="start-task">
-    <header>
-      <Breadcrumbs paths={[
-        { name: 'Tasks', route: '/tasks' },
-        { name: 'Start Process' }]} />
-    </header>
+  // return <main id="start-task">
+  //   <header>
+  //     <Breadcrumbs paths={[
+  //       { name: 'Tasks', route: '/tasks' },
+  //       { name: 'Start Process' }]} />
+  //   </header>
+  //
+  //   <div class="row">
+  //     <StartableProcessesList />
+  //     {params.id !== undefined
+  //       ? <StartProcessForm />
+  //       : <p>Select a process definition</p>}
+  //   </div>
+  // </main>
 
-    <div class="row">
-      <StartableProcessesList />
-      {params.id !== undefined
-        ? <StartProcessForm />
-        : <p>Select a process definition</p>}
-    </div>
-  </main>
+  return <div>
+    <StartableProcessesList />
+    {params.tab !== undefined
+      ? <StartProcessForm />
+      : <p>Select a process definition</p>}
+  </div>
 }
 
 const StartableProcessesList = () => {
@@ -38,21 +45,35 @@ const StartableProcessesList = () => {
     { params } = useRoute(),
     search_term = useSignal('')
 
-  if (params.id !== null && state.api.process.definition.one.value !== null
+  if (params.tab !== null && state.api.process.definition.one.value !== null
     && state.api.process.definition.one.value?.data !== undefined) {
     void engine_rest.process_definition.start_form(state, state.api.process.definition.one.value.data.key)
       .then(() => void engine_rest.task.get_task_form(state, state.api.process.definition.start_form.value.data.key.substring(13)))
   }
 
   return <div>
-    <input
-      type="text"
-      className="search-input"
-      id="process-popup-search-input"
-      placeholder="Search by process name."
-      value={search_term.value}
-      onChange={(e) => (search_term.value = e.target.value)} />
-    <ul class="list">
+
+    <div className="row space-between p-1">
+      <h2>Start Task</h2>
+
+      <input
+        type="text"
+        className="search-input"
+        id="process-popup-search-input"
+        placeholder="Search by process name."
+        value={search_term.value}
+        onChange={(e) => (search_term.value = e.target.value)} />
+    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>Definition Name</th>
+        <th>Version</th>
+        <th>Description</th>
+        <th>Key</th>
+      </tr>
+      </thead>
+      <tbody>
       <RequestState
         signal={state.api.process.definition.list}
         on_success={() =>
@@ -68,13 +89,17 @@ const StartableProcessesList = () => {
 
               })
               .map((process) => (
-                <li key={process.id}
-                    class={(process.id === params.id) ? 'selected' : ''}>
-                  <a href={`/tasks/start/${process.id}`}>{process.name}</a>
-                </li>
+                <tr key={process.id}
+                    class={(process.id === params.tab) ? 'selected' : ''}>
+                  <td><a href={`/tasks/start/${process.id}`}>{process.name}</a></td>
+                  <td>{process.version}</td>
+                  <td>{process.description}</td>
+                  <td>{process.key}</td>
+                </tr>
               ))}
           </>} />
-    </ul>
+      </tbody>
+    </table>
   </div>
 }
 
@@ -93,11 +118,10 @@ const StartProcessForm = () => {
         form_data = new FormData(form),
         response = {},
         to_base_64 = (file) => new Promise((resolve, reject) => {
-          fr.onload = () => resolve(fr);
-          fr.onerror = (err) => reject(err);
-          fr.readAsDataURL(file);
-        });
-
+          fr.onload = () => resolve(fr)
+          fr.onerror = (err) => reject(err)
+          fr.readAsDataURL(file)
+        })
 
       form_fields.value.map(async ({ variable_name, type, input_type }) => {
         console.log(variable_name, form_data.get(variable_name))
@@ -106,7 +130,7 @@ const StartProcessForm = () => {
           type,
           value:
             input_type === 'file'
-              ? await to_base_64(form_data.get(variable_name)).result.split("base,")[1]
+              ? await to_base_64(form_data.get(variable_name)).result.split('base,')[1]
               : form_data.get(variable_name)
         }
 

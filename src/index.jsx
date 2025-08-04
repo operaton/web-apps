@@ -35,8 +35,7 @@ export function App () {
           <Route path="/decisions" component={DecisionsPage} />
           <Route path="/decisions/:decision_id" component={DecisionsPage} />
           <Route path="/tasks" component={TasksPage} />
-          <Route path="/tasks/start" component={StartProcessList} />
-          <Route path="/tasks/start/:id" component={StartProcessList} />
+          {/*<Route path="/tasks/start/:id" component={TasksPage} />*/}
           <Route path="/tasks/:task_id" component={TasksPage} />
           <Route path="/tasks/:task_id/:tab" component={TasksPage} />
           <Route path="/processes" component={ProcessesPage} />

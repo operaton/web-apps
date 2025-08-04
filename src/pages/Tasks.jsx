@@ -8,6 +8,7 @@ import { TaskForm } from './TaskForm.jsx'
 import engine_rest, { RequestState, RESPONSE_STATE } from '../api/engine_rest.jsx'
 import { useSignal } from '@preact/signals'
 import { BPMNViewer } from '../components/BPMNViewer.jsx'
+import { StartProcessList } from './StartProcessList.jsx'
 
 const TasksPage = () => {
   const state = useContext(AppState)
@@ -20,10 +21,16 @@ const TasksPage = () => {
     console.warn(state)
   }
 
+  console.log(params.task_id)
+
   return (
     <main id="tasks" class="fade-in">
       <TaskList />
-      {params?.task_id ? <Task /> : <NoSelectedTask />}
+      {{
+        start: <StartProcessList />,
+        filter: <Filter />,
+        undefined: <NoSelectedTask />,
+      }[params?.task_id ] ?? <Task /> }
     </main>
   )
 }
@@ -50,30 +57,37 @@ const TaskList = () => {
       {/*  </div>*/}
       {/*</div>*/}
 
-      <div>
-        <a href="/tasks/start" className="button"><Icons.play />Start Process</a>
+      <div id="task-actions">
+        <a href="/tasks/start">Start&nbsp;Process</a>
+        <a href="/tasks/filter">Create Filter</a>
+        <ul id="filter-lsit">
+          <li aria-selected={true}>All Tasks</li>
+          <li>My Tasks</li>
+        </ul>
       </div>
 
-      <table>
-        <thead>
-        <tr>
-          <th>Task Name</th>
-          <th>Processes Definition</th>
-          <th>Processes Version</th>
-          <th>Created on</th>
-          <th>Assignee</th>
-          <th>Priority</th>
-        </tr>
-        </thead>
-        <tbody>
-        <RequestState
-          signal={taskList}
-          on_success={() =>
-            taskList.value?.data?.map(task =>
-              <TaskRowEntry key={task.id} task={task}
-                            selected={task.id === selectedTaskId} />)} />
-        </tbody>
-      </table>
+      <div>
+        <table>
+          <thead>
+          <tr>
+            <th>Task Name</th>
+            <th>Processes Definition</th>
+            <th>Processes Version</th>
+            <th>Created on</th>
+            <th>Assignee</th>
+            <th>Priority</th>
+          </tr>
+          </thead>
+          <tbody>
+          <RequestState
+            signal={taskList}
+            on_success={() =>
+              taskList.value?.data?.map(task =>
+                <TaskRowEntry key={task.id} task={task}
+                              selected={task.id === selectedTaskId} />)} />
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
@@ -90,7 +104,7 @@ const TaskRowEntry = ({ task, selected }) => {
 
   return (
     <tr id={id} key={id} aria-selected={selected}>
-      <td><a href={`/tasks/${id}/${task_tabs[0].id}`} aria-labelledby={id}>{name}</a></td>
+      <th scope="row"><a href={`/tasks/${id}/${task_tabs[0].id}`} aria-labelledby={id}>{name}</a></th>
       <td>{definitionName}</td>
       <td>{definitionVersion}</td>
       <td>{formatter.formatRelativeDate(created)}</td>
@@ -416,6 +430,103 @@ const Diagram = () => {
         <BPMNViewer xml={diagram.value.data?.bpmn20Xml} container="diagram" />}
     />
   </>
+}
+
+const Filter = () => {
+
+
+  return <div>
+
+    <form>
+      <h2>Filter Editor</h2>
+      <h3>General</h3>
+      <label>Name
+        <input/>
+      </label>
+      <label>Description
+        <input/>
+      </label>
+      <label>Color
+        <input type="color" />
+      </label>
+      <label>Priority
+        <input type="number" />
+      </label>
+      <label>Auto Referesh
+        <input type="checkbox" />
+      </label>
+
+      <h3>Criteria</h3>
+      <button>Add Criteria</button>
+      <table>
+        <thead>
+          <tr>
+            <th scope="column">Key</th>
+            <th scope="column">Value</th>
+            <th scope="column">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td></td>
+            <td></td>
+            <td>Remove</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Permissions</h3>
+
+      <label>Accessible by all users
+        <input type="checkbox" />
+      </label>
+
+      <button>Add Permission</button>
+      <table>
+        <thead>
+        <tr>
+          <th scope="column">Group / User</th>
+          <th scope="column">Identifier</th>
+          <th scope="column">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Remove</td>
+        </tr>
+        </tbody>
+      </table>
+
+
+      <h3>Variables</h3>
+
+      <p>The variables you set here will be shown in the task list view.</p>
+
+      <label>Show undefined variables
+        <input type="checkbox" />
+      </label>
+
+      <button>Add Variable</button>
+      <table>
+        <thead>
+        <tr>
+          <th scope="column">Name</th>
+          <th scope="column">Label</th>
+          <th scope="column">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Remove</td>
+        </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
 }
 
 const HistoryTab = () => {
