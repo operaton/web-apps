@@ -19,10 +19,10 @@ You require the following software to run the app
 
 ## Running the app
 
-- `npm run dev` - Starts a dev server at http://localhost:5173/
+- `npm run dev` - Starts a dev server at http://127.0.0.1:5173
   - **IMPORTANT:** instead of localhost use http://127.0.0.1:5173 to avoid CORS issues! 
 - `npm run build` - Builds for production, emitting to `dist/`
-- `npm run preview` - Starts a server at http://localhost:4173/ to test production build locally
+- `npm run preview` - Starts a server at http://localhost:4173/ (maybe 127.0.0.1 as well to avoid CORS, not tested yet) to test production build locally
 
 ## Documentation
 
