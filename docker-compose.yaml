@@ -2,15 +2,17 @@ services:
   operaton:
     image: operaton/operaton:latest
     environment:
-      camunda.bpm.run.cors.enabled: true
-      camunda.bpm.run.cors.allowed-origins: '*'
+      - "OPERATON_BPM_RUN_CORS_ENABLED=true"
+      - "OPERATON_BPM_RUN_CORS_ALLOWED_ORIGINS-origins=localhost:5173"
+      - "LOGGING_LEVEL_ROOT=DEBUG"
     ports:
       - "8084:8080"
   c7:
     image: camunda/camunda-bpm-platform:run-latest
     environment:
-      camunda.bpm.run.cors.enabled: true
-      camunda.bpm.run.cors.allowed-origins: '*'
+      - "CAMUNDA_BPM_RUN_CORS_ENABLED=true"
+      - "CAMUNDA_BPM_RUN_CORS_ALLOWED_ORIGINS-origins=localhost:5173"
+      - "LOGGING_LEVEL_ROOT=DEBUG"
     ports:
       - "8088:8080"
 
