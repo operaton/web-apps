@@ -19,14 +19,12 @@ a, a:visited {
 }
 
 table {
-  /*display: block;*/
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   text-indent: 0;
   overflow: scroll;
   white-space: nowrap;
-  /*margin-top: 1lh;*/
 
   /* TODO: Force scrollbar visible on MacOS as an indicator, if table is scrollable */
 }

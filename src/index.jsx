@@ -1,6 +1,7 @@
 import { render } from "preact";
 import { LocationProvider, Route, Router } from "preact-iso";
 import { AppState, createAppState } from "./state.js";
+import './helper/i18n';
 
 import { Header } from "./components/Header.jsx";
 import { GoTo } from "./components/GoTo.jsx";
