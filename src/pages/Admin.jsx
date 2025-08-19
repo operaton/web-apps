@@ -92,8 +92,6 @@ const TenantCreate = () => {
 
   const set_value = (k, v) => form_tenant.value[k] = v.currentTarget.value
 
-  console.log('test', tenant_create.value)
-
   const on_submit = e => {
     e.preventDefault()
     console.log(tenant_create.value)
@@ -182,7 +180,6 @@ const GroupsPage = () => {
   // //   void api.group.all(state)
   // // }
 
-  // console.log(groups.value)
 
   return (selection_id === 'new')
     ? <GroupCreate />
@@ -200,11 +197,9 @@ const GroupCreate = () => {
 
   const set_value = (k, v) => form_group.value[k] = v.currentTarget.value
 
-  console.log('test', form_group.value)
 
   const on_submit = e => {
     e.preventDefault()
-    console.log(form_group.value)
     void engine_rest.group.create(state, form_group.value)
     // e.currentTarget.reset(); // Clear the inputs to prepare for the next submission
   }
@@ -479,7 +474,6 @@ const UserCreate = () => {
   const set_p_value = (k, v) => set_value('profile', k, v)
   const set_c_value = (k, v) => set_value('credentials', k, v)
 
-  console.log('test', user_create.value)
 
   const on_submit = e => {
     e.preventDefault()
@@ -639,12 +633,10 @@ const AuthorizationResourceRow = (authorization) => {
     set_value = (k, v) => form_authorization.value[k] = v.currentTarget.value,
     set_null = (k) => form_authorization.value[k] = null
 
-  console.log(is_deleted.value)
 
   const
     on_submit = e => {
       e.preventDefault()
-      console.log(form_authorization.value)
       void engine_rest.authorization.update(state, id, form_authorization.value)
       // e.currentTarget.reset(); // Clear the inputs to prepare for the next submission
     },

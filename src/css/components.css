@@ -90,11 +90,10 @@
 
 
 #tasks {
-
-
   #task-list {
     display: flex;
-    /*gap: var(--spacing-1);*/
+    /*justify-content: space-between;*/
+    gap: var(--spacing-1);
     height: 100%;
     overflow: hidden;
     position: relative;
@@ -104,7 +103,6 @@
     border-width: var(--border-width-2);
     box-sizing: border-box;
 
-
     > div {
       overflow-y: scroll;
       height: 100%;
@@ -112,9 +110,9 @@
       display: flex;
       flex-direction: column;
 
-      &:last-child {
+      &:nth-child(2) {
         /*width: 100%;*/
-        flex: 1;
+        flex-grow: 1;
       }
     }
 
@@ -127,14 +125,27 @@
     #task-actions {
       padding: var(--spacing-1);
       height: calc(100% - 2 * var(--spacing-1));
-      background-color: var(--background-2);
+      /*background-color: var(--background-2);*/
+      border-left: var(--border);
 
       > *:first-child {
         margin-top: 0;
       }
+
+      #filter-list {
+        list-style: none;
+        padding: 0;
+        margin-top: .5lh;
+        display: flex;
+        flex-direction: column;
+        gap: .2em;
+
+        li[aria-selected=true] {
+          font-style: italic;
+          font-weight: bold;
+        }
+      }
     }
-
-
   }
 
   #task-details {
@@ -159,22 +170,6 @@
         background: var(--background-3);
         margin: 0;
       }
-
-      > dl {
-        /*display: flex;*/
-        /*flex-direction: column;*/
-        /*grid-auto-flow: column;*/
-        /*grid-template-rows: 1fr 1fr;*/
-        /*gap: var(--spacing-1) var(--spacing-3);*/
-        /*justify-content: start;*/
-        /*align-items: start;*/
-        /*margin: 0;*/
-
-        /*dt, dd, button {*/
-        /*  margin: 0;*/
-        /*}*/
-
-      }
     }
 
     .task-tabs {
@@ -182,18 +177,6 @@
       position: relative;
       max-height: 100%;
       z-index: 5;
-
-      /*.tabs {*/
-      /*  display: grid;*/
-      /*}*/
-
-      /*.tab-selection {*/
-      /*  grid-area: tabs-header;*/
-      /*}*/
-
-      /*.selected-tab {*/
-      /*  grid-area: tab-content;*/
-      /*}*/
 
       h1 {
         font-size: var(--h2-size);
@@ -208,12 +191,10 @@
       }
 
       /* tab menu */
-
       .task-tabs {
         display: flex;
         width: max-content;
         margin-top: var(--spacing-3);
-        /* padding: var(--spacing-1) 0; */
         font-size: var(--small-font-size);
         font-weight: bold;
         border-radius: var(--border-radius);
@@ -253,7 +234,6 @@
       }
 
       /* engine generated form, CSS classes given by the engine */
-
       .task-form {
         form {
           column-width: auto;
@@ -716,24 +696,11 @@ div.accordion {
   cursor: copy;
   background-color: var(--color-primary-transparent);
   border-radius: var(--spacing-4);
-  /*font-style: italic;*/
-  /*text-shadow: 0 0 4px var(--color-primary-transparent);*/
 }
 
-/*.copy-on-click:hover::after {*/
-/*  content: url("../assets/icons/copy-to-clipboard.svg");*/
-/*  width: 1rem;*/
-/*  height: 1rem;*/
-/*  display: inline-block;*/
-/*  stroke-width: .5rem;*/
-/*  text-shadow: 0 0 4px var(--color-primary-transparent);*/
-/*}*/
-
 .copy-on-click:active {
-  /*font-weight: bold;*/
   background-color: var(--color-primary);
   color: white;
-  /*text-shadow: 0 0 4px var(--color-primary);*/
 }
 
 /* dialog */
@@ -775,7 +742,6 @@ dialog#global-search {
 #admin-page > div {
   padding: var(--spacing-2);
   overflow-y: auto;
-  /*height: calc(100% - 2 * var(--spacing-2));*/
   width: calc(100% - var(--spacing-3));
   flex: 1;
   background-clip: padding-box;

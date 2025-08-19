@@ -6,7 +6,6 @@ import { useLayoutEffect } from 'preact/hooks'
 export const DmnViewer = ({ xml, container }) => {
 
   document.querySelector(container).innerText = ''
-  console.log('create dmn diagram')
 
   const
     // https://github.com/operaton/operaton/blob/main/webapps/frontend/operaton-commons-ui/lib/widgets/dmn-viewer/cam-widget-dmn-viewer.js#L301
@@ -24,8 +23,6 @@ export const DmnViewer = ({ xml, container }) => {
     })
 
   viewer.importXML(xml, (err) => {
-    console.log('import xml')
-
     if (err) {
       console.log('error rendering', err)
     }

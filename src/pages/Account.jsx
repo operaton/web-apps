@@ -67,7 +67,6 @@ const ProfileEditPage = () => {
   //   return () => user_profile_edit_response.value = undefined
   // })
 
-  console.log(user_profile_edit_response.value)
 
   return <section>
     <h2>Edit Profile</h2>

@@ -138,7 +138,6 @@ const CreateUserPage = () => {
 
   const on_submit = e => {
     e.preventDefault()
-    console.log(user_create.value)
     user_create_response.value = engine_rest.create_user(state)
     // e.currentTarget.reset(); // Clear the inputs to prepare for the next submission
   }
@@ -185,7 +184,7 @@ Each endpoint has an identical structure:
 // engine_rest.jsx
 
 export const get_process_definitions = (state) =>
-  fetch(`${_url(state)}/process-definition/statistics`)
+  fetch(`${_url_engine_rest(state)}/process-definition/statistics`)
     .then(response => response.json())
     .then(json => state.process_definitions.value = json)
 ```
@@ -225,7 +224,7 @@ const url_params = (definition_id) =>
   }).toString()
 
 export const get_process_instances = (state, definition_id) =>
-  fetch(`${_url(state)}/history/process-instance?${url_params(definition_id)}`)
+  fetch(`${_url_engine_rest(state)}/history/process-instance?${url_params(definition_id)}`)
     .then(response => response.json())
     .then(json => (state.process_instances.value = json))
 ```

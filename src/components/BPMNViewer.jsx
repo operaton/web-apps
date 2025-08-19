@@ -29,6 +29,7 @@ import * as bpmnvisu from 'bpmn-visualization'
 
 /**
  * BPMN Diagram Viewer
+ * @params props
  * @param xml a xml string of a bpmn diagram
  * @param container the html id for an element which gets filled with the diagram
  * @param tokens elements shown on the diagram
@@ -96,7 +97,6 @@ export const BPMNViewer = ({ xml, container, tokens }) => {
 
       const callActivityElement = viewer.bpmnElementsRegistry.getElementsByIds([id])[0].htmlElement
       callActivityElement.onclick = () => {
-        console.log(definition_id)
         const actions_list = []
 
         if (callActivityElement.classList.contains('bpmn-call-activity')) {

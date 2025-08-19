@@ -124,8 +124,6 @@ const StartProcessForm = () => {
         })
 
       form_fields.value.map(async ({ variable_name, type, input_type }) => {
-        console.log(variable_name, form_data.get(variable_name))
-
         response[variable_name] = {
           type,
           value:
@@ -146,7 +144,6 @@ const StartProcessForm = () => {
         response['business_key'] = form_data.get('business_key').toString()
       }
 
-      console.log(response)
 
       // void engine_rest.process_definition.submit_form(state, params.id, response)
     }

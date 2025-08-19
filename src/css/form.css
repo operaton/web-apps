@@ -47,6 +47,7 @@ button, .button, .button:visited {
   padding: var(--spacing-1) var(--spacing-2);
   font-weight: 500;
   line-height: 1;
+  text-decoration: none;
 
   display: inline-flex;
   align-items: center;
@@ -57,6 +58,11 @@ button, .button, .button:visited {
   &[type=submit], &.primary {
     background: var(--color-primary);
     color: white;
+  }
+
+  &.secondary {
+    border: var(--border-width) solid var(--border-color-2);
+    background: transparent;
   }
 
   &.neutral {
@@ -174,7 +180,7 @@ select {
 }
 
 :where(input, select, textarea, button):disabled,
-:where(input, select, textarea, button):read-only {
+form :where(input, select, textarea, button):read-only {
   background: var(--background-2);
   color: var(--text-disabled);
 }

@@ -30,8 +30,6 @@ export function Header () {
   useHotkeys('alt+4', () => route('/deployments'))
   useHotkeys('alt+7', () => route('/admin'))
 
-  console.log(import.meta.env.VITE_HIDE_RELEASE_WARNING, typeof import.meta.env.VITE_HIDE_RELEASE_WARNING)
-
   return <header>
     {import.meta.env.VITE_HIDE_RELEASE_WARNING === 'true'
       ? <></>

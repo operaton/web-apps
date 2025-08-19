@@ -16,12 +16,7 @@ const TasksPage = () => {
 
   if (state.api.task.list.value === null) {
     void engine_rest.task.get_tasks(state)
-
-    //TODO: remove, only for dev
-    console.warn(state)
   }
-
-  console.log(params.task_id)
 
   return (
     <main id="tasks" class="fade-in">
@@ -43,29 +38,7 @@ const TaskList = () => {
 
   return (
     <div id="task-list">
-      {/*<div class="tile-filter" id="task-filter">*/}
-      {/*  <div class="filter-header" onClick={open_filter}>*/}
-      {/*    <span class="label">Filter Tasks & Search</span>*/}
-      {/*    <span class="icon down"><Icons.chevron_down /></span>*/}
-      {/*    <span class="icon up"><Icons.chevron_up /></span>*/}
-      {/*  </div>*/}
-      {/*  <div class="filter-menu">*/}
-      {/*    <menu>*/}
-      {/*      <li>My Tasks</li>*/}
-      {/*      <li>Claimed Tasks</li>*/}
-      {/*    </menu>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-
-      <div id="task-actions">
-        <a href="/tasks/start">Start&nbsp;Process</a>
-        <a href="/tasks/filter">Create Filter</a>
-        <ul id="filter-lsit">
-          <li aria-selected={true}>All Tasks</li>
-          <li>My Tasks</li>
-        </ul>
-      </div>
-
+      <h2 class="screen-hidden">Task List</h2>
       <div>
         <table>
           <thead>
@@ -87,6 +60,15 @@ const TaskList = () => {
                               selected={task.id === selectedTaskId} />)} />
           </tbody>
         </table>
+      </div>
+      <div id="task-actions">
+        <a href="/tasks/start" className="button">Start&nbsp;Process</a>
+        <a href="/tasks/filter" className="button">Create Filter</a>
+        <h3>Filters</h3>
+        <ul id="filter-list">
+          <li aria-selected={true}>All Tasks</li>
+          <li>My Tasks</li>
+        </ul>
       </div>
     </div>
   )
@@ -207,7 +189,6 @@ const SetDueDateButton = () => {
 
     submit = (event) => {
       event.preventDefault()
-      console.log(date_state.value)
       engine_rest.task.update_task(state, { due: `${date_state.value.date}T${date_state.value.time}:0.000+0000` }, params.task_id)
         .then(() => {close()})
     }
@@ -352,7 +333,6 @@ const SetGroupsButton = () => {
               <th>Action</th>
             </tr>
             </thead>
-            {() => console.log('in', state.api.task.identity_links.value)}
             <tbody>
             {state.api.task.identity_links.value.data.map(
               ({ groupId, type }, index) => type === 'candidate'
@@ -441,7 +421,7 @@ const Filter = () => {
       <h2>Filter Editor</h2>
       <h3>General</h3>
       <label>Name
-        <input/>
+        <input />
       </label>
       <label>Description
         <input/>
