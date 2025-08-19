@@ -40,7 +40,7 @@ export function Header () {
     }
     <nav id="secondary-navigation">
       <h1 id="logo">
-        <a href="/">Operaton&nbsp;BPM</a>
+        <a href="/">Operaton</a>
       </h1>
       <button id="mobile-menu-toggle" onClick={show_mobile_menu}>
         <Icons.squares />
