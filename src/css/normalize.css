@@ -31,14 +31,14 @@ table {
   /* TODO: Force scrollbar visible on MacOS as an indicator, if table is scrollable */
 }
 
-tr:hover :where(td, th),
-tr[aria-selected=true] :where(td, th) {
+tbody tr:hover :where(td, th),
+tbody tr[aria-selected=true] :where(td, th) {
   background-color: var(--background-2);
   &:first-child { border-radius: var(--border-radius) 0 0 var(--border-radius) }
   &:last-child { border-radius: 0 var(--border-radius) var(--border-radius) 0; }
 }
 
-tr:hover :where(td, th){
+tbody tr:hover :where(td, th){
   border-top: var(--border-2);
   border-bottom: var(--border-2);
   margin: calc(-1 * var(--border-width-2));
