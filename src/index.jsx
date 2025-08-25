@@ -5,6 +5,7 @@ import './helper/i18n';
 
 import { Header } from "./components/Header.jsx";
 import { GoTo } from "./components/GoTo.jsx";
+import * as Icons from './assets/icons.jsx'
 
 import { Home } from "./pages/Home.jsx";
 import { TasksPage } from "./pages/Tasks.jsx";
@@ -35,6 +36,14 @@ export const App = () => {
     </AppState.Provider>
   );
 };
+
+const servers = JSON.parse(import.meta.env.VITE_BACKEND)
+
+const swap_server = (e, state) => {
+  const server = servers.find(s => s.url === e.target.value)
+  state.server.value = server
+  localStorage.setItem('server', JSON.stringify(server))
+}
 
 const get_cookie = (/** @type {string} */ name) => {
   const value = `; ${document.cookie}`;
@@ -110,6 +119,19 @@ const Routing = () => {
         <div>
           <p>Operaton Web Apps</p>
           <h1>Login</h1>
+          <label className="row center gap-1 p-1">
+            Server Selection
+            <select
+              onChange={(e) => swap_server(e, state)}>
+              <option disabled>ℹ️ Choose a server to retrieve your processes
+              </option>
+              {servers.map(server =>
+                <option key={server.url} value={server.url}
+                        selected={state.server.value?.url === server.url}>
+                  {server.name} {server.c7_mode ? '(C7)' : ''}
+                </option>)}
+            </select>
+          </label>
           <form onSubmit={login} class=".form-horizontal">
             <label for="username">User name*</label>
             <input
