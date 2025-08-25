@@ -37,10 +37,10 @@ const TaskList = () => {
     taskList = state.api.task.list,
     { params } = useRoute(),
     selectedTaskId = params.task_id,
-    { t, i18n } = useTranslation("translation", { keyPrefix: "tasks" });
+    [t] = useTranslation("translation", { keyPrefix: "tasks" });
 
-  // todo remove me, testing only
-  i18n.changeLanguage('de-DE');
+  // todo remove me, testing onlyx
+  // i18n.changeLanguage('de-DE');
 
   return (
     <div id="task-list">
