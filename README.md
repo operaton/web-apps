@@ -38,7 +38,7 @@ As well have a look at [Coding Conventions.md](docs/Coding%20Conventions.md).
 Sometimes the GitHub issues aren't the best place to discuss some topics. Hence we provide a forum and a Slack channel as well:
 
 - [forum.operaton.org](https://forum.operaton.org)
-- [Slack](https://operaton.org/chat)
+- [Slack](https://operaton.org/chat) (#webapps channel)
 
 ## Screenshots
 
