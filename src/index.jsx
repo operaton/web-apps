@@ -5,7 +5,6 @@ import './helper/i18n';
 
 import { Header } from "./components/Header.jsx";
 import { GoTo } from "./components/GoTo.jsx";
-import * as Icons from './assets/icons.jsx'
 
 import { Home } from "./pages/Home.jsx";
 import { TasksPage } from "./pages/Tasks.jsx";
@@ -15,13 +14,8 @@ import { DeploymentsPage } from "./pages/Deployments.jsx";
 import { NotFound } from "./pages/_404.jsx";
 import { AccountPage } from "./pages/Account.jsx";
 
-import "./css/fonts.css";
-import "./css/form.css";
-import "./css/variables.css";
 import "./css/layout.css";
 import "./css/components.css";
-import "./css/normalize.css";
-import "./css/animation.css";
 import { DecisionsPage } from "./pages/Decisions.jsx";
 import { useContext } from "preact/hooks";
 import engine_rest from "./api/engine_rest.jsx";
@@ -82,7 +76,7 @@ const Routing = () => {
     return (
       <LocationProvider>
         <Header />
-        <div id="content">
+        <main id="content">
           <Router>
             <Route path="/" component={Home} />
             <Route path="/decisions" component={DecisionsPage} />
@@ -107,7 +101,7 @@ const Routing = () => {
             <Route path="/account/:page_id/:selection_id" component={AccountPage} />
             <Route default component={NotFound} />
           </Router>
-        </div>
+        </main>
         <GoTo />
       </LocationProvider>
     );
