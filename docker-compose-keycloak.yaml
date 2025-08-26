@@ -11,6 +11,15 @@ services:
     ports:
       - "8084:8080"
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+    command: start-dev
+    ports:
+      - "8888:8080"
+
   c7:
     image: camunda/camunda-bpm-platform:run-latest
     environment:
