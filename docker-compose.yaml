@@ -2,7 +2,7 @@ services:
   operaton:
     image: operaton/operaton:latest
     environment:
-      - OPERATON_BPM_RUN_EXAMPLE_ENABLED=false
+      # - OPERATON_BPM_RUN_EXAMPLE_ENABLED=false
       - OPERATON_BPM_RUN_CORS_ENABLED=true
       - OPERATON_BPM_RUN_AUTH_ENABLED=true
       - OPERATON_BPM_RUN_CORS_ALLOW_CREDENTIALS=true
