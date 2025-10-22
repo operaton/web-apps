@@ -76,7 +76,6 @@ const Routing = () => {
     return (
       <LocationProvider>
         <Header />
-        <main id="content">
           <Router>
             <Route path="/" component={Home} />
             <Route path="/decisions" component={DecisionsPage} />
@@ -100,8 +99,7 @@ const Routing = () => {
             <Route path="/account/:page_id" component={AccountPage} />
             <Route path="/account/:page_id/:selection_id" component={AccountPage} />
             <Route default component={NotFound} />
-          </Router>
-        </main>
+          </Router> 
         <GoTo />
       </LocationProvider>
     );

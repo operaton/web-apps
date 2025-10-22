@@ -21,7 +21,7 @@ const TasksPage = () => {
   }
 
   return (
-    <main id="tasks" class="fade-in">
+    <main id="content" class="tasks fade-in">
       <TaskList />
       {{
         start: <StartProcessList />,
@@ -131,7 +131,7 @@ const Task = () => {
 
   return (
     <div id="task-details" className="fade-in">
-      <header>
+      <section id="task-data">
         <div>
           <h2>{task.value?.data?.name}</h2>
           <a href={`/processes/${pd.value?.data?.id}`}>
@@ -166,7 +166,7 @@ const Task = () => {
         <button>
           <Icons.chat_bubble_left /> Comment
         </button>
-      </header>
+      </section>
       <TaskTabs />
     </div>
   );
@@ -190,7 +190,7 @@ const TaskTabs = () => {
   }
 
   return (
-    <div className="task-tabs">
+    <section className="task-tabs">
       {state.api.task.one.value.data !== null && state.api.task.one.value.data !== undefined ? (
         <>
           <Tabs tabs={task_tabs} base_url={`/tasks/${state.api.task.one.value.data.id}`} className="fade-in" />
@@ -198,7 +198,7 @@ const TaskTabs = () => {
       ) : (
         "Loading"
       )}
-    </div>
+    </section>
   );
 };
 
