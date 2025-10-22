@@ -177,7 +177,7 @@
 
 @layer embedded-form {
   /* engine generated form, CSS classes given by the engine */
-  .task-form form { column-width: auto; }    
+  .task-form form { column-width: auto; }
   .task-form .has-error { display: none; }
   .task-form .input-group-btn { display: none; }
   .task-form .form-fields {
@@ -186,7 +186,7 @@
   }
   .task-form .form-fields .form-group { width: 40%; }
   .task-form label { margin-top: 1em; }
-  .task-form .task-form [type="checkbox"], 
+  .task-form .task-form [type="checkbox"],
   .task-form input[type="radio"] {
     margin-left: var(--spacing-2);
     width: auto;
@@ -262,7 +262,7 @@
 }
 
 @layer pages {
-  
+
   #task-list {
     display: flex;
     /*justify-content: space-between;*/
@@ -290,12 +290,12 @@
     }
 
     table {
-      margin-top: var(--spacing-1);
-      margin-left: var(--spacing-1);
+      /*margin-top: var(--spacing-1);*/
+      /*margin-left: var(--spacing-1);*/
       width: calc(100% - var(--spacing-1));
     }
   }
-  
+
   #task-details {
     height: 100%;
     /*gap: var(--spacing-2);*/
@@ -383,7 +383,7 @@
       margin: 0;
     }
   }
-  
+
   .tasks {
 
     .task-empty {
@@ -417,7 +417,7 @@
     border-width: var(--border-width-2);
 
     table {
-      margin: var(--spacing-1);
+      /*margin: var(--spacing-1);*/
       flex: 1;
 
       tr.selected {
@@ -712,6 +712,7 @@
   }
 
   tbody tr:hover :where(td, th) {
+    box-sizing: border-box;
     border-top: var(--border-2);
     border-bottom: var(--border-2);
     margin: calc(-1 * var(--border-width-2));

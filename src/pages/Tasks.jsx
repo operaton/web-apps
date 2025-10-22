@@ -50,11 +50,10 @@ const TaskList = () => {
           <thead>
             <tr>
               <th>{t("task-list.table-headings.task-name")}</th>
-              <th>{t("task-list.table-headings.processes-definition")}</th>
-              <th>{t("task-list.table-headings.processes-version")}</th>
+              <th>{t("task-list.table-headings.process-definition")}</th>
+              <th>{t("task-list.table-headings.process-version")}</th>
               <th>{t("task-list.table-headings.created-on")}</th>
               <th>{t("task-list.table-headings.assignee")}</th>
-              <th>{t("task-list.table-headings.priority")}</th>
             </tr>
           </thead>
           <tbody>
@@ -106,7 +105,6 @@ const TaskRowEntry = ({ task, selected }) => {
       <td>{definitionVersion}</td>
       <td>{formatter.formatRelativeDate(created)}</td>
       <td>{assignee ? assignee : "-"}</td>
-      <td>{priority}</td>
     </tr>
   );
 };
