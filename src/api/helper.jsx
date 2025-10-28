@@ -13,9 +13,6 @@ export const get_credentials = (state) => `${state.auth.credentials.username}:${
 
 let headers = new Headers();
 headers.set("credentials", "include");
-// headers.set('Authorization', `Basic ${window.btoa(unescape(encodeURIComponent('demo:demo')))}`) //TODO authentication
-let headers_json = headers;
-headers_json.set("Content-Type", "application/json");
 let headers_form_urlencoded = headers;
 headers_form_urlencoded.set("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
@@ -141,6 +138,7 @@ const fetch_with_body = async (method, url, body, state, signl) => {
 
   let headers = new Headers();
   headers.set("Authorization", `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`);
+  headers.set("Content-Type", "application/json");
 
   try {
     const response = await fetch(`${_url_engine_rest(state)}${url}`, {
