@@ -11,6 +11,7 @@ import * as formatter from "../helper/date_formatter.js";
 import { AppState } from "../state.js";
 import { StartProcessList } from "./StartProcessList.jsx";
 import { TaskForm } from "./TaskForm.jsx";
+import { formatRelativeDate } from "../helper/date_formatter.js";
 
 const TasksPage = () => {
   const state = useContext(AppState);
@@ -617,7 +618,7 @@ const HistoryEntry = () =>
   useContext(AppState).api.history.user_operation.value.data.map(
     ({ timestamp, userId, operationType, property, newValue }, index) => (
       <tr key={index}>
-        <td>{timestamp}</td>
+        <td>{formatRelativeDate(timestamp)}</td>
         <td>{userId}</td>
         <td>{operationType}</td>
         <td>{property}</td>
