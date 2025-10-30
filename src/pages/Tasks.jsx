@@ -116,17 +116,34 @@ const NoSelectedTask = () => (
   </div>
 );
 
+const CommentDialog = () => {
+
+    const hideCommentEditor = () => document.getElementById('task-comment-editor').close();
+
+    return (
+        <dialog id="task-comment-editor" className="fade-in">
+            <h2>Add Comment</h2>
+            <textarea id="comment-textarea" rows="12" />
+            <div id="comment-buttons">
+                <button id="save-task-comment">Save</button>
+                <button id="close-task-comment" onClick={hideCommentEditor}>Cancel</button>
+            </div>
+        </dialog>);
+};
+
 // when something has changed (e.g. assignee) in the task we have to update the task list
 const Task = () => {
-  const state = useContext(AppState),
-    {
-      api: {
-        task: { one: task },
+    const state = useContext(AppState),
+        {
+            api: {
+                task: { one: task },
         process: {
           definition: { one: pd },
         },
       },
     } = state;
+
+    const showCommentEditor = () => document.getElementById('task-comment-editor').showModal();
 
   return (
     <div id="task-details" className="fade-in">
@@ -162,7 +179,8 @@ const Task = () => {
           </dd>
         </dl>
 
-        <button>
+        <CommentDialog />
+        <button onClick={showCommentEditor}>
           <Icons.chat_bubble_left /> Comment
         </button>
       </section>
