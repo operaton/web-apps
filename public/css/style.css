@@ -389,6 +389,18 @@
     }
   }
 
+  #task-comment-editor {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+
+      #comment-buttons {
+          display: flex;
+          flex-direction: row;
+          gap: var(--spacing-1);
+      }
+  }
+
   .tasks {
 
     .task-empty {

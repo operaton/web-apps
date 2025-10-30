@@ -15,13 +15,13 @@ const swap_server = (e, state) => {
 }
 
 export function Header () {
-  const
-    { url, route } = useLocation(),
-    state = useContext(AppState),
-    // dialogs
-    showSearch = () => document.getElementById('global-search').showModal(),
-    show_mobile_menu = () => document.getElementById('mobile-menu').showModal(),
-    close_mobile_menu = () => document.getElementById('mobile-menu').close()
+    const
+        {url, route} = useLocation(),
+        state = useContext(AppState),
+        // dialogs
+        showSearch = () => document.getElementById('global-search').showModal(),
+        show_mobile_menu = () => document.getElementById('mobile-menu').showModal(),
+        close_mobile_menu = () => document.getElementById('mobile-menu').close();
 
   useHotkeys('alt+0', () => route('/'))
   useHotkeys('alt+1', () => route('/tasks'))
