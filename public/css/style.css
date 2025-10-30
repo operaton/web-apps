@@ -705,6 +705,10 @@
     /* TODO: Force scrollbar visible on MacOS as an indicator, if table is scrollable */
   }
 
+  tbody:nth-child(odd) {
+    background-color: var(--background-2);
+  }
+
   tbody tr:hover :where(td, th),
   tbody tr[aria-selected="true"] :where(td, th) {
     background-color: var(--background-2);

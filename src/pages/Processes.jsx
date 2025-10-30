@@ -162,14 +162,24 @@ const ProcessDefinitionSelection = () => {
         <th>State</th>
       </tr>
       </thead>
-      <tbody>
       <RequestState
         signal={definition.list}
-        on_success={() =>
-          definition.list.value?.data?.map(process =>
-            <ProcessDefinition key={process.id} {...process} />)
+        on_success={() => {
+
+          const grouped_definitions = Object.groupBy(definition.list.value?.data, ({ definition }) => definition.key)
+          console.log(grouped_definitions)
+          const grouped_definitions_values = Object.entries(grouped_definitions)
+          console.log(grouped_definitions_values)
+
+          return <>
+            {grouped_definitions_values.map(([key, definition_group]) =>
+               <tbody key={key}>
+                 {definition_group.map(definition => <ProcessDefinition key={definition.id} {...definition} />)}
+              </tbody>
+            )}
+          </>
+        }
         } />
-      </tbody>
     </table>
   </div>
 }
