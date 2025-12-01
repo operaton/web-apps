@@ -170,23 +170,51 @@ const Task = () => {
 };
 
 const CommentButton = () => {
-  const
-    showCommentEditor = () => document.getElementById('add_task_comment').showModal(),
-    hideCommentEditor = () => document.getElementById('add_task_comment').close();
+  const state = useContext(AppState),
+    { params } = useRoute(),
+    comment_state = useSignal(""),
+    show = () => document.getElementById('add_task_comment').showModal(),
+    close = () => document.getElementById('add_task_comment').close(),
+    submit = (event) => {
+      event.preventDefault();
+      engine_rest.task
+        .post_task_comment(state, params.task_id, comment_state.value)
+        .then(() => {
+          if (state.api.task.add_comment.value.status === RESPONSE_STATE.SUCCESS) {
+            comment_state.value = "";
+            close();
+            // Reload comments to show the newly added comment
+            engine_rest.task.get_task_comments(state, params.task_id);
+          }
+        });
+    };
 
   return (
     <>
-      <button onClick={showCommentEditor}>
+      <button onClick={show}>
         <Icons.chat_bubble_left /> Comment
       </button>
 
       <dialog id="add_task_comment" className="fade-in">
+        <header>
           <h2>Add Comment</h2>
-          <textarea id="comment-textarea" rows="12" />
+          <button onClick={close} class="neutral">
+            <Icons.close />
+          </button>
+        </header>
+        <form onSubmit={submit} id="task-comment-editor">
+          <textarea
+            id="comment-textarea"
+            placeholder="Enter your comment here..."
+            value={comment_state.value}
+            onInput={(e) => (comment_state.value = e.currentTarget.value)}
+            required
+          />
           <div id="comment-buttons">
-              <button id="save-task-comment">Save</button>
-              <button id="close-task-comment" onClick={hideCommentEditor}>Cancel</button>
+            <button type="submit" class="primary">Save Comment</button>
+            <button type="button" class="secondary" onClick={close}>Cancel</button>
           </div>
+        </form>
       </dialog>
     </>
   )
@@ -608,16 +636,33 @@ const HistoryTab = () => {
     {
       api: {
         history: { user_operation },
-        task: { one },
+        task: { one, comments },
       },
-    } = state;
+    } = state,
+    { params } = useRoute();
 
   void engine_rest.history.get_user_operation(state, one.value?.data?.executionId);
+  void engine_rest.task.get_task_comments(state, params.task_id);
 
   return (
     <>
       <h2>History</h2>
 
+      <h3>Comments</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>User</th>
+            <th>Comment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <RequestState signal={comments} on_success={() => <CommentEntry />} />
+        </tbody>
+      </table>
+
+      <h3>User Operations</h3>
       <table>
         <thead>
           <tr>
@@ -634,6 +679,28 @@ const HistoryTab = () => {
       </table>
     </>
   );
+};
+
+const CommentEntry = () => {
+  const comments = useContext(AppState).api.task.comments.value?.data;
+
+  if (!comments || comments.length === 0) {
+    return (
+      <tr>
+        <td colspan="3" style="text-align: center; color: var(--text-2); font-style: italic;">
+          No comments yet
+        </td>
+      </tr>
+    );
+  }
+
+  return comments.map(({ time, userId, message }, index) => (
+    <tr key={index}>
+      <td>{formatRelativeDate(time)}</td>
+      <td>{userId}</td>
+      <td>{message}</td>
+    </tr>
+  ));
 };
 
 const HistoryEntry = () =>

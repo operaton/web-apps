@@ -392,12 +392,20 @@
   #task-comment-editor {
       display: flex;
       flex-direction: column;
-      gap: var(--spacing-1);
+      gap: var(--spacing-2);
+
+      textarea {
+          width: 100%;
+          min-height: 20vh;
+          resize: vertical;
+          box-sizing: border-box;
+      }
 
       #comment-buttons {
           display: flex;
           flex-direction: row;
           gap: var(--spacing-1);
+          justify-content: flex-end;
       }
   }
 
