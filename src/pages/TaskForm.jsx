@@ -112,9 +112,15 @@ const parse_html = (state, html) => {
     if (field.getAttribute('cam-variable-type') === 'Long') field.type = 'number'
     if (disable) field.setAttribute('disabled', 'disabled')
     if (field.hasAttribute('required')) {
-      //TODO: Muss noch gemacht werden
-      if (field.type !== 'date') {
-        field.previousElementSibling.textContent += '*'
+      // Mark required fields with asterisk
+      // Try to find label: either previous sibling or parent label (for nested inputs)
+      const prevElement = field.previousElementSibling
+      const parentLabel = field.closest('label')
+
+      if (prevElement && prevElement.tagName === 'LABEL' && !prevElement.textContent.includes('*')) {
+        prevElement.textContent += '*'
+      } else if (parentLabel && !parentLabel.textContent.includes('*')) {
+        parentLabel.textContent += '*'
       }
     }
 
