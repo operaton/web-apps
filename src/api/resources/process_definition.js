@@ -18,8 +18,8 @@ export const get_called_process_definitions = (state, definition_id) =>
  * @param {string} process_definition_id - Process definition ID
  * @sideeffects Updates state.bpmn_xml
  */
-export const get_diagram = (state, process_definition_id) =>
-  GET(`/process-definition/${process_definition_id}/xml`, state, state.api.process.definition.diagram)
+export const get_diagram = (state, process_definition_id, signal = state.api.process.definition.diagram) =>
+  GET(`/process-definition/${process_definition_id}/xml`, state, signal)
 
 /**
  * Fetches statistics and all details for a single process definition

@@ -59,7 +59,7 @@ export function Header () {
           <menu>
             <li><a href="/deployments" class={url.startsWith('/deployments') && 'active'}>Deployments</a></li>
             <li><a href="/">Batches</a></li>
-            <li><a href="/">Migrations</a></li>
+            <li><a href="/migrations" class={url.startsWith('/migrations') && 'active'}>Migrations</a></li>
           </menu>
           <menu>
             <li><a href="/admin" class={url.startsWith('/admin') && 'active'}>Admin</a></li>

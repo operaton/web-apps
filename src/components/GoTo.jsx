@@ -17,7 +17,7 @@ const get_stored_server = () => {
   return stored_server
 }
 
-const createSearchState = () => {
+const create_search_state = () => {
   const server = signal(get_stored_server())
 
   const api = {
@@ -41,7 +41,7 @@ const SearchState = createContext(undefined)
 
 const GoTo = () =>
   <dialog id="global-search" class="fade-in">
-    <SearchState.Provider value={createSearchState()}>
+    <SearchState.Provider value={create_search_state()}>
       <SearchComponent />
     </SearchState.Provider>
   </dialog>

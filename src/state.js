@@ -62,6 +62,9 @@ const createAppState = () => {
       create: signal(null),
       add_user: signal(null)
     },
+    migration: {
+      generate: signal(null),
+    },
     tenant: {
       list: signal(null),
       by_member: signal(null),

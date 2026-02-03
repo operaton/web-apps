@@ -490,3 +490,17 @@ dialog#global-search {
     }
   }
 }
+
+/* migrations page */
+
+.migration-diagrams {
+  display: flex;
+  width: 100%;
+}
+.migration-diagrams > * {
+  flex: 1;
+}
+
+.migration-diagrams .react-bpmn-diagram-container {
+  height: 20em;
+}

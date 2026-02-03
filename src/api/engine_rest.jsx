@@ -9,6 +9,7 @@ import process_instance from './resources/process_instance.js'
 import deployment from './resources/deployment.js'
 import history from './resources/history.js'
 import job_definition from './resources/job_definition.js'
+import migration from './resources/migration.js'
 import task from './resources/task.js'
 import authorization from './resources/authorization.js'
 import decision from './resources/decision.js'
@@ -22,6 +23,7 @@ const engine_rest = {
   group,
   history,
   job_definition,
+  migration,
   process_definition,
   process_instance,
   task,
