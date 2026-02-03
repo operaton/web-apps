@@ -13,7 +13,8 @@ You require the following software to run the app
 - [Preact & Vite Setup](https://preactjs.com/guide/v10/getting-started#create-a-vite-powered-preact-app)
   - An up-to-date version of `node.js` 
 - An Operaton API for the backend to consume
-  - With Docker Compose run `docker compose up -d`
+  - With Docker Compose run `docker compose up -d`, or
+  - With Podman Compose (needs to be [installed on top of Podman](https://github.com/containers/podman-compose)) run `podman compose up -d`
   - Or with Maven ([example](https://github.com/javahippie/operaton-spring-boot-example))
 - Create a `.env.development.local` file in the root of this project and configure your backend as shown [here](./docs/Environment%20Variables.md)
 
