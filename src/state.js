@@ -4,8 +4,8 @@
  * Global app state using Preact signals.
  */
 
-import { signal } from '@preact/signals'
-import { createContext } from 'preact'
+import { signal } from "@preact/signals";
+import { createContext } from "preact";
 
 /**
  * Create the global app state by invoking the function in the root [Tasks.jsx`]
@@ -17,33 +17,33 @@ import { createContext } from 'preact'
  * @returns {Object} exposing all defined signals
  */
 const createAppState = () => {
-  const server = signal(get_stored_server())
+  const server = signal(get_stored_server());
   const auth = {
     logged_in: signal({ data: "unknown" }),
-    credentials: signal({username: null, password: null}),
+    credentials: signal({ username: null, password: null }),
     user: { id: signal() },
     login_response: signal(null),
     logout_response: signal(null),
-  }
+  };
 
   const deployments_page = {
     selected_resource: signal(null),
     selected_deployment: signal(null),
     selected_process_statistics: signal(null),
-  }
-  const history_mode = signal(false)
-  const user_profile = signal(null)
-  const task_claim_result = signal(null)
-  const task_assign_result = signal(null)
+  };
+  const history_mode = signal(false);
+  const user_profile = signal(null);
+  const task_claim_result = signal(null);
+  const task_assign_result = signal(null);
 
   const api = {
     authorization: {
       all: signal(null),
       update: signal(null),
-      delete: signal(null)
+      delete: signal(null),
     },
     engine: {
-      telemetry: signal(null)
+      telemetry: signal(null),
     },
     user: {
       count: signal(null),
@@ -52,7 +52,7 @@ const createAppState = () => {
       // todo: remove demo user when login is implemented
       profile: signal({ id: "demo" }),
       group: {
-        list: signal(null)
+        list: signal(null),
       },
       credentials: signal(null),
       unlock: signal(null),
@@ -60,16 +60,18 @@ const createAppState = () => {
     group: {
       list: signal(null),
       create: signal(null),
-      add_user: signal(null)
+      add_user: signal(null),
     },
     migration: {
       generate: signal(null),
+      validation: signal(null),
+      execution: signal(null),
     },
     tenant: {
       list: signal(null),
       by_member: signal(null),
       create: signal(null),
-      add_user: signal(null)
+      add_user: signal(null),
     },
     process: {
       definition: {
@@ -82,6 +84,7 @@ const createAppState = () => {
         start_form: signal(null),
         deployed_start_form: signal(null),
         rendered_form: signal(null),
+        activity_instance_statistics: signal(null),
       },
       instance: {
         called: signal(null),
@@ -89,7 +92,8 @@ const createAppState = () => {
         list: signal(null),
         count: signal(null),
         variables: signal(null),
-      }
+        by_defintion_id: signal(null),
+      },
     },
     task: {
       list: signal(null),
@@ -111,7 +115,7 @@ const createAppState = () => {
       all: signal(null),
       resources: signal(null),
       resource: signal(null),
-      delete: signal(null)
+      delete: signal(null),
     },
     decision: {
       definitions: signal(null),
@@ -121,16 +125,16 @@ const createAppState = () => {
     history: {
       incident: {
         by_process_definition: signal(null),
-        by_process_instance: signal(null)
+        by_process_instance: signal(null),
       },
       user_operation: signal(null),
     },
     job_definition: {
       all: {
-        by_process_definition: signal(null)
-      }
-    }
-  }
+        by_process_definition: signal(null),
+      },
+    },
+  };
 
   return {
     server,
@@ -140,21 +144,21 @@ const createAppState = () => {
     history_mode,
     user_profile,
     task_claim_result,
-    task_assign_result
-  }
-}
+    task_assign_result,
+  };
+};
 
-const AppState = createContext(undefined)
+const AppState = createContext(undefined);
 
 const get_stored_server = () => {
-  if (localStorage.getItem('server')) {
-    return JSON.parse(localStorage.getItem('server'))
+  if (localStorage.getItem("server")) {
+    return JSON.parse(localStorage.getItem("server"));
   }
 
-  const stored_server = JSON.parse(import.meta.env.VITE_BACKEND)[0]
-  localStorage.setItem('server', JSON.stringify(stored_server))
+  const stored_server = JSON.parse(import.meta.env.VITE_BACKEND)[0];
+  localStorage.setItem("server", JSON.stringify(stored_server));
 
-  return stored_server
-}
+  return stored_server;
+};
 
-export { createAppState, AppState }
+export { createAppState, AppState };

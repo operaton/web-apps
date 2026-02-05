@@ -146,7 +146,7 @@ const get_tasks = (state, sort_key = "name", sort_order = "asc") => {
 
 const get_task_process_definitions = (state, ids) =>
   fetch(
-    `${state.server.value.url}/engine-rest/process-definition?processDefinitionIdIn=${ids}`,
+    `${state.server.value.url}/engine-rest/task?processDefinitionId=${ids}`,
     {
       headers: new Headers({
         Authorization: `Basic ${window.btoa("demo:demo")}`,
@@ -163,6 +163,7 @@ const task = {
   update_task,
   get_task_form,
   get_process_instance_tasks,
+  get_task_process_definitions,
   get_task_rendered_form,
   get_task_deployed_form,
   claim_task,

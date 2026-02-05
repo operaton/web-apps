@@ -84,6 +84,10 @@ export const get_rendered_start_form = async (state, id) =>
 export const start_process_submit_form = (state, id, body = {}) =>
   POST(`/process-definition/${id}/submit-form`, body, state, state.api.process.definition.submit_form)
 
+
+export const get_activity_instance_statistics = (state, id) =>
+  GET(`/process-definition/${id}/statistics`, state, state.api.process.definition.activity_instance_statistics)
+
 const process_definition = {
   list: get_process_definitions,
   one: get_process_definition,
@@ -95,7 +99,8 @@ const process_definition = {
   start_form: get_start_form,
   get_deployed_start_form,
   rendered_start_form: get_rendered_start_form,
-  submit_form: start_process_submit_form
+  submit_form: start_process_submit_form,
+  activity_instance_statistics: get_activity_instance_statistics,
 }
 
 export default process_definition

@@ -1,6 +1,9 @@
 import { signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
-import engine_rest, { RequestState } from "../api/engine_rest.jsx";
+import engine_rest, {
+  RequestState,
+  RESPONSE_STATE,
+} from "../api/engine_rest.jsx";
 import { AppState } from "../state.js";
 import { createContext } from "preact";
 import ReactBpmn from "react-bpmn";
@@ -46,9 +49,9 @@ const ProcessSelection = () => {
         route(`${url}?${name}=${value}`);
       } else if (query[name] !== null) {
         query[name] = value;
-        const params_as_string = Object.entries(query).map(
-          ([k, v]) => `&${k}=${v}`
-        ).join('');
+        const params_as_string = Object.entries(query)
+          .map(([k, v]) => `&${k}=${v}`)
+          .join("");
         route(`${path}?${params_as_string}`);
       } else {
         route(`${url}&${name}=${value}`);
@@ -62,22 +65,41 @@ const ProcessSelection = () => {
       },
     } = state;
 
-  console.log(query)
-
   if (query.source) {
-    migration_state.source.value = query.source
-    engine_rest.process_definition.diagram(
+    migration_state.source.value = query.source;
+    void engine_rest.process_definition.diagram(
       state,
       migration_state.source.value,
       migration_state.source_diagram,
     );
+
+    void engine_rest.process_instance.by_defintion_id(
+      state,
+      migration_state.source.value,
+    );
+    // void engine_rest.task
+    //   .get_task_process_definitions(state, migration_state.source.value)
+    //   .then(console.log);
+    // void engine_rest.process_definition.activity_instance_statistics(
+    //   state,
+    //   migration_state.source.value,
+    // );
+    // .then(() => console.log(state.api.process.definition.activity_instance_statistics.value))
   }
   if (query.target) {
-    migration_state.target.value = query.target
+    migration_state.target.value = query.target;
     engine_rest.process_definition.diagram(
       state,
       migration_state.target.value,
       migration_state.target_diagram,
+    );
+  }
+
+  if (query.source && query.target) {
+    engine_rest.migration.generate(
+      state,
+      migration_state.source.value,
+      migration_state.target.value,
     );
   }
 
@@ -95,9 +117,15 @@ const ProcessSelection = () => {
             migration_state.source.value,
             migration_state.source_diagram,
           );
+          engine_rest.process_instance.by_defintion_id(
+            state,
+            migration_state.source.value,
+          );
         }}
       >
-        <option disabled selected>-- select source ---</option>
+        <option disabled selected>
+          -- select source ---
+        </option>
         <RequestState
           state={state}
           signal={list}
@@ -131,7 +159,9 @@ const ProcessSelection = () => {
           );
         }}
       >
-        <option disabled selected>-- select target ---</option>
+        <option disabled selected>
+          -- select target ---
+        </option>
         <RequestState
           state={state}
           signal={list}
@@ -167,17 +197,99 @@ const ProcessSelection = () => {
       <RequestState
         state={state}
         signal={state.api.migration.generate}
+        on_nothing={() => <></>}
         on_success={() => (
-          <ul>
-            {state.api.migration.generate.value.data.instructions.map(
-              (instruction, index) => (
-                <li key={index}>
-                  {instruction.sourceActivityIds[0]} →{" "}
-                  {instruction.targetActivityIds[0]}
-                </li>
-              ),
+          <>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="column">Source Activity</th>
+                  <th scope="column">Target Activity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {state.api.migration.generate.value.data.instructions.map(
+                  (instruction, index) => (
+                    <tr key={index}>
+                      <td>{instruction.sourceActivityIds[0]}</td>
+                      <td>
+                        <select>
+                          <option>{instruction.targetActivityIds[0]}</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ),
+                )}
+              </tbody>
+            </table>
+
+            <button
+              onClick={() =>
+                engine_rest.migration.validate(
+                  state,
+                  state.api.migration.generate.value.data,
+                )
+              }
+            >
+              Validate Mapping
+            </button>
+          </>
+        )}
+      />
+
+      <RequestState
+        state={state}
+        signal={state.api.process.instance.by_defintion_id}
+        on_success={() => (
+          <RequestState
+            state={state}
+            signal={state.api.migration.validation}
+            on_nothing={() => <></>}
+            on_success={() => (
+              <>
+                <h2>Process Instances of Source Defintion</h2>
+                <ul>
+                  {state.api.process.instance.by_defintion_id.value.data.map(
+                    ({ id }) => (
+                      <li key={id}>{id}</li>
+                    ),
+                  )}
+                </ul>
+                <button
+                  onClick={() =>
+                    engine_rest.migration
+                      .execute(
+                        state,
+                        state.api.migration.generate.value.data,
+                        state.api.process.instance.by_defintion_id.value.data.map(
+                          ({ id }) => id,
+                        ),
+                        true,
+                      )
+                      .then(() =>
+                        console.log(state.api.migration.execution.value),
+                      )
+                  }
+                >
+                  Execute Migration
+                </button>
+              </>
             )}
-          </ul>
+          />
+        )}
+      />
+
+      <RequestState
+        state={state}
+        signal={state.api.migration.execution}
+        on_nothing={() => <></>}
+        on_success={() => (
+          <>
+            {state.api.migration.execution.value.status ===
+            RESPONSE_STATE.SUCCESS
+              ? "Migration successfull"
+              : "Migration failed"}
+          </>
         )}
       />
 
@@ -187,6 +299,7 @@ const ProcessSelection = () => {
           <RequestState
             state={migration_state}
             signal={migration_state.source_diagram}
+            on_nothing={() => <p>Select source process defintion</p>}
             on_success={() => (
               <ReactBpmn
                 diagramXML={
@@ -204,6 +317,7 @@ const ProcessSelection = () => {
           <RequestState
             state={migration_state}
             signal={migration_state.target_diagram}
+            on_nothing={() => <p>Select target process defintion</p>}
             on_success={() => (
               <ReactBpmn
                 diagramXML={
