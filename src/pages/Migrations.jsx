@@ -9,19 +9,23 @@ import { createContext } from "preact";
 import ReactBpmn from "react-bpmn";
 import BpmnModdle from "bpmn-moddle";
 import { diff } from "bpmn-js-differ";
-import { useLocation, useRoute } from "preact-iso/router";
+import { useLocation } from "preact-iso/router";
 
 const create_mirgation_state = () => {
   const source = signal(null),
     source_diagram = signal(null),
+    source_activities = signal(null),
     target = signal(null),
-    target_diagram = signal(null);
+    target_diagram = signal(null),
+    target_activities = signal(null);
 
   return {
     source,
     source_diagram,
+    source_activities,
     target,
     target_diagram,
+    target_activities,
   };
 };
 
@@ -40,6 +44,8 @@ const MigrationsPage = () => {
     </MigrationState.Provider>
   );
 };
+
+const bpmnModdle = new BpmnModdle();
 
 const ProcessSelection = () => {
   const state = useContext(AppState),
@@ -68,11 +74,28 @@ const ProcessSelection = () => {
 
   if (query.source) {
     migration_state.source.value = query.source;
-    void engine_rest.process_definition.diagram(
-      state,
-      migration_state.source.value,
-      migration_state.source_diagram,
-    );
+    void engine_rest.process_definition
+      .diagram(
+        state,
+        migration_state.source.value,
+        migration_state.source_diagram,
+      )
+      .then(() => {
+        bpmnModdle
+          .fromXML(migration_state.source_diagram.value.data?.bpmn20Xml)
+          .then(
+            ({ rootElement: definitions }) =>
+              (migration_state.source_activities.value = {
+                status: "SUCCESS",
+                data: definitions.rootElements
+                  .find(({ id }) => id === "invoice")
+                  .flowElements.filter(
+                    ({ isImmediate, $type }) =>
+                      !isImmediate && $type !== "bpmn:SequenceFlow",
+                  ),
+              }),
+          );
+      });
 
     void engine_rest.process_instance.by_defintion_id(
       state,
@@ -81,11 +104,30 @@ const ProcessSelection = () => {
   }
   if (query.target) {
     migration_state.target.value = query.target;
-    engine_rest.process_definition.diagram(
-      state,
-      migration_state.target.value,
-      migration_state.target_diagram,
-    );
+    engine_rest.process_definition
+      .diagram(
+        state,
+        migration_state.target.value,
+        migration_state.target_diagram,
+      )
+      .then(() => {
+        console.log(migration_state.target_diagram.value.data?.bpmn20Xml);
+        bpmnModdle
+          .fromXML(migration_state.target_diagram.value.data?.bpmn20Xml)
+          .then(
+            ({ rootElement: definitions }) =>
+              (migration_state.target_activities.value = {
+                status: "SUCCESS",
+                data: definitions.rootElements
+                  .find(({ id }) => id === "invoice")
+                  .flowElements.filter(
+                    ({ isImmediate, $type }) =>
+                      !isImmediate && $type !== "bpmn:SequenceFlow",
+                  ),
+              }),
+          )
+          .then(() => console.log("done", migration_state.target_activities));
+      });
   }
 
   if (query.source && query.target) {
@@ -95,32 +137,6 @@ const ProcessSelection = () => {
       migration_state.target.value,
     );
   }
-
-  // useEffect(() => {
-  //   if (
-  //     migration_state.source_diagram.value !== null &&
-  //     migration_state.source_diagram.value.data !== null
-  //   ) {
-  //     const bpmnModdle = new BpmnModdle();
-
-  //     console.log("xml", migration_state.source_diagram.value.data?.bpmn20Xml);
-
-  //     // const { rootElement: definitionsA } = await;
-  //     bpmnModdle
-  //       .fromXML(migration_state.source_diagram.value.data?.bpmn20Xml)
-  //       .then(({ rootElement: definitions }) =>
-  //         console.log("diff moddle", definitions),
-  //       );
-  //   }
-
-  //   console.log(
-  //     "diff",
-  //     diff(
-  //       migration_state.source_diagram.value.data?.bpmn20Xml,
-  //       migration_state.target_diagram.value.data?.bpmn20Xml,
-  //     ),
-  //   );
-  // });
 
   return (
     <div id="migration">
@@ -223,51 +239,151 @@ const ProcessSelection = () => {
         </div>
       </section>
 
+      <RequestState
+        state={migration_state}
+        signal={migration_state.target_activities}
+        on_success={() => <Mappings />}
+      />
+
+      <ProcessInstanceSelection />
+
+      <RequestState
+        state={state}
+        signal={state.api.migration.execution}
+        on_nothing={() => <></>}
+        on_success={() => (
+          <>
+            {state.api.migration.execution.value.status ===
+            RESPONSE_STATE.SUCCESS
+              ? "Migration successfull"
+              : "Migration failed"}
+          </>
+        )}
+      />
+
+      <Diagrams />
+    </div>
+  );
+};
+
+const Diagrams = () => {
+  const migration_state = useContext(MigrationState);
+
+  return (
+    <div class="migration-diagrams">
+      <div>
+        <h3>Source Diagram</h3>
+        <RequestState
+          state={migration_state}
+          signal={migration_state.source_diagram}
+          on_nothing={() => <p>Select source process defintion</p>}
+          on_success={() => (
+            <ReactBpmn
+              diagramXML={migration_state.source_diagram.value.data?.bpmn20Xml}
+              onShown={() => console.log("shown")}
+              onLoading={() => console.log("loading")}
+              onError={() => console.log("error")}
+            />
+          )}
+        />
+      </div>
+      <div>
+        <h3>Target Diagram</h3>
+        <RequestState
+          state={migration_state}
+          signal={migration_state.target_diagram}
+          on_nothing={() => <p>Select target process defintion</p>}
+          on_success={() => (
+            <ReactBpmn
+              diagramXML={migration_state.target_diagram.value.data?.bpmn20Xml}
+              onShown={() => console.log("shown")}
+              onLoading={() => console.log("loading")}
+              onError={() => console.log("error")}
+            />
+          )}
+        />
+      </div>
+    </div>
+  );
+};
+
+const Mappings = () => {
+  const state = useContext(AppState),
+    migration_state = useContext(MigrationState);
+
+  console.log("activity", migration_state.target_activities.value.data);
+
+  return (
+    <>
       <h2>Mappings</h2>
 
       <RequestState
         state={state}
         signal={state.api.migration.generate}
         on_nothing={() => <></>}
-        on_success={() => (
-          <>
-            <table>
-              <thead>
-                <tr>
-                  <th scope="column">Source Activity</th>
-                  <th scope="column">Target Activity</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.api.migration.generate.value.data.instructions.map(
-                  (instruction, index) => (
-                    <tr key={index}>
-                      <td>{instruction.sourceActivityIds[0]}</td>
-                      <td>
-                        <select>
-                          <option>{instruction.targetActivityIds[0]}</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ),
-                )}
-              </tbody>
-            </table>
+        on_success={() => {
+          return (
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="column">Source Activity</th>
+                    <th scope="column">Target Activity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {migration_state.target_activities.value !== null &&
+                  migration_state.source_activities.value !== null ? (
+                    state.api.migration.generate.value.data.instructions.map(
+                      (instruction, index) => (
+                        <tr key={index}>
+                          <td>{instruction.sourceActivityIds[0]}</td>
+                          <td>
+                            <select>
+                              <option>
+                                {instruction.targetActivityIds[0]}
+                              </option>
+                              {migration_state.target_activities.value.data.map(
+                                (activity) => (
+                                  <option key={activity.id} value={activity.id}>
+                                    {activity.name} ({activity.id})
+                                  </option>
+                                ),
+                              )}
+                            </select>
+                          </td>
+                        </tr>
+                      ),
+                    )
+                  ) : (
+                    <p>Loading...</p>
+                  )}
+                </tbody>
+              </table>
 
-            <button
-              onClick={() =>
-                engine_rest.migration.validate(
-                  state,
-                  state.api.migration.generate.value.data,
-                )
-              }
-            >
-              Validate Mapping
-            </button>
-          </>
-        )}
+              <button
+                onClick={() =>
+                  engine_rest.migration.validate(
+                    state,
+                    state.api.migration.generate.value.data,
+                  )
+                }
+              >
+                Validate Mapping
+              </button>
+            </>
+          );
+        }}
       />
+    </>
+  );
+};
 
+const ProcessInstanceSelection = () => {
+  const state = useContext(AppState);
+
+  return (
+    <>
       <RequestState
         state={state}
         signal={state.api.process.instance.by_defintion_id}
@@ -309,75 +425,7 @@ const ProcessSelection = () => {
           />
         )}
       />
-
-      <RequestState
-        state={state}
-        signal={state.api.migration.execution}
-        on_nothing={() => <></>}
-        on_success={() => (
-          <>
-            {state.api.migration.execution.value.status ===
-            RESPONSE_STATE.SUCCESS
-              ? "Migration successfull"
-              : "Migration failed"}
-          </>
-        )}
-      />
-
-      <div class="migration-diagrams">
-        <div>
-          <h3>Source Diagram</h3>
-          <RequestState
-            state={migration_state}
-            signal={migration_state.source_diagram}
-            on_nothing={() => <p>Select source process defintion</p>}
-            on_success={() => {
-              const bpmnModdle = new BpmnModdle();
-
-              // const { rootElement: definitionsA } = await;
-              bpmnModdle
-                .fromXML(migration_state.source_diagram.value.data?.bpmn20Xml)
-                .then(({ rootElement: definitions }) =>
-                  console.log(
-                    "diff moddle",
-                    definitions.rootElements.find(({ id }) => id === "invoice"),
-                    // .flowElements.filter(({ isImmediate }) => !isImmediate),
-                  ),
-                );
-
-              return (
-                <ReactBpmn
-                  diagramXML={
-                    migration_state.source_diagram.value.data?.bpmn20Xml
-                  }
-                  onShown={() => console.log("shown")}
-                  onLoading={() => console.log("loading")}
-                  onError={() => console.log("error")}
-                />
-              );
-            }}
-          />
-        </div>
-        <div>
-          <h3>Target Diagram</h3>
-          <RequestState
-            state={migration_state}
-            signal={migration_state.target_diagram}
-            on_nothing={() => <p>Select target process defintion</p>}
-            on_success={() => (
-              <ReactBpmn
-                diagramXML={
-                  migration_state.target_diagram.value.data?.bpmn20Xml
-                }
-                onShown={() => console.log("shown")}
-                onLoading={() => console.log("loading")}
-                onError={() => console.log("error")}
-              />
-            )}
-          />
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 
