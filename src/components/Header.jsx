@@ -1,97 +1,156 @@
 // noinspection HtmlUnknownAnchorTarget,JSValidateTypes
 
-import { useLocation } from 'preact-iso'
-import * as Icons from '../assets/icons.jsx'
-import { useHotkeys } from 'react-hotkeys-hook'
-import { useContext } from 'preact/hooks'
-import { AppState } from '../state.js'
+import { useLocation } from "preact-iso";
+import * as Icons from "../assets/icons.jsx";
+import { useHotkeys } from "react-hotkeys-hook";
+import { useContext } from "preact/hooks";
+import { AppState } from "../state.js";
 
-const servers = JSON.parse(import.meta.env.VITE_BACKEND)
+const servers = JSON.parse(import.meta.env.VITE_BACKEND);
 
 const swap_server = (e, state) => {
-  const server = servers.find(s => s.url === e.target.value)
-  state.server.value = server
-  localStorage.setItem('server', JSON.stringify(server))
-}
+  const server = servers.find((s) => s.url === e.target.value);
+  state.server.value = server;
+  localStorage.setItem("server", JSON.stringify(server));
+};
 
-export function Header () {
-  const
-    { url, route } = useLocation(),
+export function Header() {
+  const { url, route } = useLocation(),
     state = useContext(AppState),
     // dialogs
-    showSearch = () => document.getElementById('global-search').showModal(),
-    show_mobile_menu = () => document.getElementById('mobile-menu').showModal(),
-    close_mobile_menu = () => document.getElementById('mobile-menu').close()
+    showSearch = () => document.getElementById("global-search").showModal(),
+    show_mobile_menu = () => document.getElementById("mobile-menu").showModal(),
+    close_mobile_menu = () => document.getElementById("mobile-menu").close();
 
-  useHotkeys('alt+0', () => route('/'))
-  useHotkeys('alt+1', () => route('/tasks'))
-  useHotkeys('alt+2', () => route('/processes'))
-  useHotkeys('alt+3', () => route('/decisions'))
-  useHotkeys('alt+4', () => route('/deployments'))
-  useHotkeys('alt+7', () => route('/admin'))
+  useHotkeys("alt+0", () => route("/"));
+  useHotkeys("alt+1", () => route("/tasks"));
+  useHotkeys("alt+2", () => route("/processes"));
+  useHotkeys("alt+3", () => route("/decisions"));
+  useHotkeys("alt+4", () => route("/deployments"));
+  useHotkeys("alt+5", () => route("/batches"));
+  useHotkeys("alt+6", () => route("/migrations"));
+  useHotkeys("alt+7", () => route("/admin"));
 
-  return <header id="top">
-    {import.meta.env.VITE_HIDE_RELEASE_WARNING === 'true'
-      ? <></>
-      : <div id="release-warning ">
-        Public Alpha Release – Untested and not ready for production – Share your feedback with an <a href="https://github.com/operaton/web-apps/issues">issue</a> or in the <a
-        href="https://forum.operaton.org/">forum</a>
-      </div>}
+  return (
+    <header id="top">
+      {import.meta.env.VITE_HIDE_RELEASE_WARNING === "true" ? (
+        <></>
+      ) : (
+        <div id="release-warning ">
+          Public Alpha Release – Untested and not ready for production – Share
+          your feedback with an{" "}
+          <a href="https://github.com/operaton/web-apps/issues">issue</a> or in
+          the <a href="https://forum.operaton.org/">forum</a>
+        </div>
+      )}
 
-    <menu id="skip-links">
-      <li><a href="#content">Skip to content</a></li>
-      <li><a href="#primary-navigation">Skip to Primary Navigation</a></li>
-    </menu>
+      <menu id="skip-links">
+        <li>
+          <a href="#content">Skip to content</a>
+        </li>
+        <li>
+          <a href="#primary-navigation">Skip to Primary Navigation</a>
+        </li>
+      </menu>
 
-    <h1 id="logo"><a href="/">Operaton</a></h1>
-    <button type="button" id="mobile-menu-toggle" tabindex={-1} hidden />
+      <h1 id="logo">
+        <a href="/">Operaton</a>
+      </h1>
+      <button type="button" id="mobile-menu-toggle" tabindex={-1} hidden />
 
-    <div id="nav-wrapper">
-      <nav id="primary-navigation" aria-label="Main">
-        <menu>
+      <div id="nav-wrapper">
+        <nav id="primary-navigation" aria-label="Main">
           <menu>
-            <li><a href="/tasks" class={url.startsWith('/tasks') && 'active'}>Tasks</a></li>
-          </menu>
-          <menu>
-            <li><a href="/processes" class={url.startsWith('/processes') && 'active'}>Processes</a></li>
-            <li><a href="/decisions" className={url.startsWith('/decisions') && 'active'}>Decisions</a></li>
-          </menu>
-          <menu>
-            <li><a href="/deployments" class={url.startsWith('/deployments') && 'active'}>Deployments</a></li>
-            <li><a href="/">Batches</a></li>
-            <li><a href="/migrations" class={url.startsWith('/migrations') && 'active'}>Migrations</a></li>
-          </menu>
-          <menu>
-            <li><a href="/admin" class={url.startsWith('/admin') && 'active'}>Admin</a></li>
-          </menu>
-        </menu>
-      </nav>
-      <div>
-        <nav id="secondary-navigation">
-          <menu>
-            <li><a href="/help">Help</a></li>
-            <li><a href="/account">Account</a></li>
+            <menu>
+              <li>
+                <a href="/tasks" class={url.startsWith("/tasks") && "active"}>
+                  Tasks
+                </a>
+              </li>
+            </menu>
+            <menu>
+              <li>
+                <a
+                  href="/processes"
+                  class={url.startsWith("/processes") && "active"}
+                >
+                  Processes
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/decisions"
+                  className={url.startsWith("/decisions") && "active"}
+                >
+                  Decisions
+                </a>
+              </li>
+            </menu>
+            <menu>
+              <li>
+                <a
+                  href="/deployments"
+                  class={url.startsWith("/deployments") && "active"}
+                >
+                  Deployments
+                </a>
+              </li>
+              <li>
+                <a href="/">Batches</a>
+              </li>
+              <li>
+                <a
+                  href="/migrations"
+                  class={url.startsWith("/migrations") && "active"}
+                >
+                  Migrations
+                </a>
+              </li>
+            </menu>
+            <menu>
+              <li>
+                <a href="/admin" class={url.startsWith("/admin") && "active"}>
+                  Admin
+                </a>
+              </li>
+            </menu>
           </menu>
         </nav>
-        <button id="go-to" onClick={showSearch}><Icons.search />Go To</button>
-        <label id="server-selector" title="Server selection">
-          <Icons.server />
-          <select
-            onChange={(e) => swap_server(e, state)}>
-            <option disabled>Choose a server</option>
-            {servers.map(server =>
-              <option key={server.url} value={server.url}
-                      selected={state.server.value?.url === server.url}>
-                {server.name} {server.c7_mode ? '(C7)' : ''}
-              </option>)}
-          </select>
-        </label>
+        <div>
+          <nav id="secondary-navigation">
+            <menu>
+              <li>
+                <a href="/help">Help</a>
+              </li>
+              <li>
+                <a href="/account">Account</a>
+              </li>
+            </menu>
+          </nav>
+          <button id="go-to" onClick={showSearch}>
+            <Icons.search />
+            Go To
+          </button>
+          <label id="server-selector" title="Server selection">
+            <Icons.server />
+            <select onChange={(e) => swap_server(e, state)}>
+              <option disabled>Choose a server</option>
+              {servers.map((server) => (
+                <option
+                  key={server.url}
+                  value={server.url}
+                  selected={state.server.value?.url === server.url}
+                >
+                  {server.name} {server.c7_mode ? "(C7)" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
+  );
 }
-
-
 
 // <dialog id="mobile-menu">
 //   <button id="mobile-menu-toggle" onClick={close_mobile_menu}>

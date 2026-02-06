@@ -1,7 +1,7 @@
 import { render } from "preact";
 import { LocationProvider, Route, Router } from "preact-iso";
 import { AppState, createAppState } from "./state.js";
-import './helper/i18n';
+import "./helper/i18n";
 
 import { Header } from "./components/Header.jsx";
 import { GoTo } from "./components/GoTo.jsx";
@@ -32,13 +32,13 @@ export const App = () => {
   );
 };
 
-const servers = JSON.parse(import.meta.env.VITE_BACKEND)
+const servers = JSON.parse(import.meta.env.VITE_BACKEND);
 
 const swap_server = (e, state) => {
-  const server = servers.find(s => s.url === e.target.value)
-  state.server.value = server
-  localStorage.setItem('server', JSON.stringify(server))
-}
+  const server = servers.find((s) => s.url === e.target.value);
+  state.server.value = server;
+  localStorage.setItem("server", JSON.stringify(server));
+};
 
 const get_cookie = (/** @type {string} */ name) => {
   const value = `; ${document.cookie}`;
@@ -67,8 +67,10 @@ const Routing = () => {
       );
     };
 
-
-  if (cookie !== undefined && state.auth.logged_in.value.data !== "authenticated") {
+  if (
+    cookie !== undefined &&
+    state.auth.logged_in.value.data !== "authenticated"
+  ) {
     const { username, password } = JSON.parse(cookie);
     void engine_rest.auth.login(state, username, password, true);
   }
@@ -78,7 +80,7 @@ const Routing = () => {
       <LocationProvider>
         <Header />
         <Router>
-          <Route path="/" component={Home} />
+          <Route path="/" component={TasksPage} />
           <Route path="/decisions" component={DecisionsPage} />
           <Route path="/decisions/:decision_id" component={DecisionsPage} />
           <Route path="/tasks" component={TasksPage} />
@@ -87,19 +89,38 @@ const Routing = () => {
           <Route path="/tasks/:task_id/:tab" component={TasksPage} />
           <Route path="/processes" component={ProcessesPage} />
           <Route path="/processes/:definition_id" component={ProcessesPage} />
-          <Route path="/processes/:definition_id/:panel" component={ProcessesPage} />
-          <Route path="/processes/:definition_id/:panel/:selection_id" component={ProcessesPage} />
-          <Route path="/processes/:definition_id/:panel/:selection_id/:sub_panel" component={ProcessesPage} />
+          <Route
+            path="/processes/:definition_id/:panel"
+            component={ProcessesPage}
+          />
+          <Route
+            path="/processes/:definition_id/:panel/:selection_id"
+            component={ProcessesPage}
+          />
+          <Route
+            path="/processes/:definition_id/:panel/:selection_id/:sub_panel"
+            component={ProcessesPage}
+          />
           <Route path="/migrations" component={MigrationsPage} />
           <Route path="/deployments" component={DeploymentsPage} />
-          <Route path="/deployments/:deployment_id" component={DeploymentsPage} />
-          <Route path="/deployments/:deployment_id/:resource_name" component={DeploymentsPage} />
+          <Route
+            path="/deployments/:deployment_id"
+            component={DeploymentsPage}
+          />
+          <Route
+            path="/deployments/:deployment_id/:resource_name"
+            component={DeploymentsPage}
+          />
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/:page_id" component={AdminPage} />
           <Route path="/admin/:page_id/:selection_id" component={AdminPage} />
           <Route path="/account" component={AccountPage} />
           <Route path="/account/:page_id" component={AccountPage} />
-          <Route path="/account/:page_id/:selection_id" component={AccountPage} />
+          <Route
+            path="/account/:page_id/:selection_id"
+            component={AccountPage}
+          />
+          <Route path="/help" component={Home} />
           <Route default component={NotFound} />
         </Router>
         <GoTo />
@@ -115,15 +136,19 @@ const Routing = () => {
           <h1>Login</h1>
           <label className="row center gap-1 p-1">
             Server Selection
-            <select
-              onChange={(e) => swap_server(e, state)}>
-              <option disabled>ℹ️ Choose a server to retrieve your processes
+            <select onChange={(e) => swap_server(e, state)}>
+              <option disabled>
+                ℹ️ Choose a server to retrieve your processes
               </option>
-              {servers.map(server =>
-                <option key={server.url} value={server.url}
-                        selected={state.server.value?.url === server.url}>
-                  {server.name} {server.c7_mode ? '(C7)' : ''}
-                </option>)}
+              {servers.map((server) => (
+                <option
+                  key={server.url}
+                  value={server.url}
+                  selected={state.server.value?.url === server.url}
+                >
+                  {server.name} {server.c7_mode ? "(C7)" : ""}
+                </option>
+              ))}
             </select>
           </label>
           <form onSubmit={login} class=".form-horizontal">
@@ -131,7 +156,9 @@ const Routing = () => {
             <input
               name="username"
               id="username"
-              onInput={(e) => (credentials.value.username = e.currentTarget.value)}
+              onInput={(e) =>
+                (credentials.value.username = e.currentTarget.value)
+              }
               required
             />
 
@@ -140,7 +167,9 @@ const Routing = () => {
               name="password"
               type="password"
               id="password"
-              onInput={(e) => (credentials.value.password = e.currentTarget.value)}
+              onInput={(e) =>
+                (credentials.value.password = e.currentTarget.value)
+              }
               required
             />
 
@@ -148,7 +177,9 @@ const Routing = () => {
             <input
               type="checkbox"
               name="remember_credentials"
-              onInput={(e) => (credentials.value.remember_login = e.currentTarget.checked)}
+              onInput={(e) =>
+                (credentials.value.remember_login = e.currentTarget.checked)
+              }
             />
 
             <div class="button-group">

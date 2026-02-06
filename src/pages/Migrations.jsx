@@ -141,127 +141,143 @@ const ProcessSelection = () => {
   return (
     <div id="migration">
       <h1 class="screen-hidden">Migrations</h1>
-      <section>
-        <h2>Process Defintion Selection</h2>
-        <div class="row">
+      <div>
+        <section>
+          <h2 class="screen-hidden">Process Defintion Selection</h2>
           <div>
-            <label>Source Process Definition</label>
-            <br />
-            <select
-              onChange={(e) => {
-                // @ts-ignore
-                migration_state.source.value = e.target.value;
-                add_query_params("source", migration_state.source.value);
-                engine_rest.process_definition.diagram(
-                  state,
-                  migration_state.source.value,
-                  migration_state.source_diagram,
-                );
-                engine_rest.process_instance.by_defintion_id(
-                  state,
-                  migration_state.source.value,
-                );
-              }}
-            >
-              <option disabled selected>
-                -- Select source ---
-              </option>
-              <RequestState
-                state={state}
-                signal={list}
-                on_success={() =>
-                  list.value.data.map(({ id, definition }) => (
-                    <option
-                      key={id}
-                      disabled={migration_state.target.value == id}
-                      selected={migration_state.source.value == id}
-                      value={id}
-                    >
-                      {definition.name} – v{definition.version}
-                    </option>
-                  ))
-                }
-              />
-            </select>
-          </div>
+            <div>
+              <label>Source </label>
+              <select
+                onChange={(e) => {
+                  // @ts-ignore
+                  migration_state.source.value = e.target.value;
+                  add_query_params("source", migration_state.source.value);
+                  engine_rest.process_definition.diagram(
+                    state,
+                    migration_state.source.value,
+                    migration_state.source_diagram,
+                  );
+                  engine_rest.process_instance.by_defintion_id(
+                    state,
+                    migration_state.source.value,
+                  );
+                  engine_rest.migration.generate(
+                    state,
+                    migration_state.source.value,
+                    migration_state.target.value,
+                  );
+                }}
+              >
+                <option disabled selected>
+                  -- Select source ---
+                </option>
+                <RequestState
+                  state={state}
+                  signal={list}
+                  on_success={() =>
+                    list.value.data.map(({ id, definition }) => (
+                      <option
+                        key={id}
+                        disabled={migration_state.target.value == id}
+                        selected={migration_state.source.value == id}
+                        value={id}
+                      >
+                        {definition.name} – v{definition.version}
+                      </option>
+                    ))
+                  }
+                />
+              </select>
+            </div>
 
-          <div>
-            <label>Target Process Definition</label>
-            <br />
-            <select
-              onChange={(e) => {
-                migration_state.target.value = e.target.value;
-                add_query_params("target", migration_state.target.value);
-                engine_rest.process_definition.diagram(
-                  state,
-                  migration_state.target.value,
-                  migration_state.target_diagram,
-                );
-              }}
-            >
-              <option disabled selected>
-                -- Select target ---
-              </option>
-              <RequestState
-                state={state}
-                signal={list}
-                on_success={() =>
-                  list.value.data.map(({ id, definition }) => (
-                    <option
-                      key={id}
-                      disabled={migration_state.source.value == id}
-                      selected={migration_state.target.value == id}
-                      value={id}
-                    >
-                      {definition.name} – v{definition.version}
-                    </option>
-                  ))
-                }
-              />
-            </select>
+            <div>
+              <label>Target </label>
+              <select
+                onChange={(e) => {
+                  migration_state.target.value = e.target.value;
+                  add_query_params("target", migration_state.target.value);
+                  engine_rest.process_definition.diagram(
+                    state,
+                    migration_state.target.value,
+                    migration_state.target_diagram,
+                  );
+                  engine_rest.migration.generate(
+                    state,
+                    migration_state.source.value,
+                    migration_state.target.value,
+                  );
+                }}
+              >
+                <option disabled selected>
+                  -- Select target ---
+                </option>
+                <RequestState
+                  state={state}
+                  signal={list}
+                  on_success={() =>
+                    list.value.data.map(({ id, definition }) => (
+                      <option
+                        key={id}
+                        disabled={migration_state.source.value == id}
+                        selected={migration_state.target.value == id}
+                        value={id}
+                      >
+                        {definition.name} – v{definition.version}
+                      </option>
+                    ))
+                  }
+                />
+              </select>
+            </div>
           </div>
+        </section>
 
-          <button
-            onClick={() =>
-              engine_rest.migration.generate(
+        <Diagrams />
+
+        <hr />
+
+        <RequestState
+          state={migration_state}
+          signal={migration_state.target_activities}
+          on_success={() => <Mappings />}
+        />
+
+        <hr />
+
+        <ProcessInstanceSelection />
+
+        <RequestState
+          state={state}
+          signal={state.api.migration.execution}
+          on_nothing={() => <></>}
+          on_success={() => (
+            <>
+              {state.api.migration.execution.value.status ===
+              RESPONSE_STATE.SUCCESS
+                ? "Migration successfull"
+                : "Migration failed"}
+            </>
+          )}
+        />
+      </div>
+      <div id="execute">
+        <button
+          onClick={() =>
+            engine_rest.migration
+              .execute(
                 state,
-                migration_state.source.value,
-                migration_state.target.value,
+                state.api.migration.generate.value.data,
+                state.api.process.instance.by_defintion_id.value.data.map(
+                  ({ id }) => id,
+                ),
+                true,
               )
-            }
-            disabled={
-              migration_state.source.value === null ||
-              migration_state.target.value === null
-            }
-          >
-            Generate Mapping
-          </button>
-        </div>
-      </section>
-
-      <RequestState
-        state={migration_state}
-        signal={migration_state.target_activities}
-        on_success={() => <Mappings />}
-      />
-
-      <ProcessInstanceSelection />
-
-      <RequestState
-        state={state}
-        signal={state.api.migration.execution}
-        on_nothing={() => <></>}
-        on_success={() => (
-          <>
-            {state.api.migration.execution.value.status ===
-            RESPONSE_STATE.SUCCESS
-              ? "Migration successfull"
-              : "Migration failed"}
-          </>
-        )}
-      />
-
-      <Diagrams />
+              .then(() => console.log(state.api.migration.execution.value))
+          }
+        >
+          Execute Migration
+        </button>
+      </div>
     </div>
   );
 };
@@ -270,40 +286,49 @@ const Diagrams = () => {
   const migration_state = useContext(MigrationState);
 
   return (
-    <div class="migration-diagrams">
-      <div>
-        <h3>Source Diagram</h3>
-        <RequestState
-          state={migration_state}
-          signal={migration_state.source_diagram}
-          on_nothing={() => <p>Select source process defintion</p>}
-          on_success={() => (
-            <ReactBpmn
-              diagramXML={migration_state.source_diagram.value.data?.bpmn20Xml}
-              onShown={() => console.log("shown")}
-              onLoading={() => console.log("loading")}
-              onError={() => console.log("error")}
-            />
-          )}
-        />
+    // <div class="migration-diagrams">
+    <section>
+      <h2 class="screen-hidden">Diagrams</h2>
+      <div class="migration-diagrams">
+        <div>
+          <h3 class="screen-hidden">Source</h3>
+          <RequestState
+            state={migration_state}
+            signal={migration_state.source_diagram}
+            on_nothing={() => <p>Select source process defintion</p>}
+            on_success={() => (
+              <ReactBpmn
+                diagramXML={
+                  migration_state.source_diagram.value.data?.bpmn20Xml
+                }
+                onShown={() => console.log("shown")}
+                onLoading={() => console.log("loading")}
+                onError={() => console.log("error")}
+              />
+            )}
+          />
+        </div>
+        <div>
+          <h3 class="screen-hidden">Target</h3>
+          <RequestState
+            state={migration_state}
+            signal={migration_state.target_diagram}
+            on_nothing={() => <p>Select target process defintion</p>}
+            on_success={() => (
+              <ReactBpmn
+                diagramXML={
+                  migration_state.target_diagram.value.data?.bpmn20Xml
+                }
+                onShown={() => console.log("shown")}
+                onLoading={() => console.log("loading")}
+                onError={() => console.log("error")}
+              />
+            )}
+          />
+        </div>
       </div>
-      <div>
-        <h3>Target Diagram</h3>
-        <RequestState
-          state={migration_state}
-          signal={migration_state.target_diagram}
-          on_nothing={() => <p>Select target process defintion</p>}
-          on_success={() => (
-            <ReactBpmn
-              diagramXML={migration_state.target_diagram.value.data?.bpmn20Xml}
-              onShown={() => console.log("shown")}
-              onLoading={() => console.log("loading")}
-              onError={() => console.log("error")}
-            />
-          )}
-        />
-      </div>
-    </div>
+      {/* </div>*/}
+    </section>
   );
 };
 
@@ -311,11 +336,9 @@ const Mappings = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState);
 
-  console.log("activity", migration_state.target_activities.value.data);
-
   return (
     <>
-      <h2>Mappings</h2>
+      <h2 class="screen-hidden">Mappings</h2>
 
       <RequestState
         state={state}
@@ -334,19 +357,34 @@ const Mappings = () => {
                 <tbody>
                   {migration_state.target_activities.value !== null &&
                   migration_state.source_activities.value !== null ? (
-                    state.api.migration.generate.value.data.instructions.map(
-                      (instruction, index) => (
-                        <tr key={index}>
-                          <td>{instruction.sourceActivityIds[0]}</td>
+                    // state.api.migration.generate.value.data.instructions
+                    migration_state.source_activities.value.data.map(
+                      (source_activity) => (
+                        <tr key={source_activity.id}>
+                          <td>{source_activity.name}</td>
                           <td>
                             <select>
-                              <option>
-                                {instruction.targetActivityIds[0]}
-                              </option>
+                              <option value="">-- none -- (do not map)</option>
+                              {/* {instruction.targetActivityIds[0]}*/}
+
                               {migration_state.target_activities.value.data.map(
-                                (activity) => (
-                                  <option key={activity.id} value={activity.id}>
-                                    {activity.name} ({activity.id})
+                                (target_activity) => (
+                                  <option
+                                    key={target_activity.id}
+                                    value={target_activity.id}
+                                    selected={state.api.migration.generate.value.data.instructions.find(
+                                      ({
+                                        sourceActivityIds,
+                                        targetActivityIds,
+                                      }) =>
+                                        sourceActivityIds[0] ===
+                                          source_activity.id &&
+                                        targetActivityIds[0] ===
+                                          target_activity.id,
+                                    )}
+                                  >
+                                    {target_activity.name} ({target_activity.id}
+                                    )
                                   </option>
                                 ),
                               )}
@@ -394,7 +432,9 @@ const ProcessInstanceSelection = () => {
             on_nothing={() => <></>}
             on_success={() => (
               <>
-                <h2>Process Instances of Source Defintion</h2>
+                <h2 class="screen-hidden">
+                  Process Instances of Source Defintion
+                </h2>
                 <ul>
                   {state.api.process.instance.by_defintion_id.value.data.map(
                     ({ id }) => (
@@ -402,24 +442,6 @@ const ProcessInstanceSelection = () => {
                     ),
                   )}
                 </ul>
-                <button
-                  onClick={() =>
-                    engine_rest.migration
-                      .execute(
-                        state,
-                        state.api.migration.generate.value.data,
-                        state.api.process.instance.by_defintion_id.value.data.map(
-                          ({ id }) => id,
-                        ),
-                        true,
-                      )
-                      .then(() =>
-                        console.log(state.api.migration.execution.value),
-                      )
-                  }
-                >
-                  Execute Migration
-                </button>
               </>
             )}
           />
