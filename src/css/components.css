@@ -217,8 +217,8 @@ main#processes {
 .tabs {
   /*height: 100%;*/
   position: relative;
-  overflow-y: scroll;
-  overscroll-behavior: none;
+  /*overflow-y: scroll;*/
+  /*overscroll-behavior: none;*/
 }
 
 .tabs #diagram {
@@ -230,7 +230,7 @@ main#processes {
   flex-wrap: wrap;
   padding-top: var(--spacing-1);
   background: var(--background-2);
-  /*position: sticky;*/
+  position: sticky;
   top: 0;
   z-index: 10;
   gap: var(--spacing-1);
