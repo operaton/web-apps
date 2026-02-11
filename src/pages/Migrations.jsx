@@ -550,3 +550,85 @@ const ProcessInstanceSelection = () => {
 };
 
 export { MigrationsPage };
+
+/*
+{
+  "migrationPlan": {
+    "sourceProcessDefinitionId": "invoice:2:451a34de-e771-11ee-9f50-6e21836f88b1",
+    "targetProcessDefinitionId": "invoice:1:449b19c5-e771-11ee-9f50-6e21836f88b1",
+    "instructions": [
+      {
+        "sourceActivityIds": [
+          "prepareBankTransfer"
+        ],
+        "targetActivityIds": [
+          "prepareBankTransfer"
+        ],
+        "updateEventTrigger": false
+      },
+      {
+        "sourceActivityIds": [
+          "approveInvoice"
+        ],
+        "targetActivityIds": [
+          "approveInvoice"
+        ],
+        "updateEventTrigger": false
+      },
+      {
+        "sourceActivityIds": [
+          "ServiceTask_1"
+        ],
+        "targetActivityIds": [
+          "ServiceTask_1"
+        ],
+        "updateEventTrigger": false
+      },
+      {
+        "sourceActivityIds": [
+          "reviewInvoice"
+        ],
+        "targetActivityIds": [
+          "reviewInvoice"
+        ],
+        "updateEventTrigger": false
+      }
+    ],
+    "variables": {
+      "Test": {
+        "type": "String",
+        "value": "Hello World"
+      }
+    }
+  },
+  "skipIoMappings": true,
+  "skipCustomListeners": true,
+  "processInstanceQuery": {
+    "active": true,
+    "processDefinitionId": "invoice:2:451a34de-e771-11ee-9f50-6e21836f88b1"
+  }
+}
+*/
+
+/*
+
+Process Instance Filter Query Params:
+
+ID
+Business Key
+Parent ID
+Sub ID
+Variable
+Active
+Suspended
+Root Instances Only
+Leaf Instances Only
+With Incidents Only
+Incident ID
+Incident Type
+Incident Message
+Tenant ID
+Activity ID
+Without Tenant ID
+
+*/
