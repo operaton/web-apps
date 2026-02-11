@@ -761,6 +761,7 @@
     background: var(--background-1);
     font: var(--body-font-family);
     color: var(--text);
+    max-width: 100%;
   }
   input,
   textarea {
