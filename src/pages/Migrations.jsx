@@ -1,5 +1,5 @@
 import { signal } from "@preact/signals";
-import { useContext, useEffect } from "preact/hooks";
+import { useContext } from "preact/hooks";
 import engine_rest, {
   RequestState,
   RESPONSE_STATE,
@@ -8,8 +8,8 @@ import { AppState } from "../state.js";
 import { createContext } from "preact";
 import ReactBpmn from "react-bpmn";
 import BpmnModdle from "bpmn-moddle";
-import { diff } from "bpmn-js-differ";
 import { useLocation } from "preact-iso/router";
+import { m41 } from "happy-dom/lib/PropertySymbol.js";
 
 const create_mirgation_state = () => {
   const source = signal(null),
@@ -17,7 +17,9 @@ const create_mirgation_state = () => {
     source_activities = signal(null),
     target = signal(null),
     target_diagram = signal(null),
-    target_activities = signal(null);
+    target_activities = signal(null),
+    mappings = signal({}),
+    selected_process_instances = signal({});
 
   return {
     source,
@@ -26,6 +28,8 @@ const create_mirgation_state = () => {
     target,
     target_diagram,
     target_activities,
+    mappings,
+    selected_process_instances,
   };
 };
 
@@ -70,7 +74,28 @@ const ProcessSelection = () => {
           definition: { list },
         },
       },
-    } = state;
+    } = state,
+    generate = () =>
+      migration_state.source.value !== null &&
+      migration_state.target.value !== null
+        ? engine_rest.migration
+            .generate(
+              state,
+              migration_state.source.value,
+              migration_state.target.value,
+            )
+            .then(
+              () =>
+                (migration_state.mappings.value = Object.fromEntries(
+                  state.api.migration.generate.value.data.instructions.map(
+                    (instruction) => [
+                      instruction.sourceActivityIds[0],
+                      instruction.targetActivityIds[0],
+                    ],
+                  ),
+                )),
+            )
+        : null;
 
   if (query.source) {
     migration_state.source.value = query.source;
@@ -111,7 +136,6 @@ const ProcessSelection = () => {
         migration_state.target_diagram,
       )
       .then(() => {
-        console.log(migration_state.target_diagram.value.data?.bpmn20Xml);
         bpmnModdle
           .fromXML(migration_state.target_diagram.value.data?.bpmn20Xml)
           .then(
@@ -125,18 +149,11 @@ const ProcessSelection = () => {
                       !isImmediate && $type !== "bpmn:SequenceFlow",
                   ),
               }),
-          )
-          .then(() => console.log("done", migration_state.target_activities));
+          );
       });
   }
 
-  if (query.source && query.target) {
-    engine_rest.migration.generate(
-      state,
-      migration_state.source.value,
-      migration_state.target.value,
-    );
-  }
+  if (query.source && query.target) generate();
 
   return (
     <div id="migration">
@@ -161,11 +178,7 @@ const ProcessSelection = () => {
                     state,
                     migration_state.source.value,
                   );
-                  engine_rest.migration.generate(
-                    state,
-                    migration_state.source.value,
-                    migration_state.target.value,
-                  );
+                  generate();
                 }}
               >
                 <option disabled selected>
@@ -201,11 +214,7 @@ const ProcessSelection = () => {
                     migration_state.target.value,
                     migration_state.target_diagram,
                   );
-                  engine_rest.migration.generate(
-                    state,
-                    migration_state.source.value,
-                    migration_state.target.value,
-                  );
+                  generate();
                 }}
               >
                 <option disabled selected>
@@ -239,6 +248,13 @@ const ProcessSelection = () => {
         <RequestState
           state={migration_state}
           signal={migration_state.target_activities}
+          on_nothing={() => (
+            <p>
+              <small>
+                Select process definitions to define the migration mappings
+              </small>
+            </p>
+          )}
           on_success={() => <Mappings />}
         />
 
@@ -263,16 +279,14 @@ const ProcessSelection = () => {
       <div id="execute">
         <button
           onClick={() =>
-            engine_rest.migration
-              .execute(
-                state,
-                state.api.migration.generate.value.data,
-                state.api.process.instance.by_defintion_id.value.data.map(
-                  ({ id }) => id,
-                ),
-                true,
-              )
-              .then(() => console.log(state.api.migration.execution.value))
+            engine_rest.migration.execute(
+              state,
+              state.api.migration.generate.value.data,
+              Object.entries(
+                migration_state.selected_process_instances.value,
+              ).map(([k]) => k),
+              true,
+            )
           }
         >
           Execute Migration
@@ -295,7 +309,11 @@ const Diagrams = () => {
           <RequestState
             state={migration_state}
             signal={migration_state.source_diagram}
-            on_nothing={() => <p>Select source process defintion</p>}
+            on_nothing={() => (
+              <p>
+                <small>Select source process defintion</small>
+              </p>
+            )}
             on_success={() => (
               <ReactBpmn
                 diagramXML={
@@ -313,7 +331,11 @@ const Diagrams = () => {
           <RequestState
             state={migration_state}
             signal={migration_state.target_diagram}
-            on_nothing={() => <p>Select target process defintion</p>}
+            on_nothing={() => (
+              <p>
+                <small>Select target process defintion</small>
+              </p>
+            )}
             on_success={() => (
               <ReactBpmn
                 diagramXML={
@@ -336,6 +358,8 @@ const Mappings = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState);
 
+  console.log("mappings", state.api.migration.generate.value);
+
   return (
     <>
       <h2 class="screen-hidden">Mappings</h2>
@@ -343,7 +367,13 @@ const Mappings = () => {
       <RequestState
         state={state}
         signal={state.api.migration.generate}
-        on_nothing={() => <></>}
+        on_nothing={() => (
+          <p>
+            <small>
+              Select process definitions to define the migration mappings
+            </small>
+          </p>
+        )}
         on_success={() => {
           return (
             <>
@@ -363,7 +393,19 @@ const Mappings = () => {
                         <tr key={source_activity.id}>
                           <td>{source_activity.name}</td>
                           <td>
-                            <select>
+                            <select
+                              onChange={(e) => {
+                                if (e.target.value !== "") {
+                                  migration_state.mappings.value[
+                                    source_activity.id
+                                  ] = e.target.value;
+                                } else {
+                                  delete migration_state.mappings.value[
+                                    source_activity.id
+                                  ];
+                                }
+                              }}
+                            >
                               <option value="">-- none -- (do not map)</option>
                               {/* {instruction.targetActivityIds[0]}*/}
 
@@ -400,12 +442,30 @@ const Mappings = () => {
               </table>
 
               <button
-                onClick={() =>
+                onClick={() => {
+                  console.log(
+                    "mappings validate",
+                    migration_state.mappings.value,
+                  );
+
+                  let migration_plan = state.api.migration.generate.value.data;
+
+                  migration_plan.instructions = Object.keys(
+                    migration_state.mappings.value,
+                  ).map((key) => {
+                    return {
+                      sourceActivityIds: [key],
+                      targetActivityIds: [migration_state.mappings.value[key]],
+                      updateEventTrigger: false,
+                    };
+                  });
+
                   engine_rest.migration.validate(
                     state,
-                    state.api.migration.generate.value.data,
-                  )
-                }
+                    migration_plan,
+                    // state.api.migration.generate.value.data,
+                  );
+                }}
               >
                 Validate Mapping
               </button>
@@ -413,18 +473,42 @@ const Mappings = () => {
           );
         }}
       />
+
+      <RequestState
+        state={state}
+        signal={state.api.migration.validation}
+        on_nothing={() => <p>Validation result</p>}
+        on_success={() => (
+          <ul>
+            {state.api.migration.validation.value.data.instructionReports.map(
+              (report) =>
+                report.failures.map((failure) => (
+                  <li key={failure.toString()}>{failure}</li>
+                )),
+            )}
+          </ul>
+        )}
+      />
     </>
   );
 };
 
 const ProcessInstanceSelection = () => {
-  const state = useContext(AppState);
+  const state = useContext(AppState),
+    migration_state = useContext(MigrationState);
 
   return (
     <>
       <RequestState
         state={state}
         signal={state.api.process.instance.by_defintion_id}
+        on_nothing={() => (
+          <p>
+            <small>
+              Define mappings to select process instances for migration
+            </small>
+          </p>
+        )}
         on_success={() => (
           <RequestState
             state={state}
@@ -432,16 +516,30 @@ const ProcessInstanceSelection = () => {
             on_nothing={() => <></>}
             on_success={() => (
               <>
-                <h2 class="screen-hidden">
-                  Process Instances of Source Defintion
-                </h2>
-                <ul>
+                <h2>Select Process Instances of Source Definition</h2>
+                <form>
                   {state.api.process.instance.by_defintion_id.value.data.map(
                     ({ id }) => (
-                      <li key={id}>{id}</li>
+                      // eslint-disable-next-line react/jsx-key
+                      <>
+                        <input
+                          type="checkbox"
+                          id={id}
+                          value={id}
+                          onChange={(e) =>
+                            (migration_state.selected_process_instances.value[
+                              id
+                            ] = e.target.checked)
+                          }
+                        />
+
+                        <label key={id} for={id}>
+                          {id}
+                        </label>
+                      </>
                     ),
                   )}
-                </ul>
+                </form>
               </>
             )}
           />
