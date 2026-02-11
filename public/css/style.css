@@ -873,25 +873,25 @@
 
   th, td {
       box-sizing: border-box;
-      border: var(--border-2);
-      border-color: transparent;
+      /*border: var(--border-2);*/
+      /*border-color: transparent;*/
   }
 
   tbody tr:hover :where(td, th) {
-    border-top: var(--border-2);
-    border-bottom: var(--border-2);
+    /*border-top: var(--border-2);*/
+    /*border-bottom: var(--border-2);*/
     margin: calc(-1 * var(--border-width-2));
     /*padding-top: calc(var(--spacing-1) - var(--border-width-2));
     padding-bottom: calc(var(--spacing-1) - var(--border-width-2));*/
 
     &:first-child {
       border-radius: var(--border-radius) 0 0 var(--border-radius);
-      border-left: var(--border-2);
+      /*border-left: var(--border-2);*/
       /*padding: calc(var(--spacing-1) - var(--border-width-2));*/
     }
     &:last-child {
       border-radius: 0 var(--border-radius) var(--border-radius) 0;
-      border-right: var(--border-2);
+      /*border-right: var(--border-2);*/
     }
   }
 
