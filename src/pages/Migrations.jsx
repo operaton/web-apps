@@ -209,7 +209,6 @@ const ProcessSelection = () => {
                   -- Select source ---
                 </option>
                 <RequestState
-                  state={state}
                   signal={list}
                   on_success={() =>
                     list.value.data.map(({ id, definition }) => (
@@ -247,7 +246,6 @@ const ProcessSelection = () => {
                   -- Select target ---
                 </option>
                 <RequestState
-                  state={state}
                   signal={list}
                   on_success={() =>
                     list.value.data.map(({ id, definition }) => (
@@ -289,7 +287,6 @@ const ProcessSelection = () => {
         <ProcessInstanceSelection />
 
         <RequestState
-          state={state}
           signal={state.api.migration.execution}
           on_nothing={() => <></>}
           on_success={() => (
@@ -345,9 +342,9 @@ const Diagrams = () => {
                 diagramXML={
                   migration_state.source_diagram.value.data?.bpmn20Xml
                 }
-                onShown={() => console.log("shown")}
-                onLoading={() => console.log("loading")}
-                onError={() => console.log("error")}
+                onShown={() => console.log("BPMN Diagram 1: shown")}
+                onLoading={() => console.log("BPMN Diagram 1: loading")}
+                onError={() => console.log("BPMN Diagram 1: error")}
               />
             )}
           />
@@ -367,9 +364,9 @@ const Diagrams = () => {
                 diagramXML={
                   migration_state.target_diagram.value.data?.bpmn20Xml
                 }
-                onShown={() => console.log("shown")}
-                onLoading={() => console.log("loading")}
-                onError={() => console.log("error")}
+                onShown={() => console.log("BPMN Diagram 2: shown")}
+                onLoading={() => console.log("BPMN Diagram 2: loading")}
+                onError={() => console.log("BPMN Diagram 2: error")}
               />
             )}
           />
@@ -393,7 +390,6 @@ const Mappings = () => {
       <h2 class="screen-hidden">Mappings</h2>
 
       <RequestState
-        state={state}
         signal={state.api.migration.generate}
         on_nothing={() => (
           <p>
@@ -464,26 +460,10 @@ const Mappings = () => {
                           </td>
                           <td>
                             <RequestState
-                              state={state}
                               signal={state.api.migration.validation}
                               on_nothing={() => <p>Not validated</p>}
                               on_success={() => (
                                 <p>
-                                  {
-                                    void console.log(
-                                      "validation",
-                                      state.api.migration.validation.value.data.instructionReports.some(
-                                        (report) =>
-                                          report.instruction
-                                            .sourceActivityIds[0] ===
-                                          source_activity.id,
-                                        // ? report.failures.toString()
-                                        // : "valid",
-                                      )
-                                        ? "invalid"
-                                        : "valid",
-                                    )
-                                  }
                                   {state.api.migration.validation.value.data.instructionReports.some(
                                     (report) =>
                                       report.instruction
@@ -535,7 +515,6 @@ const Mappings = () => {
       />
 
       <RequestState
-        state={state}
         signal={state.api.migration.validation}
         on_nothing={() => <p>Validation result</p>}
         on_success={() => (
@@ -560,8 +539,6 @@ const ProcessInstanceSelection = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState);
 
-  console.log("instance selection", state.api.migration.validation.value);
-
   if (
     state.api.migration.validation.value !== null &&
     state.api.migration.validation.value.data.instructionReports.length > 0
@@ -576,8 +553,10 @@ const ProcessInstanceSelection = () => {
   return (
     <>
       <RequestState
-        state={state}
-        signal={state.api.process.instance.by_defintion_id}
+        signal={[
+          state.api.process.instance.by_defintion_id,
+          state.api.migration.validation,
+        ]}
         on_nothing={() => (
           <p>
             <small>
@@ -586,39 +565,31 @@ const ProcessInstanceSelection = () => {
           </p>
         )}
         on_success={() => (
-          <RequestState
-            state={state}
-            signal={state.api.migration.validation}
-            on_nothing={() => <></>}
-            on_success={() => (
-              <>
-                <h2>Select Process Instances of Source Definition</h2>
-                <form>
-                  {state.api.process.instance.by_defintion_id.value.data.map(
-                    ({ id }) => (
-                      // eslint-disable-next-line react/jsx-key
-                      <>
-                        <input
-                          type="checkbox"
-                          id={id}
-                          value={id}
-                          onChange={(e) =>
-                            (migration_state.selected_process_instances.value[
-                              id
-                            ] = e.target.checked)
-                          }
-                        />
+          <>
+            <h2>Select Process Instances of Source Definition</h2>
+            <form>
+              {state.api.process.instance.by_defintion_id.value.data.map(
+                ({ id }) => (
+                  // eslint-disable-next-line react/jsx-key
+                  <>
+                    <input
+                      type="checkbox"
+                      id={id}
+                      value={id}
+                      onChange={(e) =>
+                        (migration_state.selected_process_instances.value[id] =
+                          e.target.checked)
+                      }
+                    />
 
-                        <label key={id} for={id}>
-                          {id}
-                        </label>
-                      </>
-                    ),
-                  )}
-                </form>
-              </>
-            )}
-          />
+                    <label key={id} for={id}>
+                      {id}
+                    </label>
+                  </>
+                ),
+              )}
+            </form>
+          </>
         )}
       />
     </>
