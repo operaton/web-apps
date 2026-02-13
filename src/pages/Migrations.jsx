@@ -392,11 +392,9 @@ const Mappings = () => {
       <RequestState
         signal={state.api.migration.generate}
         on_nothing={() => (
-          <p>
-            <small>
-              Select process definitions to define the migration mappings
-            </small>
-          </p>
+          <small>
+            Select process definitions to define the migration mappings
+          </small>
         )}
         on_success={() => {
           return (
@@ -433,7 +431,6 @@ const Mappings = () => {
                               }}
                             >
                               <option value="">-- none -- (do not map)</option>
-                              {/* {instruction.targetActivityIds[0]}*/}
 
                               {migration_state.target_activities.value.data.map(
                                 (target_activity) => (
@@ -469,8 +466,6 @@ const Mappings = () => {
                                       report.instruction
                                         .sourceActivityIds[0] ===
                                       source_activity.id,
-                                    // ? report.failures.toString()
-                                    // : "valid",
                                   )
                                     ? "invalid"
                                     : "valid"}
@@ -486,29 +481,6 @@ const Mappings = () => {
                   )}
                 </tbody>
               </table>
-
-              {/* <button
-                onClick={() => {
-                  let migration_plan = state.api.migration.generate.value.data;
-
-                  migration_plan.instructions = Object.keys(
-                    migration_state.mappings.value,
-                  ).map((key) => {
-                    return {
-                      sourceActivityIds: [key],
-                      targetActivityIds: [migration_state.mappings.value[key]],
-                      updateEventTrigger: false,
-                    };
-                  });
-
-                  engine_rest.migration.validate(
-                    state,
-                    migration_plan,
-                  );
-                }}
-              >
-                Validate Mapping
-              </button>*/}
             </>
           );
         }}
@@ -516,18 +488,23 @@ const Mappings = () => {
 
       <RequestState
         signal={state.api.migration.validation}
-        on_nothing={() => <p>Validation result</p>}
+        on_nothing={() => <></>}
         on_success={() => (
           <div>
-            <h3>Valdiation errors</h3>
-            <ul>
-              {state.api.migration.validation.value.data.instructionReports.map(
-                (report) =>
-                  report.failures.map((failure) => (
-                    <li key={failure.toString()}>{failure}</li>
-                  )),
-              )}
-            </ul>
+            {state.api.migration.validation.value.data.instructionReports
+              .length > 0 ? (
+              <>
+                <h3>Valdiation errors</h3>
+                <ul>
+                  {state.api.migration.validation.value.data.instructionReports.map(
+                    (report) =>
+                      report.failures.map((failure) => (
+                        <li key={failure.toString()}>{failure}</li>
+                      )),
+                  )}
+                </ul>
+              </>
+            ) : null}
           </div>
         )}
       />
@@ -537,34 +514,26 @@ const Mappings = () => {
 
 const ProcessInstanceSelection = () => {
   const state = useContext(AppState),
-    migration_state = useContext(MigrationState);
+    migration_state = useContext(MigrationState),
+    has_errors = () =>
+      state.api.migration.validation.value.data.instructionReports.length > 0;
 
-  if (
-    state.api.migration.validation.value !== null &&
-    state.api.migration.validation.value.data.instructionReports.length > 0
-  ) {
-    return (
-      <p>
-        Invalid mappings. To select process instances and execute the migration,
-        first make sure your mappings are all valid.
-      </p>
-    );
-  }
   return (
-    <>
-      <RequestState
-        signal={[
-          state.api.process.instance.by_defintion_id,
-          state.api.migration.validation,
-        ]}
-        on_nothing={() => (
+    <RequestState
+      signal={[
+        state.api.process.instance.by_defintion_id,
+        state.api.migration.validation,
+      ]}
+      on_nothing={() => (
+        <small>Define mappings to select process instances for migration</small>
+      )}
+      on_success={() =>
+        has_errors() ? (
           <p>
-            <small>
-              Define mappings to select process instances for migration
-            </small>
+            Invalid mappings. To select process instances and execute the
+            migration, first make sure your mappings are all valid.
           </p>
-        )}
-        on_success={() => (
+        ) : (
           <>
             <h2>Select Process Instances of Source Definition</h2>
             <form>
@@ -590,9 +559,9 @@ const ProcessInstanceSelection = () => {
               )}
             </form>
           </>
-        )}
-      />
-    </>
+        )
+      }
+    />
   );
 };
 
