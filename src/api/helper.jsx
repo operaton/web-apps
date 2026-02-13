@@ -56,18 +56,34 @@ export const RequestState = ({
       ? !signal.some((sig) => sig.value === null)
       : signal.value !== null;
 
-  console.log(
-    is_array,
-    is_array ? signal.map((sig) => sig.value) : signal.value,
-    is_not_null,
-  );
-
   if (is_not_null) {
     if (is_array) {
-      return signal.map((sig) =>
-        // (sig) => console.log("foreach", sig.value),
-        resolve_signal(sig, on_load, on_success, on_error),
+      if (signal.some((sig) => sig.value === null)) {
+        return;
+      }
+
+      const error = signal.find(
+        (sig) => sig.value.status === RESPONSE_STATE.ERROR,
       );
+      if (error) {
+        return resolve_signal(error, on_load, on_success, on_error);
+      }
+
+      const not_init = signal.find(
+        (sig) => sig.value.status === RESPONSE_STATE.NOT_INITIALIZED,
+      );
+      if (not_init) {
+        return resolve_signal(not_init, on_load, on_success, on_error);
+      }
+
+      const loading = signal.find(
+        (sig) => sig.value.status === RESPONSE_STATE.LOADING,
+      );
+      if (loading) {
+        return resolve_signal(loading, on_load, on_success, on_error);
+      }
+
+      return resolve_signal(signal[0], on_load, on_success, on_error);
     }
     return resolve_signal(signal, on_load, on_success, on_error);
   }
@@ -102,29 +118,6 @@ const resolve_signal = (signal, on_load, on_success, on_error) => {
       </p>
     );
   }
-  // <>
-  // {
-  //   NOT_INITIALIZED: <p>No data requested</p>,
-  //   LOADING: on_load ? on_load : <p class="fade-in-delayed">Loading...</p>,
-  //   SUCCESS: signal.value?.data ? on_success() : <p>No data</p>,
-  //   ERROR: on_error ? (
-  //     on_error
-  //   ) : (
-  //     <p class="error">
-  //       <strong>Error:</strong>{" "}
-  //       {(
-  //         Array.isArray(signal)
-  //           ? signal.some((sig) => sig.value.error)
-  //           : signal.value.error !== undefined
-  //       )
-  //         ? Array.isArray(signal)
-  //           ? signal.map((sig) => `${sig.value.error.message} `)
-  //           : signal.value.error.message
-  //         : "No error message."}
-  //     </p>
-  //   ),
-  // }[signal.value.status]
-  // </>
 };
 
 const response_data = (response) =>
