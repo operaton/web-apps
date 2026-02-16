@@ -22,14 +22,14 @@ export function Header() {
     show_mobile_menu = () => document.getElementById("mobile-menu").showModal(),
     close_mobile_menu = () => document.getElementById("mobile-menu").close();
 
-  useHotkeys("alt+0", () => route("/"));
-  useHotkeys("alt+1", () => route("/tasks"));
-  useHotkeys("alt+2", () => route("/processes"));
-  useHotkeys("alt+3", () => route("/decisions"));
-  useHotkeys("alt+4", () => route("/deployments"));
-  useHotkeys("alt+5", () => route("/batches"));
-  useHotkeys("alt+6", () => route("/migrations"));
-  useHotkeys("alt+7", () => route("/admin"));
+  useHotkeys("alt+shift+0", () => route("/"));
+  useHotkeys("alt+shift+1", () => route("/tasks"));
+  useHotkeys("alt+shift+2", () => route("/processes"));
+  useHotkeys("alt+shift+3", () => route("/decisions"));
+  useHotkeys("alt+shift+4", () => route("/deployments"));
+  useHotkeys("alt+shift+5", () => route("/batches"));
+  useHotkeys("alt+shift+6", () => route("/migrations"));
+  useHotkeys("alt+shift+7", () => route("/admin"));
 
   return (
     <header id="top">
