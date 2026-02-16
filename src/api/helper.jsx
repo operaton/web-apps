@@ -120,6 +120,11 @@ const resolve_signal = (signal, on_load, on_success, on_error) => {
   }
 };
 
+export const has_data = (signal) =>
+  signal.value !== null &&
+  signal.value.status === RESPONSE_STATE.SUCCESS &&
+  signal.value.data !== null;
+
 const response_data = (response) =>
   response.ok
     ? response.status === 204
