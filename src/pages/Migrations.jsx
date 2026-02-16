@@ -53,7 +53,8 @@ const bpmnModdle = new BpmnModdle();
 const validate = (state, migration_state) => {
   if (
     migration_state.mappings.value !== null &&
-    state.api.migration.generate.value !== null
+    state.api.migration.generate.value !== null &&
+    state.api.migration.generate.value.data !== null
   ) {
     let migration_plan = state.api.migration.generate.value.data;
 
@@ -71,23 +72,43 @@ const validate = (state, migration_state) => {
   }
 };
 
+const add_query_params_abstract = (query, url, route, path, name, value) => {
+  if (Object.keys(query).length === 0) {
+    route(`${url}?${name}=${value}`);
+  } else if (query[name] !== null) {
+    query[name] = value;
+    const params_as_string = Object.entries(query)
+      .map(([k, v]) => `&${k}=${v}`)
+      .join("");
+    route(`${path}?${params_as_string}`);
+  } else {
+    route(`${url}&${name}=${value}`);
+  }
+};
+
+const generate_abstract = (migration_state, state) =>
+  migration_state.source.value !== null && migration_state.target.value !== null
+    ? engine_rest.migration
+        .generate(
+          state,
+          migration_state.source.value,
+          migration_state.target.value,
+        )
+        .then(
+          () =>
+            (migration_state.mappings.value = Object.fromEntries(
+              state.api.migration.generate.value.data.instructions.map(
+                (instruction) => [
+                  instruction.sourceActivityIds[0],
+                  instruction.targetActivityIds[0],
+                ],
+              ),
+            )),
+        )
+    : null;
+
 const ProcessSelection = () => {
   const state = useContext(AppState),
-    migration_state = useContext(MigrationState),
-    { route, url, query, path } = useLocation(),
-    add_query_params = (name, value) => {
-      if (Object.keys(query).length === 0) {
-        route(`${url}?${name}=${value}`);
-      } else if (query[name] !== null) {
-        query[name] = value;
-        const params_as_string = Object.entries(query)
-          .map(([k, v]) => `&${k}=${v}`)
-          .join("");
-        route(`${path}?${params_as_string}`);
-      } else {
-        route(`${url}&${name}=${value}`);
-      }
-    },
     {
       api: {
         process: {
@@ -95,27 +116,18 @@ const ProcessSelection = () => {
         },
       },
     } = state,
-    generate = () =>
-      migration_state.source.value !== null &&
-      migration_state.target.value !== null
-        ? engine_rest.migration
-            .generate(
-              state,
-              migration_state.source.value,
-              migration_state.target.value,
-            )
-            .then(
-              () =>
-                (migration_state.mappings.value = Object.fromEntries(
-                  state.api.migration.generate.value.data.instructions.map(
-                    (instruction) => [
-                      instruction.sourceActivityIds[0],
-                      instruction.targetActivityIds[0],
-                    ],
-                  ),
-                )),
-            )
-        : null;
+    migration_state = useContext(MigrationState),
+    { route, url, query, path } = useLocation(),
+    add_query_params = (name, value) =>
+      add_query_params_abstract(query, url, route, path, name, value),
+    generate = () => generate_abstract(migration_state, state);
+
+  if (query.source === undefined || query.target === undefined) {
+    console.log("clear state");
+    state.api.migration.validation.value = null;
+    state.api.migration.generate.value = null;
+    state.api.process.instance.by_defintion_id.value = null;
+  }
 
   if (query.source) {
     migration_state.source.value = query.source;
