@@ -9,6 +9,7 @@ import { createContext } from "preact";
 import ReactBpmn from "react-bpmn";
 import BpmnModdle from "bpmn-moddle";
 import { useLocation } from "preact-iso/router";
+import { has_data } from "../api/helper.jsx";
 
 const create_mirgation_state = () => {
   const source = signal(null),
@@ -212,9 +213,7 @@ const ProcessSelection = () => {
                     state,
                     migration_state.source.value,
                   );
-                  generate();
-
-                  validate(state, migration_state);
+                  generate().then(() => validate(state, migration_state));
                 }}
               >
                 <option disabled selected>
@@ -249,9 +248,7 @@ const ProcessSelection = () => {
                     migration_state.target.value,
                     migration_state.target_diagram,
                   );
-                  generate();
-
-                  validate(state, migration_state);
+                  generate().then(() => validate(state, migration_state));
                 }}
               >
                 <option disabled selected>
@@ -393,7 +390,8 @@ const Mappings = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState);
 
-  if (state.api.migration.generate.value !== null) {
+  if (has_data(state.api.migration.generate)) {
+    console.log("migration generate", state.api.migration.generate.value);
     validate(state, migration_state);
   }
 
