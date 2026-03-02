@@ -67,8 +67,7 @@ const find_activities_of_diagram = (diagram_signal, activities_signal) =>
       return (activities_signal.value = {
         status: "SUCCESS",
         data: definitions.rootElements
-          // fixme: invoice as variable ID
-          .find(({ id }) => id === "invoice")
+          .find(({ $type }) => $type === "bpmn:Process")
           .flowElements.filter(({ isImmediate, $type }) => {
             // console.log($type);
             return !(
