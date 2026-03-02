@@ -57,7 +57,7 @@ const ProfileEditPage = () => {
   user_profile_edit.value = { ...user_profile.value.data }
 
   const
-    set_value = (k, v) => user_profile_edit.value[k] = v.currentTarget.value,
+    set_value = (k, v) => user_profile_edit.value = { ...user_profile_edit.peek(), [k]: v.currentTarget.value },
     on_submit = e => {
       e.preventDefault()
       engine_rest.user.profile.update(state).then(() => engine_rest.user.profile.get(state))
@@ -136,9 +136,10 @@ const AccountAccountPage = () => {
     // form handlers
     on_submit = e => {
       e.preventDefault()
-      credentials.value.data.authenticatedUserPassword = old_password.value
-      credentials.value.data.password = password.value
-      void engine_rest.user.credentials_update(state, null)
+      void engine_rest.user.credentials_update(state, null, {
+        authenticatedUserPassword: old_password.value,
+        password: password.value,
+      })
     }
     // ,
     // handle_delete_user = e => {

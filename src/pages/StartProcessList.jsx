@@ -158,20 +158,19 @@ const StartProcessForm = () => {
       button_group = document.createElement('div'),
       submit_button = document.createElement('button')
 
-    inputs.forEach(input =>
-      form_fields.value.push({
+    const fields = [
+      ...Array.from(inputs, input => ({
         variable_name: input.getAttribute('cam-variable-name'),
         type: input.getAttribute('cam-variable-type'),
         input_type: input.getAttribute('type')
-      })
-    )
-    selects.forEach(input =>
-      form_fields.value.push({
+      })),
+      ...Array.from(selects, input => ({
         variable_name: input.getAttribute('cam-variable-name'),
         type: input.getAttribute('cam-variable-type'),
         input_type: 'select'
-      })
-    )
+      })),
+    ]
+    form_fields.value = [...form_fields.peek(), ...fields]
 
     submit_button.innerText = 'Submit'
     submit_button.setAttribute('type', 'submit')

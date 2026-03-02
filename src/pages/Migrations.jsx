@@ -82,21 +82,18 @@ const find_activities_of_diagram = (diagram_signal, activities_signal) =>
 
 const validate = (state, migration_state) => {
   if (
-    migration_state.mappings.value !== null &&
-    state.api.migration.generate.value !== null &&
-    state.api.migration.generate.value.data !== null
+    migration_state.mappings.peek() !== null &&
+    state.api.migration.generate.peek() !== null &&
+    state.api.migration.generate.peek().data !== null
   ) {
-    let migration_plan = state.api.migration.generate.value.data;
-
-    migration_plan.instructions = Object.keys(
-      migration_state.mappings.value,
-    ).map((key) => {
-      return {
+    const migration_plan = {
+      ...state.api.migration.generate.peek().data,
+      instructions: Object.keys(migration_state.mappings.peek()).map((key) => ({
         sourceActivityIds: [key],
-        targetActivityIds: [migration_state.mappings.value[key]],
+        targetActivityIds: [migration_state.mappings.peek()[key]],
         updateEventTrigger: false,
-      };
-    });
+      })),
+    };
 
     engine_rest.migration.validate(state, migration_plan);
   }
@@ -329,21 +326,31 @@ const ProcessSelection = () => {
           onSubmit={(event) => {
             event.preventDefault();
             const variables_map = {};
-            for (const v of migration_state.variables.value) {
+            for (const v of migration_state.variables.peek()) {
               if (v.name.trim() !== "")
                 variables_map[v.name] = { type: v.type, value: v.value };
             }
-            state.api.migration.generate.value.data.variables = variables_map;
+            const migration_plan = {
+              ...state.api.migration.generate.peek().data,
+              instructions: Object.keys(
+                migration_state.mappings.peek(),
+              ).map((key) => ({
+                sourceActivityIds: [key],
+                targetActivityIds: [migration_state.mappings.peek()[key]],
+                updateEventTrigger: false,
+              })),
+              variables: variables_map,
+            };
             engine_rest.migration.execute(
               state,
-              state.api.migration.generate.value.data,
+              migration_plan,
               Object.entries(
-                migration_state.selected_process_instances.value,
+                migration_state.selected_process_instances.peek(),
               ).map(([k]) => k),
               null,
-              execute_form_data.value.skip_custom_listeners,
-              execute_form_data.value.skip_io_mappings,
-              execute_form_data.value.async,
+              execute_form_data.peek().skip_custom_listeners,
+              execute_form_data.peek().skip_io_mappings,
+              execute_form_data.peek().async,
             );
           }}
         >
@@ -353,7 +360,7 @@ const ProcessSelection = () => {
             id="async"
             name="async"
             onInput={(e) =>
-              (execute_form_data.value.async = e.currentTarget.checked)
+              (execute_form_data.value = { ...execute_form_data.peek(), async: e.currentTarget.checked })
             }
           />
 
@@ -363,8 +370,7 @@ const ProcessSelection = () => {
             id="skip_custom_listeners"
             name="skip_custom_listeners"
             onInput={(e) =>
-              (execute_form_data.value.skip_custom_listeners =
-                e.currentTarget.checked)
+              (execute_form_data.value = { ...execute_form_data.peek(), skip_custom_listeners: e.currentTarget.checked })
             }
           />
 
@@ -374,8 +380,7 @@ const ProcessSelection = () => {
             id="skip_io_mappings"
             name="skip_io_mappings"
             onInput={(e) =>
-              (execute_form_data.value.skip_io_mappings =
-                e.currentTarget.checked)
+              (execute_form_data.value = { ...execute_form_data.peek(), skip_io_mappings: e.currentTarget.checked })
             }
           />
 
@@ -446,9 +451,13 @@ const Diagrams = () => {
 
 const update_mapping = (e, source_activity, migration_state, state) => {
   if (e.target.value !== "") {
-    migration_state.mappings.value[source_activity.id] = e.target.value;
+    migration_state.mappings.value = {
+      ...migration_state.mappings.peek(),
+      [source_activity.id]: e.target.value,
+    };
   } else {
-    delete migration_state.mappings.value[source_activity.id];
+    const { [source_activity.id]: _, ...rest } = migration_state.mappings.peek();
+    migration_state.mappings.value = rest;
   }
 
   validate(state, migration_state);
@@ -477,11 +486,7 @@ const generate_mapping_rows = (migration_state, state) => (
                   <option
                     key={target_activity.id}
                     value={target_activity.id}
-                    selected={state.api.migration.generate.value.data.instructions.find(
-                      ({ sourceActivityIds, targetActivityIds }) =>
-                        sourceActivityIds[0] === source_activity.id &&
-                        targetActivityIds[0] === target_activity.id,
-                    )}
+                    selected={migration_state.mappings.value[source_activity.id] === target_activity.id}
                   >
                     {target_activity.name} ({target_activity.id})
                   </option>
@@ -518,7 +523,7 @@ const Mappings = () => {
 
   if (
     has_data(state.api.migration.generate) &&
-    Object.keys(migration_state.mappings.value).length > 0
+    Object.keys(migration_state.mappings.peek()).length > 0
   ) {
     validate(state, migration_state);
   }
@@ -726,8 +731,8 @@ const ProcessInstanceSelection = () => {
                       id={id}
                       value={id}
                       onChange={(e) =>
-                        (migration_state.selected_process_instances.value[id] =
-                          e.target.checked)
+                        (migration_state.selected_process_instances.value =
+                          { ...migration_state.selected_process_instances.peek(), [id]: e.target.checked })
                       }
                     />
 

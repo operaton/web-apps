@@ -90,7 +90,7 @@ const TenantCreate = () => {
     { api: { tenant: { create: tenant_create } } } = state,
     form_tenant = signal({ profile: {}, credentials: {} })
 
-  const set_value = (k, v) => form_tenant.value[k] = v.currentTarget.value
+  const set_value = (k, v) => form_tenant.value = { ...form_tenant.peek(), [k]: v.currentTarget.value }
 
   const on_submit = e => {
     e.preventDefault()
@@ -195,7 +195,7 @@ const GroupCreate = () => {
     { api: { group: { create: group_create } } } = state,
     form_group = useSignal({})
 
-  const set_value = (k, v) => form_group.value[k] = v.currentTarget.value
+  const set_value = (k, v) => form_group.value = { ...form_group.peek(), [k]: v.currentTarget.value }
 
 
   const on_submit = e => {
@@ -630,8 +630,8 @@ const AuthorizationResourceRow = (authorization) => {
     is_deleted = useSignal(false),
     form_authorization = signal(authorization),
     form_id = `authorization_edit_${id}`,
-    set_value = (k, v) => form_authorization.value[k] = v.currentTarget.value,
-    set_null = (k) => form_authorization.value[k] = null
+    set_value = (k, v) => form_authorization.value = { ...form_authorization.peek(), [k]: v.currentTarget.value },
+    set_null = (k) => form_authorization.value = { ...form_authorization.peek(), [k]: null }
 
 
   const

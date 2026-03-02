@@ -157,7 +157,7 @@ const Routing = () => {
               name="username"
               id="username"
               onInput={(e) =>
-                (credentials.value.username = e.currentTarget.value)
+                (credentials.value = { ...credentials.peek(), username: e.currentTarget.value })
               }
               required
             />
@@ -168,7 +168,7 @@ const Routing = () => {
               type="password"
               id="password"
               onInput={(e) =>
-                (credentials.value.password = e.currentTarget.value)
+                (credentials.value = { ...credentials.peek(), password: e.currentTarget.value })
               }
               required
             />
@@ -178,7 +178,7 @@ const Routing = () => {
               type="checkbox"
               name="remember_credentials"
               onInput={(e) =>
-                (credentials.value.remember_login = e.currentTarget.checked)
+                (credentials.value = { ...credentials.peek(), remember_login: e.currentTarget.checked })
               }
             />
 
