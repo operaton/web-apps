@@ -724,6 +724,11 @@
     transition: 50ms all;
   }
 
+  input[type="checkbox"] {
+      width: 1em;
+      height: 1em;
+  }
+
   button[type="submit"]:is(:focus, :active, :hover) {
     outline: 0.1em solid var(--color-primary);
   }

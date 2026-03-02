@@ -250,7 +250,11 @@ const fetch_with_body = async (method, url, body, state, signl) => {
     const json = await response_data(response);
     return (signl.value = { status: RESPONSE_STATE.SUCCESS, data: json });
   } catch (error) {
-    return console.log("error:", error);
+    if (error instanceof Response) {
+      const json = await error.json().catch(() => ({ message: error.statusText }));
+      return (signl.value = { status: RESPONSE_STATE.ERROR, error: json });
+    }
+    return (signl.value = { status: RESPONSE_STATE.ERROR, error });
   }
 };
 

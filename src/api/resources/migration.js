@@ -12,7 +12,7 @@ const generate = (
     {
       sourceProcessDefinitionId: source_process_definition_id,
       targetProcessDefinitionId: target_process_definition_id,
-      variables: variables,
+      variables,
       updateEventTriggers: update_event_triggers,
     },
     state,
@@ -30,15 +30,20 @@ const validate = (state, migration_plan) =>
 const execute = (
   state,
   migration_plan,
-  process_instances,
+  process_instances = null,
+  process_instance_query = null,
   skip_custom_listeners = false,
+  skip_io_mappings = false,
+  async = false,
 ) =>
   POST(
-    `/migration/execute`,
+    `/migration/${async ? "executeAsync" : "execute"}`,
     {
       migrationPlan: migration_plan,
       processInstanceIds: process_instances,
+      processInstanceQuery: process_instance_query,
       skipCustomListeners: skip_custom_listeners,
+      skipIoMappings: skip_io_mappings,
     },
     state,
     state.api.migration.execution,

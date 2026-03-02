@@ -19,7 +19,8 @@ const create_mirgation_state = () => {
     target_diagram = signal(null),
     target_activities = signal(null),
     mappings = signal({}),
-    selected_process_instances = signal({});
+    selected_process_instances = signal({}),
+    variables = signal([]);
 
   return {
     source,
@@ -30,6 +31,7 @@ const create_mirgation_state = () => {
     target_activities,
     mappings,
     selected_process_instances,
+    variables,
   };
 };
 
@@ -50,6 +52,33 @@ const MigrationsPage = () => {
 };
 
 const bpmnModdle = new BpmnModdle();
+
+/**
+ * Takes the XML representation of a BPMN diagram, gets all the activities and
+ * filters for non-immediate and mappable activity types
+ * @param {*} diagram_signal
+ * @param {*} activities_signal
+ * @returns
+ */
+const find_activities_of_diagram = (diagram_signal, activities_signal) =>
+  bpmnModdle
+    .fromXML(diagram_signal.value.data?.bpmn20Xml)
+    .then(({ rootElement: definitions }) => {
+      return (activities_signal.value = {
+        status: "SUCCESS",
+        data: definitions.rootElements
+          // fixme: invoice as variable ID
+          .find(({ id }) => id === "invoice")
+          .flowElements.filter(({ isImmediate, $type }) => {
+            // console.log($type);
+            return !(
+              isImmediate ||
+              $type === "bpmn:SequenceFlow" ||
+              $type === "bpmn:DataStoreReference"
+            );
+          }),
+      });
+    });
 
 const validate = (state, migration_state) => {
   if (
@@ -121,7 +150,12 @@ const ProcessSelection = () => {
     { route, url, query, path } = useLocation(),
     add_query_params = (name, value) =>
       add_query_params_abstract(query, url, route, path, name, value),
-    generate = () => generate_abstract(migration_state, state);
+    generate = () => generate_abstract(migration_state, state),
+    execute_form_data = signal({
+      async: false,
+      skip_io_mappings: false,
+      skip_custom_listeners: false,
+    });
 
   if (query.source === undefined || query.target === undefined) {
     console.log("clear state");
@@ -138,22 +172,12 @@ const ProcessSelection = () => {
         migration_state.source.value,
         migration_state.source_diagram,
       )
-      .then(() => {
-        bpmnModdle
-          .fromXML(migration_state.source_diagram.value.data?.bpmn20Xml)
-          .then(
-            ({ rootElement: definitions }) =>
-              (migration_state.source_activities.value = {
-                status: "SUCCESS",
-                data: definitions.rootElements
-                  .find(({ id }) => id === "invoice")
-                  .flowElements.filter(
-                    ({ isImmediate, $type }) =>
-                      !isImmediate && $type !== "bpmn:SequenceFlow",
-                  ),
-              }),
-          );
-      });
+      .then(() =>
+        find_activities_of_diagram(
+          migration_state.source_diagram,
+          migration_state.source_activities,
+        ),
+      );
 
     void engine_rest.process_instance.by_defintion_id(
       state,
@@ -168,22 +192,12 @@ const ProcessSelection = () => {
         migration_state.target.value,
         migration_state.target_diagram,
       )
-      .then(() => {
-        bpmnModdle
-          .fromXML(migration_state.target_diagram.value.data?.bpmn20Xml)
-          .then(
-            ({ rootElement: definitions }) =>
-              (migration_state.target_activities.value = {
-                status: "SUCCESS",
-                data: definitions.rootElements
-                  .find(({ id }) => id === "invoice")
-                  .flowElements.filter(
-                    ({ isImmediate, $type }) =>
-                      !isImmediate && $type !== "bpmn:SequenceFlow",
-                  ),
-              }),
-          );
-      });
+      .then(() =>
+        find_activities_of_diagram(
+          migration_state.target_diagram,
+          migration_state.target_activities,
+        ),
+      );
   }
 
   if (query.source && query.target) {
@@ -295,34 +309,80 @@ const ProcessSelection = () => {
 
         <ProcessInstanceSelection />
 
+        <Variables />
+
         <RequestState
           signal={state.api.migration.execution}
           on_nothing={() => <></>}
-          on_success={() => (
-            <>
-              {state.api.migration.execution.value.status ===
-              RESPONSE_STATE.SUCCESS
-                ? "Migration successfull"
-                : "Migration failed"}
-            </>
-          )}
+          on_success={() => <p>Migration successful</p>}
+          on_error={
+            <p class="error">
+              <strong>Migration failed: </strong>
+              {state.api.migration.execution.value?.error?.message ??
+                "Unknown error"}
+            </p>
+          }
         />
       </div>
       <div id="execute">
-        <button
-          onClick={() =>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const variables_map = {};
+            for (const v of migration_state.variables.value) {
+              if (v.name.trim() !== "")
+                variables_map[v.name] = { type: v.type, value: v.value };
+            }
+            state.api.migration.generate.value.data.variables = variables_map;
             engine_rest.migration.execute(
               state,
               state.api.migration.generate.value.data,
               Object.entries(
                 migration_state.selected_process_instances.value,
               ).map(([k]) => k),
-              true,
-            )
-          }
+              null,
+              execute_form_data.value.skip_custom_listeners,
+              execute_form_data.value.skip_io_mappings,
+              execute_form_data.value.async,
+            );
+          }}
         >
-          Execute Migration
-        </button>
+          <label for="async">Async</label>
+          <input
+            type="checkbox"
+            id="async"
+            name="async"
+            onInput={(e) =>
+              (execute_form_data.value.async = e.currentTarget.checked)
+            }
+          />
+
+          <label for="skip_custom_listeners">Skip Custom Listeners</label>
+          <input
+            type="checkbox"
+            id="skip_custom_listeners"
+            name="skip_custom_listeners"
+            onInput={(e) =>
+              (execute_form_data.value.skip_custom_listeners =
+                e.currentTarget.checked)
+            }
+          />
+
+          <label for="skip_io_mappings">Skip IO Mappings</label>
+          <input
+            type="checkbox"
+            id="skip_io_mappings"
+            name="skip_io_mappings"
+            onInput={(e) =>
+              (execute_form_data.value.skip_io_mappings =
+                e.currentTarget.checked)
+            }
+          />
+
+          <div class="button-group">
+            <button type="submit">Execute Migration</button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -351,7 +411,6 @@ const Diagrams = () => {
                 diagramXML={
                   migration_state.source_diagram.value.data?.bpmn20Xml
                 }
-                onShown={() => console.log("BPMN Diagram 1: shown")}
                 onLoading={() => console.log("BPMN Diagram 1: loading")}
                 onError={() => console.log("BPMN Diagram 1: error")}
               />
@@ -373,7 +432,6 @@ const Diagrams = () => {
                 diagramXML={
                   migration_state.target_diagram.value.data?.bpmn20Xml
                 }
-                onShown={() => console.log("BPMN Diagram 2: shown")}
                 onLoading={() => console.log("BPMN Diagram 2: loading")}
                 onError={() => console.log("BPMN Diagram 2: error")}
               />
@@ -386,12 +444,82 @@ const Diagrams = () => {
   );
 };
 
+const update_mapping = (e, source_activity, migration_state, state) => {
+  if (e.target.value !== "") {
+    migration_state.mappings.value[source_activity.id] = e.target.value;
+  } else {
+    delete migration_state.mappings.value[source_activity.id];
+  }
+
+  validate(state, migration_state);
+};
+
+const generate_mapping_rows = (migration_state, state) => (
+  <RequestState
+    signal={[
+      migration_state.target_activities,
+      migration_state.source_activities,
+    ]}
+    on_success={() =>
+      migration_state.source_activities.value.data.map((source_activity) => (
+        <tr key={source_activity.id}>
+          <td>{source_activity.name}</td>
+          <td>
+            <select
+              onChange={(e) =>
+                update_mapping(e, source_activity, migration_state, state)
+              }
+            >
+              <option value="">-- none -- (do not map)</option>
+
+              {migration_state.target_activities.value.data.map(
+                (target_activity) => (
+                  <option
+                    key={target_activity.id}
+                    value={target_activity.id}
+                    selected={state.api.migration.generate.value.data.instructions.find(
+                      ({ sourceActivityIds, targetActivityIds }) =>
+                        sourceActivityIds[0] === source_activity.id &&
+                        targetActivityIds[0] === target_activity.id,
+                    )}
+                  >
+                    {target_activity.name} ({target_activity.id})
+                  </option>
+                ),
+              )}
+            </select>
+          </td>
+          <td>
+            <RequestState
+              signal={state.api.migration.validation}
+              on_nothing={() => <p>Not validated</p>}
+              on_success={() => (
+                <p>
+                  {state.api.migration.validation.value.data.instructionReports.some(
+                    (report) =>
+                      report.instruction.sourceActivityIds[0] ===
+                      source_activity.id,
+                  )
+                    ? "invalid"
+                    : "valid"}
+                </p>
+              )}
+            />
+          </td>
+        </tr>
+      ))
+    }
+  />
+);
+
 const Mappings = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState);
 
-  if (has_data(state.api.migration.generate)) {
-    console.log("migration generate", state.api.migration.generate.value);
+  if (
+    has_data(state.api.migration.generate) &&
+    Object.keys(migration_state.mappings.value).length > 0
+  ) {
     validate(state, migration_state);
   }
 
@@ -406,94 +534,20 @@ const Mappings = () => {
             Select process definitions to define the migration mappings
           </small>
         )}
-        on_success={() => {
-          return (
-            <>
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="column">Source Activity</th>
-                    <th scope="column">Target Activity</th>
-                    <th scope="column">Valid</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {migration_state.target_activities.value !== null &&
-                  migration_state.source_activities.value !== null ? (
-                    migration_state.source_activities.value.data.map(
-                      (source_activity) => (
-                        <tr key={source_activity.id}>
-                          <td>{source_activity.name}</td>
-                          <td>
-                            <select
-                              onChange={(e) => {
-                                if (e.target.value !== "") {
-                                  migration_state.mappings.value[
-                                    source_activity.id
-                                  ] = e.target.value;
-                                } else {
-                                  delete migration_state.mappings.value[
-                                    source_activity.id
-                                  ];
-                                }
-
-                                validate(state, migration_state);
-                              }}
-                            >
-                              <option value="">-- none -- (do not map)</option>
-
-                              {migration_state.target_activities.value.data.map(
-                                (target_activity) => (
-                                  <option
-                                    key={target_activity.id}
-                                    value={target_activity.id}
-                                    selected={state.api.migration.generate.value.data.instructions.find(
-                                      ({
-                                        sourceActivityIds,
-                                        targetActivityIds,
-                                      }) =>
-                                        sourceActivityIds[0] ===
-                                          source_activity.id &&
-                                        targetActivityIds[0] ===
-                                          target_activity.id,
-                                    )}
-                                  >
-                                    {target_activity.name} ({target_activity.id}
-                                    )
-                                  </option>
-                                ),
-                              )}
-                            </select>
-                          </td>
-                          <td>
-                            <RequestState
-                              signal={state.api.migration.validation}
-                              on_nothing={() => <p>Not validated</p>}
-                              on_success={() => (
-                                <p>
-                                  {state.api.migration.validation.value.data.instructionReports.some(
-                                    (report) =>
-                                      report.instruction
-                                        .sourceActivityIds[0] ===
-                                      source_activity.id,
-                                  )
-                                    ? "invalid"
-                                    : "valid"}
-                                </p>
-                              )}
-                            />
-                          </td>
-                        </tr>
-                      ),
-                    )
-                  ) : (
-                    <p>Loading...</p>
-                  )}
-                </tbody>
-              </table>
-            </>
-          );
-        }}
+        on_success={() => (
+          <>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="column">Source Activity</th>
+                  <th scope="column">Target Activity</th>
+                  <th scope="column">Valid</th>
+                </tr>
+              </thead>
+              <tbody>{generate_mapping_rows(migration_state, state)}</tbody>
+            </table>
+          </>
+        )}
       />
 
       <RequestState
@@ -518,6 +572,122 @@ const Mappings = () => {
           </div>
         )}
       />
+    </>
+  );
+};
+
+const VARIABLE_TYPES = [
+  "String",
+  "Integer",
+  "Long",
+  "Double",
+  "Boolean",
+  "Date",
+];
+
+const add_variable = (migration_state) =>
+  (migration_state.variables.value = [
+    ...migration_state.variables.value,
+    { name: "", type: "String", value: "" },
+  ]);
+
+const remove_variable = (migration_state, index) =>
+  (migration_state.variables.value = migration_state.variables.value.filter(
+    (_, i) => i !== index,
+  ));
+
+const update_variable = (migration_state, index, field, value) => {
+  const updated = [...migration_state.variables.value];
+  updated[index] = { ...updated[index], [field]: value };
+  migration_state.variables.value = updated;
+};
+
+const Variables = () => {
+  const migration_state = useContext(MigrationState);
+
+  return (
+    <>
+      <h2>Variables</h2>
+      {migration_state.variables.value.length > 0 && (
+        <table>
+          <thead>
+            <tr>
+              <th scope="column">Name</th>
+              <th scope="column">Type</th>
+              <th scope="column">Value</th>
+              <th scope="column"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {migration_state.variables.value.map((variable, index) => (
+              <tr key={index}>
+                <td>
+                  <input
+                    type="text"
+                    value={variable.name}
+                    placeholder="Variable name"
+                    onInput={(e) =>
+                      update_variable(
+                        migration_state,
+                        index,
+                        "name",
+                        e.currentTarget.value,
+                      )
+                    }
+                  />
+                </td>
+                <td>
+                  <select
+                    value={variable.type}
+                    onChange={(e) =>
+                      update_variable(
+                        migration_state,
+                        index,
+                        "type",
+                        e.target.value,
+                      )
+                    }
+                  >
+                    {VARIABLE_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={variable.value}
+                    placeholder="Value"
+                    onInput={(e) =>
+                      update_variable(
+                        migration_state,
+                        index,
+                        "value",
+                        e.currentTarget.value,
+                      )
+                    }
+                  />
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    onClick={() => remove_variable(migration_state, index)}
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <div class="button-group">
+        <button type="button" onClick={() => add_variable(migration_state)}>
+          Add Variable
+        </button>
+      </div>
     </>
   );
 };
