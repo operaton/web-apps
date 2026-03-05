@@ -1,9 +1,6 @@
 import { signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
-import engine_rest, {
-  RequestState,
-  RESPONSE_STATE,
-} from "../api/engine_rest.jsx";
+import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { AppState } from "../state.js";
 import { createContext } from "preact";
 import ReactBpmn from "react-bpmn";
@@ -20,7 +17,8 @@ const create_mirgation_state = () => {
     target_activities = signal(null),
     mappings = signal({}),
     selected_process_instances = signal({}),
-    variables = signal([]);
+    variables = signal([]),
+    process_instance_query = signal([]);
 
   return {
     source,
@@ -32,6 +30,7 @@ const create_mirgation_state = () => {
     mappings,
     selected_process_instances,
     variables,
+    process_instance_query,
   };
 };
 
@@ -135,17 +134,10 @@ const generate_abstract = (migration_state, state) =>
 
 const ProcessSelection = () => {
   const state = useContext(AppState),
-    {
-      api: {
-        process: {
-          definition: { list },
-        },
-      },
-    } = state,
+    { api: { process: { definition: { list }, }, }, } = state,
     migration_state = useContext(MigrationState),
     { route, url, query, path } = useLocation(),
-    add_query_params = (name, value) =>
-      add_query_params_abstract(query, url, route, path, name, value),
+    add_query_params = (name, value) => add_query_params_abstract(query, url, route, path, name, value),
     generate = () => generate_abstract(migration_state, state),
     execute_form_data = signal({
       async: false,
@@ -227,7 +219,7 @@ const ProcessSelection = () => {
                 }}
               >
                 <option disabled selected>
-                  -- Select source ---
+                  --- Select source ---
                 </option>
                 <RequestState
                   signal={list}
@@ -259,11 +251,8 @@ const ProcessSelection = () => {
                     migration_state.target_diagram,
                   );
                   generate().then(() => validate(state, migration_state));
-                }}
-              >
-                <option disabled selected>
-                  -- Select target ---
-                </option>
+                }}>
+                <option disabled selected>--- Select target ---</option>
                 <RequestState
                   signal={list}
                   on_success={() =>
@@ -305,7 +294,40 @@ const ProcessSelection = () => {
 
         <ProcessInstanceSelection />
 
-        <Variables />
+        <RequestState
+          signal={[
+            state.api.process.instance.by_defintion_id,
+            state.api.migration.validation,
+          ]}
+          on_nothing={() => <></>}
+          on_success={() =>
+            state.api.migration.validation.value.data.instructionReports
+              .length > 0 ? (
+              <></>
+            ) : (
+              <section>
+                <h2>Process Instance Query</h2>
+                <ProcessInstanceQuery />
+              </section>
+            )
+          }
+        />
+
+        <RequestState
+          signal={[
+            state.api.process.instance.by_defintion_id,
+            state.api.migration.validation,
+          ]}
+          on_nothing={() => <></>}
+          on_success={() =>
+            state.api.migration.validation.value.data.instructionReports
+              .length > 0 ? (
+              <></>
+            ) : (
+              <Variables />
+            )
+          }
+        />
 
         <RequestState
           signal={state.api.migration.execution}
@@ -331,22 +353,29 @@ const ProcessSelection = () => {
             }
             const migration_plan = {
               ...state.api.migration.generate.peek().data,
-              instructions: Object.keys(
-                migration_state.mappings.peek(),
-              ).map((key) => ({
-                sourceActivityIds: [key],
-                targetActivityIds: [migration_state.mappings.peek()[key]],
-                updateEventTrigger: false,
-              })),
+              instructions: Object.keys(migration_state.mappings.peek()).map(
+                (key) => ({
+                  sourceActivityIds: [key],
+                  targetActivityIds: [migration_state.mappings.peek()[key]],
+                  updateEventTrigger: false,
+                }),
+              ),
               variables: variables_map,
             };
+            const selected_ids = Object.entries(
+                migration_state.selected_process_instances.peek(),
+              )
+                .filter(([, v]) => v)
+                .map(([k]) => k),
+              query_obj = build_query(
+                migration_state.process_instance_query.peek(),
+              ),
+              has_query = Object.keys(query_obj).length > 0;
             engine_rest.migration.execute(
               state,
               migration_plan,
-              Object.entries(
-                migration_state.selected_process_instances.peek(),
-              ).map(([k]) => k),
-              null,
+              selected_ids.length > 0 ? selected_ids : null,
+              has_query ? query_obj : null,
               execute_form_data.peek().skip_custom_listeners,
               execute_form_data.peek().skip_io_mappings,
               execute_form_data.peek().async,
@@ -359,7 +388,10 @@ const ProcessSelection = () => {
             id="async"
             name="async"
             onInput={(e) =>
-              (execute_form_data.value = { ...execute_form_data.peek(), async: e.currentTarget.checked })
+              (execute_form_data.value = {
+                ...execute_form_data.peek(),
+                async: e.currentTarget.checked,
+              })
             }
           />
 
@@ -369,7 +401,10 @@ const ProcessSelection = () => {
             id="skip_custom_listeners"
             name="skip_custom_listeners"
             onInput={(e) =>
-              (execute_form_data.value = { ...execute_form_data.peek(), skip_custom_listeners: e.currentTarget.checked })
+              (execute_form_data.value = {
+                ...execute_form_data.peek(),
+                skip_custom_listeners: e.currentTarget.checked,
+              })
             }
           />
 
@@ -379,7 +414,10 @@ const ProcessSelection = () => {
             id="skip_io_mappings"
             name="skip_io_mappings"
             onInput={(e) =>
-              (execute_form_data.value = { ...execute_form_data.peek(), skip_io_mappings: e.currentTarget.checked })
+              (execute_form_data.value = {
+                ...execute_form_data.peek(),
+                skip_io_mappings: e.currentTarget.checked,
+              })
             }
           />
 
@@ -455,7 +493,8 @@ const update_mapping = (e, source_activity, migration_state, state) => {
       [source_activity.id]: e.target.value,
     };
   } else {
-    const { [source_activity.id]: _, ...rest } = migration_state.mappings.peek();
+    const { [source_activity.id]: _, ...rest } =
+      migration_state.mappings.peek();
     migration_state.mappings.value = rest;
   }
 
@@ -485,7 +524,10 @@ const generate_mapping_rows = (migration_state, state) => (
                   <option
                     key={target_activity.id}
                     value={target_activity.id}
-                    selected={migration_state.mappings.value[source_activity.id] === target_activity.id}
+                    selected={
+                      migration_state.mappings.value[source_activity.id] ===
+                      target_activity.id
+                    }
                   >
                     {target_activity.name} ({target_activity.id})
                   </option>
@@ -619,7 +661,7 @@ const Variables = () => {
               <th scope="column">Name</th>
               <th scope="column">Type</th>
               <th scope="column">Value</th>
-              <th scope="column"></th>
+              <th scope="column">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -696,6 +738,169 @@ const Variables = () => {
   );
 };
 
+const QUERY_FIELDS = [
+  { name: "processInstanceIds", label: "ID", type: "array" },
+  { name: "businessKey", label: "Business Key", type: "text" },
+  { name: "superProcessInstance", label: "Parent ID", type: "text" },
+  { name: "subProcessInstance", label: "Sub ID", type: "text" },
+  { name: "active", label: "Active", type: "boolean" },
+  { name: "suspended", label: "Suspended", type: "boolean" },
+  {
+    name: "rootProcessInstances",
+    label: "Root Instances Only",
+    type: "boolean",
+  },
+  {
+    name: "leafProcessInstances",
+    label: "Leaf Instances Only",
+    type: "boolean",
+  },
+  { name: "withIncident", label: "With Incidents Only", type: "boolean" },
+  { name: "incidentId", label: "Incident ID", type: "text" },
+  { name: "incidentType", label: "Incident Type", type: "text" },
+  { name: "incidentMessage", label: "Incident Message", type: "text" },
+  { name: "tenantIdIn", label: "Tenant ID", type: "array" },
+  { name: "activityIdIn", label: "Activity ID", type: "array" },
+  { name: "withoutTenantId", label: "Without Tenant ID", type: "boolean" },
+];
+
+const add_query_row = (migration_state) =>
+  (migration_state.process_instance_query.value = [
+    ...migration_state.process_instance_query.value,
+    { field: QUERY_FIELDS[0].name, value: "" },
+  ]);
+
+const remove_query_row = (migration_state, index) =>
+  (migration_state.process_instance_query.value =
+    migration_state.process_instance_query.value.filter((_, i) => i !== index));
+
+const update_query_row = (migration_state, index, key, value) => {
+  const updated = [...migration_state.process_instance_query.value];
+  updated[index] = { ...updated[index], [key]: value };
+  if (key === "field") {
+    const field_def = QUERY_FIELDS.find((f) => f.name === value);
+    updated[index].value = field_def?.type === "boolean" ? "true" : "";
+  }
+  migration_state.process_instance_query.value = updated;
+};
+
+const build_query = (rows) => {
+  const query = {};
+  for (const { field, value } of rows) {
+    if (value === "") continue;
+    const field_def = QUERY_FIELDS.find((f) => f.name === field);
+    if (!field_def) continue;
+    if (field_def.type === "boolean") query[field] = value === "true";
+    else if (field_def.type === "array")
+      query[field] = value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    else query[field] = value;
+  }
+  return query;
+};
+
+const ProcessInstanceQuery = () => {
+  const migration_state = useContext(MigrationState);
+
+  return (
+    <>
+      <small>
+        When creating a process instance query, the filter{" "}
+        <code>processDefinitionId: "source process definition ID"</code> is
+        automatically added.
+      </small>
+      {migration_state.process_instance_query.value.length > 0 && (
+        <table>
+          <thead>
+            <tr>
+              <th>Filter</th>
+              <th>Value</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {migration_state.process_instance_query.value.map((row, index) => {
+              const field_def = QUERY_FIELDS.find((f) => f.name === row.field);
+              return (
+                <tr key={index}>
+                  <td>
+                    <select
+                      value={row.field}
+                      onChange={(e) =>
+                        update_query_row(
+                          migration_state,
+                          index,
+                          "field",
+                          e.target.value,
+                        )
+                      }
+                    >
+                      {QUERY_FIELDS.map(({ name, label }) => (
+                        <option key={name} value={name}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    {field_def?.type === "boolean" ? (
+                      <select
+                        value={row.value}
+                        onChange={(e) =>
+                          update_query_row(
+                            migration_state,
+                            index,
+                            "value",
+                            e.target.value,
+                          )
+                        }
+                      >
+                        <option value="true">true</option>
+                        <option value="false">false</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={row.value}
+                        placeholder={
+                          field_def?.type === "array" ? "value1, value2" : ""
+                        }
+                        onInput={(e) =>
+                          update_query_row(
+                            migration_state,
+                            index,
+                            "value",
+                            e.target.value,
+                          )
+                        }
+                      />
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      onClick={() => remove_query_row(migration_state, index)}
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+      <div class="button-group">
+        <button type="button" onClick={() => add_query_row(migration_state)}>
+          Add Filter
+        </button>
+      </div>
+    </>
+  );
+};
+
 const ProcessInstanceSelection = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState),
@@ -720,28 +925,35 @@ const ProcessInstanceSelection = () => {
         ) : (
           <>
             <h2>Select Process Instances of Source Definition</h2>
-            <form>
-              {state.api.process.instance.by_defintion_id.value.data.map(
-                ({ id }) => (
-                  // eslint-disable-next-line react/jsx-key
-                  <>
-                    <input
-                      type="checkbox"
-                      id={id}
-                      value={id}
-                      onChange={(e) =>
-                        (migration_state.selected_process_instances.value =
-                          { ...migration_state.selected_process_instances.peek(), [id]: e.target.checked })
-                      }
-                    />
+            {state.api.process.instance.by_defintion_id.value.data.length ===
+            0 ? (
+              <p>No processes found for migration.</p>
+            ) : (
+              <form>
+                {state.api.process.instance.by_defintion_id.value.data.map(
+                  ({ id }) => (
+                    // eslint-disable-next-line react/jsx-key
+                    <>
+                      <input
+                        type="checkbox"
+                        id={id}
+                        value={id}
+                        onChange={(e) =>
+                          (migration_state.selected_process_instances.value = {
+                            ...migration_state.selected_process_instances.peek(),
+                            [id]: e.target.checked,
+                          })
+                        }
+                      />
 
-                    <label key={id} for={id}>
-                      {id}
-                    </label>
-                  </>
-                ),
-              )}
-            </form>
+                      <label key={id} for={id}>
+                        {id}
+                      </label>
+                    </>
+                  ),
+                )}
+              </form>
+            )}
           </>
         )
       }

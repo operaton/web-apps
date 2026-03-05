@@ -15,8 +15,9 @@ import { DeploymentsPage } from "./pages/Deployments.jsx";
 import { NotFound } from "./pages/_404.jsx";
 import { AccountPage } from "./pages/Account.jsx";
 
-import "./css/layout.css";
-import "./css/components.css";
+import "./css/style.css"
+
+// import "./css/components.css";
 import { DecisionsPage } from "./pages/Decisions.jsx";
 import { useContext } from "preact/hooks";
 import engine_rest from "./api/engine_rest.jsx";
@@ -126,7 +127,7 @@ const Routing = () => {
         <GoTo />
       </LocationProvider>
     );
-  } else if (logged_in.value.data === "unknown") {
+  } else if (logged_in.value.data === "unknown" && cookie === undefined) {
     void engine_rest.auth.is_authenticated(state);
   } else if (logged_in.value.data === "unauthenticated") {
     return (
@@ -157,7 +158,10 @@ const Routing = () => {
               name="username"
               id="username"
               onInput={(e) =>
-                (credentials.value = { ...credentials.peek(), username: e.currentTarget.value })
+                (credentials.value = {
+                  ...credentials.peek(),
+                  username: e.currentTarget.value,
+                })
               }
               required
             />
@@ -168,7 +172,10 @@ const Routing = () => {
               type="password"
               id="password"
               onInput={(e) =>
-                (credentials.value = { ...credentials.peek(), password: e.currentTarget.value })
+                (credentials.value = {
+                  ...credentials.peek(),
+                  password: e.currentTarget.value,
+                })
               }
               required
             />
@@ -178,7 +185,10 @@ const Routing = () => {
               type="checkbox"
               name="remember_credentials"
               onInput={(e) =>
-                (credentials.value = { ...credentials.peek(), remember_login: e.currentTarget.checked })
+                (credentials.value = {
+                  ...credentials.peek(),
+                  remember_login: e.currentTarget.checked,
+                })
               }
             />
 

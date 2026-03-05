@@ -244,14 +244,14 @@ const SetDueDateButton = () => {
             type="date"
             id="date"
             value={due_date !== null ? due_date?.toISOString().split("T")[0] : null}
-            onInput={(e) => (date_state.value["date"] = e.currentTarget.value)}
+            onInput={(e) => (date_state.value = { ...date_state.peek(), date: e.currentTarget.value })}
           />
           <label for="time">Time</label>
           <input
             type="time"
             id="time"
             value={due_date !== null ? due_date?.toISOString().split("T")[1].substring(0, 5) : null}
-            onInput={(e) => (date_state.value["time"] = e.currentTarget.value)}
+            onInput={(e) => (date_state.value = { ...date_state.peek(), time: e.currentTarget.value })}
           />
           <div class="button-group">
             <button type="submit">Submit</button>
@@ -310,14 +310,14 @@ const SetFollowUpDateButton = () => {
             type="date"
             id="date"
             value={followUpDate !== null ? followUpDate?.toISOString().split("T")[0] : null}
-            onInput={(e) => (date_state.value["date"] = e.currentTarget.value)}
+            onInput={(e) => (date_state.value = { ...date_state.peek(), date: e.currentTarget.value })}
           />
           <label for="time">Time</label>
           <input
             type="time"
             id="time"
             value={followUpDate !== null ? followUpDate?.toISOString().split("T")[1].substring(0, 5) : null}
-            onInput={(e) => (date_state.value["time"] = e.currentTarget.value)}
+            onInput={(e) => (date_state.value = { ...date_state.peek(), time: e.currentTarget.value })}
           />
           <div class="button-group">
             <button type="submit">Submit</button>

@@ -470,7 +470,7 @@ const UserCreate = () => {
     { api: { user: { create: user_create } } } = state,
     form_user = signal({ profile: {}, credentials: {} })
 
-  const set_value = (k1, k2, v) => form_user.value[k1][k2] = v.currentTarget.value
+  const set_value = (k1, k2, v) => form_user.value = { ...form_user.peek(), [k1]: { ...form_user.peek()[k1], [k2]: v.currentTarget.value } }
   const set_p_value = (k, v) => set_value('profile', k, v)
   const set_c_value = (k, v) => set_value('credentials', k, v)
 

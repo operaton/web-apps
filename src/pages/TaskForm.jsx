@@ -20,9 +20,8 @@ const TaskForm = () => {
   const rendered_form = state.api.task.rendered_form.value
   const deployed_form = state.api.task.deployed_form.value
 
-  if (!selectedTask.data?.formKey && !selectedTask[refName] && !rendered_form) {
+  if (!selectedTask.formKey && !selectedTask[refName] && !rendered_form) {
     void engine_rest.task.get_task_rendered_form(state, selectedTask.id)
-    void engine_rest.task.get_task_form(state, selectedTask.formKey.substring(13))
   }
 
   if (!selectedTask.formKey && selectedTask[refName] && !deployed_form) {
@@ -38,6 +37,9 @@ const TaskForm = () => {
   }
 
   if (selectedTask.formKey) {
+    if (!state.api.task.form.value) {
+      void engine_rest.task.get_task_form(state, selectedTask.formKey.substring(13))
+    }
 
     // todo: if a link to a document exists, place this url in the generated html
     //  localhost:8088/engine-rest/task/8c317066-e488-11ef-86ef-0242ac140003/variables/invoiceDocument/data

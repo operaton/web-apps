@@ -41,7 +41,13 @@ const execute = (
     {
       migrationPlan: migration_plan,
       processInstanceIds: process_instances,
-      processInstanceQuery: process_instance_query,
+      processInstanceQuery:
+        process_instance_query === null
+          ? null
+          : {
+              ...process_instance_query,
+              processDefinitionId: migration_plan.sourceProcessDefinitionId,
+            },
       skipCustomListeners: skip_custom_listeners,
       skipIoMappings: skip_io_mappings,
     },

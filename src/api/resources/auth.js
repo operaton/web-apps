@@ -71,9 +71,16 @@ const is_authenticated = async (state) => {
   const signal = state.auth.logged_in;
   signal.value = { status: RESPONSE_STATE.LOADING };
 
+  const headers = { "Content-Type": "application/json" };
+  if (state.auth.credentials?.username) {
+    const { username, password } = state.auth.credentials;
+    headers["Authorization"] =
+      `Basic ${window.btoa(unescape(encodeURIComponent(`${username}:${password}`)))}`;
+  }
+
   try {
     const response = await fetch(`${_url_engine_rest(state)}/authorization`, {
-      headers: { "Content-Type": "application/json" },
+      headers,
       credentials: "include",
     });
     await (response.ok ? response.json() : Promise.reject(response));
