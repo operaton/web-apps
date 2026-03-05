@@ -47,7 +47,7 @@ export function Header() {
           <li><a href="#primary-navigation">Skip to Primary Navigation</a></li>
         </menu>
 
-        <h1 id="logo"><a href="/">Operaton</a></h1>
+        <a href="/"  id="logo"><b>OPERATON</b></a>
         {/* <button
           type="button"
           id="mobile-menu-toggle"
