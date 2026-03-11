@@ -546,8 +546,8 @@ const generate_mapping_rows = (migration_state, state) => (
                       report.instruction.sourceActivityIds[0] ===
                       source_activity.id,
                   )
-                    ? "invalid"
-                    : "valid"}
+                    ? "No"
+                    : "Yes"}
                 </p>
               )}
             />

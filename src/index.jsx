@@ -7,6 +7,7 @@ import { Header } from "./components/Header.jsx";
 import { GoTo } from "./components/GoTo.jsx";
 
 import { Home } from "./pages/Home.jsx";
+import { DashboardPage } from "./pages/Dashboard.jsx";
 import { TasksPage } from "./pages/Tasks.jsx";
 import { ProcessesPage } from "./pages/Processes.jsx";
 import { MigrationsPage } from "./pages/Migrations.jsx";
@@ -82,7 +83,7 @@ const Routing = () => {
       <LocationProvider>
         <Header />
         <Router>
-          <Route path="/" component={TasksPage} />
+          <Route path="/" component={DashboardPage} />
           <Route path="/decisions" component={DecisionsPage} />
           <Route path="/decisions/:decision_id" component={DecisionsPage} />
           <Route path="/tasks" component={TasksPage} />

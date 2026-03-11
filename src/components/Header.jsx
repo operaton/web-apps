@@ -47,17 +47,11 @@ export function Header() {
           <li><a href="#primary-navigation">Skip to Primary Navigation</a></li>
         </menu>
 
-        <a href="/"  id="logo"><b>OPERATON</b></a>
-        {/* <button
-          type="button"
-          id="mobile-menu-toggle"
-          aria-label="Open menu"
-          onClick={show_mobile_menu}
-        />*/}
 
         <div id="nav-wrapper">
           <nav id="primary-navigation" aria-label="Main">
             <menu>
+              <li><a href="/"            class={url === "/" && "active"}          id="logo">OPERATON</a></li>
               <li><a href="/tasks"       class={url.startsWith("/tasks")       && "active"}>Tasks</a></li>
               <li><a href="/processes"   class={url.startsWith("/processes")   && "active"}>Processes</a></li>
               <li><a href="/decisions"   class={url.startsWith("/decisions")   && "active"}>Decisions</a></li>
