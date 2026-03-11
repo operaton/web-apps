@@ -388,6 +388,71 @@ div.accordion {
 
 dialog#global-search {
   height: 80%;
+  overflow: hidden;
+}
+.goto-search {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--spacing-1);
+}
+.goto-search > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.goto-search > header button {
+  margin: 0;
+  background: var(--background-3);
+  color: var(--text);
+}
+.goto-input {
+  font-size: var(--base-font-size);
+  width: 100%;
+  box-sizing: border-box;
+}
+.goto-results {
+  flex: 1;
+  overflow-y: auto;
+}
+.goto-results h4 {
+  font-size: var(--small-font-size);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+  margin: var(--spacing-2) 0 var(--spacing-1);
+}
+.goto-results h4:first-child {
+  margin-top: 0;
+}
+.goto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-1);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.goto-item:visited {
+  color: var(--text);
+}
+.goto-item small {
+  color: var(--text-2);
+  font-size: var(--small-font-size);
+}
+.goto-item:hover,
+.goto-selected {
+  background: var(--background-2);
+}
+.goto-hint {
+  color: var(--text-2);
+}
+.goto-empty {
+  color: var(--text-2);
+  text-align: center;
+  margin-top: var(--spacing-3);
 }
 
 /* TODO: needs to be designed */
@@ -467,9 +532,14 @@ dialog#global-search {
   font-size: 0.8em;
   font-weight: normal;
   margin: 0;
-  padding: 0;
-  background: none;
-  padding: 0 0.2em;
+  background: var(--background-3);
+  color: var(--text);
+  padding: 0.2em 0.5em;
+}
+#go-to kbd {
+  font-size: 0.85em;
+  opacity: 0.6;
+  margin-left: 0.3em;
 }
 
 /* StartProcessList */

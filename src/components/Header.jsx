@@ -69,8 +69,7 @@ export function Header() {
               </menu>
             </nav>
             <button id="go-to" onClick={showSearch}>
-              {/* <Icons.search />*/}
-              Go To
+              Go To <kbd>Alt+K</kbd>
             </button>
             <label id="server-selector" title="Server selection">
               {/* <Icons.server />*/}
