@@ -1,5 +1,6 @@
 import { signal } from "@preact/signals";
 import { useContext } from "preact/hooks";
+import { useTranslation } from "react-i18next";
 import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { AppState } from "../state.js";
 import { createContext } from "preact";
@@ -132,11 +133,47 @@ const generate_abstract = (migration_state, state) =>
         )
     : null;
 
+const QUERY_FIELDS_KEYS = [
+  { name: "processInstanceIds", labelKey: "migrations.query-fields.id", type: "array" },
+  { name: "businessKey", labelKey: "migrations.query-fields.business-key", type: "text" },
+  { name: "superProcessInstance", labelKey: "migrations.query-fields.parent-id", type: "text" },
+  { name: "subProcessInstance", labelKey: "migrations.query-fields.sub-id", type: "text" },
+  { name: "active", labelKey: "migrations.query-fields.active", type: "boolean" },
+  { name: "suspended", labelKey: "migrations.query-fields.suspended", type: "boolean" },
+  {
+    name: "rootProcessInstances",
+    labelKey: "migrations.query-fields.root-instances-only",
+    type: "boolean",
+  },
+  {
+    name: "leafProcessInstances",
+    labelKey: "migrations.query-fields.leaf-instances-only",
+    type: "boolean",
+  },
+  { name: "withIncident", labelKey: "migrations.query-fields.with-incidents-only", type: "boolean" },
+  { name: "incidentId", labelKey: "migrations.query-fields.incident-id", type: "text" },
+  { name: "incidentType", labelKey: "migrations.query-fields.incident-type", type: "text" },
+  { name: "incidentMessage", labelKey: "migrations.query-fields.incident-message", type: "text" },
+  { name: "tenantIdIn", labelKey: "migrations.query-fields.tenant-id", type: "array" },
+  { name: "activityIdIn", labelKey: "migrations.query-fields.activity-id", type: "array" },
+  { name: "withoutTenantId", labelKey: "migrations.query-fields.without-tenant-id", type: "boolean" },
+];
+
+const VARIABLE_TYPES = [
+  "String",
+  "Integer",
+  "Long",
+  "Double",
+  "Boolean",
+  "Date",
+];
+
 const ProcessSelection = () => {
   const state = useContext(AppState),
     { api: { process: { definition: { list }, }, }, } = state,
     migration_state = useContext(MigrationState),
     { route, url, query, path } = useLocation(),
+    [t] = useTranslation(),
     add_query_params = (name, value) => add_query_params_abstract(query, url, route, path, name, value),
     generate = () => generate_abstract(migration_state, state),
     execute_form_data = signal({
@@ -194,13 +231,13 @@ const ProcessSelection = () => {
 
   return (
     <div id="migration">
-      <h1 class="screen-hidden">Migrations</h1>
+      <h1 class="screen-hidden">{t("migrations.title")}</h1>
       <div>
         <section>
-          <h2 class="screen-hidden">Process Defintion Selection</h2>
+          <h2 class="screen-hidden">{t("migrations.process-selection")}</h2>
           <div>
             <div>
-              <label>Source </label>
+              <label>{t("migrations.source")} </label>
               <select
                 onChange={(e) => {
                   // @ts-ignore
@@ -219,7 +256,7 @@ const ProcessSelection = () => {
                 }}
               >
                 <option disabled selected>
-                  --- Select source ---
+                  {t("migrations.select-source")}
                 </option>
                 <RequestState
                   signal={list}
@@ -240,7 +277,7 @@ const ProcessSelection = () => {
             </div>
 
             <div>
-              <label>Target </label>
+              <label>{t("migrations.target")} </label>
               <select
                 onChange={(e) => {
                   migration_state.target.value = e.target.value;
@@ -252,7 +289,7 @@ const ProcessSelection = () => {
                   );
                   generate().then(() => validate(state, migration_state));
                 }}>
-                <option disabled selected>--- Select target ---</option>
+                <option disabled selected>{t("migrations.select-target")}</option>
                 <RequestState
                   signal={list}
                   on_success={() =>
@@ -283,7 +320,7 @@ const ProcessSelection = () => {
           on_nothing={() => (
             <p>
               <small>
-                Select process definitions to define the migration mappings
+                {t("migrations.select-definitions-hint")}
               </small>
             </p>
           )}
@@ -306,7 +343,7 @@ const ProcessSelection = () => {
               <></>
             ) : (
               <section>
-                <h2>Process Instance Query</h2>
+                <h2>{t("migrations.process-instance-query")}</h2>
                 <ProcessInstanceQuery />
               </section>
             )
@@ -332,12 +369,12 @@ const ProcessSelection = () => {
         <RequestState
           signal={state.api.migration.execution}
           on_nothing={() => <></>}
-          on_success={() => <p>Migration successful</p>}
+          on_success={() => <p>{t("migrations.success")}</p>}
           on_error={
             <p class="error">
-              <strong>Migration failed: </strong>
+              <strong>{t("migrations.failed")} </strong>
               {state.api.migration.execution.value?.error?.message ??
-                "Unknown error"}
+                t("migrations.unknown-error")}
             </p>
           }
         />
@@ -382,7 +419,7 @@ const ProcessSelection = () => {
             );
           }}
         >
-          <label for="async">Async</label>
+          <label for="async">{t("migrations.async")}</label>
           <input
             type="checkbox"
             id="async"
@@ -395,7 +432,7 @@ const ProcessSelection = () => {
             }
           />
 
-          <label for="skip_custom_listeners">Skip Custom Listeners</label>
+          <label for="skip_custom_listeners">{t("migrations.skip-custom-listeners")}</label>
           <input
             type="checkbox"
             id="skip_custom_listeners"
@@ -408,7 +445,7 @@ const ProcessSelection = () => {
             }
           />
 
-          <label for="skip_io_mappings">Skip IO Mappings</label>
+          <label for="skip_io_mappings">{t("migrations.skip-io-mappings")}</label>
           <input
             type="checkbox"
             id="skip_io_mappings"
@@ -422,7 +459,7 @@ const ProcessSelection = () => {
           />
 
           <div class="button-group">
-            <button type="submit">Execute Migration</button>
+            <button type="submit">{t("migrations.execute")}</button>
           </div>
         </form>
       </div>
@@ -431,21 +468,22 @@ const ProcessSelection = () => {
 };
 
 const Diagrams = () => {
-  const migration_state = useContext(MigrationState);
+  const migration_state = useContext(MigrationState),
+    [t] = useTranslation();
 
   return (
     // <div class="migration-diagrams">
     <section>
-      <h2 class="screen-hidden">Diagrams</h2>
+      <h2 class="screen-hidden">{t("migrations.diagrams")}</h2>
       <div class="migration-diagrams">
         <div>
-          <h3 class="screen-hidden">Source</h3>
+          <h3 class="screen-hidden">{t("migrations.source")}</h3>
           <RequestState
             state={migration_state}
             signal={migration_state.source_diagram}
             on_nothing={() => (
               <p>
-                <small>Select source process defintion</small>
+                <small>{t("migrations.select-source-definition")}</small>
               </p>
             )}
             on_success={() => (
@@ -460,13 +498,13 @@ const Diagrams = () => {
           />
         </div>
         <div>
-          <h3 class="screen-hidden">Target</h3>
+          <h3 class="screen-hidden">{t("migrations.target")}</h3>
           <RequestState
             state={migration_state}
             signal={migration_state.target_diagram}
             on_nothing={() => (
               <p>
-                <small>Select target process defintion</small>
+                <small>{t("migrations.select-target-definition")}</small>
               </p>
             )}
             on_success={() => (
@@ -501,7 +539,7 @@ const update_mapping = (e, source_activity, migration_state, state) => {
   validate(state, migration_state);
 };
 
-const generate_mapping_rows = (migration_state, state) => (
+const generate_mapping_rows = (migration_state, state, t) => (
   <RequestState
     signal={[
       migration_state.target_activities,
@@ -517,7 +555,7 @@ const generate_mapping_rows = (migration_state, state) => (
                 update_mapping(e, source_activity, migration_state, state)
               }
             >
-              <option value="">-- none -- (do not map)</option>
+              <option value="">{t("migrations.do-not-map")}</option>
 
               {migration_state.target_activities.value.data.map(
                 (target_activity) => (
@@ -538,7 +576,7 @@ const generate_mapping_rows = (migration_state, state) => (
           <td>
             <RequestState
               signal={state.api.migration.validation}
-              on_nothing={() => <p>Not validated</p>}
+              on_nothing={() => <p>{t("migrations.not-validated")}</p>}
               on_success={() => (
                 <p>
                   {state.api.migration.validation.value.data.instructionReports.some(
@@ -546,8 +584,8 @@ const generate_mapping_rows = (migration_state, state) => (
                       report.instruction.sourceActivityIds[0] ===
                       source_activity.id,
                   )
-                    ? "No"
-                    : "Yes"}
+                    ? t("common.no")
+                    : t("common.yes")}
                 </p>
               )}
             />
@@ -560,7 +598,8 @@ const generate_mapping_rows = (migration_state, state) => (
 
 const Mappings = () => {
   const state = useContext(AppState),
-    migration_state = useContext(MigrationState);
+    migration_state = useContext(MigrationState),
+    [t] = useTranslation();
 
   if (
     has_data(state.api.migration.generate) &&
@@ -571,13 +610,13 @@ const Mappings = () => {
 
   return (
     <>
-      <h2 class="screen-hidden">Mappings</h2>
+      <h2 class="screen-hidden">{t("migrations.mappings")}</h2>
 
       <RequestState
         signal={state.api.migration.generate}
         on_nothing={() => (
           <small>
-            Select process definitions to define the migration mappings
+            {t("migrations.select-definitions-hint")}
           </small>
         )}
         on_success={() => (
@@ -585,12 +624,12 @@ const Mappings = () => {
             <table>
               <thead>
                 <tr>
-                  <th scope="column">Source Activity</th>
-                  <th scope="column">Target Activity</th>
-                  <th scope="column">Valid</th>
+                  <th scope="column">{t("migrations.source-activity")}</th>
+                  <th scope="column">{t("migrations.target-activity")}</th>
+                  <th scope="column">{t("migrations.valid")}</th>
                 </tr>
               </thead>
-              <tbody>{generate_mapping_rows(migration_state, state)}</tbody>
+              <tbody>{generate_mapping_rows(migration_state, state, t)}</tbody>
             </table>
           </>
         )}
@@ -604,7 +643,7 @@ const Mappings = () => {
             {state.api.migration.validation.value.data.instructionReports
               .length > 0 ? (
               <>
-                <h3>Valdiation errors</h3>
+                <h3>{t("migrations.validation-errors")}</h3>
                 <ul>
                   {state.api.migration.validation.value.data.instructionReports.map(
                     (report) =>
@@ -621,15 +660,6 @@ const Mappings = () => {
     </>
   );
 };
-
-const VARIABLE_TYPES = [
-  "String",
-  "Integer",
-  "Long",
-  "Double",
-  "Boolean",
-  "Date",
-];
 
 const add_variable = (migration_state) =>
   (migration_state.variables.value = [
@@ -649,19 +679,20 @@ const update_variable = (migration_state, index, field, value) => {
 };
 
 const Variables = () => {
-  const migration_state = useContext(MigrationState);
+  const migration_state = useContext(MigrationState),
+    [t] = useTranslation();
 
   return (
     <>
-      <h2>Variables</h2>
+      <h2>{t("migrations.variables")}</h2>
       {migration_state.variables.value.length > 0 && (
         <table>
           <thead>
             <tr>
-              <th scope="column">Name</th>
-              <th scope="column">Type</th>
-              <th scope="column">Value</th>
-              <th scope="column">Actions</th>
+              <th scope="column">{t("common.name")}</th>
+              <th scope="column">{t("common.type")}</th>
+              <th scope="column">{t("common.value")}</th>
+              <th scope="column">{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -671,7 +702,7 @@ const Variables = () => {
                   <input
                     type="text"
                     value={variable.name}
-                    placeholder="Variable name"
+                    placeholder={t("migrations.variable-name")}
                     onInput={(e) =>
                       update_variable(
                         migration_state,
@@ -705,7 +736,7 @@ const Variables = () => {
                   <input
                     type="text"
                     value={variable.value}
-                    placeholder="Value"
+                    placeholder={t("common.value")}
                     onInput={(e) =>
                       update_variable(
                         migration_state,
@@ -721,7 +752,7 @@ const Variables = () => {
                     type="button"
                     onClick={() => remove_variable(migration_state, index)}
                   >
-                    Remove
+                    {t("common.remove")}
                   </button>
                 </td>
               </tr>
@@ -731,43 +762,17 @@ const Variables = () => {
       )}
       <div class="button-group">
         <button type="button" onClick={() => add_variable(migration_state)}>
-          Add Variable
+          {t("migrations.add-variable")}
         </button>
       </div>
     </>
   );
 };
 
-const QUERY_FIELDS = [
-  { name: "processInstanceIds", label: "ID", type: "array" },
-  { name: "businessKey", label: "Business Key", type: "text" },
-  { name: "superProcessInstance", label: "Parent ID", type: "text" },
-  { name: "subProcessInstance", label: "Sub ID", type: "text" },
-  { name: "active", label: "Active", type: "boolean" },
-  { name: "suspended", label: "Suspended", type: "boolean" },
-  {
-    name: "rootProcessInstances",
-    label: "Root Instances Only",
-    type: "boolean",
-  },
-  {
-    name: "leafProcessInstances",
-    label: "Leaf Instances Only",
-    type: "boolean",
-  },
-  { name: "withIncident", label: "With Incidents Only", type: "boolean" },
-  { name: "incidentId", label: "Incident ID", type: "text" },
-  { name: "incidentType", label: "Incident Type", type: "text" },
-  { name: "incidentMessage", label: "Incident Message", type: "text" },
-  { name: "tenantIdIn", label: "Tenant ID", type: "array" },
-  { name: "activityIdIn", label: "Activity ID", type: "array" },
-  { name: "withoutTenantId", label: "Without Tenant ID", type: "boolean" },
-];
-
 const add_query_row = (migration_state) =>
   (migration_state.process_instance_query.value = [
     ...migration_state.process_instance_query.value,
-    { field: QUERY_FIELDS[0].name, value: "" },
+    { field: QUERY_FIELDS_KEYS[0].name, value: "" },
   ]);
 
 const remove_query_row = (migration_state, index) =>
@@ -778,7 +783,7 @@ const update_query_row = (migration_state, index, key, value) => {
   const updated = [...migration_state.process_instance_query.value];
   updated[index] = { ...updated[index], [key]: value };
   if (key === "field") {
-    const field_def = QUERY_FIELDS.find((f) => f.name === value);
+    const field_def = QUERY_FIELDS_KEYS.find((f) => f.name === value);
     updated[index].value = field_def?.type === "boolean" ? "true" : "";
   }
   migration_state.process_instance_query.value = updated;
@@ -788,7 +793,7 @@ const build_query = (rows) => {
   const query = {};
   for (const { field, value } of rows) {
     if (value === "") continue;
-    const field_def = QUERY_FIELDS.find((f) => f.name === field);
+    const field_def = QUERY_FIELDS_KEYS.find((f) => f.name === field);
     if (!field_def) continue;
     if (field_def.type === "boolean") query[field] = value === "true";
     else if (field_def.type === "array")
@@ -802,27 +807,28 @@ const build_query = (rows) => {
 };
 
 const ProcessInstanceQuery = () => {
-  const migration_state = useContext(MigrationState);
+  const migration_state = useContext(MigrationState),
+    [t] = useTranslation();
 
   return (
     <>
       <small>
-        When creating a process instance query, the filter{" "}
-        <code>processDefinitionId: "source process definition ID"</code> is
-        automatically added.
+        {t("migrations.query-hint-prefix")}{" "}
+        <code>processDefinitionId: "source process definition ID"</code>{" "}
+        {t("migrations.query-hint-suffix")}
       </small>
       {migration_state.process_instance_query.value.length > 0 && (
         <table>
           <thead>
             <tr>
-              <th>Filter</th>
-              <th>Value</th>
+              <th>{t("migrations.filter")}</th>
+              <th>{t("common.value")}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {migration_state.process_instance_query.value.map((row, index) => {
-              const field_def = QUERY_FIELDS.find((f) => f.name === row.field);
+              const field_def = QUERY_FIELDS_KEYS.find((f) => f.name === row.field);
               return (
                 <tr key={index}>
                   <td>
@@ -837,9 +843,9 @@ const ProcessInstanceQuery = () => {
                         )
                       }
                     >
-                      {QUERY_FIELDS.map(({ name, label }) => (
+                      {QUERY_FIELDS_KEYS.map(({ name, labelKey }) => (
                         <option key={name} value={name}>
-                          {label}
+                          {t(labelKey)}
                         </option>
                       ))}
                     </select>
@@ -883,7 +889,7 @@ const ProcessInstanceQuery = () => {
                       type="button"
                       onClick={() => remove_query_row(migration_state, index)}
                     >
-                      Remove
+                      {t("common.remove")}
                     </button>
                   </td>
                 </tr>
@@ -894,7 +900,7 @@ const ProcessInstanceQuery = () => {
       )}
       <div class="button-group">
         <button type="button" onClick={() => add_query_row(migration_state)}>
-          Add Filter
+          {t("migrations.add-filter")}
         </button>
       </div>
     </>
@@ -904,6 +910,7 @@ const ProcessInstanceQuery = () => {
 const ProcessInstanceSelection = () => {
   const state = useContext(AppState),
     migration_state = useContext(MigrationState),
+    [t] = useTranslation(),
     has_errors = () =>
       state.api.migration.validation.value.data.instructionReports.length > 0;
 
@@ -914,20 +921,19 @@ const ProcessInstanceSelection = () => {
         state.api.migration.validation,
       ]}
       on_nothing={() => (
-        <small>Define mappings to select process instances for migration</small>
+        <small>{t("migrations.define-mappings-hint")}</small>
       )}
       on_success={() =>
         has_errors() ? (
           <p>
-            Invalid mappings. To select process instances and execute the
-            migration, first make sure your mappings are all valid.
+            {t("migrations.invalid-mappings")}
           </p>
         ) : (
           <>
-            <h2>Select Process Instances of Source Definition</h2>
+            <h2>{t("migrations.select-instances")}</h2>
             {state.api.process.instance.by_defintion_id.value.data.length ===
             0 ? (
-              <p>No processes found for migration.</p>
+              <p>{t("migrations.no-processes-for-migration")}</p>
             ) : (
               <form>
                 {state.api.process.instance.by_defintion_id.value.data.map(
@@ -962,85 +968,3 @@ const ProcessInstanceSelection = () => {
 };
 
 export { MigrationsPage };
-
-/*
-{
-  "migrationPlan": {
-    "sourceProcessDefinitionId": "invoice:2:451a34de-e771-11ee-9f50-6e21836f88b1",
-    "targetProcessDefinitionId": "invoice:1:449b19c5-e771-11ee-9f50-6e21836f88b1",
-    "instructions": [
-      {
-        "sourceActivityIds": [
-          "prepareBankTransfer"
-        ],
-        "targetActivityIds": [
-          "prepareBankTransfer"
-        ],
-        "updateEventTrigger": false
-      },
-      {
-        "sourceActivityIds": [
-          "approveInvoice"
-        ],
-        "targetActivityIds": [
-          "approveInvoice"
-        ],
-        "updateEventTrigger": false
-      },
-      {
-        "sourceActivityIds": [
-          "ServiceTask_1"
-        ],
-        "targetActivityIds": [
-          "ServiceTask_1"
-        ],
-        "updateEventTrigger": false
-      },
-      {
-        "sourceActivityIds": [
-          "reviewInvoice"
-        ],
-        "targetActivityIds": [
-          "reviewInvoice"
-        ],
-        "updateEventTrigger": false
-      }
-    ],
-    "variables": {
-      "Test": {
-        "type": "String",
-        "value": "Hello World"
-      }
-    }
-  },
-  "skipIoMappings": true,
-  "skipCustomListeners": true,
-  "processInstanceQuery": {
-    "active": true,
-    "processDefinitionId": "invoice:2:451a34de-e771-11ee-9f50-6e21836f88b1"
-  }
-}
-*/
-
-/*
-
-Process Instance Filter Query Params:
-
-ID
-Business Key
-Parent ID
-Sub ID
-Variable
-Active
-Suspended
-Root Instances Only
-Leaf Instances Only
-With Incidents Only
-Incident ID
-Incident Type
-Incident Message
-Tenant ID
-Activity ID
-Without Tenant ID
-
-*/

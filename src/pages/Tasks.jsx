@@ -38,33 +38,30 @@ const TaskList = () => {
     taskList = state.api.task.list,
     { params } = useRoute(),
     selectedTaskId = params.task_id,
-    [t] = useTranslation("translation", { keyPrefix: "tasks" });
-
-  // todo remove me, testing onlyx
-  // i18n.changeLanguage('de-DE');
+    [t] = useTranslation();
 
   return (
     <div id="task-list">
-      <h2 class="screen-hidden">{t("title")}</h2>
+      <h2 class="screen-hidden">{t("tasks.title")}</h2>
       <div id="task-actions">
-        <a href="/tasks/start" className="button">Start&nbsp;Process</a>
-        
-        <label>Current Filter</label>
+        <a href="/tasks/start" className="button">{t("tasks.start-process-label")}</a>
+
+        <label>{t("tasks.current-filter")}</label>
         <select id="filter-list">
-          <option selected>All Tasks</option>
-          <option>My Tasks</option>
+          <option selected>{t("tasks.all-tasks")}</option>
+          <option>{t("tasks.my-tasks")}</option>
         </select>
-        <a href="/tasks/filter" className="button">Edit Filters</a>
+        <a href="/tasks/filter" className="button">{t("tasks.edit-filters")}</a>
       </div>
       <div>
         <table>
           <thead>
             <tr>
-              <th>{t("task-list.table-headings.task-name")}</th>
-              <th>{t("task-list.table-headings.process-definition")}</th>
-              <th>{t("task-list.table-headings.process-version")}</th>
-              <th>{t("task-list.table-headings.created-on")}</th>
-              <th>{t("task-list.table-headings.assignee")}</th>
+              <th>{t("tasks.task-list.table-headings.task-name")}</th>
+              <th>{t("tasks.task-list.table-headings.process-definition")}</th>
+              <th>{t("tasks.task-list.table-headings.process-version")}</th>
+              <th>{t("tasks.task-list.table-headings.created-on")}</th>
+              <th>{t("tasks.task-list.table-headings.assignee")}</th>
             </tr>
           </thead>
           <tbody>
@@ -75,7 +72,7 @@ const TaskList = () => {
             />
           </tbody>
         </table>
-        <small>Load more</small>
+        <small>{t("tasks.load-more")}</small>
       </div>
     </div>
   );
@@ -105,15 +102,19 @@ const TaskRowEntry = ({ task, selected }) => {
   );
 };
 
-const NoSelectedTask = () => (
-  <div id="task-details" className="fade-in">
-    <div class="task-empty">Select a task from the task list above to show its details.</div>
-  </div>
-);
+const NoSelectedTask = () => {
+  const [t] = useTranslation();
+  return (
+    <div id="task-details" className="fade-in">
+      <div class="task-empty">{t("tasks.select-task")}</div>
+    </div>
+  );
+};
 
 // when something has changed (e.g. assignee) in the task we have to update the task list
 const Task = () => {
   const state = useContext(AppState),
+    [t] = useTranslation(),
     {
       api: {
         task: { one: task },
@@ -129,36 +130,36 @@ const Task = () => {
         <div>
           <h2>{task.value?.data?.name}</h2>
           <a href={`/processes/${pd.value?.data?.id}`}>
-            {pd.value?.data?.name} (version {pd.value?.data?.version})
+            {pd.value?.data?.name} ({t("processes.version")} {pd.value?.data?.version})
           </a>
           {state.api.task.one.value?.data !== undefined ? (
             <p>{state.api.task.one.value?.data.description}</p>
           ) : (
-            <p>No description provided.</p>
+            <p>{t("tasks.no-description")}</p>
           )}
         </div>
 
         <dl>
-          <dt>Follow Up Date</dt>
+          <dt>{t("tasks.follow-up.label")}</dt>
           <dd>
             <SetFollowUpDateButton />
           </dd>
-          <dt>Due Date</dt>
+          <dt>{t("tasks.due-date.set")}</dt>
           <dd>
             <SetDueDateButton />
           </dd>
-          <dt>Assignee</dt>
+          <dt>{t("tasks.task-list.table-headings.assignee")}</dt>
           <dd>
             <ClaimButton />
           </dd>
-          <dt>Groups</dt>
+          <dt>{t("tasks.groups.set")}</dt>
           <dd>
             <SetGroupsButton />
           </dd>
         </dl>
 
         <button>
-          <Icons.chat_bubble_left /> Comment
+          <Icons.chat_bubble_left /> {t("tasks.comment")}
         </button>
       </section>
       <TaskTabs />
@@ -169,6 +170,7 @@ const Task = () => {
 const TaskTabs = () => {
   const state = useContext(AppState);
   const { params } = useRoute();
+  const [t] = useTranslation();
   const currentTaskId = useSignal(null);
 
   // reset error/result state (optional)
@@ -190,7 +192,7 @@ const TaskTabs = () => {
           <Tabs tabs={task_tabs} base_url={`/tasks/${state.api.task.one.value.data.id}`} className="fade-in" />
         </>
       ) : (
-        "Loading"
+        t("common.loading")
       )}
     </section>
   );
@@ -199,6 +201,7 @@ const TaskTabs = () => {
 const SetDueDateButton = () => {
   const state = useContext(AppState),
     { params } = useRoute(),
+    [t] = useTranslation(),
     {
       api: {
         task: { one: task },
@@ -226,22 +229,22 @@ const SetDueDateButton = () => {
   return (
     <>
       <button onClick={show} class="link">
-        {due_date === null ? "Set Due Date" : due_date.toLocaleString()}
+        {due_date === null ? t("tasks.due-date.set") : due_date.toLocaleString()}
       </button>
 
       <dialog id="set_due_date">
-        <button onClick={close}>Close</button>
-        <h2>Set Due Date for Task</h2>
+        <button onClick={close}>{t("common.close")}</button>
+        <h2>{t("tasks.due-date.title")}</h2>
 
         <form onSubmit={submit}>
-          <label for="date">Date</label>
+          <label for="date">{t("tasks.due-date.date")}</label>
           <input
             type="date"
             id="date"
             value={due_date !== null ? due_date?.toISOString().split("T")[0] : null}
             onInput={(e) => (date_state.value = { ...date_state.peek(), date: e.currentTarget.value })}
           />
-          <label for="time">Time</label>
+          <label for="time">{t("tasks.due-date.time")}</label>
           <input
             type="time"
             id="time"
@@ -249,7 +252,7 @@ const SetDueDateButton = () => {
             onInput={(e) => (date_state.value = { ...date_state.peek(), time: e.currentTarget.value })}
           />
           <div class="button-group">
-            <button type="submit">Submit</button>
+            <button type="submit">{t("common.submit")}</button>
           </div>
         </form>
       </dialog>
@@ -260,6 +263,7 @@ const SetDueDateButton = () => {
 const SetFollowUpDateButton = () => {
   const state = useContext(AppState),
     { params } = useRoute(),
+    [t] = useTranslation(),
     {
       api: {
         task: { one: task },
@@ -292,22 +296,22 @@ const SetFollowUpDateButton = () => {
   return (
     <>
       <button onClick={show} class="link">
-        {followUpDate === null ? "Set Due Date" : followUpDate.toLocaleString()}
+        {followUpDate === null ? t("tasks.follow-up.set") : followUpDate.toLocaleString()}
       </button>
 
       <dialog id="set_follow_up_date">
-        <button onClick={close}>Close</button>
-        <h2>Set Follow Up Date for Task</h2>
+        <button onClick={close}>{t("common.close")}</button>
+        <h2>{t("tasks.follow-up.title")}</h2>
 
         <form onSubmit={submit}>
-          <label for="date">Date</label>
+          <label for="date">{t("tasks.due-date.date")}</label>
           <input
             type="date"
             id="date"
             value={followUpDate !== null ? followUpDate?.toISOString().split("T")[0] : null}
             onInput={(e) => (date_state.value = { ...date_state.peek(), date: e.currentTarget.value })}
           />
-          <label for="time">Time</label>
+          <label for="time">{t("tasks.due-date.time")}</label>
           <input
             type="time"
             id="time"
@@ -315,7 +319,7 @@ const SetFollowUpDateButton = () => {
             onInput={(e) => (date_state.value = { ...date_state.peek(), time: e.currentTarget.value })}
           />
           <div class="button-group">
-            <button type="submit">Submit</button>
+            <button type="submit">{t("common.submit")}</button>
           </div>
         </form>
       </dialog>
@@ -325,6 +329,7 @@ const SetFollowUpDateButton = () => {
 
 const SetGroupsButton = () => {
   const state = useContext(AppState),
+    [t] = useTranslation(),
     {
       api: {
         task: { identity_links },
@@ -347,7 +352,7 @@ const SetGroupsButton = () => {
     <>
       <button onClick={show} class="link">
         {identity_links.value?.data
-          ? "Set groups"
+          ? t("tasks.groups.set")
           : identity_links.value?.data
               ?.reduce((res, { groupId, type }) => (type === "candidate" ? `${res + groupId}, ` : res), "")
               .slice(0, -2)}
@@ -355,22 +360,22 @@ const SetGroupsButton = () => {
 
       <dialog id="add_groups">
         <header>
-          <h2>Manage Groups</h2>
+          <h2>{t("tasks.groups.manage")}</h2>
           <button onClick={close} class="neutral">
             <Icons.close />
           </button>
         </header>
 
-        <h3>Add Groups</h3>
+        <h3>{t("tasks.groups.add")}</h3>
         <form onSubmit={submit}>
-          <label for="group_id">Group ID</label>
+          <label for="group_id">{t("tasks.groups.group-id")}</label>
           <input id="group_id" key="group_id" required onInput={(e) => (group_state.value = e.currentTarget.value)} />
           <div class="button-group">
-            <button type="submit">Add Group</button>
+            <button type="submit">{t("tasks.groups.add-group")}</button>
           </div>
         </form>
 
-        <h3>Remove Groups</h3>
+        <h3>{t("tasks.groups.remove-groups")}</h3>
 
         <RequestState
           signal={state.api.task.identity_links}
@@ -378,8 +383,8 @@ const SetGroupsButton = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Group ID</th>
-                  <th>Action</th>
+                  <th>{t("tasks.groups.group-id")}</th>
+                  <th>{t("common.action")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -388,7 +393,7 @@ const SetGroupsButton = () => {
                     <tr key={index}>
                       <td>{groupId}</td>
                       <td>
-                        <button onClick={() => delete_group(groupId)}>Delete</button>
+                        <button onClick={() => delete_group(groupId)}>{t("common.delete")}</button>
                       </td>
                     </tr>
                   ) : null,
@@ -404,6 +409,7 @@ const SetGroupsButton = () => {
 
 const ClaimButton = () => {
   const state = useContext(AppState),
+    [t] = useTranslation(),
     task = state.api.task.one.value?.data,
     user = state.api.user.profile.value?.data,
     claim_result = state.api.task.claim_result.value?.data,
@@ -423,22 +429,22 @@ const ClaimButton = () => {
       on_success={() => (
         <>
           <button class="link" onClick={show}>
-            {task?.assignee === null ? "Claim" : task?.assignee === user?.id ? "You" : task?.assignee}
+            {task?.assignee === null ? t("tasks.claim") : task?.assignee === user?.id ? t("tasks.you") : task?.assignee}
           </button>
 
           <dialog id="set_assignee">
-            <button onClick={close}>Close</button>
+            <button onClick={close}>{t("common.close")}</button>
             {assignee_is_different && !assigned ? (
               <button onClick={() => engine_rest.task.assign_task(state, null, task.id)} className="secondary">
-                <Icons.user_minus /> Reset Assignee
+                <Icons.user_minus /> {t("tasks.reset-assignee")}
               </button>
             ) : (user_is_assignee || claimed) && !unclaimed ? (
               <button onClick={() => engine_rest.task.unclaim_task(state, task.id)} className="secondary">
-                <Icons.user_minus /> Unclaim
+                <Icons.user_minus /> {t("tasks.unclaim")}
               </button>
             ) : (
               <button onClick={() => engine_rest.task.claim_task(state, task.id)} className="secondary">
-                <Icons.user_plus /> Claim
+                <Icons.user_plus /> {t("tasks.claim")}
               </button>
             )}
           </dialog>
@@ -475,99 +481,101 @@ const Diagram = () => {
 };
 
 const Filter = () => {
+  const [t] = useTranslation();
+
   return (
     <div>
       <form>
-        <h2>Filter Editor</h2>
-        <h3>General</h3>
+        <h2>{t("tasks.filter.title")}</h2>
+        <h3>{t("tasks.filter.general")}</h3>
         <label>
-          Name
+          {t("common.name")}
           <input />
         </label>
         <label>
-          Description
+          {t("tasks.filter.description")}
           <input />
         </label>
         <label>
-          Color
+          {t("tasks.filter.color")}
           <input type="color" />
         </label>
         <label>
-          Priority
+          {t("tasks.task-list.table-headings.priority")}
           <input type="number" />
         </label>
         <label>
-          Auto Referesh
+          {t("tasks.filter.auto-refresh")}
           <input type="checkbox" />
         </label>
 
-        <h3>Criteria</h3>
-        <button>Add Criteria</button>
+        <h3>{t("tasks.filter.criteria")}</h3>
+        <button>{t("tasks.filter.add-criteria")}</button>
         <table>
           <thead>
             <tr>
-              <th scope="column">Key</th>
-              <th scope="column">Value</th>
-              <th scope="column">Action</th>
+              <th scope="column">{t("common.key")}</th>
+              <th scope="column">{t("common.value")}</th>
+              <th scope="column">{t("common.action")}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td></td>
               <td></td>
-              <td>Remove</td>
+              <td>{t("common.remove")}</td>
             </tr>
           </tbody>
         </table>
 
-        <h3>Permissions</h3>
+        <h3>{t("tasks.filter.permissions")}</h3>
 
         <label>
-          Accessible by all users
+          {t("tasks.filter.accessible-by-all")}
           <input type="checkbox" />
         </label>
 
-        <button>Add Permission</button>
+        <button>{t("tasks.filter.add-permission")}</button>
         <table>
           <thead>
             <tr>
-              <th scope="column">Group / User</th>
-              <th scope="column">Identifier</th>
-              <th scope="column">Action</th>
+              <th scope="column">{t("tasks.filter.group-user")}</th>
+              <th scope="column">{t("tasks.filter.identifier")}</th>
+              <th scope="column">{t("common.action")}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td></td>
               <td></td>
-              <td>Remove</td>
+              <td>{t("common.remove")}</td>
             </tr>
           </tbody>
         </table>
 
-        <h3>Variables</h3>
+        <h3>{t("tasks.filter.variables")}</h3>
 
-        <p>The variables you set here will be shown in the task list view.</p>
+        <p>{t("tasks.filter.variables-hint")}</p>
 
         <label>
-          Show undefined variables
+          {t("tasks.filter.show-undefined")}
           <input type="checkbox" />
         </label>
 
-        <button>Add Variable</button>
+        <button>{t("tasks.filter.add-variable")}</button>
         <table>
           <thead>
             <tr>
-              <th scope="column">Name</th>
-              <th scope="column">Label</th>
-              <th scope="column">Action</th>
+              <th scope="column">{t("common.name")}</th>
+              <th scope="column">{t("tasks.filter.label")}</th>
+              <th scope="column">{t("common.action")}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td></td>
               <td></td>
-              <td>Remove</td>
+              <td>{t("common.remove")}</td>
             </tr>
           </tbody>
         </table>
@@ -578,6 +586,7 @@ const Filter = () => {
 
 const HistoryTab = () => {
   const state = useContext(AppState),
+    [t] = useTranslation(),
     {
       api: {
         history: { user_operation },
@@ -589,16 +598,16 @@ const HistoryTab = () => {
 
   return (
     <>
-      <h2>History</h2>
+      <h2>{t("tasks.history.title")}</h2>
 
       <table>
         <thead>
           <tr>
-            <th>Date / Time</th>
-            <th>User</th>
-            <th>Action</th>
-            <th>Type</th>
-            <th>Value</th>
+            <th>{t("tasks.history.date-time")}</th>
+            <th>{t("tasks.history.user")}</th>
+            <th>{t("common.action")}</th>
+            <th>{t("common.type")}</th>
+            <th>{t("common.value")}</th>
           </tr>
         </thead>
         <tbody>
@@ -624,19 +633,19 @@ const HistoryEntry = () =>
 
 const task_tabs = [
   {
-    name: "Form",
+    nameKey: "tasks.tabs.form",
     id: "form",
     pos: 0,
     target: <TaskForm />,
   },
   {
-    name: "History",
+    nameKey: "tasks.tabs.history",
     id: "history",
     pos: 1,
     target: <HistoryTab />,
   },
   {
-    name: "Diagram",
+    nameKey: "tasks.tabs.diagram",
     id: "diagram",
     pos: 2,
     target: <Diagram />,

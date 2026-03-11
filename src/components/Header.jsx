@@ -4,6 +4,7 @@ import { useLocation } from "preact-iso"
 import * as Icons from "../assets/icons.jsx"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useContext } from "preact/hooks"
+import { useTranslation } from "react-i18next"
 import { AppState } from "../state.js"
 
 const servers = JSON.parse(import.meta.env.VITE_BACKEND)
@@ -17,6 +18,7 @@ const swap_server = (e, state) => {
 export function Header() {
   const { url, route } = useLocation(),
     state = useContext(AppState),
+    [t] = useTranslation(),
     // dialogs
     showSearch = () => document.getElementById("global-search").showModal(),
     show_mobile_menu = () => document.getElementById("mobile-menu").showModal(),
@@ -37,14 +39,17 @@ export function Header() {
         {import.meta.env.VITE_HIDE_RELEASE_WARNING === "true"
           ? null
           : <div id="release-warning">
-              Public Alpha Release – Untested and not ready for production – Share your feedback with an 
-              <a href="https://github.com/operaton/web-apps/issues">issue</a> or in the 
-              <a href="https://forum.operaton.org/">forum</a>
+              {t("nav.release-warning")}{" "}
+              <a href="https://github.com/operaton/web-apps/issues">{t("nav.release-warning-issue")}</a>{" "}
+              {t("nav.release-warning-forum") !== t("nav.release-warning-issue") && <>
+                {t("nav.release-warning-or")}{" "}
+                <a href="https://forum.operaton.org/">{t("nav.release-warning-forum")}</a>
+              </>}
             </div>}
 
         <menu id="skip-links">
-          <li><a href="#content">           Skip to content</a></li>
-          <li><a href="#primary-navigation">Skip to Primary Navigation</a></li>
+          <li><a href="#content">           {t("nav.skip-to-content")}</a></li>
+          <li><a href="#primary-navigation">{t("nav.skip-to-navigation")}</a></li>
         </menu>
 
 
@@ -52,30 +57,30 @@ export function Header() {
           <nav id="primary-navigation" aria-label="Main">
             <menu>
               <li><a href="/"            class={url === "/" && "active"}          id="logo">OPERATON</a></li>
-              <li><a href="/tasks"       class={url.startsWith("/tasks")       && "active"}>Tasks</a></li>
-              <li><a href="/processes"   class={url.startsWith("/processes")   && "active"}>Processes</a></li>
-              <li><a href="/decisions"   class={url.startsWith("/decisions")   && "active"}>Decisions</a></li>
-              <li><a href="/deployments" class={url.startsWith("/deployments") && "active"}>Deployments</a></li>
-              <li><a href="/">                                                              Batches</a></li>
-              <li><a href="/migrations"  class={url.startsWith("/migrations")  && "active"}>Migrations</a></li>
-              <li><a href="/admin"       class={url.startsWith("/admin")       && "active"}>Admin</a></li>
+              <li><a href="/tasks"       class={url.startsWith("/tasks")       && "active"}>{t("nav.tasks")}</a></li>
+              <li><a href="/processes"   class={url.startsWith("/processes")   && "active"}>{t("nav.processes")}</a></li>
+              <li><a href="/decisions"   class={url.startsWith("/decisions")   && "active"}>{t("nav.decisions")}</a></li>
+              <li><a href="/deployments" class={url.startsWith("/deployments") && "active"}>{t("nav.deployments")}</a></li>
+              <li><a href="/">                                                              {t("nav.batches")}</a></li>
+              <li><a href="/migrations"  class={url.startsWith("/migrations")  && "active"}>{t("nav.migrations")}</a></li>
+              <li><a href="/admin"       class={url.startsWith("/admin")       && "active"}>{t("nav.admin")}</a></li>
             </menu>
           </nav>
           <div>
             <nav id="secondary-navigation">
               <menu>
-                <li><a href="/help">   Help</a></li>
-                <li><a href="/account">Account</a></li>
+                <li><a href="/help">   {t("nav.help")}</a></li>
+                <li><a href="/account">{t("nav.account")}</a></li>
               </menu>
             </nav>
             <button id="go-to" onClick={showSearch}>
-              Go To <kbd>Alt+K</kbd>
+              {t("nav.go-to")} <kbd>Alt+K</kbd>
             </button>
             <label id="server-selector" title="Server selection">
               {/* <Icons.server />*/}
               <select onChange={(e) => swap_server(e, state)}>
-                <option disabled>Choose a server</option>
-                {servers.map((server) => 
+                <option disabled>{t("nav.choose-server")}</option>
+                {servers.map((server) =>
                   <option key={server.url} value={server.url} selected={state.server.value?.url === server.url}>
                     {server.name} {server.c7_mode ? "(C7)" : ""}
                   </option>)}
@@ -87,16 +92,16 @@ export function Header() {
 
       <dialog id="mobile-menu">
         <header>
-          <h2>Menu</h2>
-          <button onClick={close_mobile_menu} aria-label="Close menu">
+          <h2>{t("nav.menu")}</h2>
+          <button onClick={close_mobile_menu} aria-label={t("nav.close-menu")}>
             <Icons.close />
           </button>
         </header>
-        <nav aria-label="Mobile navigation">
+        <nav aria-label={t("nav.mobile-navigation")}>
           <menu>
             <li>
               <a href="/tasks" class={url.startsWith("/tasks") && "active"}>
-                Tasks
+                {t("nav.tasks")}
               </a>
             </li>
             <li>
@@ -104,7 +109,7 @@ export function Header() {
                 href="/processes"
                 class={url.startsWith("/processes") && "active"}
               >
-                Processes
+                {t("nav.processes")}
               </a>
             </li>
             <li>
@@ -112,7 +117,7 @@ export function Header() {
                 href="/decisions"
                 class={url.startsWith("/decisions") && "active"}
               >
-                Decisions
+                {t("nav.decisions")}
               </a>
             </li>
             <li>
@@ -120,32 +125,32 @@ export function Header() {
                 href="/deployments"
                 class={url.startsWith("/deployments") && "active"}
               >
-                Deployments
+                {t("nav.deployments")}
               </a>
             </li>
             <li>
-              <a href="/">Batches</a>
+              <a href="/">{t("nav.batches")}</a>
             </li>
             <li>
               <a
                 href="/migrations"
                 class={url.startsWith("/migrations") && "active"}
               >
-                Migrations
+                {t("nav.migrations")}
               </a>
             </li>
             <li>
               <a href="/admin" class={url.startsWith("/admin") && "active"}>
-                Admin
+                {t("nav.admin")}
               </a>
             </li>
           </menu>
           <menu>
             <li>
-              <a href="/help">Help</a>
+              <a href="/help">{t("nav.help")}</a>
             </li>
             <li>
-              <a href="/account">Account</a>
+              <a href="/account">{t("nav.account")}</a>
             </li>
           </menu>
         </nav>
@@ -158,14 +163,14 @@ export function Header() {
               }}
             >
               <Icons.search />
-              Go To
+              {t("nav.go-to")}
             </button>
           </li>
           <li>
             <label id="mobile-server-selector" title="Server selection">
               <Icons.server />
               <select onChange={(e) => swap_server(e, state)}>
-                <option disabled>Choose a server</option>
+                <option disabled>{t("nav.choose-server")}</option>
                 {servers.map((server) => (
                   <option
                     key={server.url}

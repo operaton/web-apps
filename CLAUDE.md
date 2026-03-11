@@ -62,6 +62,6 @@ The backend is called Operaton which is a fork of Camunda 7. You can use Camunda
 - **CSS**: Vanilla CSS only, use CSS custom properties, prefer classless styling, prefer cascading over many single classes. Styles live in `public/css/style.css` and `src/css/`
 - **File creation**: avoid creating unnecessary files; only create new files for reusable components
 - **Tests**: `*.test.js` / `*.test.jsx` colocated with source, using `describe`/`it`/`expect` (vitest globals), `@testing-library/preact` for component tests
-- **i18n**: `react-i18next`, translations in `public/locales/{locale}/translation.json` (en-US, de-DE)
+- **i18n**: `react-i18next`, translations in `public/locales/{locale}/translation.json` (en-US, de-DE), always store text strings of the UI in the translation files
 - **Icons**: JSX components in `src/assets/icons.jsx`, sourced from heroicons.com
 - **Accessibility**: semantic HTML, keyboard navigation, skip links, ARIA attributes

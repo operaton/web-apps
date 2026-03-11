@@ -1,5 +1,6 @@
 import { useContext } from 'preact/hooks'
 import { useRoute, useLocation } from 'preact-iso'
+import { useTranslation } from 'react-i18next'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
 import { AppState } from '../state.js'
 import { Breadcrumbs } from '../components/Breadcrumbs.jsx'
@@ -10,7 +11,8 @@ const AdminPage = () => {
   const
     { params: { page_id } } = useRoute(),
     { route } = useLocation(),
-    state = useContext(AppState)
+    state = useContext(AppState),
+    [t] = useTranslation()
 
   if (page_id === undefined) {
     route('/admin/users')
@@ -30,11 +32,11 @@ const AdminPage = () => {
   return <div id="admin-page">
     <nav>
       <ul class="list">
-        <li class={is_selected('users')}><a href="/admin/users">Users</a></li>
-        <li class={is_selected('groups')}><a href="/admin/groups">Groups</a></li>
-        <li class={is_selected('tenants')}><a href="/admin/tenants">Tenants</a></li>
-        <li class={is_selected('authorizations')}><a href="/admin/authorizations">Authorizations</a></li>
-        <li class={is_selected('system')}><a href="/admin/system">System</a></li>
+        <li class={is_selected('users')}><a href="/admin/users">{t("admin.users")}</a></li>
+        <li class={is_selected('groups')}><a href="/admin/groups">{t("admin.groups")}</a></li>
+        <li class={is_selected('tenants')}><a href="/admin/tenants">{t("admin.tenants")}</a></li>
+        <li class={is_selected('authorizations')}><a href="/admin/authorizations">{t("admin.authorizations")}</a></li>
+        <li class={is_selected('system')}><a href="/admin/system">{t("admin.system")}</a></li>
       </ul>
     </nav>
 
@@ -45,7 +47,7 @@ const AdminPage = () => {
       tenants: <TenantsPage />,
       authorizations: <AuthorizationsPage />,
       system: <SystemPage />,
-    })[page_id] ?? <p>Select Page</p>}
+    })[page_id] ?? <p>{t("common.select-page")}</p>}
 
   </div>
 }
@@ -63,7 +65,8 @@ const TenantsPage = () => {
 
 const TenantDetails = (tenant_id) => {
   const
-    state = useContext(AppState)
+    state = useContext(AppState),
+    [t] = useTranslation()
 
   void engine_rest.user.profile.get(state, tenant_id.value)
   void engine_rest.group.by_member(state, tenant_id.value)
@@ -71,16 +74,16 @@ const TenantDetails = (tenant_id) => {
 
   return <div class="content fade-in">
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Tenant', route: '/admin/tenants' },
-      { name: 'Details' }]} />
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.tenants"), route: '/admin/tenants' },
+      { name: t("admin.details") }]} />
 
-    <h2>Tenant Details</h2>
+    <h2>{t("admin.tenant.details")}</h2>
 
-    <h3>Information</h3>
-    <h3>Groups</h3>
-    <h3>Users</h3>
-    <h3>Danger Zone</h3>
+    <h3>{t("admin.tenant.information")}</h3>
+    <h3>{t("admin.groups")}</h3>
+    <h3>{t("admin.users")}</h3>
+    <h3>{t("admin.danger-zone")}</h3>
   </div>
 }
 
@@ -88,6 +91,7 @@ const TenantCreate = () => {
   const
     state = useContext(AppState),
     { api: { tenant: { create: tenant_create } } } = state,
+    [t] = useTranslation(),
     form_tenant = signal({ profile: {}, credentials: {} })
 
   const set_value = (k, v) => form_tenant.value = { ...form_tenant.peek(), [k]: v.currentTarget.value }
@@ -100,24 +104,24 @@ const TenantCreate = () => {
   }
 
   return <div>
-    <h2>Create New Tenant</h2>
+    <h2>{t("admin.tenant.create-title")}</h2>
     <RequestState
       signal={tenant_create}
       on_nothing={() => <></>}
-      on_success={() => <p className="success">Successfully created new tenant.</p>}
+      on_success={() => <p className="success">{t("admin.tenant.success-created")}</p>}
       // on_error={() => <p className="error">Error: {user_create.value.error.message}</p>}
     />
 
     <form onSubmit={on_submit}>
-      <label for="tenant-id">Tenant ID</label>
+      <label for="tenant-id">{t("admin.tenant.tenant-id")}</label>
       <input id="tenant-id" type="text" onInput={(e) => set_value('id', e)} required />
 
-      <label for="tenant-name">Tenant Name</label>
+      <label for="tenant-name">{t("admin.tenant.tenant-name")}</label>
       <input id="tenant-name" type="text" onInput={(e) => set_value('name', e)} required />
 
       <div class="button-group">
-        <button type="submit">Create New User</button>
-        <a href="/admin/users" class="button secondary">Cancel</a>
+        <button type="submit">{t("admin.user.create")}</button>
+        <a href="/admin/users" class="button secondary">{t("common.cancel")}</a>
       </div>
     </form>
   </div>
@@ -126,15 +130,16 @@ const TenantCreate = () => {
 const TenantList = () => {
   const
     state = useContext(AppState),
-    { api: { tenant: { list: tenants } } } = state
+    { api: { tenant: { list: tenants } } } = state,
+    [t] = useTranslation()
 
   return <div>
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Tenants' }]} />
-    <h2>Tenants</h2>
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.tenants") }]} />
+    <h2>{t("admin.tenants")}</h2>
 
-    <a href="/admin/tenants/new" class="button">Create new tenant</a>
+    <a href="/admin/tenants/new" class="button">{t("admin.tenant.create")}</a>
 
     <RequestState
       signal={tenants}
@@ -142,8 +147,8 @@ const TenantList = () => {
         ? <table class="fade-in">
           <thead>
           <tr>
-            <th>ID</th>
-            <th>Name</th>
+            <th>{t("common.id")}</th>
+            <th>{t("common.name")}</th>
           </tr>
           </thead>
           <tbody>
@@ -155,7 +160,7 @@ const TenantList = () => {
           ))}
           </tbody>
         </table>
-        : <p>No tenants</p>} />
+        : <p>{t("admin.tenant.no-tenants")}</p>} />
   </div>
 }
 
@@ -164,22 +169,6 @@ const GroupsPage = () => {
     state = useContext(AppState),
     { api: { group: { list: groups } } } = state,
     { params: { selection_id } } = useRoute()
-  // //computed local state
-  // // groups_without_user_groups = useComputed(() => groups.value?.data?.filter(group => !groups.value?.data?.map(user_group => user_group.id).includes(group.id))),
-  // // dialog functions
-  // // close_add_group_dialog = () => document.getElementById('add-group-dialog').close(),
-  // // show_add_group_dialog = () => {
-  // //   void api.group.all(state)
-  // //   document.getElementById('add-group-dialog').showModal()
-  // // },
-  // // button handler
-  // // handle_add_group = (group_id) => api.group.create(state, group_id).then(() => api.group.all(state, null)),
-  // // handle_remove_group = (group_id) => api.group.delete(state, group_id).then(() => api.group.all(state, null))
-  //
-  // // if (!groups.value) {
-  // //   void api.group.all(state)
-  // // }
-
 
   return (selection_id === 'new')
     ? <GroupCreate />
@@ -193,6 +182,7 @@ const GroupCreate = () => {
   const
     state = useContext(AppState),
     { api: { group: { create: group_create } } } = state,
+    [t] = useTranslation(),
     form_group = useSignal({})
 
   const set_value = (k, v) => form_group.value = { ...form_group.peek(), [k]: v.currentTarget.value }
@@ -205,27 +195,27 @@ const GroupCreate = () => {
   }
 
   return <div>
-    <h2>Create New Group</h2>
+    <h2>{t("admin.group.create")}</h2>
     <RequestState
       signal={group_create}
       on_nothing={() => <></>}
-      on_success={() => <p className="success">Successfully created new group.</p>}
+      on_success={() => <p className="success">{t("admin.group.success-created")}</p>}
       // on_error={() => <p className="error">Error: {user_create.value.error.message}</p>}
     />
 
     <form onSubmit={on_submit}>
-      <label for="group-id">Group ID</label>
+      <label for="group-id">{t("admin.group.group-id")}</label>
       <input id="group-id" type="text" onInput={(e) => set_value('id', e)} required />
 
-      <label for="group-name"> Group Name</label>
+      <label for="group-name"> {t("admin.group.group-name")}</label>
       <input id="group-name" type="text" onInput={(e) => set_value('groupName', e)} required />
 
-      <label for="group-type">Group Type</label>
+      <label for="group-type">{t("admin.group.group-type")}</label>
       <input id="group-type" type="text" onInput={(e) => set_value('groupType', e)} required />
 
       <div class="button-group">
-        <button type="submit">Create New Group</button>
-        <a href="/admin/groups" class="button secondary">Cancel</a>
+        <button type="submit">{t("admin.group.create")}</button>
+        <a href="/admin/groups" class="button secondary">{t("common.cancel")}</a>
       </div>
     </form>
   </div>
@@ -233,23 +223,24 @@ const GroupCreate = () => {
 
 const GroupsList = () => {
   const
-    { api: { group: { list: groups } } } = useContext(AppState)
+    { api: { group: { list: groups } } } = useContext(AppState),
+    [t] = useTranslation()
 
   return <div>
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Groups' }]} />
-    <h2>Groups</h2>
-    <a href="/admin/groups/new">Create New Group</a>
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.groups") }]} />
+    <h2>{t("admin.groups")}</h2>
+    <a href="/admin/groups/new">{t("admin.group.create")}</a>
     <RequestState
       signal={groups}
       on_success={() => groups.value !== null ? <table class="fade-in">
           <thead>
           <tr>
-            <th>Group ID</th>
-            <th>Group Name</th>
-            <th>Group Type</th>
-            <th>Action</th>
+            <th>{t("admin.group.group-id")}</th>
+            <th>{t("admin.group.group-name")}</th>
+            <th>{t("admin.group.group-type")}</th>
+            <th>{t("common.action")}</th>
           </tr>
           </thead>
           <tbody>
@@ -263,13 +254,14 @@ const GroupsList = () => {
           ))}
           </tbody>
         </table>
-        : <p>User is currently not a member of any group.</p>} />
+        : <p>{t("admin.group.no-groups")}</p>} />
   </div>
 }
 
 const GroupDetails = (user_id) => {
   const
-    state = useContext(AppState)
+    state = useContext(AppState),
+    [t] = useTranslation()
 
   void engine_rest.user.profile.get(state, user_id.value)
   void engine_rest.group.by_member(state, user_id.value)
@@ -277,39 +269,36 @@ const GroupDetails = (user_id) => {
 
   return <div class="content fade-in">
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Groups', route: '/admin/groups' },
-      { name: 'Details' }]} />
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.groups"), route: '/admin/groups' },
+      { name: t("admin.details") }]} />
 
-    <h2>Group Details</h2>
+    <h2>{t("admin.group.details")}</h2>
 
-    <h3>Profile</h3>
+    <h3>{t("admin.group.profile")}</h3>
     <UserProfile />
     <UserPassword />
     <UserGroups />
-    <h3>Tenants</h3>
-    <h3>Danger Zone</h3>
+    <h3>{t("admin.tenants")}</h3>
+    <h3>{t("admin.danger-zone")}</h3>
   </div>
 }
 
 const SystemPage = () => {
-  const { api: { engine: { telemetry } } } = useContext(AppState)
+  const { api: { engine: { telemetry } } } = useContext(AppState),
+    [t] = useTranslation()
 
   return <div>
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'System' }]} />
-    <h2>System</h2>
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.system") }]} />
+    <h2>{t("admin.system")}</h2>
     <RequestState
       signal={telemetry}
       on_success={() => <pre class="fade-in">{telemetry.value !== undefined ? JSON.stringify(telemetry.value?.data, null, 2) : ''} </pre>}
     />
   </div>
 }
-
-// const JsonToText = (json) => {
-//   return
-// }
 
 const UserPage = () => {
   const
@@ -327,21 +316,22 @@ const UserPage = () => {
 }
 
 const UserList = () => {
-  const { api: { user: { list: users } } } = useContext(AppState)
+  const { api: { user: { list: users } } } = useContext(AppState),
+    [t] = useTranslation()
 
   return <div className="content">
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Users' }]} />
-    <h2>Users</h2>
-    <a href="/admin/users/new">Create New User</a>
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.users") }]} />
+    <h2>{t("admin.users")}</h2>
+    <a href="/admin/users/new">{t("admin.user.create")}</a>
     <table class="fade-in">
       <thead>
       <tr>
-        <th>ID</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Email</th>
+        <th>{t("common.id")}</th>
+        <th>{t("admin.user.first-name")}</th>
+        <th>{t("admin.user.last-name")}</th>
+        <th>{t("admin.user.email")}</th>
       </tr>
       </thead>
       <tbody>
@@ -355,7 +345,7 @@ const UserList = () => {
             <td>{email}</td>
           </tr>
         )) ?? <tr>
-          <td>No Users found</td>
+          <td>{t("admin.user.no-users")}</td>
         </tr>} />
       </tbody>
     </table>
@@ -364,7 +354,8 @@ const UserList = () => {
 
 const UserDetails = (user_id) => {
   const
-    state = useContext(AppState)
+    state = useContext(AppState),
+    [t] = useTranslation()
 
   void engine_rest.user.profile.get(state, user_id.value)
   void engine_rest.group.by_member(state, user_id.value)
@@ -372,37 +363,38 @@ const UserDetails = (user_id) => {
 
   return <div class="content fade-in">
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Users', route: '/admin/users' },
-      { name: 'Details' }]} />
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.users"), route: '/admin/users' },
+      { name: t("admin.details") }]} />
 
-    <h2>User Details</h2>
+    <h2>{t("admin.user.details")}</h2>
 
-    <h3>Profile</h3>
+    <h3>{t("admin.group.profile")}</h3>
     <UserProfile />
     <UserPassword />
     <UserGroups />
-    <h3>Tenants</h3>
-    <h3>Danger Zone</h3>
+    <h3>{t("admin.tenants")}</h3>
+    <h3>{t("admin.danger-zone")}</h3>
   </div>
 }
 
 const UserGroups = () => {
-  const { api: { user: { group: { list: user_groups } } } } = useContext(AppState)
+  const { api: { user: { group: { list: user_groups } } } } = useContext(AppState),
+    [t] = useTranslation()
 
   return <>
-    <h3>Groups</h3>
+    <h3>{t("admin.groups")}</h3>
     <RequestState
       signal={user_groups}
       on_success={() =>
         <table>
-          <caption class="screen-hidden">User Groups</caption>
+          <caption class="screen-hidden">{t("admin.group.user-groups")}</caption>
           <thead>
           <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Action</th>
+            <th>{t("common.id")}</th>
+            <th>{t("common.name")}</th>
+            <th>{t("common.type")}</th>
+            <th>{t("common.action")}</th>
           </tr>
           </thead>
           <tbody>
@@ -410,12 +402,12 @@ const UserGroups = () => {
             <td>{group.id}</td>
             <td>{group.name}</td>
             <td>{group.type}</td>
-            <td>Remove from group</td>
+            <td>{t("admin.user.remove-from-group")}</td>
           </tr>)}
           </tbody>
         </table>
       } />
-    <button>Add to group</button>
+    <button>{t("admin.user.add-to-group")}</button>
   </>
 }
 
@@ -423,41 +415,43 @@ const UserProfile = () => {
   /** @namespace user_profile.value.data.firstName **/
   /** @namespace user_profile.value.data.lastName **/
   const
-    { api: { user: { profile } } } = useContext(AppState)
+    { api: { user: { profile } } } = useContext(AppState),
+    [t] = useTranslation()
 
   return <>{profile.value?.data
     ? <form>
-      <label for="first-name">First Name </label>
+      <label for="first-name">{t("admin.user.first-name")} </label>
       <input id="first-name" value={profile.value.data.firstName ?? ''} />
 
-      <label for="last-name">Last Name</label>
+      <label for="last-name">{t("admin.user.last-name")}</label>
       <input id="last-name" value={profile.value.data.lastName ?? ''} />
 
-      <label for="email">Email</label>
+      <label for="email">{t("admin.user.email")}</label>
       <input id="email" type="email" value={profile.value.data.email ?? ''} />
 
 
       <div class="button-group">
-        <button type="submit">Update Profile</button>
+        <button type="submit">{t("admin.user.update-profile")}</button>
       </div>
     </form>
-    : <p>Loading...</p>
+    : <p>{t("common.loading")}</p>
   }</>
 }
 
 const UserPassword = () => {
+  const [t] = useTranslation()
 
   return <>
-    <h3>Password</h3>
+    <h3>{t("admin.user.password")}</h3>
     <form>
-      <label for="new-password">New Password</label>
+      <label for="new-password">{t("admin.user.new-password")}</label>
       <input id="new-password" type="password" placeholder="* * * * * * * * *" />
 
-      <label for="new-password-repeat">New Password (repeat)</label>
+      <label for="new-password-repeat">{t("admin.user.new-password-repeat")}</label>
       <input id="new-password-repeat" type="password" placeholder="* * * * * * * * *" />
 
       <div class="button-group">
-        <button type="submit">Change Password</button>
+        <button type="submit">{t("admin.user.change-password")}</button>
       </div>
     </form>
   </>
@@ -468,6 +462,7 @@ const UserCreate = () => {
   const
     state = useContext(AppState),
     { api: { user: { create: user_create } } } = state,
+    [t] = useTranslation(),
     form_user = signal({ profile: {}, credentials: {} })
 
   const set_value = (k1, k2, v) => form_user.value = { ...form_user.peek(), [k1]: { ...form_user.peek()[k1], [k2]: v.currentTarget.value } }
@@ -483,36 +478,36 @@ const UserCreate = () => {
   }
 
   return <div>
-    <h2>Create New User</h2>
+    <h2>{t("admin.user.create")}</h2>
     <RequestState
       signal={user_create}
       on_nothing={() => <></>}
-      on_success={() => <p className="success">Successfully created new user.</p>}
+      on_success={() => <p className="success">{t("admin.user.success-created")}</p>}
       // on_error={() => <p className="error">Error: {user_create.value.error.message}</p>}
     />
 
     <form onSubmit={on_submit}>
-      <label for="user-id">User ID</label>
+      <label for="user-id">{t("admin.user.user-id")}</label>
       <input id="user-id" type="text" onInput={(e) => set_p_value('id', e)} required />
 
-      <label for="password1">Password</label>
+      <label for="password1">{t("admin.user.password")}</label>
       <input id="password1" type="password" onInput={(e) => set_c_value('password', e)} required />
 
-      <label for="password2"> Password (repeated)</label>
+      <label for="password2"> {t("admin.user.password-repeated")}</label>
       <input id="password2" type="password" onInput={(e) => set_c_value('password', e)} />
 
-      <label for="first-name"> First Name</label>
+      <label for="first-name"> {t("admin.user.first-name")}</label>
       <input id="first-name" type="text" onInput={(e) => set_p_value('firstName', e)} required />
 
-      <label for="last-name">Last Name</label>
+      <label for="last-name">{t("admin.user.last-name")}</label>
       <input id="last-name" type="text" onInput={(e) => set_p_value('lastName', e)} required />
 
-      <label for="email">Email</label>
+      <label for="email">{t("admin.user.email")}</label>
       <input id="email" type="email" onInput={(e) => set_p_value('email', e)} required />
 
       <div class="button-group">
-        <button type="submit">Create New User</button>
-        <a href="/admin/users" class="button secondary">Cancel</a>
+        <button type="submit">{t("admin.user.create")}</button>
+        <a href="/admin/users" class="button secondary">{t("common.cancel")}</a>
       </div>
     </form>
   </div>
@@ -522,6 +517,7 @@ const AuthorizationsPage = () => {
   const
     { query: { resource_type } } = useRoute(),
     state = useContext(AppState),
+    [t] = useTranslation(),
     show_create_authorization = useSignal(false)
 
   if (resource_type !== undefined || state.api.authorization.all.value === null) {
@@ -530,16 +526,16 @@ const AuthorizationsPage = () => {
 
   return <div>
     <Breadcrumbs paths={[
-      { name: 'Admin', route: '/admin' },
-      { name: 'Authorizations' }]} />
+      { name: t("nav.admin"), route: '/admin' },
+      { name: t("admin.authorizations") }]} />
 
     <div class="row">
       <ul class="list">
-        {authorization_resources.map(({ name, resource_type }) =>
+        {authorization_resources.map(({ nameKey, resource_type }) =>
           <li key={resource_type}>
             <a href={`/admin/authorizations?resource_type=${resource_type}`}
                onClick={() => engine_rest.authorization.all(state, resource_type)}>
-              {name}
+              {t(nameKey)}
             </a>
           </li>)}
       </ul>
@@ -547,24 +543,24 @@ const AuthorizationsPage = () => {
         ? <div>
           <h3>
             {(resource_type !== undefined && resource_type !== null)
-              ? authorization_resources.find(({ resource_type: resource_type_ }) => resource_type_.toString() === resource_type).name
-              : ''} Authorization
+              ? t(authorization_resources.find(({ resource_type: resource_type_ }) => resource_type_.toString() === resource_type).nameKey)
+              : ''} {t("admin.authorization.title")}
           </h3>
 
           <button onClick={() => show_create_authorization.value = !show_create_authorization.value}>
             {!show_create_authorization.value
-              ? 'Create new authorization'
-              : 'Cancel creating new authorization'}
+              ? t("admin.authorization.create")
+              : t("admin.authorization.cancel-create")}
           </button>
 
           <table class="fade-in">
             <thead>
             <tr>
-              <th>Type</th>
-              <th>User / Group</th>
-              <th>Permissions</th>
-              <th>Resource ID</th>
-              <th>Action</th>
+              <th>{t("common.type")}</th>
+              <th>{t("admin.authorization.user-group")}</th>
+              <th>{t("admin.authorization.permissions")}</th>
+              <th>{t("admin.authorization.resource-id")}</th>
+              <th>{t("common.action")}</th>
             </tr>
             </thead>
             <tbody>
@@ -573,9 +569,9 @@ const AuthorizationsPage = () => {
                 <td>
                   <form id="create-authorization-form" onSubmit={null}>
                     <select>
-                      <option value="gloabl">GLOBAL</option>
-                      <option value="allow">ALLOW</option>
-                      <option value="deny">DENY</option>
+                      <option value="gloabl">{t("admin.authorization.global")}</option>
+                      <option value="allow">{t("admin.authorization.allow")}</option>
+                      <option value="deny">{t("admin.authorization.deny")}</option>
                     </select>
                   </form>
                 </td>
@@ -587,9 +583,9 @@ const AuthorizationsPage = () => {
                 </td>
                 <td>
                   <fieldset>
-                    <legend>Available Permissions</legend>
+                    <legend>{t("admin.authorization.available-permissions")}</legend>
                     <label>
-                      Create
+                      {t("common.create")}
                       <input type="checkbox" value="" />
                     </label>
                   </fieldset>
@@ -602,8 +598,8 @@ const AuthorizationsPage = () => {
                     onInput={(e) => {}} />
                 </td>
                 <td class="button-group">
-                  <button onClick={() => null}>Cancel</button>
-                  <button form="create-authorization-form" type="submit">Save</button>
+                  <button onClick={() => null}>{t("common.cancel")}</button>
+                  <button form="create-authorization-form" type="submit">{t("common.save")}</button>
                 </td>
               </tr>
               : ''
@@ -614,7 +610,7 @@ const AuthorizationsPage = () => {
             </tbody>
           </table>
         </div>
-        : <p class="info-box">Select a authorization resource</p>}
+        : <p class="info-box">{t("admin.authorization.select-resource")}</p>}
         </div>
     </div>
     }
@@ -626,6 +622,7 @@ const AuthorizationResourceRow = (authorization) => {
   const
     { permissions, type, groupId, userId, resourceId, id } = authorization,
     state = useContext(AppState),
+    [t] = useTranslation(),
     is_edit = useSignal(false),
     is_deleted = useSignal(false),
     form_authorization = signal(authorization),
@@ -653,21 +650,21 @@ const AuthorizationResourceRow = (authorization) => {
     ? <tr key={id}>
       {!is_edit.value
         ? <>
-          <td>{{ 0: 'Global', 1: 'Allow', 2: 'Deny' }[type]}</td>
+          <td>{{ 0: t("admin.authorization.global-display"), 1: t("admin.authorization.allow-display"), 2: t("admin.authorization.deny-display") }[type]}</td>
           {/* (0=global, 1=grant, 2=revoke)*/}
           <td>{userId || groupId}</td>
           <td>{permissions.toString()}</td>
           <td>{resourceId}</td>
           <td className="button-group">
-            <button onClick={() => is_edit.value = true}>Edit</button>
+            <button onClick={() => is_edit.value = true}>{t("common.edit")}</button>
 
             <button onClick={() => show_delete_dialog()}>
-              Delete
+              {t("common.delete")}
             </button>
           </td>
         </>
         : <>
-          <td>{{ 0: 'Global', 1: 'Allow', 2: 'Deny' }[type]}</td>
+          <td>{{ 0: t("admin.authorization.global-display"), 1: t("admin.authorization.allow-display"), 2: t("admin.authorization.deny-display") }[type]}</td>
           {/* (0=global, 1=grant, 2=revoke)*/}
           <td>
             <form id={form_id} onSubmit={on_submit}>
@@ -689,8 +686,8 @@ const AuthorizationResourceRow = (authorization) => {
             <input form={form_id} name="resourceId" value={resourceId} onInput={(e) => set_value('resourceId', e)} />
           </td>
           <td class="button-group">
-            <button onClick={() => is_edit.value = false}>Cancel</button>
-            <button form={form_id} type="submit">Save</button>
+            <button onClick={() => is_edit.value = false}>{t("common.cancel")}</button>
+            <button form={form_id} type="submit">{t("common.save")}</button>
           </td>
         </>
       }
@@ -699,11 +696,11 @@ const AuthorizationResourceRow = (authorization) => {
   }
 
     <dialog id={dialog_id}>
-      Do you really want to delete this authorization?
+      {t("admin.authorization.confirm-delete")}
 
       <div class="button-group">
-        <button class="danger" onClick={delete_authorization}>Delete</button>
-        <button onClick={() => document.getElementById(dialog_id).close()}>Cancel</button>
+        <button class="danger" onClick={delete_authorization}>{t("common.delete")}</button>
+        <button onClick={() => document.getElementById(dialog_id).close()}>{t("common.cancel")}</button>
       </div>
     </dialog>
   </>
@@ -724,27 +721,27 @@ const permissions = {
 }
 
 const authorization_resources = [
-  { id: 'application', name: 'Application', resource_type: 0, resource_id: 'admin/cockpit/tasklist/*', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'authorization', name: 'Authorization', resource_type: 4, resource_id: 'Authorization ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'batch', name: 'Batch', resource_type: 13, resource_id: 'Batch ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'decision_definition', name: 'Decision Definition', resource_type: 10, resource_id: 'Decision Definition Key', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'decision_requirements_definition', name: 'Decision Requirements Definition', resource_type: 14, resource_id: 'Decision Requirements Definition Key', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'deployment', name: 'Deployment', resource_type: 9, resource_id: 'Deployment ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'filter', name: 'Filter', resource_type: 5, resource_id: 'Filter ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'group', name: 'Group', resource_type: 2, resource_id: 'Group ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'group_membership', name: 'Group Membership', resource_type: 3, resource_id: 'Group ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'process_definition', name: 'Process Definition', resource_type: 6, resource_id: 'Process Definition Key', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'process_instance', name: 'Process Instance', resource_type: 8, resource_id: 'Process Instance ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'task', name: 'Task', resource_type: 7, resource_id: 'Task ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'historic_task', name: 'Historic Task', resource_type: 19, resource_id: 'Historic Task ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'historic_process_instance', name: 'Historic Process Instance', resource_type: 20, resource_id: 'Historic Process Instance ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'tenant', name: 'Tenant', resource_type: 11, resource_id: 'Tenant ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'tenant_membership', name: 'Tenant Membership', resource_type: 12, resource_id: 'Tenant ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'user', name: 'User', resource_type: 1, resource_id: 'User ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'report', name: 'Report', resource_type: 15, resource_id: 'Report ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'dashboard', name: 'Dashboard', resource_type: 16, resource_id: 'Dashboard', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'user_operation_log_category', name: 'User Operation Log Category', resource_type: 17, resource_id: 'User Operation Log Category', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
-  { id: 'system', name: 'System', resource_type: 21, resource_id: '* resources do not support individual resource ids. You have to use them with a wildcard id (*).', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'application', nameKey: 'admin.authorization-resources.application', resource_type: 0, resource_id: 'admin/cockpit/tasklist/*', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'authorization', nameKey: 'admin.authorization-resources.authorization', resource_type: 4, resource_id: 'Authorization ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'batch', nameKey: 'admin.authorization-resources.batch', resource_type: 13, resource_id: 'Batch ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'decision_definition', nameKey: 'admin.authorization-resources.decision-definition', resource_type: 10, resource_id: 'Decision Definition Key', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'decision_requirements_definition', nameKey: 'admin.authorization-resources.decision-requirements-definition', resource_type: 14, resource_id: 'Decision Requirements Definition Key', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'deployment', nameKey: 'admin.authorization-resources.deployment', resource_type: 9, resource_id: 'Deployment ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'filter', nameKey: 'admin.authorization-resources.filter', resource_type: 5, resource_id: 'Filter ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'group', nameKey: 'admin.authorization-resources.group', resource_type: 2, resource_id: 'Group ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'group_membership', nameKey: 'admin.authorization-resources.group-membership', resource_type: 3, resource_id: 'Group ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'process_definition', nameKey: 'admin.authorization-resources.process-definition', resource_type: 6, resource_id: 'Process Definition Key', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'process_instance', nameKey: 'admin.authorization-resources.process-instance', resource_type: 8, resource_id: 'Process Instance ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'task', nameKey: 'admin.authorization-resources.task', resource_type: 7, resource_id: 'Task ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'historic_task', nameKey: 'admin.authorization-resources.historic-task', resource_type: 19, resource_id: 'Historic Task ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'historic_process_instance', nameKey: 'admin.authorization-resources.historic-process-instance', resource_type: 20, resource_id: 'Historic Process Instance ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'tenant', nameKey: 'admin.authorization-resources.tenant', resource_type: 11, resource_id: 'Tenant ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'tenant_membership', nameKey: 'admin.authorization-resources.tenant-membership', resource_type: 12, resource_id: 'Tenant ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'user', nameKey: 'admin.authorization-resources.user', resource_type: 1, resource_id: 'User ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'report', nameKey: 'admin.authorization-resources.report', resource_type: 15, resource_id: 'Report ID', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'dashboard', nameKey: 'admin.authorization-resources.dashboard', resource_type: 16, resource_id: 'Dashboard', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'user_operation_log_category', nameKey: 'admin.authorization-resources.user-operation-log', resource_type: 17, resource_id: 'User Operation Log Category', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
+  { id: 'system', nameKey: 'admin.authorization-resources.system', resource_type: 21, resource_id: '* resources do not support individual resource ids. You have to use them with a wildcard id (*).', permission: [permissions.READ, permissions.UPDATE, permissions.CREATE, permissions.DELETE] },
 ]
 
 export { AdminPage }

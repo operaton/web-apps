@@ -1,9 +1,11 @@
 import { useContext } from "preact/hooks"
+import { useTranslation } from "react-i18next"
 import engine_rest, { RequestState } from "../api/engine_rest.jsx"
 import { AppState } from "../state.js"
 
 export const DashboardPage = () => {
-  const state = useContext(AppState)
+  const state = useContext(AppState),
+    [t] = useTranslation()
 
   if (state.api.task.list.value === null)
     void engine_rest.task.get_tasks(state)
@@ -14,12 +16,14 @@ export const DashboardPage = () => {
   if (state.api.decision.definitions.value === null)
     void engine_rest.decision.get_decision_definitions(state)
 
+  const username = state.auth.user.id.value ?? state.auth.credentials.value?.username
+
   return (
     <main id="content" class="dashboard fade-in">
-      <h2>Hello{(state.auth.user.id.value ?? state.auth.credentials.value?.username) ? `, ${state.auth.user.id.value ?? state.auth.credentials.value?.username}` : ""}</h2>
+      <h2>{t("dashboard.greeting")}{username ? `, ${username}` : ""}</h2>
       <div class="dashboard-cards">
         <DashboardCard
-          title="Tasks"
+          title={t("nav.tasks")}
           href="/tasks"
           signal={state.api.task.list}
           render={(data) => {
@@ -27,13 +31,13 @@ export const DashboardPage = () => {
             return (
               <>
                 <span class="dashboard-count">{tasks.length}</span>
-                <span>open tasks</span>
+                <span>{t("dashboard.open-tasks")}</span>
               </>
             )
           }}
         />
         <DashboardCard
-          title="Processes"
+          title={t("nav.processes")}
           href="/processes"
           signal={state.api.process.definition.list}
           render={(data) => {
@@ -44,16 +48,16 @@ export const DashboardPage = () => {
             return (
               <>
                 <span class="dashboard-count">{definitions.length}</span>
-                <span>deployed definitions</span>
+                <span>{t("dashboard.deployed-definitions")}</span>
                 {incidents > 0 && (
-                  <span class="dashboard-incidents">{incidents} incident{incidents !== 1 && "s"}</span>
+                  <span class="dashboard-incidents">{incidents} {incidents !== 1 ? t("dashboard.incidents") : t("dashboard.incident")}</span>
                 )}
               </>
             )
           }}
         />
         <DashboardCard
-          title="Decisions"
+          title={t("nav.decisions")}
           href="/decisions"
           signal={state.api.decision.definitions}
           render={(data) => {
@@ -61,13 +65,13 @@ export const DashboardPage = () => {
             return (
               <>
                 <span class="dashboard-count">{decisions.length}</span>
-                <span>decision definitions</span>
+                <span>{t("dashboard.decision-definitions")}</span>
               </>
             )
           }}
         />
         <DashboardCard
-          title="Deployments"
+          title={t("nav.deployments")}
           href="/deployments"
           signal={state.api.deployment.all}
           render={(data) => {
@@ -75,7 +79,7 @@ export const DashboardPage = () => {
             return (
               <>
                 <span class="dashboard-count">{deployments.length}</span>
-                <span>deployments</span>
+                <span>{t("dashboard.deployments")}</span>
               </>
             )
           }}
@@ -83,7 +87,7 @@ export const DashboardPage = () => {
       </div>
 
       <section class="dashboard-section">
-        <h3>Open Incidents</h3>
+        <h3>{t("dashboard.open-incidents")}</h3>
         <RequestState
           signal={state.api.process.definition.list}
           on_success={() => {
@@ -91,14 +95,14 @@ export const DashboardPage = () => {
               incidents = definitions.flatMap((d) =>
                 (d.incidents ?? []).map((i) => ({ ...i, processName: d.definition?.name ?? d.definition?.key }))
               )
-            if (incidents.length === 0) return <p>No incidents</p>
+            if (incidents.length === 0) return <p>{t("dashboard.no-incidents")}</p>
             return (
               <table>
                 <thead>
                   <tr>
-                    <th>Type</th>
-                    <th>Process</th>
-                    <th>Count</th>
+                    <th>{t("common.type")}</th>
+                    <th>{t("dashboard.process")}</th>
+                    <th>{t("dashboard.count")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -118,27 +122,27 @@ export const DashboardPage = () => {
 
       <section class="dashboard-section">
         <header>
-          <h3>Recent Tasks</h3>
-          <a href="/tasks" class="dashboard-see-more">See all tasks</a>
+          <h3>{t("dashboard.recent-tasks")}</h3>
+          <a href="/tasks" class="dashboard-see-more">{t("dashboard.see-all-tasks")}</a>
         </header>
         <RequestState
           signal={state.api.task.list}
           on_success={() => {
             const tasks = state.api.task.list.value?.data ?? []
-            if (tasks.length === 0) return <p>No open tasks.</p>
+            if (tasks.length === 0) return <p>{t("dashboard.no-open-tasks")}</p>
             return (
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Assignee</th>
-                    <th>Created</th>
+                    <th>{t("common.name")}</th>
+                    <th>{t("dashboard.assignee")}</th>
+                    <th>{t("dashboard.created")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tasks.slice(0, 10).map((task) => (
                     <tr key={task.id}>
-                      <td><a href={`/tasks/${task.id}`}>{task.name ?? "Unnamed"}</a></td>
+                      <td><a href={`/tasks/${task.id}`}>{task.name ?? t("dashboard.unnamed")}</a></td>
                       <td>{task.assignee ?? "–"}</td>
                       <td>{task.created ? new Date(task.created).toLocaleDateString() : "–"}</td>
                     </tr>
@@ -152,22 +156,22 @@ export const DashboardPage = () => {
 
       <section class="dashboard-section">
         <header>
-          <h3>Process Definitions</h3>
-          <a href="/processes" class="dashboard-see-more">See all processes</a>
+          <h3>{t("dashboard.process-definitions")}</h3>
+          <a href="/processes" class="dashboard-see-more">{t("dashboard.see-all-processes")}</a>
         </header>
         <RequestState
           signal={state.api.process.definition.list}
           on_success={() => {
             const definitions = state.api.process.definition.list.value?.data ?? []
-            if (definitions.length === 0) return <p>No process definitions.</p>
+            if (definitions.length === 0) return <p>{t("dashboard.no-process-definitions")}</p>
             return (
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Key</th>
-                    <th>Instances</th>
-                    <th>Incidents</th>
+                    <th>{t("common.name")}</th>
+                    <th>{t("common.key")}</th>
+                    <th>{t("dashboard.instances")}</th>
+                    <th>{t("dashboard.open-incidents")}</th>
                   </tr>
                 </thead>
                 <tbody>

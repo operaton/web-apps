@@ -6,6 +6,7 @@
  * Please refer to the `docs/Coding Conventions.md` "JavaScript > api.js" to
  * learn how we organize the code in this file.
  */
+import { useTranslation } from "react-i18next";
 export const _url_server = (state) => `${state.server.value.url}`;
 export const _url_engine_rest = (state) =>
   `${state.server.value.url}/engine-rest`;
@@ -56,7 +57,8 @@ export const RequestState = ({
   on_nothing = null,
   on_load = null,
 }) => {
-  const is_array = Array.isArray(signal),
+  const [t] = useTranslation(),
+    is_array = Array.isArray(signal),
     is_not_null = is_array
       ? !signal.some((sig) => sig.value === null)
       : signal.value !== null;
@@ -71,44 +73,44 @@ export const RequestState = ({
         (sig) => sig.value.status === RESPONSE_STATE.ERROR,
       );
       if (error) {
-        return resolve_signal(error, on_load, on_success, on_error);
+        return resolve_signal(error, on_load, on_success, on_error, t);
       }
 
       const not_init = signal.find(
         (sig) => sig.value.status === RESPONSE_STATE.NOT_INITIALIZED,
       );
       if (not_init) {
-        return resolve_signal(not_init, on_load, on_success, on_error);
+        return resolve_signal(not_init, on_load, on_success, on_error, t);
       }
 
       const loading = signal.find(
         (sig) => sig.value.status === RESPONSE_STATE.LOADING,
       );
       if (loading) {
-        return resolve_signal(loading, on_load, on_success, on_error);
+        return resolve_signal(loading, on_load, on_success, on_error, t);
       }
 
-      return resolve_signal(signal[0], on_load, on_success, on_error);
+      return resolve_signal(signal[0], on_load, on_success, on_error, t);
     }
-    return resolve_signal(signal, on_load, on_success, on_error);
+    return resolve_signal(signal, on_load, on_success, on_error, t);
   }
   if (on_nothing) {
     return on_nothing();
   }
-  return <p class="fade-in-delayed">Fetching...</p>;
+  return <p class="fade-in-delayed">{t("common.fetching")}</p>;
 };
 
-const resolve_signal = (signal, on_load, on_success, on_error) => {
+const resolve_signal = (signal, on_load, on_success, on_error, t) => {
   if (signal.value.status === RESPONSE_STATE.NOT_INITIALIZED) {
-    return <p>No data requested</p>;
+    return <p>{t("common.no-data-requested")}</p>;
   }
 
   if (signal.value.status === RESPONSE_STATE.LOADING) {
-    return on_load ? on_load : <p class="fade-in-delayed">Loading...</p>;
+    return on_load ? on_load : <p class="fade-in-delayed">{t("common.loading")}</p>;
   }
 
   if (signal.value.status === RESPONSE_STATE.SUCCESS) {
-    return signal.value?.data ? on_success() : <p>No data</p>;
+    return signal.value?.data ? on_success() : <p>{t("common.no-data")}</p>;
   }
 
   if (signal.value.status === RESPONSE_STATE.ERROR) {
@@ -116,10 +118,10 @@ const resolve_signal = (signal, on_load, on_success, on_error) => {
       on_error
     ) : (
       <p class="error">
-        <strong>Error:</strong>
+        <strong>{t("common.error")}</strong>
         {signal.value.error !== undefined
           ? signal.value.error.message
-          : "No error message."}
+          : t("common.no-error-message")}
       </p>
     );
   }

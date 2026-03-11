@@ -1,4 +1,5 @@
 import { useState, useContext } from 'preact/hooks'
+import { useTranslation } from 'react-i18next'
 import DOMPurify from 'dompurify'
 import { AppState } from '../state.js'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
@@ -12,10 +13,11 @@ const TaskForm = () => {
     [error, setError] = useState(null),
     state = useContext(AppState),
     { params } = useRoute(),
+    [t] = useTranslation(),
     selectedTask = state.api.task.one.value.data,
     refName = state.server.value.c7_mode ? 'camundaFormRef' : 'operatonFormRef'
 
-  if (!selectedTask) return <p class="info-box">No task selected.</p>
+  if (!selectedTask) return <p class="info-box">{t("tasks.form.no-task-selected")}</p>
 
   const rendered_form = state.api.task.rendered_form.value
   const deployed_form = state.api.task.deployed_form.value
@@ -41,15 +43,8 @@ const TaskForm = () => {
       void engine_rest.task.get_task_form(state, selectedTask.formKey.substring(13))
     }
 
-    // todo: if a link to a document exists, place this url in the generated html
-    //  localhost:8088/engine-rest/task/8c317066-e488-11ef-86ef-0242ac140003/variables/invoiceDocument/data
-    //  where such a link exists <a cam-file-download="invoiceDocument"></a>
-
     return (
       <>
-        {/*<a href={`${state.server.value.url}/${formLink}`} target="_blank" rel="noreferrer">Embedded Form</a>*/}
-
-
         <RequestState signal={state.api.task.form} on_success={() =>
           // eslint-disable-next-line react/no-danger
           <div dangerouslySetInnerHTML={{ __html: state.api.task.form.value.data }} />
@@ -71,7 +66,7 @@ const TaskForm = () => {
 
   return (
     <>
-      <div style={'margin-bottom: 8px;'}>(*) required field</div>
+      <div style={'margin-bottom: 8px;'}>{t("tasks.form.required-field")}</div>
       <div id="generated-form" class="task-form">
         <form onSubmit={(e) => submit_form(e, state, setError, params.task_id)}>
           <div class="form-fields" dangerouslySetInnerHTML={{ __html: generated }} />
@@ -80,8 +75,8 @@ const TaskForm = () => {
             <span class="error-text">{error}</span>
           </div>
           <div class="form-buttons">
-            <button type="submit">Complete Task</button>
-            <button type="button" class="secondary" onClick={() => store_data(state)}>Save Form</button>
+            <button type="submit">{t("tasks.form.complete-task")}</button>
+            <button type="button" class="secondary" onClick={() => store_data(state)}>{t("tasks.form.save-form")}</button>
           </div>
         </form>
       </div>

@@ -2,6 +2,7 @@ import { useContext } from "preact/hooks"
 import { signal, useSignal } from "@preact/signals"
 import { useHotkeys } from "react-hotkeys-hook"
 import { useLocation } from "preact-iso"
+import { useTranslation } from "react-i18next"
 import { AppState } from "../state.js"
 import { RESPONSE_STATE } from "../api/engine_rest.jsx"
 import { _url_engine_rest, get_auth_header } from "../api/helper.jsx"
@@ -14,43 +15,43 @@ const show = () => {
 }
 
 const CATEGORIES = [
-  { key: "pages", label: "Pages" },
-  { key: "tasks", label: "Tasks" },
-  { key: "processes", label: "Process Definitions" },
-  { key: "decisions", label: "Decision Definitions" },
-  { key: "deployments", label: "Deployments" },
-  { key: "lookup", label: "ID Lookup" },
+  { key: "pages", labelKey: "goto.categories.pages" },
+  { key: "tasks", labelKey: "goto.categories.tasks" },
+  { key: "processes", labelKey: "goto.categories.processes" },
+  { key: "decisions", labelKey: "goto.categories.decisions" },
+  { key: "deployments", labelKey: "goto.categories.deployments" },
+  { key: "lookup", labelKey: "goto.categories.lookup" },
 ]
 
 const PAGES = [
-  { name: "Dashboard", href: "/" },
-  { name: "Tasks", href: "/tasks" },
-  { name: "Processes", href: "/processes" },
-  { name: "Decisions", href: "/decisions" },
-  { name: "Deployments", href: "/deployments" },
-  { name: "Migrations", href: "/migrations" },
-  { name: "Admin", href: "/admin" },
-  { name: "Admin – Users", href: "/admin/users" },
-  { name: "Admin – Groups", href: "/admin/groups" },
-  { name: "Admin – Tenants", href: "/admin/tenants" },
-  { name: "Admin – Authorizations", href: "/admin/authorizations" },
-  { name: "Admin – System", href: "/admin/system" },
-  { name: "Account", href: "/account" },
-  { name: "Help", href: "/help" },
+  { nameKey: "goto.pages.dashboard", href: "/" },
+  { nameKey: "goto.pages.tasks", href: "/tasks" },
+  { nameKey: "goto.pages.processes", href: "/processes" },
+  { nameKey: "goto.pages.decisions", href: "/decisions" },
+  { nameKey: "goto.pages.deployments", href: "/deployments" },
+  { nameKey: "goto.pages.migrations", href: "/migrations" },
+  { nameKey: "goto.pages.admin", href: "/admin" },
+  { nameKey: "goto.pages.admin-users", href: "/admin/users" },
+  { nameKey: "goto.pages.admin-groups", href: "/admin/groups" },
+  { nameKey: "goto.pages.admin-tenants", href: "/admin/tenants" },
+  { nameKey: "goto.pages.admin-authorizations", href: "/admin/authorizations" },
+  { nameKey: "goto.pages.admin-system", href: "/admin/system" },
+  { nameKey: "goto.pages.account", href: "/account" },
+  { nameKey: "goto.pages.help", href: "/help" },
 ]
 
 const match = (text, query) =>
   text?.toLowerCase().includes(query.toLowerCase())
 
-const collect_results = (query, state) => {
+const collect_results = (query, state, t) => {
   if (!query) return []
 
   const results = []
 
   // Pages
-  const pages = PAGES.filter((p) => match(p.name, query))
+  const pages = PAGES.filter((p) => match(t(p.nameKey), query))
   if (pages.length)
-    results.push({ category: "pages", items: pages.map((p) => ({ label: p.name, href: p.href })) })
+    results.push({ category: "pages", items: pages.map((p) => ({ label: t(p.nameKey), href: p.href })) })
 
   // Tasks
   const tasks = state.api.task.list.value
@@ -126,10 +127,10 @@ const do_lookup = async (query, state) => {
   const base = _url_engine_rest(state)
 
   const lookups = [
-    { type: "Process Definition", url: `/process-definition/${query}`, href: (d) => `/processes/${d.id}`, label: (d) => d.name ?? d.key },
-    { type: "Process Instance", url: `/process-instance/${query}`, href: (d) => `/processes/${d.definitionId}`, label: (d) => d.id },
-    { type: "Task", url: `/task/${query}`, href: (d) => `/tasks/${d.id}`, label: (d) => d.name ?? d.id },
-    { type: "Deployment", url: `/deployment/${query}`, href: (d) => `/deployments/${d.id}`, label: (d) => d.name ?? d.id },
+    { typeKey: "goto.lookup-types.process-definition", url: `/process-definition/${query}`, href: (d) => `/processes/${d.id}`, label: (d) => d.name ?? d.key },
+    { typeKey: "goto.lookup-types.process-instance", url: `/process-instance/${query}`, href: (d) => `/processes/${d.definitionId}`, label: (d) => d.id },
+    { typeKey: "goto.lookup-types.task", url: `/task/${query}`, href: (d) => `/tasks/${d.id}`, label: (d) => d.name ?? d.id },
+    { typeKey: "goto.lookup-types.deployment", url: `/deployment/${query}`, href: (d) => `/deployments/${d.id}`, label: (d) => d.name ?? d.id },
   ]
 
   const results = await Promise.all(
@@ -138,7 +139,7 @@ const do_lookup = async (query, state) => {
         const res = await fetch(`${base}${l.url}`, { headers })
         if (!res.ok) return null
         const data = await res.json()
-        return { type: l.type, label: l.label(data), href: l.href(data) }
+        return { typeKey: l.typeKey, label: l.label(data), href: l.href(data) }
       } catch {
         return null
       }
@@ -160,6 +161,7 @@ const GoTo = () => (
 const SearchComponent = () => {
   const state = useContext(AppState),
     { route } = useLocation(),
+    [t] = useTranslation(),
     query = useSignal(""),
     results = useSignal([]),
     selected = useSignal(0)
@@ -168,7 +170,7 @@ const SearchComponent = () => {
 
   const update_search = (value) => {
     query.value = value
-    results.value = collect_results(value, state)
+    results.value = collect_results(value, state, t)
     selected.value = 0
 
     clearTimeout(debounce_timer)
@@ -216,14 +218,14 @@ const SearchComponent = () => {
   return (
     <search class="goto-search">
       <header>
-        <h2>Go To</h2>
-        <button class="neutral" onClick={close}>Close</button>
+        <h2>{t("goto.title")}</h2>
+        <button class="neutral" onClick={close}>{t("goto.close")}</button>
       </header>
 
       <input
         autofocus
         type="search"
-        placeholder="Search pages, tasks, processes, decisions..."
+        placeholder={t("goto.placeholder")}
         class="goto-input"
         value={query.value}
         onInput={(e) => update_search(e.currentTarget.value)}
@@ -231,13 +233,13 @@ const SearchComponent = () => {
       />
 
       <div class="goto-results" role="listbox">
-        {!query.value && <p class="goto-hint">Type to search across all resources, or paste an ID for direct lookup.</p>}
+        {!query.value && <p class="goto-hint">{t("goto.hint")}</p>}
 
         {results.value.map((group) => {
           const cat = CATEGORIES.find((c) => c.key === group.category)
           return (
             <section key={group.category}>
-              <h4>{cat?.label ?? group.category}</h4>
+              <h4>{cat ? t(cat.labelKey) : group.category}</h4>
               {group.items.map((item) => {
                 const idx = item_index++
                 return (
@@ -260,7 +262,7 @@ const SearchComponent = () => {
 
         {query.value && lookup_signal.value?.status === "success" && (
           <section>
-            <h4>ID Lookup</h4>
+            <h4>{t("goto.id-lookup")}</h4>
             {lookup_signal.value.data.map((item) => {
               const idx = item_index++
               return (
@@ -273,7 +275,7 @@ const SearchComponent = () => {
                   onClick={(e) => { e.preventDefault(); navigate(item.href) }}
                 >
                   <span>{item.label}</span>
-                  <small>{item.type}</small>
+                  <small>{t(item.typeKey)}</small>
                 </a>
               )
             })}
@@ -281,7 +283,7 @@ const SearchComponent = () => {
         )}
 
         {query.value && results.value.length === 0 && lookup_signal.value?.status === "empty" && (
-          <p class="goto-empty">No results found</p>
+          <p class="goto-empty">{t("goto.no-results")}</p>
         )}
       </div>
     </search>

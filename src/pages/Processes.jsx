@@ -1,6 +1,7 @@
 import { signal, useSignalEffect } from '@preact/signals'
 import { useContext, useEffect } from 'preact/hooks'
 import { useLocation, useRoute } from 'preact-iso'
+import { useTranslation } from 'react-i18next'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
 import * as Icons from '../assets/icons.jsx'
 import { AppState } from '../state.js'
@@ -39,6 +40,7 @@ const ProcessesPage = () => {
     state = useContext(AppState),
     { params, query, path } = useRoute(),
     { route } = useLocation(),
+    [t] = useTranslation(),
     details_width = signal(localStorage.getItem('details_width') ?? 400),
     enable_history_mode = () => {
       route(`${path}?history=true`)
@@ -110,11 +112,11 @@ const ProcessesPage = () => {
         <div id="history-mode-indicator" class={state.history_mode.value ? 'on' : 'off'}>
           {state.history_mode.value ?
             <button onClick={disable_history_mode}>
-              History Mode Active
+              {t("processes.history-mode-active")}
             </button>
             :
             <button onClick={enable_history_mode}>
-              Enable History Mode
+              {t("processes.enable-history-mode")}
             </button>}
         </div>
       </div>
@@ -145,21 +147,22 @@ const ProcessDiagram = () => {
 
 const ProcessDefinitionSelection = () => {
   const
-    { api: { process: { definition } } } = useContext(AppState)
+    { api: { process: { definition } } } = useContext(AppState),
+    [t] = useTranslation()
 
   return <div class="fade-in">
     <h1>
-      Process Definitions
+      {t("processes.title")}
     </h1>
     <table>
       <thead>
       <tr>
-        <th>Name</th>
-        <th>Version</th>
-        <th>Key</th>
-        <th>Instances</th>
-        <th>Incidents</th>
-        <th>State</th>
+        <th>{t("common.name")}</th>
+        <th>{t("processes.version")}</th>
+        <th>{t("common.key")}</th>
+        <th>{t("dashboard.instances")}</th>
+        <th>{t("processes.tabs.incidents")}</th>
+        <th>{t("common.state")}</th>
       </tr>
       </thead>
       <RequestState
@@ -188,7 +191,8 @@ const ProcessDefinitionDetails = () => {
   const
     { api: { process: { definition: { one: process_definition } } } } =
       useContext(AppState),
-    { params } = useRoute()
+    { params } = useRoute(),
+    [t] = useTranslation()
 
   /** @namespace process_definition.value.data.tenantId **/
   return (
@@ -196,7 +200,7 @@ const ProcessDefinitionDetails = () => {
       <div class="row gap-2">
         <a className="tabs-back"
            href={`/processes${keep_history_query(useRoute().query)}`}
-           title="Change Definition">
+           title={t("processes.change-definition")}>
           <Icons.arrow_left />
           <Icons.list />
         </a>
@@ -205,14 +209,14 @@ const ProcessDefinitionDetails = () => {
           on_success={() => <div>
             <h1>{process_definition.value?.data.name ?? ' '}</h1>
             <dl>
-              <dt>Definition ID</dt>
+              <dt>{t("processes.definition-id")}</dt>
               <dd className="font-mono copy-on-click" onClick={copyToClipboard}
-              title="Click to copy">
+              title={t("processes.click-to-copy")}>
                 {process_definition.value?.data.id ?? '-/-'}
               </dd>
               {process_definition.value?.data.tenantId ?
                 <>
-                  <dt>Tenant ID</dt>
+                  <dt>{t("processes.tenant-id")}</dt>
                   <dd>{process_definition?.value.data.tenantId ?? '-/-'}</dd>
                 </> : <></>
               }
@@ -242,7 +246,8 @@ const ProcessDefinition =
 const Instances = () => {
   const
     state = useContext(AppState),
-    { params } = useRoute()
+    { params } = useRoute(),
+    [t] = useTranslation()
 
   if (!params.selection_id) {
     if (!state.history_mode.value) {
@@ -256,10 +261,10 @@ const Instances = () => {
     ? (<table class="fade-in">
       <thead>
       <tr>
-        <th>ID</th>
-        <th>Start Time</th>
-        <th>State</th>
-        <th>Business Key</th>
+        <th>{t("common.id")}</th>
+        <th>{t("processes.start-time")}</th>
+        <th>{t("common.state")}</th>
+        <th>{t("processes.business-key")}</th>
       </tr>
       </thead>
       <tbody>
@@ -277,7 +282,8 @@ const InstanceTableRows = () =>
 const InstanceDetails = () => {
   const
     state = useContext(AppState),
-    { params: { selection_id, definition_id, panel } } = useRoute()
+    { params: { selection_id, definition_id, panel } } = useRoute(),
+    [t] = useTranslation()
 
   if (selection_id) {
     if (state.api.process.instance.one === undefined || state.api.process.instance.one.value === null) {
@@ -294,7 +300,7 @@ const InstanceDetails = () => {
       <div class="row gap-2">
         <BackToListBtn
           url={`/processes/${definition_id}/instances${keep_history_query(useRoute().query)}`}
-          title="Change Instance"
+          title={t("processes.change-instance")}
           className="bg-1" />
         <InstanceDetailsDescription />
       </div>
@@ -308,14 +314,18 @@ const InstanceDetails = () => {
   )
 }
 
-const InstanceDetailsDescription = () =>
+const InstanceDetailsDescription = () => {
+  const [t] = useTranslation()
 
-  <dl>
-    <dt>Instance ID</dt>
-    <dd>{useContext(AppState).api.process.instance.one.value.data?.id ?? '-/-'}</dd>
-    <dt>Business Key</dt>
-    <dd>{useContext(AppState).api.process.instance.one.value.data?.businessKey ?? '-/-'}</dd>
-  </dl>
+  return (
+    <dl>
+      <dt>{t("processes.instance-id")}</dt>
+      <dd>{useContext(AppState).api.process.instance.one.value.data?.id ?? '-/-'}</dd>
+      <dt>{t("processes.business-key")}</dt>
+      <dd>{useContext(AppState).api.process.instance.one.value.data?.businessKey ?? '-/-'}</dd>
+    </dl>
+  )
+}
 
 const ProcessInstance = ({ id, startTime, state, businessKey }) => (
   <tr>
@@ -331,6 +341,7 @@ const InstanceVariables = () => {
   const
     state = useContext(AppState),
     { params } = useRoute(),
+    [t] = useTranslation(),
     selection_exists =
       state.api.process.instance.variables.value !== null
       && state.api.process.instance.variables.value.data !== null
@@ -350,10 +361,10 @@ const InstanceVariables = () => {
     <table>
       <thead>
       <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Value</th>
-        <th>Actions</th>
+        <th>{t("common.name")}</th>
+        <th>{t("common.type")}</th>
+        <th>{t("common.value")}</th>
+        <th>{t("common.actions")}</th>
       </tr>
       </thead>
       <tbody>
@@ -373,7 +384,7 @@ const InstanceVariables = () => {
               <td>{type}</td>
               <td>{value}</td>
             </tr>))
-        : 'Loading ...'}
+        : t("common.loading")}
       </tbody>
     </table>
   )
@@ -382,7 +393,8 @@ const InstanceVariables = () => {
 const InstanceIncidents = () => {
   const
     state = useContext(AppState),
-    { params } = useRoute()
+    { params } = useRoute(),
+    [t] = useTranslation()
 
   // fixme: rm useSignalEffect
   useSignalEffect(() => {
@@ -394,16 +406,16 @@ const InstanceIncidents = () => {
     <table>
       <thead>
       <tr>
-        <th>Message</th>
-        <th>Process Instance</th>
-        <th>Timestamp</th>
-        <th>Activity</th>
-        <th>Failing Activity</th>
-        <th>Cause Process Instance ID</th>
-        <th>Root Cause Process Instance ID</th>
-        <th>Type</th>
-        <th>Annotation</th>
-        <th>Action</th>
+        <th>{t("processes.incidents.message")}</th>
+        <th>{t("processes.incidents.process-instance")}</th>
+        <th>{t("processes.incidents.timestamp")}</th>
+        <th>{t("common.activity")}</th>
+        <th>{t("processes.incidents.failing-activity")}</th>
+        <th>{t("processes.incidents.cause-process-instance-id")}</th>
+        <th>{t("processes.incidents.root-cause-process-instance-id")}</th>
+        <th>{t("common.type")}</th>
+        <th>{t("processes.incidents.annotation")}</th>
+        <th>{t("common.action")}</th>
       </tr>
       </thead>
       <tbody>
@@ -443,7 +455,8 @@ const InstanceIncidents = () => {
 const InstanceUserTasks = () => {
   const
     state = useContext(AppState),
-    { params } = useRoute()
+    { params } = useRoute(),
+    [t] = useTranslation()
 
   // fixme: rm useSignalEffect
   useSignalEffect(() => {
@@ -456,16 +469,16 @@ const InstanceUserTasks = () => {
     <table>
       <thead>
       <tr>
-        <th>Activity</th>
-        <th>Assignee</th>
-        <th>Owner</th>
-        <th>Created</th>
-        <th>Due</th>
-        <th>Follow Up</th>
-        <th>Priority</th>
-        <th>Delegation State</th>
-        <th>Task ID</th>
-        <th>Action</th>
+        <th>{t("common.activity")}</th>
+        <th>{t("dashboard.assignee")}</th>
+        <th>{t("processes.user-tasks.owner")}</th>
+        <th>{t("dashboard.created")}</th>
+        <th>{t("processes.user-tasks.due")}</th>
+        <th>{t("processes.user-tasks.follow-up")}</th>
+        <th>{t("tasks.task-list.table-headings.priority")}</th>
+        <th>{t("processes.user-tasks.delegation-state")}</th>
+        <th>{t("processes.user-tasks.task-id")}</th>
+        <th>{t("common.action")}</th>
       </tr>
       </thead>
       <tbody>
@@ -494,8 +507,8 @@ const InstanceUserTasks = () => {
             <td>{delegationState}</td>
             <td><UUIDLink path="/" uuid={id} /></td>
             <td>
-              <button>Groups</button>
-              <button>Users</button>
+              <button>{t("processes.user-tasks.groups")}</button>
+              <button>{t("processes.user-tasks.users")}</button>
             </td>
           </tr>))}
       </tbody>
@@ -506,7 +519,8 @@ const InstanceUserTasks = () => {
 const CalledProcessInstances = () => {
   const
     state = useContext(AppState),
-    { selection_id, query } = useRoute()
+    { selection_id, query } = useRoute(),
+    [t] = useTranslation()
 
   // fixme: rm useSignalEffect
   useSignalEffect(() =>
@@ -519,16 +533,16 @@ const CalledProcessInstances = () => {
     <table>
       <thead>
       <tr>
-        <th>State</th>
-        <th>Called Process Instance</th>
-        <th>Process Definition</th>
-        <th>Activity</th>
+        <th>{t("common.state")}</th>
+        <th>{t("processes.called-instances.called-process-instance")}</th>
+        <th>{t("processes.called-instances.process-definition")}</th>
+        <th>{t("common.activity")}</th>
       </tr>
       </thead>
       <tbody>
       {state.api.process.instance.called.value?.data?.map(instance =>
         <tr key={instance.id}>
-          <td>{instance.suspended ? 'Suspended' : 'Running'}</td>
+          <td>{instance.suspended ? t("common.suspended") : t("common.running")}</td>
           <td><a href={`/processes/${instance.id}${keep_history_query(query)}`}>{instance.id}</a></td>
           <td>{instance.definitionId}</td>
           <td>{instance.definitionId}</td>
@@ -542,7 +556,8 @@ const CalledProcessInstances = () => {
 const Incidents = () => {
   const
     state = useContext(AppState),
-    { definition_id } = useRoute()
+    { definition_id } = useRoute(),
+    [t] = useTranslation()
 
   // fixme: rm useSignalEffect
   useSignalEffect(() =>
@@ -555,9 +570,9 @@ const Incidents = () => {
     <table>
       <thead>
       <tr>
-        <th>Message</th>
-        <th>Type</th>
-        <th>Configuration</th>
+        <th>{t("processes.incidents.message")}</th>
+        <th>{t("common.type")}</th>
+        <th>{t("processes.incidents.configuration")}</th>
       </tr>
       </thead>
       <tbody>
@@ -576,7 +591,8 @@ const Incidents = () => {
 const CalledProcessDefinitions = () => {
   const
     state = useContext(AppState),
-    { definition_id, query } = useRoute()
+    { definition_id, query } = useRoute(),
+    [t] = useTranslation()
 
   // fixme: rm useSignalEffect
   useSignalEffect(() =>
@@ -588,16 +604,16 @@ const CalledProcessDefinitions = () => {
     <table>
       <thead>
       <tr>
-        <th>Called Process Definition</th>
-        <th>State</th>
-        <th>Activity</th>
+        <th>{t("processes.called-definitions.called-process-definition")}</th>
+        <th>{t("common.state")}</th>
+        <th>{t("common.activity")}</th>
       </tr>
       </thead>
       <tbody>
       {state.api.process.definition.called.value?.data?.map(definition =>
         <tr key={definition.id}>
           <td><a href={`/processes/${definition.id}${keep_history_query(query)}`}>{definition.name}</a></td>
-          <td>{definition.suspended ? 'Suspended' : 'Running'}</td>
+          <td>{definition.suspended ? t("common.suspended") : t("common.running")}</td>
           <td>{definition.calledFromActivityIds.map(a => `${a}, `)}</td>
         </tr>
       )}
@@ -609,7 +625,8 @@ const CalledProcessDefinitions = () => {
 const JobDefinitions = () => {
   const
     state = useContext(AppState),
-    { definition_id } = useRoute()
+    { definition_id } = useRoute(),
+    [t] = useTranslation()
 
   // fixme: rm useSignalEffect
   useSignalEffect(() =>
@@ -625,26 +642,26 @@ const JobDefinitions = () => {
       <table>
         <thead>
         <tr>
-          <th>State</th>
-          <th>Activity</th>
-          <th>Type</th>
-          <th>Configuration</th>
-          <th>Overriding Job Priority</th>
-          <th>Action</th>
+          <th>{t("common.state")}</th>
+          <th>{t("common.activity")}</th>
+          <th>{t("common.type")}</th>
+          <th>{t("processes.incidents.configuration")}</th>
+          <th>{t("processes.jobs.overriding-job-priority")}</th>
+          <th>{t("common.action")}</th>
         </tr>
         </thead>
         <tbody>
         {state.api.job_definition.all.by_process_definition.value?.data?.map(definition =>
           <tr key={definition.id}>
-            <td>{definition.suspended ? 'Suspended' : 'Active'}</td>
+            <td>{definition.suspended ? t("common.suspended") : t("common.active")}</td>
             <td>?</td>
             {/*<td>{definition.calledFromActivityIds.map(a => `${a}, `)}</td>*/}
             <td>{definition.jobType}</td>
             <td>{definition.jobConfiguration}</td>
             <td>{definition.overridingJobPriority ?? '-'}</td>
             <td>
-              <button>Suspend</button>
-              <button>Change Overriding Job Priority</button>
+              <button>{t("processes.jobs.suspend")}</button>
+              <button>{t("processes.jobs.change-priority")}</button>
             </td>
           </tr>
         )}
@@ -664,25 +681,25 @@ const BackToListBtn = ({ url, title, className }) =>
 
 const process_definition_tabs = [
   {
-    name: 'Instances',
+    nameKey: 'processes.tabs.instances',
     id: 'instances',
     pos: 0,
     target: <Instances />
   },
   {
-    name: 'Incidents',
+    nameKey: 'processes.tabs.incidents',
     id: 'incidents',
     pos: 1,
     target: <Incidents />
   },
   {
-    name: 'Called Definitions',
+    nameKey: 'processes.tabs.called-definitions',
     id: 'called_definitions',
     pos: 2,
     target: <CalledProcessDefinitions />
   },
   {
-    name: 'Jobs',
+    nameKey: 'processes.tabs.jobs',
     id: 'jobs',
     pos: 3,
     target: <JobDefinitions />
@@ -693,38 +710,38 @@ const UUIDLink = ({ uuid = '?', path }) =>
 
 const process_instance_tabs = [
   {
-    name: 'Variables',
+    nameKey: 'processes.tabs.variables',
     id: 'vars',
     pos: 0,
     target: <InstanceVariables />
   },
   {
-    name: 'Instance Incidents',
+    nameKey: 'processes.tabs.instance-incidents',
     id: 'instance_incidents',
     pos: 1,
     target: <InstanceIncidents />
   },
   {
-    name: 'Called Instances',
+    nameKey: 'processes.tabs.called-instances',
     id: 'called_instances',
     pos: 2,
     target: <CalledProcessInstances />
   },
   {
-    name: 'User Tasks',
+    nameKey: 'processes.tabs.user-tasks',
     id: 'user_tasks',
     pos: 3,
     target: <InstanceUserTasks />
   },
   {
-    name: 'Jobs',
+    nameKey: 'processes.tabs.jobs',
     id: 'jobs',
     pos: 4,
     // TODO: create Jobs example for old Camunda apps
     target: <p>Jobs</p>
   },
   {
-    name: 'External Tasks',
+    nameKey: 'processes.tabs.external-tasks',
     id: 'external_tasks',
     pos: 5,
     // TODO: create External Apps example for old Camunda apps

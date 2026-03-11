@@ -1,4 +1,5 @@
 import { useContext } from 'preact/hooks'
+import { useTranslation } from 'react-i18next'
 import { AppState } from '../state.js'
 import { useLocation, useRoute } from 'preact-iso'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
@@ -11,6 +12,7 @@ const DeploymentsPage = () => {
     { deployments_page: { selected_resource } } = state,
     { params: { deployment_id, resource_name } } = useRoute(),
     { route } = useLocation(),
+    [t] = useTranslation(),
     no_deployments_loaded = state.api.deployment.all.value === null || state.api.deployment.all.value === undefined,
     no_resources_loaded = state.api.deployment.resources.value === null && deployment_id
 
@@ -54,7 +56,7 @@ const DeploymentsPage = () => {
       </div>
       {resource_name
         ? <ResourceDetails />
-        : <div class="deployment-empty">Select a deployment and resource to show details.</div>}
+        : <div class="deployment-empty">{t("deployments.select-deployment-resource")}</div>}
     </main>
   )
 }
@@ -64,6 +66,7 @@ const DeploymentsList = () => {
     state = useContext(AppState),
     { deployments_page: { selected_resource, selected_deployment, selected_process_statistics } } = state,
     { params } = useRoute(),
+    [t] = useTranslation(),
     reset_state = (deployment_id) => {
       void engine_rest.deployment.resources(state, deployment_id)
         .then(() => {
@@ -83,8 +86,8 @@ const DeploymentsList = () => {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Deployed</th>
+            <th>{t("common.name")}</th>
+            <th>{t("deployments.deployed")}</th>
           </tr>
         </thead>
         <tbody>
@@ -115,10 +118,11 @@ const DeploymentsList = () => {
 const ResourcesList = () => {
   const
     state = useContext(AppState),
-    { params } = useRoute()
+    { params } = useRoute(),
+    [t] = useTranslation()
 
   if (!params.deployment_id) {
-    return <div class="deployment-empty">Select a deployment to show its resources.</div>
+    return <div class="deployment-empty">{t("deployments.select-deployment")}</div>
   }
 
   return (
@@ -126,7 +130,7 @@ const ResourcesList = () => {
       <table>
         <thead>
           <tr>
-            <th>Resource</th>
+            <th>{t("deployments.resource")}</th>
           </tr>
         </thead>
         <tbody>
@@ -164,26 +168,27 @@ const ResourceDetails = () => {
       }
     } = state,
     { params: { resource_name } } = useRoute(),
+    [t] = useTranslation(),
     resource_file_type = resource_name?.split('.').pop()
 
   return (
     <div class="process-details">
       <RequestState
         signal={resource}
-        on_nothing={() => <p class="info-box">No resource selected</p>}
+        on_nothing={() => <p class="info-box">{t("deployments.no-resource")}</p>}
         on_success={() => <>
           {process_definition.value?.data?.length > 0
             ? <div>
-                <h3>{process_definition.value?.data[0].name || 'N/A - Process name is not defined'}</h3>
+                <h3>{process_definition.value?.data[0].name || t("deployments.no-process-name")}</h3>
                 <p class={process_definition.value?.data[0].suspended ? 'status-suspended' : 'status-active'}>
-                  {process_definition.value?.data[0].suspended ? 'Suspended' : 'Active'}
+                  {process_definition.value?.data[0].suspended ? t("common.suspended") : t("common.active")}
                 </p>
                 <dl>
-                  <dt>Name</dt>
+                  <dt>{t("common.name")}</dt>
                   <dd>{process_definition.value?.data[0].name || '?'}</dd>
-                  <dt>Key</dt>
+                  <dt>{t("common.key")}</dt>
                   <dd>{process_definition.value?.data[0].key || '?'}</dd>
-                  <dt>Instance Count</dt>
+                  <dt>{t("deployments.instance-count")}</dt>
                   <dd>
                     <RequestState
                       signal={instance_count}
@@ -192,7 +197,7 @@ const ResourceDetails = () => {
                   </dd>
                 </dl>
               </div>
-            : <p>Empty response</p>}
+            : <p>{t("deployments.empty-response")}</p>}
         </>} />
       <div id="diagram-container" />
       <RequestState
