@@ -36,7 +36,7 @@ export function Header() {
       <header id="top">
         {import.meta.env.VITE_HIDE_RELEASE_WARNING === "true"
           ? null
-          : <div id="release-warning ">
+          : <div id="release-warning">
               Public Alpha Release – Untested and not ready for production – Share your feedback with an 
               <a href="https://github.com/operaton/web-apps/issues">issue</a> or in the 
               <a href="https://forum.operaton.org/">forum</a>
