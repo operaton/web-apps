@@ -4,7 +4,6 @@ import { AppState } from '../state.js'
 import { useLocation, useRoute } from 'preact-iso'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
 import { DmnViewer } from '../components/DMNViewer.jsx'
-import { effect } from '@preact/signals'
 
 const DecisionsPage = () => {
   const state = useContext(AppState),
@@ -23,23 +22,17 @@ const DecisionsPage = () => {
   }
 
   return (
-    <div class="fade-in list-container">
-      <h2 class="screen-hidden"><DecisionsTitle /></h2>
+    <main id="content" class="decisions fade-in">
       <DecisionsList />
       <DecisionDetails />
-    </div>
+    </main>
   )
-}
-
-const DecisionsTitle = () => {
-  const [t] = useTranslation()
-  return t("decisions.title")
 }
 
 const DecisionsList = () => {
   const
     state = useContext(AppState),
-    { api: { decision: { definition, dmn } } } = state,
+    { api: { decision: { definitions, definition, dmn } } } = state,
     { params } = useRoute(),
     { route } = useLocation(),
     [t] = useTranslation(),
@@ -50,22 +43,40 @@ const DecisionsList = () => {
     }
 
   return (
-    <div class="list-wrapper">
-      <h3 class="screen-hidden">{t("decisions.queried-decisions")}</h3>
-      <ul class="list">
-        {state.api.decision.definitions.value?.data?.map((decision) => (
-          <li
-            key={decision.id}
-            class={params.decision_id === decision.id ? 'selected' : null}
-          >
-            <a href={`/decisions/${decision.id}`} onClick={() => reset_state(decision.id)}>
-              <div class="title">
-                {decision?.name || decision?.id}
-              </div>
-            </a>
-          </li>
-        )) ?? t("common.loading")}
-      </ul>
+    <div id="decision-list">
+      <h2 class="screen-hidden">{t("decisions.queried-decisions")}</h2>
+      <RequestState
+        signal={definitions}
+        on_success={() =>
+          <table>
+            <thead>
+              <tr>
+                <th>{t("common.name")}</th>
+                <th>{t("common.key")}</th>
+                <th>{t("processes.version")}</th>
+                <th>{t("decisions.version-tag")}</th>
+                <th>{t("decisions.history-ttl")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {definitions.value?.data?.map((decision) => (
+                <tr
+                  key={decision.id}
+                  class={params.decision_id === decision.id ? 'selected' : null}
+                >
+                  <td><a href={`/decisions/${decision.id}`} onClick={() => reset_state(decision.id)}>
+                    {decision?.name || decision?.id}
+                  </a></td>
+                  <td>{decision.key}</td>
+                  <td>{decision.version}</td>
+                  <td>{decision.versionTag}</td>
+                  <td>{decision.historyTimeToLive}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        }
+      />
     </div>
   )
 }
@@ -76,7 +87,7 @@ const DecisionDetails = () => {
     { params: { decision_id } } = useRoute(),
     [t] = useTranslation()
 
-  return <div class="p-2">
+  return <div id="decision-details">
     <RequestState
       signal={definition}
       on_nothing={() => <p class="info-box">{t("decisions.select-details")}</p>}

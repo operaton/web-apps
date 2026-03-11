@@ -632,6 +632,40 @@
     }
   }
 
+  .decisions {
+    overflow-y: auto;
+  }
+
+  #decision-list {
+    border-bottom: var(--border);
+    border-width: var(--border-width-2);
+
+    table {
+      width: calc(100% - var(--spacing-1));
+
+      tr.selected {
+        a {
+          color: var(--text);
+        }
+
+        td {
+          background: var(--background-3);
+
+          &:first-child {
+            border-radius: var(--border-radius) 0 0 var(--border-radius);
+          }
+          &:last-child {
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+          }
+        }
+      }
+    }
+  }
+
+  #decision-details {
+    padding: var(--spacing-2);
+  }
+
   .deployments {
     display: grid;
     grid-template-rows: minmax(5em, 30vh) auto;
