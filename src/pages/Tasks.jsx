@@ -46,6 +46,16 @@ const TaskList = () => {
   return (
     <div id="task-list">
       <h2 class="screen-hidden">{t("title")}</h2>
+      <div id="task-actions">
+        <a href="/tasks/start" className="button">Start&nbsp;Process</a>
+        
+        <label>Current Filter</label>
+        <select id="filter-list">
+          <option selected>All Tasks</option>
+          <option>My Tasks</option>
+        </select>
+        <a href="/tasks/filter" className="button">Edit Filters</a>
+      </div>
       <div>
         <table>
           <thead>
@@ -60,27 +70,12 @@ const TaskList = () => {
           <tbody>
             <RequestState
               signal={taskList}
-              on_success={() =>
-                taskList.value?.data?.map((task) => (
-                  <TaskRowEntry key={task.id} task={task} selected={task.id === selectedTaskId} />
-                ))
-              }
+              on_success={() => taskList.value?.data?.map((task) => (
+                  <TaskRowEntry key={task.id} task={task} selected={task.id === selectedTaskId} />))}
             />
           </tbody>
         </table>
-      </div>
-      <div id="task-actions">
-        <a href="/tasks/start" className="button">
-          Start&nbsp;Process
-        </a>
-        <a href="/tasks/filter" className="button">
-          Create Filter
-        </a>
-        <h3>Filters</h3>
-        <ul id="filter-list">
-          <li aria-selected={true}>All Tasks</li>
-          <li>My Tasks</li>
-        </ul>
+        <small>Load more</small>
       </div>
     </div>
   );

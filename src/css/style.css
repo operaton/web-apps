@@ -1,6 +1,9 @@
 @layer normalize, core, util, pages, embedded-form, components, custom;
 
 :root {
+--color-primary-2: #184AEF44;
+--color-secondary-2: #27F3E044;
+    
   --color-primary: #126bbe;
   --color-primary-transparent: color-mix(
     in srgb,
@@ -27,7 +30,7 @@
   );
 
   --background-1: #fff;
-  --background-2: #f2f2f4;
+  --background-2: #F2F2F4;
   --background-3: #dadadc;
 
   --border-color: #ccc;
@@ -78,6 +81,7 @@
     --text: #fff;
     --text-2: #ccc;
     --text-inverted: #000;
+    
   }
 }
 
@@ -94,6 +98,8 @@
 }
 
 @layer components {
+      
+      
   @media (width <= 70em) {
     #mobile-menu-toggle {
       display: block !important;
@@ -304,12 +310,12 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
   }
 
   main {
     overflow-y: auto;
-    overscroll-behavior: none;
-    height: calc(100vh - 2rem);
+    flex: 1;
   }
   main.split-layout {
     display: grid;
@@ -317,12 +323,17 @@
   }
 
   #top {
+    top: 0;
+    position: sticky;
     display: flex;
     align-items: center;
-    border-bottom: var(--border);
+    /*border-bottom: var(--border);*/
     height: 2rem;
     padding: 0 var(--spacing-1);
     justify-content: space-between;
+    background: var(--background-2);
+    /*opacity: .2;*/
+    z-index: 9999;
   }
 
   #mobile-menu-toggle {
@@ -481,30 +492,29 @@
 
   #task-list {
     display: flex;
+    flex-direction: column;
     /*justify-content: space-between;*/
-    gap: var(--spacing-1);
-    height: 100%;
-    overflow: hidden;
     position: relative;
-    overscroll-behavior: none;
     max-height: 100%;
     border-bottom: var(--border);
     border-width: var(--border-width-2);
     box-sizing: border-box;
 
+    
     > div {
-      overflow-y: scroll;
-      height: 100%;
       box-sizing: content-box;
-      display: flex;
-      flex-direction: column;
-
-      &:nth-child(2) {
-        /*width: 100%;*/
-        flex-grow: 1;
-      }
     }
-
+    #task-actions {
+        display: flex;
+        gap: var(--spacing-1);
+        align-items: center;
+        padding: var(--spacing-1);
+        
+        
+        > * {
+          margin: 0;
+        }
+    }
     table {
       /*margin-top: var(--spacing-1);*/
       /*margin-left: var(--spacing-1);*/
@@ -513,7 +523,6 @@
   }
 
   #task-details {
-    height: 100%;
     /*gap: var(--spacing-2);*/
     display: grid;
     grid-template-columns: max-content 3fr;
@@ -621,17 +630,17 @@
   }
 
   .tasks {
-    display: grid;
+    /*display: grid;
     grid-template-rows: minmax(5em, 30vh) auto;
-    height: 100%;
+    height: 100%;*/
   }
   .tasks > div:first-of-type {
-    overflow-y: auto;
+    /*overflow-y: auto;
     position: relative;
-    overscroll-behavior: none;
-    display: grid;
-    grid-template-columns: max-content auto;
-    max-height: 100%;
+    overscroll-behavior: none;*/
+    /*display: grid;
+    grid-template-columns: max-content auto;*/
+    /*max-height: 100%;*/
     border-bottom: var(--border);
     border-width: var(--border-width-2);
 
@@ -657,6 +666,31 @@
         }
       }
     }
+  }
+
+  .deployments {
+    display: grid;
+    grid-template-rows: minmax(5em, 30vh) auto;
+    height: 100%;
+  }
+  #deployment-lists {
+    overflow-y: auto;
+    position: relative;
+    overscroll-behavior: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 100%;
+    border-bottom: var(--border);
+    border-width: var(--border-width-2);
+  }
+  .deployment-empty {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    font-size: var(--small-font-size);
+    text-align: center;
   }
 
   #admin-page {
@@ -782,13 +816,13 @@
     margin-top: 1em;
     box-sizing: content-box;
 
-    background: var(--background-2);
-    color: var(--text);
+    background: var(--color-primary);
+    color: white;
 
     background-clip: padding-box;
-    border-radius: var(--border-radius-2);
-    padding: var(--spacing-1) var(--spacing-2);
-    font-weight: 500;
+    border-radius: 999em;
+    padding: .3em .7em;
+    font-weight: 600;
     line-height: 1;
     text-decoration: none;
 
@@ -913,6 +947,11 @@
     font: var(--body-font-family);
     color: var(--text);
     max-width: 100%;
+  }
+  select {
+    border-radius: 999em;    
+    font-size: var(--small-font-size);    
+    padding: .3em .7em;
   }
   input,
   textarea {
@@ -1067,10 +1106,9 @@
   tbody th {
     text-align: left;
     font-weight: normal;
-    font-style: italic;
     position: sticky;
     left: 0;
-    background: var(--background-1);
+    /*background: var(--background-1);*/
     z-index: 1;
   }
 

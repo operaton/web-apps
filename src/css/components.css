@@ -74,11 +74,8 @@
   text-transform: uppercase;
   font-size: 1em;
   margin: 0;
-
-  a {
-    color: var(--text);
-    text-decoration: none;
-  }
+  color: var(--text);
+  text-decoration: none;
 }
 
 /* icon */
@@ -437,6 +434,7 @@ dialog#global-search {
 /* deployments page */
 
 .process-details {
+  display: flex;
   overflow-y: auto;
   padding: var(--spacing-2);
   flex: 1;

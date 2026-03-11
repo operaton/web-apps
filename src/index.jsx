@@ -16,8 +16,8 @@ import { NotFound } from "./pages/_404.jsx";
 import { AccountPage } from "./pages/Account.jsx";
 
 import "./css/style.css"
+import "./css/components.css";
 
-// import "./css/components.css";
 import { DecisionsPage } from "./pages/Decisions.jsx";
 import { useContext } from "preact/hooks";
 import engine_rest from "./api/engine_rest.jsx";
