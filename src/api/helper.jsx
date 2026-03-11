@@ -13,6 +13,11 @@ export const _url_engine_rest = (state) =>
 export const get_credentials = (state) =>
   `${state.auth.credentials.username}:${state.auth.credentials.password}`;
 
+export const get_auth_header = (state) =>
+  state.auth.mode === "oauth"
+    ? `Bearer ${state.auth.token.value}`
+    : `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`;
+
 let headers = new Headers();
 headers.set("credentials", "include");
 let headers_form_urlencoded = headers;
@@ -136,10 +141,7 @@ export const GET = async (url, state, signl) => {
   signl.value = { status: RESPONSE_STATE.LOADING };
 
   let headers = new Headers();
-  headers.set(
-    "Authorization",
-    `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
-  );
+  headers.set("Authorization", get_auth_header(state));
 
   try {
     const response = await fetch(`${_url_engine_rest(state)}${url}`, {
@@ -156,10 +158,7 @@ export const GET_SERVER_URL = (url, state, signl) => {
   signl.value = { status: RESPONSE_STATE.LOADING };
 
   let headers = new Headers();
-  headers.set(
-    "Authorization",
-    `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
-  );
+  headers.set("Authorization", get_auth_header(state));
   headers.set(
     "Content-Type",
     "application/x-www-form-urlencoded;charset=UTF-8",
@@ -179,16 +178,8 @@ export const GET_SERVER_URL = (url, state, signl) => {
 export const POST_SERVER_URL = (url, body, state, signl) => {
   signl.value = { status: RESPONSE_STATE.LOADING };
 
-  // headers_form_urlencoded.set(
-  //   "Authorization",
-  //   `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
-  // );
-
   let headers = new Headers();
-  headers.set(
-    "Authorization",
-    `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
-  );
+  headers.set("Authorization", get_auth_header(state));
   headers.set(
     "Content-Type",
     "application/x-www-form-urlencoded;charset=UTF-8",
@@ -215,10 +206,7 @@ export const GET_TEXT = (url, state, signl) => {
   signl.value = { status: RESPONSE_STATE.LOADING };
 
   let headers = new Headers();
-  headers.set(
-    "Authorization",
-    `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
-  );
+  headers.set("Authorization", get_auth_header(state));
 
   return fetch(`${_url_engine_rest(state)}${url}`, { headers })
     .then((response) =>
@@ -234,10 +222,7 @@ const fetch_with_body = async (method, url, body, state, signl) => {
   signl.value = { status: RESPONSE_STATE.LOADING };
 
   let headers = new Headers();
-  headers.set(
-    "Authorization",
-    `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
-  );
+  headers.set("Authorization", get_auth_header(state));
   headers.set("Content-Type", "application/json");
 
   try {

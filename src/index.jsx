@@ -22,6 +22,7 @@ import { DecisionsPage } from "./pages/Decisions.jsx";
 import { useContext } from "preact/hooks";
 import engine_rest from "./api/engine_rest.jsx";
 import { useSignal } from "@preact/signals";
+import { is_oauth } from "./api/oauth.js";
 
 ("use strict");
 
@@ -152,50 +153,58 @@ const Routing = () => {
               ))}
             </select>
           </label>
-          <form onSubmit={login} class=".form-horizontal">
-            <label for="username">User name*</label>
-            <input
-              name="username"
-              id="username"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  username: e.currentTarget.value,
-                })
-              }
-              required
-            />
-
-            <label for="password">Password*</label>
-            <input
-              name="password"
-              type="password"
-              id="password"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  password: e.currentTarget.value,
-                })
-              }
-              required
-            />
-
-            <label>Remember login? (DEVELOPMENT ONLY)</label>
-            <input
-              type="checkbox"
-              name="remember_credentials"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  remember_login: e.currentTarget.checked,
-                })
-              }
-            />
-
+          {is_oauth ? (
             <div class="button-group">
-              <button type="submit">Login</button>
+              <button type="button" onClick={() => engine_rest.auth.start_oauth_login()}>
+                Login with SSO
+              </button>
             </div>
-          </form>
+          ) : (
+            <form onSubmit={login} class=".form-horizontal">
+              <label for="username">User name*</label>
+              <input
+                name="username"
+                id="username"
+                onInput={(e) =>
+                  (credentials.value = {
+                    ...credentials.peek(),
+                    username: e.currentTarget.value,
+                  })
+                }
+                required
+              />
+
+              <label for="password">Password*</label>
+              <input
+                name="password"
+                type="password"
+                id="password"
+                onInput={(e) =>
+                  (credentials.value = {
+                    ...credentials.peek(),
+                    password: e.currentTarget.value,
+                  })
+                }
+                required
+              />
+
+              <label>Remember login? (DEVELOPMENT ONLY)</label>
+              <input
+                type="checkbox"
+                name="remember_credentials"
+                onInput={(e) =>
+                  (credentials.value = {
+                    ...credentials.peek(),
+                    remember_login: e.currentTarget.checked,
+                  })
+                }
+              />
+
+              <div class="button-group">
+                <button type="submit">Login</button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     );

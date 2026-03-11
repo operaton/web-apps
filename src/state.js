@@ -19,8 +19,10 @@ import { createContext } from "preact";
 const createAppState = () => {
   const server = signal(get_stored_server());
   const auth = {
+    mode: import.meta.env.VITE_AUTH_MODE || "basic",
     logged_in: signal({ data: "unknown" }),
     credentials: signal({ username: null, password: null }),
+    token: signal(null),
     user: { id: signal() },
     login_response: signal(null),
     logout_response: signal(null),

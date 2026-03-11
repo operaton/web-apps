@@ -1,0 +1,82 @@
+{
+  "realm": "operaton",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "operaton-admin",
+        "description": "Operaton administrator role"
+      },
+      {
+        "name": "operaton-user",
+        "description": "Operaton standard user role"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "operaton-web-apps",
+      "name": "Operaton Web Apps",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://127.0.0.1:5173/*",
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "email": "demo@operaton.org",
+      "enabled": true,
+      "firstName": "Demo",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operaton-admin",
+        "operaton-user"
+      ]
+    },
+    {
+      "username": "john",
+      "email": "john@operaton.org",
+      "enabled": true,
+      "firstName": "John",
+      "lastName": "Doe",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "john",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "operaton-user"
+      ]
+    }
+  ]
+}
