@@ -21,6 +21,7 @@
     "id": "ID",
     "state": "Status",
     "action": "Aktion",
+    "label": "Bezeichnung",
     "actions": "Aktionen",
     "activity": "Aktivität",
     "yes": "Ja",
@@ -128,6 +129,7 @@
     "you": "Sie",
     "reset-assignee": "Verantwortlichen zurücksetzen",
     "comment": "Kommentar",
+    "comment-add": "Kommentar hinzufügen",
     "comment-none": "Noch keine Kommentare.",
     "comment-message": "Nachricht",
     "task-list": {
@@ -141,6 +143,7 @@
       }
     },
     "due-date": {
+      "label": "Fälligkeitsdatum",
       "set": "Fälligkeitsdatum setzen",
       "title": "Fälligkeitsdatum für Aufgabe setzen",
       "date": "Datum",
@@ -491,5 +494,10 @@
     "hint": "Vielleicht haben Sie eine URL eingefügt und einen Teil vergessen?",
     "goto-hint-prefix": "Mit der \"Gehe zu\"-Funktion oben rechts oder durch Drücken von",
     "goto-hint-suffix": "können Sie schnell zu einer Ressource navigieren, wenn Sie deren ID kennen."
+  },
+  "bpmn": {
+    "zoom-in": "Vergrößern",
+    "zoom-out": "Verkleinern",
+    "fit": "Ansicht anpassen"
   }
 }

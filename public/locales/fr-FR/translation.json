@@ -21,6 +21,7 @@
     "id": "ID",
     "state": "État",
     "action": "Action",
+    "label": "Libellé",
     "actions": "Actions",
     "activity": "Activité",
     "yes": "Oui",
@@ -128,6 +129,7 @@
     "you": "Vous",
     "reset-assignee": "Réinitialiser le responsable",
     "comment": "Commentaire",
+    "comment-add": "Ajouter un commentaire",
     "comment-none": "Aucun commentaire.",
     "comment-message": "Message",
     "task-list": {
@@ -141,6 +143,7 @@
       }
     },
     "due-date": {
+      "label": "Date d'échéance",
       "set": "Définir la date d'échéance",
       "title": "Définir la date d'échéance de la tâche",
       "date": "Date",
@@ -491,5 +494,10 @@
     "hint": "Peut-être avez-vous collé une URL et oublié une partie ?",
     "goto-hint-prefix": "En utilisant la fonction « Aller à » en haut à droite ou en appuyant sur",
     "goto-hint-suffix": "vous pouvez naviguer rapidement vers une ressource si vous connaissez son ID."
+  },
+  "bpmn": {
+    "zoom-in": "Agrandir",
+    "zoom-out": "Réduire",
+    "fit": "Ajuster à la vue"
   }
 }

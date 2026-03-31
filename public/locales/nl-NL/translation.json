@@ -21,6 +21,7 @@
     "id": "ID",
     "state": "Status",
     "action": "Actie",
+    "label": "Label",
     "actions": "Acties",
     "activity": "Activiteit",
     "yes": "Ja",
@@ -128,6 +129,7 @@
     "you": "U",
     "reset-assignee": "Toegewezene resetten",
     "comment": "Opmerking",
+    "comment-add": "Opmerking toevoegen",
     "comment-none": "Nog geen opmerkingen.",
     "comment-message": "Bericht",
     "task-list": {
@@ -141,6 +143,7 @@
       }
     },
     "due-date": {
+      "label": "Vervaldatum",
       "set": "Vervaldatum instellen",
       "title": "Vervaldatum voor taak instellen",
       "date": "Datum",
@@ -491,5 +494,10 @@
     "hint": "Misschien heeft u een URL geplakt en een deel gemist?",
     "goto-hint-prefix": "Met de \"Ga naar\"-functie rechtsboven of door op",
     "goto-hint-suffix": "te drukken kunt u snel naar een bron navigeren als u het ID kent."
+  },
+  "bpmn": {
+    "zoom-in": "Inzoomen",
+    "zoom-out": "Uitzoomen",
+    "fit": "Passend maken"
   }
 }

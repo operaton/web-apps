@@ -21,6 +21,7 @@
     "id": "ID",
     "state": "Estado",
     "action": "Acción",
+    "label": "Etiqueta",
     "actions": "Acciones",
     "activity": "Actividad",
     "yes": "Sí",
@@ -128,6 +129,7 @@
     "you": "Usted",
     "reset-assignee": "Restablecer asignado",
     "comment": "Comentario",
+    "comment-add": "Agregar comentario",
     "comment-none": "Sin comentarios.",
     "comment-message": "Mensaje",
     "task-list": {
@@ -141,6 +143,7 @@
       }
     },
     "due-date": {
+      "label": "Fecha de vencimiento",
       "set": "Establecer fecha de vencimiento",
       "title": "Establecer fecha de vencimiento de la tarea",
       "date": "Fecha",
@@ -491,5 +494,10 @@
     "hint": "¿Quizás pegó una URL y le faltó una parte?",
     "goto-hint-prefix": "Usando la función \"Ir a\" en la esquina superior derecha o presionando",
     "goto-hint-suffix": "puede navegar rápidamente a un recurso si conoce su ID."
+  },
+  "bpmn": {
+    "zoom-in": "Ampliar",
+    "zoom-out": "Reducir",
+    "fit": "Ajustar a la vista"
   }
 }

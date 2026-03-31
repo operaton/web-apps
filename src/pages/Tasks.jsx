@@ -139,24 +139,37 @@ const Task = () => {
           )}
         </div>
 
-        <dl>
-          <dt>{t("tasks.follow-up.label")}</dt>
-          <dd>
-            <SetFollowUpDateButton />
-          </dd>
-          <dt>{t("tasks.due-date.set")}</dt>
-          <dd>
-            <SetDueDateButton />
-          </dd>
-          <dt>{t("tasks.task-list.table-headings.assignee")}</dt>
-          <dd>
-            <ClaimButton />
-          </dd>
-          <dt>{t("tasks.groups.set")}</dt>
-          <dd>
-            <SetGroupsButton />
-          </dd>
-        </dl>
+        <table>
+          <thead>
+            <tr>
+              <th>{t("common.label")}</th>
+              <th>{t("common.value")}</th>
+              <th>{t("common.action")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{t("tasks.follow-up.label")}</td>
+              <td>{task.value?.data?.followUp ? new Date(task.value.data.followUp).toLocaleString() : "—"}</td>
+              <td><SetFollowUpDateButton /></td>
+            </tr>
+            <tr>
+              <td>{t("tasks.due-date.label")}</td>
+              <td>{task.value?.data?.due ? new Date(task.value.data.due).toLocaleString() : "—"}</td>
+              <td><SetDueDateButton /></td>
+            </tr>
+            <tr>
+              <td>{t("tasks.task-list.table-headings.assignee")}</td>
+              <td>{task.value?.data?.assignee ?? "—"}</td>
+              <td><ClaimButton /></td>
+            </tr>
+            <tr>
+              <td>{t("tasks.groups.set")}</td>
+              <td><GroupsList /></td>
+              <td><SetGroupsButton /></td>
+            </tr>
+          </tbody>
+        </table>
 
         <CommentButton />
       </section>
@@ -228,8 +241,8 @@ const SetDueDateButton = () => {
 
   return (
     <>
-      <button onClick={show} class="link">
-        {due_date === null ? t("tasks.due-date.set") : due_date.toLocaleString()}
+      <button onClick={show}>
+        {t("common.edit")}
       </button>
 
       <dialog id="set_due_date">
@@ -295,8 +308,8 @@ const SetFollowUpDateButton = () => {
 
   return (
     <>
-      <button onClick={show} class="link">
-        {followUpDate === null ? t("tasks.follow-up.set") : followUpDate.toLocaleString()}
+      <button onClick={show}>
+        {t("common.edit")}
       </button>
 
       <dialog id="set_follow_up_date">
@@ -327,6 +340,14 @@ const SetFollowUpDateButton = () => {
   );
 };
 
+const GroupsList = () => {
+  const state = useContext(AppState),
+    links = state.api.task.identity_links.value?.data;
+  if (!links) return "—";
+  const groups = links.filter((l) => l.type === "candidate" && l.groupId).map((l) => l.groupId);
+  return groups.length > 0 ? groups.join(", ") : "—";
+};
+
 const SetGroupsButton = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
@@ -350,12 +371,8 @@ const SetGroupsButton = () => {
 
   return (
     <>
-      <button onClick={show} class="link">
-        {identity_links.value?.data
-          ? t("tasks.groups.set")
-          : identity_links.value?.data
-              ?.reduce((res, { groupId, type }) => (type === "candidate" ? `${res + groupId}, ` : res), "")
-              .slice(0, -2)}
+      <button onClick={show}>
+        {t("common.edit")}
       </button>
 
       <dialog id="add_groups">
@@ -427,7 +444,7 @@ const CommentButton = () => {
   return (
     <>
       <button onClick={show}>
-        <Icons.chat_bubble_left /> {t("tasks.comment")}
+        <Icons.chat_bubble_left /> {t("tasks.comment-add")}
       </button>
 
       <dialog id="add_comment">
@@ -472,8 +489,8 @@ const ClaimButton = () => {
       signal={state.api.task.one}
       on_success={() => (
         <>
-          <button class="link" onClick={show}>
-            {task?.assignee === null ? t("tasks.claim") : task?.assignee === user?.id ? t("tasks.you") : task?.assignee}
+          <button onClick={show}>
+            {t("common.edit")}
           </button>
 
           <dialog id="set_assignee">
@@ -518,7 +535,13 @@ const Diagram = () => {
       <div id="diagram" />
       <RequestState
         signal={diagram}
-        on_success={() => <BPMNViewer xml={diagram.value.data?.bpmn20Xml} container="diagram" />}
+        on_success={() => (
+          <BPMNViewer
+            xml={diagram.value.data?.bpmn20Xml}
+            container="diagram"
+            highlight={[selected_task.value?.data?.taskDefinitionKey]}
+          />
+        )}
       />
     </>
   );

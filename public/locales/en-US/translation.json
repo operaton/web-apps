@@ -21,6 +21,7 @@
     "id": "ID",
     "state": "State",
     "action": "Action",
+    "label": "Label",
     "actions": "Actions",
     "activity": "Activity",
     "yes": "Yes",
@@ -128,6 +129,7 @@
     "you": "You",
     "reset-assignee": "Reset Assignee",
     "comment": "Comment",
+    "comment-add": "Add Comment",
     "comment-none": "No comments yet.",
     "comment-message": "Message",
     "task-list": {
@@ -141,6 +143,7 @@
       }
     },
     "due-date": {
+      "label": "Due Date",
       "set": "Set Due Date",
       "title": "Set Due Date for Task",
       "date": "Date",
@@ -491,5 +494,10 @@
     "hint": "Maybe you pasted a URL and missed a part?",
     "goto-hint-prefix": "Using the \"Go To\" function in the top right or pressing",
     "goto-hint-suffix": "you can quickly navigate to a resource if you know its ID."
+  },
+  "bpmn": {
+    "zoom-in": "Zoom in",
+    "zoom-out": "Zoom out",
+    "fit": "Fit to view"
   }
 }
