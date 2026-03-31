@@ -158,9 +158,7 @@ const Task = () => {
           </dd>
         </dl>
 
-        <button>
-          <Icons.chat_bubble_left /> {t("tasks.comment")}
-        </button>
+        <CommentButton />
       </section>
       <TaskTabs />
     </div>
@@ -182,7 +180,9 @@ const TaskTabs = () => {
     engine_rest.task
       .get_task(state, params.task_id)
       .then(() => engine_rest.process_definition.one(state, state.api.task.one.value?.data?.processDefinitionId))
-      .then(() => engine_rest.task.get_identity_links(state, state.api.task.one.value?.data?.id));
+      .then(() => engine_rest.task.get_identity_links(state, state.api.task.one.value?.data?.id))
+      .then(() => engine_rest.history.get_user_operation(state, state.api.task.one.value?.data?.executionId))
+      .then(() => engine_rest.task.get_comments(state, state.api.task.one.value?.data?.id));
   }
 
   return (
@@ -407,6 +407,50 @@ const SetGroupsButton = () => {
   );
 };
 
+const CommentButton = () => {
+  const state = useContext(AppState),
+    { params } = useRoute(),
+    [t] = useTranslation(),
+    close = () => document.getElementById("add_comment").close(),
+    show = () => document.getElementById("add_comment").showModal(),
+    message = useSignal(""),
+    submit = (event) => {
+      event.preventDefault();
+      engine_rest.task
+        .create_comment(state, params.task_id, message.value)
+        .then(() => {
+          message.value = "";
+          engine_rest.task.get_comments(state, params.task_id);
+        });
+    };
+
+  return (
+    <>
+      <button onClick={show}>
+        <Icons.chat_bubble_left /> {t("tasks.comment")}
+      </button>
+
+      <dialog id="add_comment">
+        <button onClick={close}>{t("common.close")}</button>
+        <h2>{t("tasks.comment")}</h2>
+
+        <form onSubmit={submit}>
+          <label for="comment_message">{t("tasks.comment-message")}</label>
+          <textarea
+            id="comment_message"
+            required
+            value={message.value}
+            onInput={(e) => (message.value = e.currentTarget.value)}
+          />
+          <div class="button-group">
+            <button type="submit">{t("common.submit")}</button>
+          </div>
+        </form>
+      </dialog>
+    </>
+  );
+};
+
 const ClaimButton = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
@@ -584,17 +628,47 @@ const Filter = () => {
   );
 };
 
+const merge_history = (...sources) =>
+  sources
+    .flatMap((s) => s())
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+const history_from_operations = (signal) =>
+  (signal.value?.data ?? []).map((op) => ({
+    timestamp: op.timestamp,
+    user: op.userId,
+    type: op.operationType,
+    detail: [op.property, op.newValue].filter(Boolean).join(": "),
+  }));
+
+const history_from_comments = (signal) =>
+  (signal.value?.data ?? []).map((c) => ({
+    timestamp: c.time,
+    user: c.userId,
+    type: "Comment",
+    detail: c.message,
+  }));
+
 const HistoryTab = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
     {
       api: {
         history: { user_operation },
-        task: { one },
+        task: { one, comment },
       },
     } = state;
 
-  void engine_rest.history.get_user_operation(state, one.value?.data?.executionId);
+  const ready =
+    user_operation.value?.status === RESPONSE_STATE.SUCCESS &&
+    comment.list.value?.status === RESPONSE_STATE.SUCCESS;
+
+  const entries = ready
+    ? merge_history(
+        () => history_from_operations(user_operation),
+        () => history_from_comments(comment.list),
+      )
+    : [];
 
   return (
     <>
@@ -605,31 +679,30 @@ const HistoryTab = () => {
           <tr>
             <th>{t("tasks.history.date-time")}</th>
             <th>{t("tasks.history.user")}</th>
-            <th>{t("common.action")}</th>
             <th>{t("common.type")}</th>
-            <th>{t("common.value")}</th>
+            <th>{t("tasks.history.detail")}</th>
           </tr>
         </thead>
         <tbody>
-          <RequestState signal={user_operation} on_success={() => <HistoryEntry />} />
+          {ready ? (
+            entries.map((entry, i) => (
+              <tr key={i}>
+                <td>{formatRelativeDate(entry.timestamp)}</td>
+                <td>{entry.user}</td>
+                <td>{entry.type}</td>
+                <td>{entry.detail}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colspan="4">{t("common.loading")}</td>
+            </tr>
+          )}
         </tbody>
       </table>
     </>
   );
 };
-
-const HistoryEntry = () =>
-  useContext(AppState).api.history.user_operation.value.data.map(
-    ({ timestamp, userId, operationType, property, newValue }, index) => (
-      <tr key={index}>
-        <td>{formatRelativeDate(timestamp)}</td>
-        <td>{userId}</td>
-        <td>{operationType}</td>
-        <td>{property}</td>
-        <td>{newValue}</td>
-      </tr>
-    ),
-  );
 
 const task_tabs = [
   {

@@ -111,6 +111,10 @@ const createAppState = () => {
       add_group: signal(null),
       delete_group: signal(null),
       identity_links: signal(null),
+      comment: {
+        list: signal(null),
+        create: signal(null),
+      },
     },
     deployment: {
       one: signal(null),

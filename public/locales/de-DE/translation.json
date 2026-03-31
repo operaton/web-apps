@@ -128,6 +128,8 @@
     "you": "Sie",
     "reset-assignee": "Verantwortlichen zurücksetzen",
     "comment": "Kommentar",
+    "comment-none": "Noch keine Kommentare.",
+    "comment-message": "Nachricht",
     "task-list": {
       "table-headings": {
         "task-name": "Aufgaben Name",
@@ -165,7 +167,8 @@
     "history": {
       "title": "Verlauf",
       "date-time": "Datum / Uhrzeit",
-      "user": "Benutzer"
+      "user": "Benutzer",
+      "detail": "Detail"
     },
     "form": {
       "no-task-selected": "Keine Aufgabe ausgewählt.",

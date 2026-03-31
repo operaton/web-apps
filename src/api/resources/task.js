@@ -154,6 +154,17 @@ const get_task_process_definitions = (state, ids) =>
     },
   ).then((r) => r.json());
 
+const get_comments = (state, task_id) =>
+  GET(`/task/${task_id}/comment`, state, state.api.task.comment.list);
+
+const create_comment = (state, task_id, message) =>
+  POST(
+    `/task/${task_id}/comment/create`,
+    { message },
+    state,
+    state.api.task.comment.create,
+  );
+
 const post_task_form = (state, task_id, data) =>
   POST(`/task/${task_id}/submit-form`, { variables: data, withVariablesInReturn: true, }, state, state.api.task.submit_form );
 
@@ -173,6 +184,8 @@ const task = {
   add_group,
   delete_group,
   get_identity_links,
+  get_comments,
+  create_comment,
 };
 
 export default task;

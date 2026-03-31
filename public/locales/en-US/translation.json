@@ -128,6 +128,8 @@
     "you": "You",
     "reset-assignee": "Reset Assignee",
     "comment": "Comment",
+    "comment-none": "No comments yet.",
+    "comment-message": "Message",
     "task-list": {
       "table-headings": {
         "task-name": "Task Name",
@@ -165,7 +167,8 @@
     "history": {
       "title": "History",
       "date-time": "Date / Time",
-      "user": "User"
+      "user": "User",
+      "detail": "Detail"
     },
     "form": {
       "no-task-selected": "No task selected.",

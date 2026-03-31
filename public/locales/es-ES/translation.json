@@ -128,6 +128,8 @@
     "you": "Usted",
     "reset-assignee": "Restablecer asignado",
     "comment": "Comentario",
+    "comment-none": "Sin comentarios.",
+    "comment-message": "Mensaje",
     "task-list": {
       "table-headings": {
         "task-name": "Nombre de la tarea",
@@ -165,7 +167,8 @@
     "history": {
       "title": "Historial",
       "date-time": "Fecha / Hora",
-      "user": "Usuario"
+      "user": "Usuario",
+      "detail": "Detalle"
     },
     "form": {
       "no-task-selected": "Ninguna tarea seleccionada.",

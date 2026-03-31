@@ -128,6 +128,8 @@
     "you": "U",
     "reset-assignee": "Toegewezene resetten",
     "comment": "Opmerking",
+    "comment-none": "Nog geen opmerkingen.",
+    "comment-message": "Bericht",
     "task-list": {
       "table-headings": {
         "task-name": "Taaknaam",
@@ -165,7 +167,8 @@
     "history": {
       "title": "Geschiedenis",
       "date-time": "Datum / Tijd",
-      "user": "Gebruiker"
+      "user": "Gebruiker",
+      "detail": "Detail"
     },
     "form": {
       "no-task-selected": "Geen taak geselecteerd.",
