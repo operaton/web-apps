@@ -100,12 +100,18 @@
 
 @layer components {
   @media (width <= 70em) {
+    #mobile-logo {
+      display: block !important;
+      font-weight: bold;
+      color: var(--text);
+      text-decoration: none;
+    }
     #mobile-menu-toggle {
       display: block !important;
       background: transparent;
       border: 0;
       padding: var(--spacing-1);
-      margin: 0;
+      margin: 0 0 0 auto;
       color: var(--text);
       font-size: 1.8em;
       line-height: 1;
@@ -325,6 +331,7 @@
     z-index: 10;
   }
 
+  #mobile-logo,
   #mobile-menu-toggle {
     display: none;
   }
@@ -362,9 +369,6 @@
 
   nav {
     padding: 0 var(--spacing-1);
-  }
-  nav > menu {
-    gap: 0 var(--spacing-1);
   }
   nav menu {
     list-style: none;
@@ -455,7 +459,7 @@
     gap: var(--spacing-2);
   }
 
-  .migration-diagrams .react-bpmn-diagram-container {
+  .migration-diagrams .djs-parent {
     height: 40vh;
   }
 
@@ -586,7 +590,7 @@
     }
 
     > button {
-      background: var(--background-3);
+      /*background: var(--background-3);*/
       margin: 0;
       justify-content: center;
     }

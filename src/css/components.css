@@ -212,7 +212,7 @@ main#processes {
 /* tabs */
 
 .tabs {
-  /*height: 100%;*/
+  height: 100%;
   position: relative;
   /*overflow-y: scroll;*/
   /*overscroll-behavior: none;*/
@@ -272,7 +272,7 @@ main#processes {
 
   padding: var(--spacing-1);
   overflow-y: auto;
-  /*height: 100%;*/
+  height: 100%;
   /*position: relative;*/
 }
 
@@ -355,7 +355,7 @@ div.accordion {
 
 /* bpmn diagram */
 
-#processes .react-bpmn-diagram-container {
+.djs-parent {
   height: 100%;
 }
 
@@ -363,8 +363,67 @@ div.accordion {
   padding: 2px;
 }
 
+.bpmn-badge {
+  padding: 0.15em 0.4em;
+  border-radius: 0.25em;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: #fff;
+}
+
+.bpmn-badge-running {
+  background: #126bbe;
+}
+
+.bpmn-badge-incident {
+  background: #bb2511;
+}
+
 .c-hand {
   cursor: pointer;
+}
+
+.bpmn-highlight .djs-visual rect,
+.bpmn-highlight .djs-visual circle,
+.bpmn-highlight .djs-visual polygon {
+  stroke: var(--color-primary) !important;
+  stroke-width: 3px !important;
+}
+
+.bpmn-controls {
+  position: absolute;
+  top: var(--spacing-1);
+  right: var(--spacing-1);
+  display: flex;
+  z-index: 5;
+  background: white;
+  border: var(--border);
+  border-radius: var(--border-radius-2);
+  overflow: hidden;
+}
+
+.bpmn-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-1);
+  background: white;
+  border: none;
+  border-right: var(--border);
+  color: black;
+  cursor: pointer;
+  font-size: 1.4em;
+  margin-top: 0;
+  border-radius: 0;
+}
+
+.bpmn-controls button:hover {
+  outline: none;
+  background-color: var(--background-2);
+}
+
+.bpmn-controls button:last-child {
+  border-right: none;
 }
 
 .copy-on-click {
@@ -505,8 +564,7 @@ dialog#global-search {
   flex: 1;
 }
 
-.bpmn-viewer .react-bpmn-diagram-container {
-  height: 100%;
+.bpmn-viewer .djs-parent {
   min-height: 40vh;
 }
 
