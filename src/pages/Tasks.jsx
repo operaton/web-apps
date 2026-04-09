@@ -33,12 +33,18 @@ const TasksPage = () => {
   );
 };
 
+const TASK_PAGE_SIZE = 3;
+
 const TaskList = () => {
   const state = useContext(AppState),
     taskList = state.api.task.list,
     { params } = useRoute(),
     selectedTaskId = params.task_id,
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    load_more = () => {
+      const current = taskList.value?.data?.length ?? 0;
+      engine_rest.task.get_tasks(state, "name", "asc", current, TASK_PAGE_SIZE);
+    };
 
   return (
     <div id="task-list">
@@ -58,10 +64,8 @@ const TaskList = () => {
           <thead>
             <tr>
               <th>{t("tasks.task-list.table-headings.task-name")}</th>
-              <th>{t("tasks.task-list.table-headings.process-definition")}</th>
-              <th>{t("tasks.task-list.table-headings.process-version")}</th>
-              <th>{t("tasks.task-list.table-headings.created-on")}</th>
               <th>{t("tasks.task-list.table-headings.assignee")}</th>
+              <th>{t("tasks.task-list.table-headings.due-in")}</th>
             </tr>
           </thead>
           <tbody>
@@ -72,14 +76,18 @@ const TaskList = () => {
             />
           </tbody>
         </table>
-        <small>{t("tasks.load-more")}</small>
+        {taskList.value?.hasMore === true ? (
+          <button class="load-more" onClick={load_more}>{t("tasks.load-more")}</button>
+        ) : taskList.value?.hasMore === false ? (
+          <small class="load-more-end">{t("tasks.no-more-items")}</small>
+        ) : null}
       </div>
     </div>
   );
 };
 
 const TaskRowEntry = ({ task, selected }) => {
-  const { id, name, created, assignee, priority, definitionName, definitionVersion } = task;
+  const { id, name, due, assignee } = task;
 
   useLayoutEffect(() => {
     if (selected) {
@@ -94,10 +102,8 @@ const TaskRowEntry = ({ task, selected }) => {
           {name}
         </a>
       </th>
-      <td>{definitionName}</td>
-      <td>{definitionVersion}</td>
-      <td>{formatter.formatRelativeDate(created)}</td>
-      <td>{assignee ? assignee : "-"}</td>
+      <td>{assignee ? assignee : "—"}</td>
+      <td>{due ? formatRelativeDate(due) : "—"}</td>
     </tr>
   );
 };
@@ -139,37 +145,12 @@ const Task = () => {
           )}
         </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>{t("common.label")}</th>
-              <th>{t("common.value")}</th>
-              <th>{t("common.action")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{t("tasks.follow-up.label")}</td>
-              <td>{task.value?.data?.followUp ? new Date(task.value.data.followUp).toLocaleString() : "—"}</td>
-              <td><SetFollowUpDateButton /></td>
-            </tr>
-            <tr>
-              <td>{t("tasks.due-date.label")}</td>
-              <td>{task.value?.data?.due ? new Date(task.value.data.due).toLocaleString() : "—"}</td>
-              <td><SetDueDateButton /></td>
-            </tr>
-            <tr>
-              <td>{t("tasks.task-list.table-headings.assignee")}</td>
-              <td>{task.value?.data?.assignee ?? "—"}</td>
-              <td><ClaimButton /></td>
-            </tr>
-            <tr>
-              <td>{t("tasks.groups.set")}</td>
-              <td><GroupsList /></td>
-              <td><SetGroupsButton /></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="task-cards">
+          <SetFollowUpDateButton />
+          <SetDueDateButton />
+          <ClaimButton />
+          <SetGroupsButton />
+        </div>
 
         <CommentButton />
       </section>
@@ -241,8 +222,10 @@ const SetDueDateButton = () => {
 
   return (
     <>
-      <button onClick={show}>
-        {t("common.edit")}
+      <button onClick={show} class="task-card">
+        <small>{t("tasks.due-date.label")}</small>
+        <span>{due_date !== null ? due_date.toLocaleString() : "—"}</span>
+        <Icons.pencil />
       </button>
 
       <dialog id="set_due_date">
@@ -308,8 +291,10 @@ const SetFollowUpDateButton = () => {
 
   return (
     <>
-      <button onClick={show}>
-        {t("common.edit")}
+      <button onClick={show} class="task-card">
+        <small>{t("tasks.follow-up.label")}</small>
+        <span>{followUpDate !== null ? followUpDate.toLocaleString() : "—"}</span>
+        <Icons.pencil />
       </button>
 
       <dialog id="set_follow_up_date">
@@ -371,8 +356,10 @@ const SetGroupsButton = () => {
 
   return (
     <>
-      <button onClick={show}>
-        {t("common.edit")}
+      <button onClick={show} class="task-card">
+        <small>{t("tasks.groups.set")}</small>
+        <span><GroupsList /></span>
+        <Icons.pencil />
       </button>
 
       <dialog id="add_groups">
@@ -438,6 +425,7 @@ const CommentButton = () => {
         .then(() => {
           message.value = "";
           engine_rest.task.get_comments(state, params.task_id);
+          close();
         });
     };
 
@@ -489,8 +477,10 @@ const ClaimButton = () => {
       signal={state.api.task.one}
       on_success={() => (
         <>
-          <button onClick={show}>
-            {t("common.edit")}
+          <button onClick={show} class="task-card">
+            <small>{t("tasks.task-list.table-headings.assignee")}</small>
+            <span>{task?.assignee ?? "—"}</span>
+            <Icons.pencil />
           </button>
 
           <dialog id="set_assignee">

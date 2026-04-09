@@ -122,6 +122,7 @@
     "my-tasks": "Meine Aufgaben",
     "edit-filters": "Filter bearbeiten",
     "load-more": "Mehr laden",
+    "no-more-items": "Keine weiteren Einträge",
     "no-description": "Keine Beschreibung vorhanden.",
     "select-task": "Wählen Sie eine Aufgabe aus der Liste oben, um deren Details anzuzeigen.",
     "claim": "Beanspruchen",
@@ -134,12 +135,13 @@
     "comment-message": "Nachricht",
     "task-list": {
       "table-headings": {
-        "task-name": "Aufgaben Name",
+        "task-name": "Aufgabe",
         "process-definition": "Prozess Definition",
         "process-version": "Prozess Version",
         "created-on": "Erstellt am",
         "assignee": "Verantwortlich",
-        "priority": "Priorität"
+        "priority": "Priorität",
+        "due-in": "Fällig in"
       }
     },
     "due-date": {

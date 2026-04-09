@@ -303,6 +303,14 @@
 }
 
 @layer pages {
+  .login-page {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-3);
+    align-items: start;
+    gap: var(--spacing-2)
+  }
+    
   #app {
     display: flex;
     flex-direction: column;
@@ -478,6 +486,10 @@
   #migration #execute button {
     margin: 0;
   }
+  
+  .tasks {
+      display: flex;
+  }
 
   #task-list {
     display: flex;
@@ -507,8 +519,8 @@
   }
 
   #task-details {
-    display: grid;
-    grid-template-columns: max-content 3fr;
+    /*display: grid;
+    grid-template-columns: max-content 3fr;*/
     width: 100%;
     overflow-y: auto;
 
@@ -878,6 +890,10 @@
 
   label {
     vertical-align: center;
+    
+    br {
+      line-height: 1.8lh;
+    }
   }
 
   button,
@@ -1121,13 +1137,6 @@
   tbody tr[aria-selected="true"] :where(td, th) {
     background-color: var(--background-2);
     margin: calc(-1 * var(--border-width-2));
-
-    &:first-child {
-      border-radius: var(--border-radius) 0 0 var(--border-radius);
-    }
-    &:last-child {
-      border-radius: 0 var(--border-radius) var(--border-radius) 0;
-    }
   }
 
   th,

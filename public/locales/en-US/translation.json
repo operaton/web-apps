@@ -122,6 +122,7 @@
     "my-tasks": "My Tasks",
     "edit-filters": "Edit Filters",
     "load-more": "Load more",
+    "no-more-items": "No more items to load",
     "no-description": "No description provided.",
     "select-task": "Select a task from the task list above to show its details.",
     "claim": "Claim",
@@ -134,12 +135,13 @@
     "comment-message": "Message",
     "task-list": {
       "table-headings": {
-        "task-name": "Task Name",
+        "task-name": "Task",
         "process-definition": "Process Definition",
         "process-version": "Process Version",
         "created-on": "Created on",
         "assignee": "Assignee",
-        "priority": "Priority"
+        "priority": "Priority",
+        "due-in": "Due In"
       }
     },
     "due-date": {

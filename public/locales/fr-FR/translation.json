@@ -122,6 +122,7 @@
     "my-tasks": "Mes tâches",
     "edit-filters": "Modifier les filtres",
     "load-more": "Charger plus",
+    "no-more-items": "Plus d'éléments à charger",
     "no-description": "Aucune description fournie.",
     "select-task": "Sélectionnez une tâche dans la liste ci-dessus pour afficher ses détails.",
     "claim": "Réclamer",
@@ -134,12 +135,13 @@
     "comment-message": "Message",
     "task-list": {
       "table-headings": {
-        "task-name": "Nom de la tâche",
+        "task-name": "Tâche",
         "process-definition": "Définition de processus",
         "process-version": "Version du processus",
         "created-on": "Créé le",
         "assignee": "Responsable",
-        "priority": "Priorité"
+        "priority": "Priorité",
+        "due-in": "Échéance"
       }
     },
     "due-date": {

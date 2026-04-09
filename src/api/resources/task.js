@@ -116,7 +116,7 @@ const tasks_with_process_definitions = async (tasks, state) => {
   return tasks;
 };
 
-const get_tasks = (state, sort_key = "name", sort_order = "asc") => {
+const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0, maxResults = 3) => {
   let headers = new Headers();
   headers.set(
     "Authorization",
@@ -124,7 +124,7 @@ const get_tasks = (state, sort_key = "name", sort_order = "asc") => {
   );
 
   fetch(
-    `${_url_engine_rest(state)}/task?sortBy=${sort_key}&sortOrder=${sort_order}`,
+    `${_url_engine_rest(state)}/task?sortBy=${sort_key}&sortOrder=${sort_order}&firstResult=${firstResult}&maxResults=${maxResults}`,
     { headers },
   )
     .then((response) =>
@@ -132,11 +132,16 @@ const get_tasks = (state, sort_key = "name", sort_order = "asc") => {
     )
     .then((tasks) => tasks_with_process_definitions(tasks, state))
     .then(
-      (json) =>
-        (state.api.task.list.value = {
+      (json) => {
+        const existing = firstResult > 0 ? (state.api.task.list.value?.data ?? []) : [];
+        const existingIds = new Set(existing.map((t) => t.id));
+        const newTasks = json.filter((t) => !existingIds.has(t.id));
+        state.api.task.list.value = {
           status: RESPONSE_STATE.SUCCESS,
-          data: json,
-        }),
+          data: [...existing, ...newTasks],
+          hasMore: json.length === maxResults,
+        };
+      },
     )
     .catch(
       (error) =>

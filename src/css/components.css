@@ -353,6 +353,70 @@ div.accordion {
   }
 }
 
+/* load more */
+
+.load-more {
+  display: block;
+  margin: var(--spacing-1) auto;
+  background: white;
+  color: var(--text);
+  border: var(--border);
+  border-radius: var(--border-radius-2);
+  padding: 0.4em 1.2em;
+  cursor: pointer;
+}
+
+.load-more-end {
+  display: block;
+  text-align: center;
+  margin: var(--spacing-1) auto;
+  color: var(--text-2);
+}
+
+/* task detail cards */
+
+.task-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+.task-card {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+  border: var(--border);
+  border-radius: var(--border-radius-2);
+  background: var(--background-1);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  flex: 1;
+  min-width: 10em;
+  position: relative;
+  margin: 0;
+}
+
+.task-card small {
+  color: var(--text-2);
+  font-size: var(--small-font-size);
+}
+
+.task-card span {
+  font-weight: bold;
+}
+
+.task-card > svg {
+  position: absolute;
+  top: var(--spacing-1);
+  right: var(--spacing-1);
+  width: 1em;
+  height: 1em;
+  color: var(--text-2);
+}
+
 /* bpmn diagram */
 
 .djs-parent {
