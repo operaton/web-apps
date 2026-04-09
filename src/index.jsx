@@ -1,4 +1,5 @@
 import { render } from "preact";
+import { Suspense } from "preact/compat";
 import { LocationProvider, Route, Router } from "preact-iso";
 import { AppState, createAppState } from "./state.js";
 import "./helper/i18n";
@@ -29,9 +30,11 @@ import { is_oauth } from "./api/oauth.js";
 
 export const App = () => {
   return (
-    <AppState.Provider value={createAppState()}>
-      <Routing />
-    </AppState.Provider>
+    <Suspense fallback="">
+      <AppState.Provider value={createAppState()}>
+        <Routing />
+      </AppState.Provider>
+    </Suspense>
   );
 };
 
@@ -133,35 +136,35 @@ const Routing = () => {
     void engine_rest.auth.is_authenticated(state);
   } else if (logged_in.value.data === "unauthenticated") {
     return (
-      <div class="col center p-3">
-        <div>
-          <p>Operaton Web Apps</p>
-          <h1>Login</h1>
-          <label className="row center gap-1 p-1">
-            Server Selection
-            <select onChange={(e) => swap_server(e, state)}>
-              <option disabled>
-                ℹ️ Choose a server to retrieve your processes
+      <section class="login-page">
+        <h1>Operaton Web Apps Login</h1>
+        <span>
+          <a href="https://docs.operaton.org/docs/documentation/webapps/">Documentation</a>&nbsp;-&nbsp;
+          <a href="https://github.com/operaton/web-apps">Source</a>
+        </span>
+        <br />
+        <label>
+          Server Selection <br />
+          <select onChange={(e) => swap_server(e, state)}>
+            <option disabled>
+              ℹ️ Choose a server to retrieve your processes
+            </option>
+            {servers.map((server) => (
+              <option
+                key={server.url}
+                value={server.url}
+                selected={state.server.value?.url === server.url}
+              >
+                {server.name} {server.c7_mode ? "(C7)" : ""}
               </option>
-              {servers.map((server) => (
-                <option
-                  key={server.url}
-                  value={server.url}
-                  selected={state.server.value?.url === server.url}
-                >
-                  {server.name} {server.c7_mode ? "(C7)" : ""}
-                </option>
-              ))}
-            </select>
-          </label>
-          {is_oauth ? (
-            <div class="button-group">
-              <button type="button" onClick={() => engine_rest.auth.start_oauth_login()}>
-                Login with SSO
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={login} class=".form-horizontal">
+            ))}
+          </select>
+        </label>
+        {is_oauth
+          ? <button type="button" onClick={() => engine_rest.auth.start_oauth_login()}>
+              Login with SSO
+            </button>
+          : <form onSubmit={login} class=".form-horizontal">
               <label for="username">User name*</label>
               <input
                 name="username"
@@ -201,13 +204,10 @@ const Routing = () => {
                 }
               />
 
-              <div class="button-group">
-                <button type="submit">Login</button>
-              </div>
+              <button type="submit">Login</button>
             </form>
-          )}
-        </div>
-      </div>
+        }
+      </section>
     );
   }
 };
