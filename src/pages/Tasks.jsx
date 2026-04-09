@@ -21,14 +21,26 @@ const TasksPage = () => {
     void engine_rest.task.get_tasks(state);
   }
 
+  if (params?.task_id === "start") {
+    return (
+      <main id="content" class="fade-in">
+        <StartProcessList />
+      </main>
+    );
+  }
+
+  if (params?.task_id === "filter") {
+    return (
+      <main id="content" class="fade-in">
+        <Filter />
+      </main>
+    );
+  }
+
   return (
     <main id="content" class="tasks fade-in">
       <TaskList />
-      {{
-        start: <StartProcessList />,
-        filter: <Filter />,
-        undefined: <NoSelectedTask />,
-      }[params?.task_id] ?? <Task />}
+      {params?.task_id === undefined ? <NoSelectedTask /> : <Task />}
     </main>
   );
 };
@@ -541,101 +553,107 @@ const Filter = () => {
   const [t] = useTranslation();
 
   return (
-    <div>
-      <form>
+    <div class="filter-editor">
+      <header>
         <h2>{t("tasks.filter.title")}</h2>
-        <h3>{t("tasks.filter.general")}</h3>
-        <label>
-          {t("common.name")}
-          <input />
-        </label>
-        <label>
-          {t("tasks.filter.description")}
-          <input />
-        </label>
-        <label>
-          {t("tasks.filter.color")}
-          <input type="color" />
-        </label>
-        <label>
-          {t("tasks.task-list.table-headings.priority")}
-          <input type="number" />
-        </label>
-        <label>
-          {t("tasks.filter.auto-refresh")}
-          <input type="checkbox" />
-        </label>
+        <a href="/tasks" class="button">{t("common.back")}</a>
+      </header>
 
-        <h3>{t("tasks.filter.criteria")}</h3>
-        <button>{t("tasks.filter.add-criteria")}</button>
-        <table>
-          <thead>
-            <tr>
-              <th scope="column">{t("common.key")}</th>
-              <th scope="column">{t("common.value")}</th>
-              <th scope="column">{t("common.action")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>{t("common.remove")}</td>
-            </tr>
-          </tbody>
-        </table>
+      <form>
+        <fieldset>
+          <legend>{t("tasks.filter.general")}</legend>
+          <div class="filter-fields">
+            <label for="filter-name">{t("common.name")}</label>
+            <input id="filter-name" />
+            <label for="filter-description">{t("tasks.filter.description")}</label>
+            <input id="filter-description" />
+            <label for="filter-priority">{t("tasks.task-list.table-headings.priority")}</label>
+            <input id="filter-priority" type="number" />
+            <label for="filter-color">{t("tasks.filter.color")}</label>
+            <input id="filter-color" type="color" />
+            <label class="filter-checkbox" for="filter-auto-refresh">
+              <input id="filter-auto-refresh" type="checkbox" />
+              {t("tasks.filter.auto-refresh")}
+            </label>
+          </div>
+        </fieldset>
 
-        <h3>{t("tasks.filter.permissions")}</h3>
+        <fieldset>
+          <legend>{t("tasks.filter.criteria")}</legend>
+          <table>
+            <thead>
+              <tr>
+                <th>{t("common.key")}</th>
+                <th>{t("common.value")}</th>
+                <th>{t("common.action")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td />
+                <td />
+                <td><button class="small">{t("common.remove")}</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button">{t("tasks.filter.add-criteria")}</button>
+        </fieldset>
 
-        <label>
-          {t("tasks.filter.accessible-by-all")}
-          <input type="checkbox" />
-        </label>
+        <fieldset>
+          <legend>{t("tasks.filter.permissions")}</legend>
+          <label class="filter-checkbox">
+            <input type="checkbox" />
+            {t("tasks.filter.accessible-by-all")}
+          </label>
+          <table>
+            <thead>
+              <tr>
+                <th>{t("tasks.filter.group-user")}</th>
+                <th>{t("tasks.filter.identifier")}</th>
+                <th>{t("common.action")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td />
+                <td />
+                <td><button class="small">{t("common.remove")}</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button">{t("tasks.filter.add-permission")}</button>
+        </fieldset>
 
-        <button>{t("tasks.filter.add-permission")}</button>
-        <table>
-          <thead>
-            <tr>
-              <th scope="column">{t("tasks.filter.group-user")}</th>
-              <th scope="column">{t("tasks.filter.identifier")}</th>
-              <th scope="column">{t("common.action")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>{t("common.remove")}</td>
-            </tr>
-          </tbody>
-        </table>
+        <fieldset>
+          <legend>{t("tasks.filter.variables")}</legend>
+          <p>{t("tasks.filter.variables-hint")}</p>
+          <label class="filter-checkbox">
+            <input type="checkbox" />
+            {t("tasks.filter.show-undefined")}
+          </label>
+          <table>
+            <thead>
+              <tr>
+                <th>{t("common.name")}</th>
+                <th>{t("tasks.filter.label")}</th>
+                <th>{t("common.action")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td />
+                <td />
+                <td><button class="small">{t("common.remove")}</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button">{t("tasks.filter.add-variable")}</button>
+        </fieldset>
 
-        <h3>{t("tasks.filter.variables")}</h3>
-
-        <p>{t("tasks.filter.variables-hint")}</p>
-
-        <label>
-          {t("tasks.filter.show-undefined")}
-          <input type="checkbox" />
-        </label>
-
-        <button>{t("tasks.filter.add-variable")}</button>
-        <table>
-          <thead>
-            <tr>
-              <th scope="column">{t("common.name")}</th>
-              <th scope="column">{t("tasks.filter.label")}</th>
-              <th scope="column">{t("common.action")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td></td>
-              <td></td>
-              <td>{t("common.remove")}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="filter-actions">
+          <button type="submit">{t("common.save")}</button>
+          <a href="/tasks">{t("common.cancel")}</a>
+        </div>
       </form>
     </div>
   );
