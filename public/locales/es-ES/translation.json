@@ -212,6 +212,22 @@
       "show-undefined": "Mostrar variables no definidas",
       "add-variable": "Añadir variable",
       "label": "Etiqueta"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "order": "Orden",
+      "asc": "Ascendente",
+      "desc": "Descendente",
+      "priority": "Prioridad",
+      "due-date": "Fecha de vencimiento",
+      "follow-up-date": "Fecha de seguimiento",
+      "task-name": "Nombre de tarea",
+      "assignee": "Asignado",
+      "process-variable": "Variable de proceso",
+      "execution-variable": "Variable de ejecución",
+      "task-variable": "Variable de tarea",
+      "case-execution-variable": "Variable de ejecución de caso",
+      "case-instance-variable": "Variable de instancia de caso"
     }
   },
   "processes": {

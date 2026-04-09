@@ -227,7 +227,7 @@ main#processes {
   display: flex;
   flex-wrap: wrap;
   padding-top: var(--spacing-1);
-  background: var(--background-2);
+  background: var(--background-1);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -258,7 +258,6 @@ main#processes {
 }
 
 .tabs > .tab-selection > a[aria-selected="true"] {
-  background: var(--background-2);
   color: var(--color-primary);
   font-weight: bold;
   text-decoration: underline;
@@ -274,7 +273,6 @@ main#processes {
   padding: var(--spacing-1);
   overflow: auto;
   height: 100%;
-  background: var(--background-2);
   /*position: relative;*/
 }
 

@@ -212,6 +212,22 @@
       "show-undefined": "Undefinierte Variablen anzeigen",
       "add-variable": "Variable hinzufügen",
       "label": "Bezeichnung"
+    },
+    "sort": {
+      "label": "Sortieren nach",
+      "order": "Sortierreihenfolge",
+      "asc": "Aufsteigend",
+      "desc": "Absteigend",
+      "priority": "Priorität",
+      "due-date": "Fälligkeitsdatum",
+      "follow-up-date": "Wiedervorlage",
+      "task-name": "Aufgabenname",
+      "assignee": "Verantwortlich",
+      "process-variable": "Prozessvariable",
+      "execution-variable": "Ausführungsvariable",
+      "task-variable": "Aufgabenvariable",
+      "case-execution-variable": "Fallausführungsvariable",
+      "case-instance-variable": "Fallinstanzvariable"
     }
   },
   "processes": {

@@ -212,6 +212,22 @@
       "show-undefined": "Ongedefinieerde variabelen tonen",
       "add-variable": "Variabele toevoegen",
       "label": "Label"
+    },
+    "sort": {
+      "label": "Sorteren op",
+      "order": "Sorteervolgorde",
+      "asc": "Oplopend",
+      "desc": "Aflopend",
+      "priority": "Prioriteit",
+      "due-date": "Vervaldatum",
+      "follow-up-date": "Opvolgdatum",
+      "task-name": "Taaknaam",
+      "assignee": "Toegewezen aan",
+      "process-variable": "Procesvariabele",
+      "execution-variable": "Uitvoeringsvariabele",
+      "task-variable": "Taakvariabele",
+      "case-execution-variable": "Zaakuitvoeringsvariabele",
+      "case-instance-variable": "Zaakinstantievariabele"
     }
   },
   "processes": {

@@ -212,6 +212,22 @@
       "show-undefined": "Show undefined variables",
       "add-variable": "Add Variable",
       "label": "Label"
+    },
+    "sort": {
+      "label": "Sort by",
+      "order": "Sort order",
+      "asc": "Ascending",
+      "desc": "Descending",
+      "priority": "Priority",
+      "due-date": "Due Date",
+      "follow-up-date": "Follow-up Date",
+      "task-name": "Task Name",
+      "assignee": "Assignee",
+      "process-variable": "Process Variable",
+      "execution-variable": "Execution Variable",
+      "task-variable": "Task Variable",
+      "case-execution-variable": "Case Execution Variable",
+      "case-instance-variable": "Case Instance Variable"
     }
   },
   "processes": {

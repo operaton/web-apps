@@ -15,7 +15,7 @@ const update_filter = (state, filter_id, body) =>
 const delete_filter = (state, filter_id) =>
   DELETE(`/filter/${filter_id}`, null, state, state.api.filter.delete);
 
-const execute_filter = async (state, filter_id, firstResult = 0, maxResults = 15) => {
+const execute_filter = async (state, filter_id, firstResult = 0, maxResults = 15, sorting = { sortBy: "created", sortOrder: "desc" }) => {
   const prev = state.api.task.list.value;
   if (firstResult === 0) state.api.task.list.value = { status: RESPONSE_STATE.LOADING };
 
@@ -24,7 +24,7 @@ const execute_filter = async (state, filter_id, firstResult = 0, maxResults = 15
   headers.set("Content-Type", "application/json");
 
   const body = {
-    sorting: [{ sortBy: "created", sortOrder: "desc" }],
+    sorting: [sorting],
   };
 
   try {

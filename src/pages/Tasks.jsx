@@ -15,15 +15,31 @@ import { formatRelativeDate } from "../helper/date_formatter.js";
 
 const TASK_PAGE_SIZE = 3;
 
+const SORT_OPTIONS = [
+  { key: "priority", nameKey: "tasks.sort.priority" },
+  { key: "dueDate", nameKey: "tasks.sort.due-date" },
+  { key: "followUpDate", nameKey: "tasks.sort.follow-up-date" },
+  { key: "name", nameKey: "tasks.sort.task-name" },
+  { key: "assignee", nameKey: "tasks.sort.assignee" },
+  { key: "processVariable", nameKey: "tasks.sort.process-variable" },
+  { key: "executionVariable", nameKey: "tasks.sort.execution-variable" },
+  { key: "taskVariable", nameKey: "tasks.sort.task-variable" },
+  { key: "caseExecutionVariable", nameKey: "tasks.sort.case-execution-variable" },
+  { key: "caseInstanceVariable", nameKey: "tasks.sort.case-instance-variable" },
+];
+
 const is_saved_filter = (value) => value && value !== "all" && value !== "my";
 
 const load_tasks = (state, query, firstResult = 0) => {
-  const filterValue = query?.filter;
+  const filterValue = query?.filter,
+    sortBy = query?.sortBy ?? "name",
+    sortOrder = query?.sortOrder ?? "asc",
+    sorting = { sortBy, sortOrder };
   if (is_saved_filter(filterValue)) {
-    void engine_rest.filter.execute_filter(state, filterValue, firstResult, TASK_PAGE_SIZE);
+    void engine_rest.filter.execute_filter(state, filterValue, firstResult, TASK_PAGE_SIZE, sorting);
   } else {
     const filter = filterValue === "my" ? { assignee: state.api.user.profile.value?.id } : {};
-    void engine_rest.task.get_tasks(state, "name", "asc", firstResult, TASK_PAGE_SIZE, filter);
+    void engine_rest.task.get_tasks(state, sortBy, sortOrder, firstResult, TASK_PAGE_SIZE, filter);
   }
 };
 
@@ -80,7 +96,19 @@ const TaskList = () => {
       if (value === "all") url.searchParams.delete("filter");
       else url.searchParams.set("filter", value);
       route(url.pathname + url.search, true);
-      load_tasks(state, { filter: value });
+      load_tasks(state, { ...query, filter: value });
+    },
+    change_sort = (e) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("sortBy", e.currentTarget.value);
+      route(url.pathname + url.search, true);
+      load_tasks(state, { ...query, sortBy: e.currentTarget.value });
+    },
+    change_sort_order = (e) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set("sortOrder", e.currentTarget.value);
+      route(url.pathname + url.search, true);
+      load_tasks(state, { ...query, sortOrder: e.currentTarget.value });
     },
     savedFilters = (state.api.filter.list.value?.data ?? []).filter(
       (f) => Object.keys(f.query ?? {}).length > 0,
@@ -90,16 +118,30 @@ const TaskList = () => {
     <div id="task-list">
       <h2 class="screen-hidden">{t("tasks.title")}</h2>
       <div id="task-actions">
-        <label for="filter-list">{t("tasks.current-filter")}</label>
-        <select id="filter-list" onChange={change_filter} value={query?.filter ?? "all"}>
-          <option value="all">{t("tasks.all-tasks")}</option>
-          <option value="my">{t("tasks.my-tasks")}</option>
-          {savedFilters.length > 0 && <option disabled>──────────</option>}
-          {savedFilters.map((f) => (
-            <option key={f.id} value={f.id}>{f.name}</option>
-          ))}
-        </select>
-        <a href="/tasks/filter" className="button">{t("tasks.edit-filters")}</a>
+        <div>
+          <label for="filter-list">{t("tasks.current-filter")}</label>
+          <select id="filter-list" onChange={change_filter} value={query?.filter ?? "all"}>
+            <option value="all">{t("tasks.all-tasks")}</option>
+            <option value="my">{t("tasks.my-tasks")}</option>
+            {savedFilters.length > 0 && <option disabled>──────────</option>}
+            {savedFilters.map((f) => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
+          <a href="/tasks/filter" className="button">{t("tasks.edit-filters")}</a>
+        </div>
+        <div>
+          <label for="sort-by">{t("tasks.sort.label")}</label>
+          <select id="sort-by" onChange={change_sort} value={query?.sortBy ?? "name"}>
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.key} value={o.key}>{t(o.nameKey)}</option>
+            ))}
+          </select>
+          <select id="sort-order" onChange={change_sort_order} value={query?.sortOrder ?? "asc"} aria-label={t("tasks.sort.order")}>
+            <option value="asc">{t("tasks.sort.asc")}</option>
+            <option value="desc">{t("tasks.sort.desc")}</option>
+          </select>
+        </div>
       </div>
       <div>
         <table>
