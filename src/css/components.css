@@ -214,6 +214,7 @@ main#processes {
 .tabs {
   height: 100%;
   position: relative;
+  min-width: 0;
   /*overflow-y: scroll;*/
   /*overscroll-behavior: none;*/
 }
@@ -257,7 +258,7 @@ main#processes {
 }
 
 .tabs > .tab-selection > a[aria-selected="true"] {
-  background: var(--background-1);
+  background: var(--background-2);
   color: var(--color-primary);
   font-weight: bold;
   text-decoration: underline;
@@ -271,8 +272,9 @@ main#processes {
     var(--border-radius);
 
   padding: var(--spacing-1);
-  overflow-y: auto;
+  overflow: auto;
   height: 100%;
+  background: var(--background-2);
   /*position: relative;*/
 }
 
@@ -361,7 +363,7 @@ div.accordion {
   background: white;
   color: var(--text);
   border: var(--border);
-  border-radius: var(--border-radius-2);
+  border-radius: 999em;
   padding: 0.4em 1.2em;
   cursor: pointer;
 }
@@ -387,7 +389,6 @@ div.accordion {
   align-items: start;
   gap: var(--spacing-1);
   padding: var(--spacing-1);
-  border: var(--border);
   border-radius: var(--border-radius-2);
   background: var(--background-1);
   color: var(--text);

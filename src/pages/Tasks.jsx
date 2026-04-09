@@ -50,8 +50,6 @@ const TaskList = () => {
     <div id="task-list">
       <h2 class="screen-hidden">{t("tasks.title")}</h2>
       <div id="task-actions">
-        <a href="/tasks/start" className="button">{t("tasks.start-process-label")}</a>
-
         <label>{t("tasks.current-filter")}</label>
         <select id="filter-list">
           <option selected>{t("tasks.all-tasks")}</option>
@@ -82,6 +80,7 @@ const TaskList = () => {
           <small class="load-more-end">{t("tasks.no-more-items")}</small>
         ) : null}
       </div>
+      <a href="/tasks/start" class="button start-process">{t("tasks.start-process-label")}</a>
     </div>
   );
 };
@@ -133,16 +132,19 @@ const Task = () => {
   return (
     <div id="task-details" className="fade-in">
       <section id="task-data">
-        <div>
-          <h2>{task.value?.data?.name}</h2>
-          <a href={`/processes/${pd.value?.data?.id}`}>
-            {pd.value?.data?.name} ({t("processes.version")} {pd.value?.data?.version})
-          </a>
-          {state.api.task.one.value?.data !== undefined ? (
-            <p>{state.api.task.one.value?.data.description}</p>
-          ) : (
-            <p>{t("tasks.no-description")}</p>
-          )}
+        <div class="task-header">
+          <div>
+            <h2>{task.value?.data?.name}</h2>
+            <a href={`/processes/${pd.value?.data?.id}`}>
+              {pd.value?.data?.name} ({t("processes.version")} {pd.value?.data?.version})
+            </a>
+            {state.api.task.one.value?.data !== undefined ? (
+              <p>{state.api.task.one.value?.data.description}</p>
+            ) : (
+              <p>{t("tasks.no-description")}</p>
+            )}
+          </div>
+          <CommentButton />
         </div>
 
         <div class="task-cards">
@@ -151,8 +153,6 @@ const Task = () => {
           <ClaimButton />
           <SetGroupsButton />
         </div>
-
-        <CommentButton />
       </section>
       <TaskTabs />
     </div>
@@ -432,7 +432,7 @@ const CommentButton = () => {
   return (
     <>
       <button onClick={show}>
-        <Icons.chat_bubble_left /> {t("tasks.comment-add")}
+        {t("tasks.comment-add")}
       </button>
 
       <dialog id="add_comment">

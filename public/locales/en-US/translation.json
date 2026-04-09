@@ -117,7 +117,7 @@
   "tasks": {
     "title": "Task List",
     "start-process-label": "Start Process",
-    "current-filter": "Current Filter",
+    "current-filter": "Filter",
     "all-tasks": "All Tasks",
     "my-tasks": "My Tasks",
     "edit-filters": "Edit Filters",

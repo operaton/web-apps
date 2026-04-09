@@ -117,7 +117,7 @@
   "tasks": {
     "title": "Takenlijst",
     "start-process-label": "Proces starten",
-    "current-filter": "Huidig filter",
+    "current-filter": "Filter",
     "all-tasks": "Alle taken",
     "my-tasks": "Mijn taken",
     "edit-filters": "Filters bewerken",

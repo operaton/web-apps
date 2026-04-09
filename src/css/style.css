@@ -321,6 +321,7 @@
   main {
     overflow-y: auto;
     flex: 1;
+    min-width: 0;
   }
   main.split-layout {
     display: grid;
@@ -488,7 +489,11 @@
   }
   
   .tasks {
-      display: flex;
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
   }
 
   #task-list {
@@ -496,8 +501,6 @@
     flex-direction: column;
     position: relative;
     max-height: 100%;
-    border-bottom: var(--border);
-    border-width: var(--border-width-2);
     box-sizing: border-box;
 
     > div {
@@ -514,21 +517,27 @@
         }
     }
     table {
-      width: calc(100% - var(--spacing-1));
+      width: 100%;
+    }
+    .start-process {
+      margin: auto auto var(--spacing-1);
     }
   }
 
   #task-details {
-    /*display: grid;
-    grid-template-columns: max-content 3fr;*/
-    width: 100%;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    flex: 1;
+    min-width: 20em;
 
     .task-tabs {
-      overflow-y: scroll;
+      overflow: auto;
       position: relative;
       max-height: 100%;
       z-index: 5;
+      flex: 1;
+      min-width: 0;
 
       h1 {
         font-size: var(--h2-size);
@@ -588,7 +597,6 @@
   }
 
   #task-data {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-2);
@@ -596,6 +604,18 @@
     background: var(--background-2);
     padding: var(--spacing-2);
     overflow-y: auto;
+
+    .task-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: start;
+      gap: var(--spacing-2);
+
+      > button {
+        margin: 0;
+      }
+    }
 
     dl {
       flex-grow: 1;
@@ -623,8 +643,6 @@
   }
 
   .tasks > div:first-of-type {
-    border-bottom: var(--border);
-    border-width: var(--border-width-2);
 
     table {
       flex: 1;
@@ -1121,11 +1139,11 @@
   }
 
   table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     text-indent: 0;
-    overflow: auto;
     white-space: nowrap;
   }
 
