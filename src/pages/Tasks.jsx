@@ -1,5 +1,5 @@
 import { useSignal } from "@preact/signals";
-import { useRoute } from "preact-iso";
+import { useLocation, useRoute } from "preact-iso";
 import { useContext, useLayoutEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 
@@ -13,12 +13,19 @@ import { StartProcessList } from "./StartProcessList.jsx";
 import { TaskForm } from "./TaskForm.jsx";
 import { formatRelativeDate } from "../helper/date_formatter.js";
 
+const TASK_PAGE_SIZE = 3;
+
+const filter_from_query = (query, state) => {
+  if (query?.filter === "my") return { assignee: state.api.user.profile.value?.id };
+  return {};
+};
+
 const TasksPage = () => {
   const state = useContext(AppState);
-  const { params } = useRoute();
+  const { params, query } = useRoute();
 
   if (state.api.task.list.value === null) {
-    void engine_rest.task.get_tasks(state);
+    void engine_rest.task.get_tasks(state, "name", "asc", 0, TASK_PAGE_SIZE, filter_from_query(query, state));
   }
 
   if (params?.task_id === "start") {
@@ -45,27 +52,37 @@ const TasksPage = () => {
   );
 };
 
-const TASK_PAGE_SIZE = 3;
-
 const TaskList = () => {
   const state = useContext(AppState),
     taskList = state.api.task.list,
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    { route } = useLocation(),
     selectedTaskId = params.task_id,
     [t] = useTranslation(),
+    activeFilter = useSignal(filter_from_query(query, state)),
     load_more = () => {
       const current = taskList.value?.data?.length ?? 0;
-      engine_rest.task.get_tasks(state, "name", "asc", current, TASK_PAGE_SIZE);
+      engine_rest.task.get_tasks(state, "name", "asc", current, TASK_PAGE_SIZE, activeFilter.value);
+    },
+    change_filter = (e) => {
+      const value = e.currentTarget.value;
+      const filter = value === "my" ? { assignee: state.api.user.profile.value?.id } : {};
+      activeFilter.value = filter;
+      const url = new URL(window.location.href);
+      if (value === "all") url.searchParams.delete("filter");
+      else url.searchParams.set("filter", value);
+      route(url.pathname + url.search, true);
+      engine_rest.task.get_tasks(state, "name", "asc", 0, TASK_PAGE_SIZE, filter);
     };
 
   return (
     <div id="task-list">
       <h2 class="screen-hidden">{t("tasks.title")}</h2>
       <div id="task-actions">
-        <label>{t("tasks.current-filter")}</label>
-        <select id="filter-list">
-          <option selected>{t("tasks.all-tasks")}</option>
-          <option>{t("tasks.my-tasks")}</option>
+        <label for="filter-list">{t("tasks.current-filter")}</label>
+        <select id="filter-list" onChange={change_filter} value={query?.filter ?? "all"}>
+          <option value="all">{t("tasks.all-tasks")}</option>
+          <option value="my">{t("tasks.my-tasks")}</option>
         </select>
         <a href="/tasks/filter" className="button">{t("tasks.edit-filters")}</a>
       </div>

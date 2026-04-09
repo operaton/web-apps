@@ -116,15 +116,23 @@ const tasks_with_process_definitions = async (tasks, state) => {
   return tasks;
 };
 
-const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0, maxResults = 3) => {
+const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0, maxResults = 3, filter = {}) => {
   let headers = new Headers();
   headers.set(
     "Authorization",
     `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
   );
 
+  const params = new URLSearchParams({
+    sortBy: sort_key,
+    sortOrder: sort_order,
+    firstResult,
+    maxResults,
+    ...filter,
+  });
+
   fetch(
-    `${_url_engine_rest(state)}/task?sortBy=${sort_key}&sortOrder=${sort_order}&firstResult=${firstResult}&maxResults=${maxResults}`,
+    `${_url_engine_rest(state)}/task?${params}`,
     { headers },
   )
     .then((response) =>
