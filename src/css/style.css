@@ -1067,7 +1067,7 @@
   }
 
   :where(input, select, textarea, button):disabled,
-  form :where(input, select, textarea, button):read-only {
+  form :where(input, select, textarea):read-only {
     background: var(--background-2);
     color: var(--text-disabled);
   }

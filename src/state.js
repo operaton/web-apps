@@ -116,6 +116,13 @@ const createAppState = () => {
         create: signal(null),
       },
     },
+    filter: {
+      list: signal(null),
+      one: signal(null),
+      create: signal(null),
+      update: signal(null),
+      delete: signal(null),
+    },
     deployment: {
       one: signal(null),
       all: signal(null),

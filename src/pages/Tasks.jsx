@@ -15,17 +15,28 @@ import { formatRelativeDate } from "../helper/date_formatter.js";
 
 const TASK_PAGE_SIZE = 3;
 
-const filter_from_query = (query, state) => {
-  if (query?.filter === "my") return { assignee: state.api.user.profile.value?.id };
-  return {};
+const is_saved_filter = (value) => value && value !== "all" && value !== "my";
+
+const load_tasks = (state, query, firstResult = 0) => {
+  const filterValue = query?.filter;
+  if (is_saved_filter(filterValue)) {
+    void engine_rest.filter.execute_filter(state, filterValue, firstResult, TASK_PAGE_SIZE);
+  } else {
+    const filter = filterValue === "my" ? { assignee: state.api.user.profile.value?.id } : {};
+    void engine_rest.task.get_tasks(state, "name", "asc", firstResult, TASK_PAGE_SIZE, filter);
+  }
 };
 
 const TasksPage = () => {
   const state = useContext(AppState);
   const { params, query } = useRoute();
 
+  if (state.api.filter.list.value === null) {
+    void engine_rest.filter.get_filters(state);
+  }
+
   if (state.api.task.list.value === null) {
-    void engine_rest.task.get_tasks(state, "name", "asc", 0, TASK_PAGE_SIZE, filter_from_query(query, state));
+    load_tasks(state, query);
   }
 
   if (params?.task_id === "start") {
@@ -59,21 +70,21 @@ const TaskList = () => {
     { route } = useLocation(),
     selectedTaskId = params.task_id,
     [t] = useTranslation(),
-    activeFilter = useSignal(filter_from_query(query, state)),
     load_more = () => {
       const current = taskList.value?.data?.length ?? 0;
-      engine_rest.task.get_tasks(state, "name", "asc", current, TASK_PAGE_SIZE, activeFilter.value);
+      load_tasks(state, query, current);
     },
     change_filter = (e) => {
       const value = e.currentTarget.value;
-      const filter = value === "my" ? { assignee: state.api.user.profile.value?.id } : {};
-      activeFilter.value = filter;
       const url = new URL(window.location.href);
       if (value === "all") url.searchParams.delete("filter");
       else url.searchParams.set("filter", value);
       route(url.pathname + url.search, true);
-      engine_rest.task.get_tasks(state, "name", "asc", 0, TASK_PAGE_SIZE, filter);
-    };
+      load_tasks(state, { filter: value });
+    },
+    savedFilters = (state.api.filter.list.value?.data ?? []).filter(
+      (f) => Object.keys(f.query ?? {}).length > 0,
+    );
 
   return (
     <div id="task-list">
@@ -83,6 +94,10 @@ const TaskList = () => {
         <select id="filter-list" onChange={change_filter} value={query?.filter ?? "all"}>
           <option value="all">{t("tasks.all-tasks")}</option>
           <option value="my">{t("tasks.my-tasks")}</option>
+          {savedFilters.length > 0 && <option disabled>──────────</option>}
+          {savedFilters.map((f) => (
+            <option key={f.id} value={f.id}>{f.name}</option>
+          ))}
         </select>
         <a href="/tasks/filter" className="button">{t("tasks.edit-filters")}</a>
       </div>
@@ -566,8 +581,87 @@ const Diagram = () => {
   );
 };
 
+const CRITERIA_KEYS = [
+  "assignee",
+  "assigneeLike",
+  "candidateGroup",
+  "candidateUser",
+  "involvedUser",
+  "unassigned",
+  "processDefinitionKey",
+  "processDefinitionName",
+  "processDefinitionNameLike",
+  "processInstanceBusinessKey",
+  "processInstanceBusinessKeyLike",
+  "taskDefinitionKey",
+  "taskDefinitionKeyLike",
+  "name",
+  "nameLike",
+  "description",
+  "descriptionLike",
+  "priority",
+  "dueBefore",
+  "dueAfter",
+  "followUpBefore",
+  "followUpAfter",
+  "createdBefore",
+  "createdAfter",
+  "active",
+  "suspended",
+];
+
 const Filter = () => {
-  const [t] = useTranslation();
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    { route } = useLocation(),
+    form = useSignal({
+      name: "",
+      description: "",
+      color: "#000000",
+      priority: 0,
+      refresh: false,
+      criteria: [],
+      variables: [],
+    }),
+    update = (key, value) => (form.value = { ...form.peek(), [key]: value }),
+    add_criteria = () =>
+      update("criteria", [...form.peek().criteria, { key: CRITERIA_KEYS[0], value: "" }]),
+    remove_criteria = (index) =>
+      update("criteria", form.peek().criteria.filter((_, i) => i !== index)),
+    update_criteria = (index, field, value) =>
+      update("criteria", form.peek().criteria.map((c, i) => (i === index ? { ...c, [field]: value } : c))),
+    add_variable = () =>
+      update("variables", [...form.peek().variables, { name: "", label: "" }]),
+    remove_variable = (index) =>
+      update("variables", form.peek().variables.filter((_, i) => i !== index)),
+    update_variable = (index, field, value) =>
+      update("variables", form.peek().variables.map((v, i) => (i === index ? { ...v, [field]: value } : v))),
+    submit = (event) => {
+      event.preventDefault();
+      const { name, description, color, priority, refresh, criteria, variables } = form.value,
+        query = {};
+      criteria.forEach(({ key, value }) => {
+        if (key === "unassigned" || key === "active" || key === "suspended") query[key] = true;
+        else if (key === "priority") query[key] = parseInt(value, 10);
+        else if (value) query[key] = value;
+      });
+      const body = {
+        resourceType: "Task",
+        name,
+        owner: state.api.user.profile.value?.id,
+        query,
+        properties: {
+          description,
+          color,
+          priority: parseInt(priority, 10) || 0,
+          refresh,
+          variables,
+        },
+      };
+      engine_rest.filter.create_filter(state, body).then(() => {
+        route("/tasks");
+      });
+    };
 
   return (
     <div class="filter-editor">
@@ -576,20 +670,44 @@ const Filter = () => {
         <a href="/tasks" class="button">{t("common.back")}</a>
       </header>
 
-      <form>
+      <form onSubmit={submit}>
         <fieldset>
           <legend>{t("tasks.filter.general")}</legend>
           <div class="filter-fields">
             <label for="filter-name">{t("common.name")}</label>
-            <input id="filter-name" />
+            <input
+              id="filter-name"
+              required
+              value={form.value.name}
+              onInput={(e) => update("name", e.currentTarget.value)}
+            />
             <label for="filter-description">{t("tasks.filter.description")}</label>
-            <input id="filter-description" />
+            <input
+              id="filter-description"
+              value={form.value.description}
+              onInput={(e) => update("description", e.currentTarget.value)}
+            />
             <label for="filter-priority">{t("tasks.task-list.table-headings.priority")}</label>
-            <input id="filter-priority" type="number" />
+            <input
+              id="filter-priority"
+              type="number"
+              value={form.value.priority}
+              onInput={(e) => update("priority", e.currentTarget.value)}
+            />
             <label for="filter-color">{t("tasks.filter.color")}</label>
-            <input id="filter-color" type="color" />
+            <input
+              id="filter-color"
+              type="color"
+              value={form.value.color}
+              onInput={(e) => update("color", e.currentTarget.value)}
+            />
             <label class="filter-checkbox" for="filter-auto-refresh">
-              <input id="filter-auto-refresh" type="checkbox" />
+              <input
+                id="filter-auto-refresh"
+                type="checkbox"
+                checked={form.value.refresh}
+                onInput={(e) => update("refresh", e.currentTarget.checked)}
+              />
               {t("tasks.filter.auto-refresh")}
             </label>
           </div>
@@ -597,74 +715,84 @@ const Filter = () => {
 
         <fieldset>
           <legend>{t("tasks.filter.criteria")}</legend>
-          <table>
-            <thead>
-              <tr>
-                <th>{t("common.key")}</th>
-                <th>{t("common.value")}</th>
-                <th>{t("common.action")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td />
-                <td />
-                <td><button class="small">{t("common.remove")}</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <button type="button">{t("tasks.filter.add-criteria")}</button>
-        </fieldset>
-
-        <fieldset>
-          <legend>{t("tasks.filter.permissions")}</legend>
-          <label class="filter-checkbox">
-            <input type="checkbox" />
-            {t("tasks.filter.accessible-by-all")}
-          </label>
-          <table>
-            <thead>
-              <tr>
-                <th>{t("tasks.filter.group-user")}</th>
-                <th>{t("tasks.filter.identifier")}</th>
-                <th>{t("common.action")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td />
-                <td />
-                <td><button class="small">{t("common.remove")}</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <button type="button">{t("tasks.filter.add-permission")}</button>
+          {form.value.criteria.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("common.key")}</th>
+                  <th>{t("common.value")}</th>
+                  <th>{t("common.action")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {form.value.criteria.map((criterion, i) => (
+                  <tr key={i}>
+                    <td>
+                      <select
+                        value={criterion.key}
+                        onChange={(e) => update_criteria(i, "key", e.currentTarget.value)}
+                      >
+                        {CRITERIA_KEYS.map((k) => (
+                          <option key={k} value={k}>{k}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      {criterion.key === "unassigned" || criterion.key === "active" || criterion.key === "suspended"
+                        ? <em>{t("common.yes")}</em>
+                        : <input
+                            value={criterion.value}
+                            onInput={(e) => update_criteria(i, "value", e.currentTarget.value)}
+                          />
+                      }
+                    </td>
+                    <td>
+                      <button type="button" onClick={() => remove_criteria(i)}>{t("common.remove")}</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <button type="button" onClick={add_criteria}>{t("tasks.filter.add-criteria")}</button>
         </fieldset>
 
         <fieldset>
           <legend>{t("tasks.filter.variables")}</legend>
           <p>{t("tasks.filter.variables-hint")}</p>
-          <label class="filter-checkbox">
-            <input type="checkbox" />
-            {t("tasks.filter.show-undefined")}
-          </label>
-          <table>
-            <thead>
-              <tr>
-                <th>{t("common.name")}</th>
-                <th>{t("tasks.filter.label")}</th>
-                <th>{t("common.action")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td />
-                <td />
-                <td><button class="small">{t("common.remove")}</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <button type="button">{t("tasks.filter.add-variable")}</button>
+          {form.value.variables.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("common.name")}</th>
+                  <th>{t("tasks.filter.label")}</th>
+                  <th>{t("common.action")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {form.value.variables.map((variable, i) => (
+                  <tr key={i}>
+                    <td>
+                      <input
+                        value={variable.name}
+                        onInput={(e) => update_variable(i, "name", e.currentTarget.value)}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        value={variable.label}
+                        onInput={(e) => update_variable(i, "label", e.currentTarget.value)}
+                      />
+                    </td>
+                    <td>
+                      <button type="button" onClick={() => remove_variable(i)}>{t("common.remove")}</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <button type="button" onClick={add_variable}>{t("tasks.filter.add-variable")}</button>
         </fieldset>
 
         <div class="filter-actions">

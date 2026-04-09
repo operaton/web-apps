@@ -117,6 +117,7 @@ const tasks_with_process_definitions = async (tasks, state) => {
 };
 
 const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0, maxResults = 3, filter = {}) => {
+  const prev = state.api.task.list.value;
   let headers = new Headers();
   headers.set(
     "Authorization",
@@ -141,7 +142,7 @@ const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0
     .then((tasks) => tasks_with_process_definitions(tasks, state))
     .then(
       (json) => {
-        const existing = firstResult > 0 ? (state.api.task.list.value?.data ?? []) : [];
+        const existing = firstResult > 0 ? (prev?.data ?? []) : [];
         const existingIds = new Set(existing.map((t) => t.id));
         const newTasks = json.filter((t) => !existingIds.has(t.id));
         state.api.task.list.value = {

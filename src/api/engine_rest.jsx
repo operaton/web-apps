@@ -16,6 +16,7 @@ import migration from "./resources/migration.js";
 import task from "./resources/task.js";
 import authorization from "./resources/authorization.js";
 import decision from "./resources/decision.js";
+import filter from "./resources/filter.js";
 
 const engine_rest = {
   auth,
@@ -23,6 +24,7 @@ const engine_rest = {
   decision,
   deployment,
   engine,
+  filter,
   group,
   history,
   job_definition,
