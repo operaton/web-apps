@@ -53,6 +53,8 @@ export function Header() {
         </menu>
 
 
+        <a href="/" id="mobile-logo">OPERATON</a>
+        <button id="mobile-menu-toggle" onClick={show_mobile_menu} aria-label={t("nav.menu")} />
         <div id="nav-wrapper">
           <nav id="primary-navigation" aria-label="Main">
             <menu>

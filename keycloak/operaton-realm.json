@@ -17,9 +17,23 @@
       {
         "name": "operaton-user",
         "description": "Operaton standard user role"
+      },
+      {
+        "name": "operaton-modeler",
+        "description": "Operaton BPMN modeler role — allows creating and deploying diagrams"
       }
     ]
   },
+  "groups": [
+    {
+      "name": "operaton-admin",
+      "path": "/operaton-admin"
+    },
+    {
+      "name": "operaton-user",
+      "path": "/operaton-user"
+    }
+  ],
   "clients": [
     {
       "clientId": "operaton-web-apps",
@@ -30,16 +44,30 @@
       "directAccessGrantsEnabled": false,
       "redirectUris": [
         "http://127.0.0.1:5173/*",
-        "http://localhost:5173/*"
+        "http://localhost:5173/*",
+        "http://localhost:3000/*"
       ],
       "webOrigins": [
         "http://127.0.0.1:5173",
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://localhost:3000"
       ],
       "protocol": "openid-connect",
       "attributes": {
         "pkce.code.challenge.method": "S256"
       }
+    },
+    {
+      "clientId": "operaton-identity-service",
+      "name": "Operaton Identity Service",
+      "description": "Service account client for the Operaton Keycloak Identity Provider Plugin",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "operaton-identity-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect"
     }
   ],
   "users": [
@@ -58,7 +86,11 @@
       ],
       "realmRoles": [
         "operaton-admin",
-        "operaton-user"
+        "operaton-user",
+        "operaton-modeler"
+      ],
+      "groups": [
+        "/operaton-admin"
       ]
     },
     {
@@ -76,7 +108,25 @@
       ],
       "realmRoles": [
         "operaton-user"
+      ],
+      "groups": [
+        "/operaton-user"
       ]
+    },
+    {
+      "username": "service-account-operaton-identity-service",
+      "enabled": true,
+      "serviceAccountClientId": "operaton-identity-service",
+      "realmRoles": [
+        "default-roles-operaton"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "query-groups",
+          "query-users",
+          "view-users"
+        ]
+      }
     }
   ]
 }
