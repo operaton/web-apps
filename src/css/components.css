@@ -505,10 +505,16 @@ div.accordion {
   font-size: 0.85em;
   font-weight: bold;
   color: #fff;
+  border: none;
 }
 
 .bpmn-badge-running {
   background: #126bbe;
+  cursor: pointer;
+}
+
+.bpmn-badge-running:hover {
+  background: #0e559a;
 }
 
 .bpmn-badge-incident {
@@ -524,6 +530,31 @@ div.accordion {
 .bpmn-highlight .djs-visual polygon {
   stroke: var(--color-primary) !important;
   stroke-width: 3px !important;
+}
+
+.bpmn-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 2px;
+  z-index: 5;
+}
+
+.bpmn-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+  background: var(--color-primary, #126bbe);
+  border: none;
+  border-radius: var(--border-radius-1, 4px);
+  cursor: pointer;
+  color: #fff;
+}
+
+.bpmn-action-btn:hover {
+  background-color: var(--color-primary-dark, #0e559a);
 }
 
 .bpmn-controls {

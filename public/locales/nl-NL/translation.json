@@ -517,6 +517,9 @@
   "bpmn": {
     "zoom-in": "Inzoomen",
     "zoom-out": "Uitzoomen",
-    "fit": "Passend maken"
+    "fit": "Passend maken",
+    "show-instances": "Lopende instanties voor deze activiteit tonen",
+    "show-incidents": "Incidenten voor deze activiteit tonen",
+    "show-called-activity": "Aangeroepen activiteit (subproces) tonen"
   }
 }

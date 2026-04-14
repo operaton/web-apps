@@ -517,6 +517,9 @@
   "bpmn": {
     "zoom-in": "Agrandir",
     "zoom-out": "Réduire",
-    "fit": "Ajuster à la vue"
+    "fit": "Ajuster à la vue",
+    "show-instances": "Afficher les instances en cours pour cette activité",
+    "show-incidents": "Afficher les incidents pour cette activité",
+    "show-called-activity": "Afficher l'activité appelée (sous-processus)"
   }
 }

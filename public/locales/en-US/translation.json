@@ -517,6 +517,9 @@
   "bpmn": {
     "zoom-in": "Zoom in",
     "zoom-out": "Zoom out",
-    "fit": "Fit to view"
+    "fit": "Fit to view",
+    "show-instances": "Show running instances for this activity",
+    "show-incidents": "Show incidents for this activity",
+    "show-called-activity": "Show called activity (sub-process)"
   }
 }
