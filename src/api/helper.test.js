@@ -9,7 +9,7 @@ const createMockState = (serverUrl, credentials = { username: 'demo', password: 
     }
   },
   auth: {
-    credentials
+    credentials: { value: credentials }
   }
 });
 

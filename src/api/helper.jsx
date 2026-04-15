@@ -12,7 +12,7 @@ export const _url_engine_rest = (state) =>
   `${state.server.value.url}/engine-rest`;
 
 export const get_credentials = (state) =>
-  `${state.auth.credentials.username}:${state.auth.credentials.password}`;
+  `${state.auth.credentials.value.username}:${state.auth.credentials.value.password}`;
 
 export const get_auth_header = (state) =>
   state.auth.mode === "oauth"

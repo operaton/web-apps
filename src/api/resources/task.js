@@ -160,11 +160,11 @@ const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0
 
 const get_task_process_definitions = (state, ids) =>
   fetch(
-    `${state.server.value.url}/engine-rest/task?processDefinitionId=${ids}`,
+    `${_url_engine_rest(state)}/process-definition?processDefinitionIdIn=${ids}`,
     {
       headers: new Headers({
-        Authorization: `Basic ${window.btoa("demo:demo")}`,
-      }), // fallback, wenn global fehlt
+        Authorization: `Basic ${window.btoa(unescape(encodeURIComponent(get_credentials(state))))}`,
+      }),
     },
   ).then((r) => r.json());
 

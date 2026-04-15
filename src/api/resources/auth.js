@@ -45,11 +45,11 @@ const login = (
       response.ok ? response.json() : Promise.reject(response),
     )
     .then((data) => {
+      state.auth.credentials.value = { username, password };
       state.auth.logged_in.value = {
         status: RESPONSE_STATE.SUCCESS,
         data: "authenticated",
       };
-      state.auth.credentials = { username, password };
       if (remember_login) {
         document.cookie = `credentials={"username": "${username}", "password": "${password}"};path=/`
       }
@@ -89,21 +89,24 @@ const is_authenticated = async (state) => {
     })
   }
 
-  // Basic auth: check with backend
+  // Basic auth: credentials are required — without them, show login
   const signal = state.auth.logged_in;
-  signal.value = { status: RESPONSE_STATE.LOADING };
-
-  const headers = { "Content-Type": "application/json" };
-  if (state.auth.credentials?.username) {
-    const { username, password } = state.auth.credentials;
-    headers["Authorization"] =
-      `Basic ${window.btoa(unescape(encodeURIComponent(`${username}:${password}`)))}`;
+  if (!state.auth.credentials.value?.username) {
+    return (signal.value = {
+      status: RESPONSE_STATE.ERROR,
+      data: "unauthenticated",
+    });
   }
+
+  signal.value = { status: RESPONSE_STATE.LOADING };
+  const { username, password } = state.auth.credentials.value;
 
   try {
     const response = await fetch(`${_url_engine_rest(state)}/authorization`, {
-      headers,
-      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${window.btoa(unescape(encodeURIComponent(`${username}:${password}`)))}`,
+      },
     });
     await (response.ok ? response.json() : Promise.reject(response));
     return (signal.value = {
