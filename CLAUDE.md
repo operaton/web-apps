@@ -65,3 +65,4 @@ The backend is called Operaton which is a fork of Camunda 7. You can use Camunda
 - **i18n**: `react-i18next`, translations in `public/locales/{locale}/translation.json` (en-US, de-DE), always store text strings of the UI in the translation files
 - **Icons**: JSX components in `src/assets/icons.jsx`, sourced from heroicons.com
 - **Accessibility**: semantic HTML, keyboard navigation, skip links, ARIA attributes
+- **Container commands**: when showing a `docker` command, always show the equivalent `podman` command as well
