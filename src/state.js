@@ -164,14 +164,17 @@ const createAppState = () => {
 const AppState = createContext(undefined);
 
 const get_stored_server = () => {
-  if (localStorage.getItem("server")) {
-    return JSON.parse(localStorage.getItem("server"));
+  const servers = JSON.parse(import.meta.env.VITE_BACKEND),
+    stored = localStorage.getItem("server");
+
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    if (servers.some((s) => s.url === parsed.url)) return parsed;
   }
 
-  const stored_server = JSON.parse(import.meta.env.VITE_BACKEND)[0];
-  localStorage.setItem("server", JSON.stringify(stored_server));
-
-  return stored_server;
+  const server = servers[0];
+  localStorage.setItem("server", JSON.stringify(server));
+  return server;
 };
 
 export { createAppState, AppState };
