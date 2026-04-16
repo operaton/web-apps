@@ -232,6 +232,7 @@
   },
   "processes": {
     "title": "Procesdefinities",
+    "filter-placeholder": "Naam / sleutel zoeken",
     "version": "Versie",
     "change-definition": "Definitie wijzigen",
     "definition-id": "Definitie-ID",

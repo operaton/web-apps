@@ -1,4 +1,4 @@
-import { signal, useSignalEffect } from '@preact/signals'
+import { signal, useSignal, useSignalEffect } from '@preact/signals'
 import { useContext, useEffect } from 'preact/hooks'
 import { useLocation, useRoute } from 'preact-iso'
 import { useTranslation } from 'react-i18next'
@@ -148,12 +148,21 @@ const ProcessDiagram = () => {
 const ProcessDefinitionSelection = () => {
   const
     { api: { process: { definition } } } = useContext(AppState),
-    [t] = useTranslation()
+    [t] = useTranslation(),
+    search_term = useSignal('')
 
   return <div class="fade-in">
-    <h1>
-      {t("processes.title")}
-    </h1>
+    <div class="row space-between p-1">
+      <h1>
+        {t("processes.title")}
+      </h1>
+      <input
+        type="text"
+        class="search-input"
+        placeholder={t("processes.filter-placeholder")}
+        value={search_term.value}
+        onInput={(e) => (search_term.value = e.target.value)} />
+    </div>
     <table>
       <thead>
       <tr>
@@ -168,17 +177,23 @@ const ProcessDefinitionSelection = () => {
       <RequestState
         signal={definition.list}
         on_success={() => {
+          const data = definition.list.value?.data ?? []
 
-          const grouped_definitions = Object.groupBy(definition.list.value?.data, ({ definition }) => definition.key)
-          console.log(grouped_definitions)
+          const filtered_data = data.filter(({ definition }) => {
+            if (search_term.value.length === 0) return true
+            const term = search_term.value.toLowerCase()
+            return (definition.name?.toLowerCase().includes(term)) ||
+                   (definition.key?.toLowerCase().includes(term))
+          })
+
+          const grouped_definitions = Object.groupBy(filtered_data, ({ definition }) => definition.key)
           const grouped_definitions_values = Object.entries(grouped_definitions)
-          console.log(grouped_definitions_values)
 
           return <>
             {grouped_definitions_values.map(([key, definition_group]) =>
                <tbody key={key}>
-                 {definition_group.map(definition => <ProcessDefinition key={definition.id} {...definition} />)}
-              </tbody>
+                  {definition_group.map(definition => <ProcessDefinition key={definition.id} {...definition} />)}
+               </tbody>
             )}
           </>
         }

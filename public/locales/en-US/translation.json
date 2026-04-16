@@ -232,6 +232,7 @@
   },
   "processes": {
     "title": "Process Definitions",
+    "filter-placeholder": "Search Name / Key",
     "version": "Version",
     "change-definition": "Change Definition",
     "definition-id": "Definition ID",

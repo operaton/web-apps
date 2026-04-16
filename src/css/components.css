@@ -207,6 +207,15 @@ main#processes {
       z-index: 999;
     }
   }
+
+  .space-between {
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .search-input::placeholder {
+    font-size: var(--small-font-size);
+  }
 }
 
 /* tabs */
