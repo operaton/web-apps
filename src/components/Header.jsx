@@ -36,7 +36,7 @@ export function Header() {
   return (
     <>
       <header id="top">
-        {import.meta.env.VITE_HIDE_RELEASE_WARNING === "true"
+        {/* {import.meta.env.VITE_HIDE_RELEASE_WARNING === "true"
           ? null
           : <div id="release-warning">
               {t("nav.release-warning")}{" "}
@@ -45,7 +45,7 @@ export function Header() {
                 {t("nav.release-warning-or")}{" "}
                 <a href="https://forum.operaton.org/">{t("nav.release-warning-forum")}</a>
               </>}
-            </div>}
+            </div>}*/}
 
         <menu id="skip-links">
           <li><a href="#content">           {t("nav.skip-to-content")}</a></li>
