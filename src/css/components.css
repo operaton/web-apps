@@ -431,7 +431,7 @@ div.accordion {
 .load-more {
   display: block;
   margin: var(--spacing-1) auto;
-  background: white;
+  background: var(--background-1);
   color: var(--text);
   border: var(--border);
   border-radius: 999em;
