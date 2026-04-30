@@ -174,6 +174,46 @@
       <bpmndi:BPMNShape id="EndEvent_Cancelled_di" bpmnElement="EndEvent_Cancelled">
         <dc:Bounds x="800" y="340" width="36" height="36" />
       </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Flow_StartToSubmit_di" bpmnElement="Flow_StartToSubmit">
+        <di:waypoint x="156" y="198" /><di:waypoint x="220" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_SubmitToRouting_di" bpmnElement="Flow_SubmitToRouting">
+        <di:waypoint x="320" y="198" /><di:waypoint x="360" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_RoutingToInvestigation_di" bpmnElement="Flow_RoutingToInvestigation">
+        <di:waypoint x="460" y="198" /><di:waypoint x="500" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_InvestigationToFanout_di" bpmnElement="Flow_InvestigationToFanout">
+        <di:waypoint x="620" y="198" /><di:waypoint x="660" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FanoutDocs_di" bpmnElement="Flow_FanoutDocs">
+        <di:waypoint x="685" y="173" /><di:waypoint x="685" y="120" /><di:waypoint x="760" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FanoutDamage_di" bpmnElement="Flow_FanoutDamage">
+        <di:waypoint x="685" y="223" /><di:waypoint x="685" y="280" /><di:waypoint x="760" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DocsToJoin_di" bpmnElement="Flow_DocsToJoin">
+        <di:waypoint x="860" y="120" /><di:waypoint x="925" y="120" /><di:waypoint x="925" y="173" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DamageToJoin_di" bpmnElement="Flow_DamageToJoin">
+        <di:waypoint x="860" y="280" /><di:waypoint x="925" y="280" /><di:waypoint x="925" y="223" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_JoinToDecision_di" bpmnElement="Flow_JoinToDecision">
+        <di:waypoint x="950" y="198" /><di:waypoint x="1000" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_DecisionToEnd_di" bpmnElement="Flow_DecisionToEnd">
+        <di:waypoint x="1100" y="198" /><di:waypoint x="1140" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_EscalateToCompensate_di" bpmnElement="Flow_EscalateToCompensate">
+        <di:waypoint x="538" y="256" /><di:waypoint x="538" y="358" /><di:waypoint x="700" y="358" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FraudToCompensate_di" bpmnElement="Flow_FraudToCompensate">
+        <di:waypoint x="588" y="256" /><di:waypoint x="588" y="358" /><di:waypoint x="700" y="358" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_CompensateToCancel_di" bpmnElement="Flow_CompensateToCancel">
+        <di:waypoint x="736" y="358" /><di:waypoint x="800" y="358" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
