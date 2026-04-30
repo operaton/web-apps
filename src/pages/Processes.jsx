@@ -552,7 +552,10 @@ const Instances = () => {
 
   return !params?.selection_id ? (
     <div class="fade-in">
-      <table>
+      <header class="processes-page-header">
+        <h1>{t("processes.tabs.instances")}</h1>
+      </header>
+      <table class="processes-table">
         <thead>
           <tr>
             <th>{t("common.id")}</th>
@@ -678,7 +681,7 @@ const InstanceVariables = () => {
   });
 
   return (
-    <table>
+    <table class="processes-table">
       <thead>
         <tr>
           <th>{t("common.name")}</th>
@@ -733,7 +736,7 @@ const InstanceIncidents = () => {
 
   /** @namespace state.api.history.incident.by_process_instance.value.data **/
   return (
-    <table>
+    <table class="processes-table">
       <thead>
         <tr>
           <th>{t("processes.incidents.message")}</th>
@@ -807,7 +810,7 @@ const InstanceUserTasks = () => {
 
   /** @namespace state.api.task.by_process_instance.value.data **/
   return (
-    <table>
+    <table class="processes-table">
       <thead>
         <tr>
           <th>{t("common.activity")}</th>
@@ -874,7 +877,7 @@ const CalledProcessInstances = () => {
   /** @namespace state.api.process.instance.called.value.data **/
   /** @namespace instance.definitionId **/
   return (
-    <table>
+    <table class="processes-table">
       <thead>
         <tr>
           <th>{t("common.state")}</th>
@@ -920,26 +923,31 @@ const Incidents = () => {
   /** @namespace instance.incidentMessage **/
   /** @namespace instance.incidentType **/
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>{t("processes.incidents.message")}</th>
-          <th>{t("common.type")}</th>
-          <th>{t("processes.incidents.configuration")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {state.api.history.incident.by_process_definition.value?.data?.map(
-          (incident) => (
-            <tr key={incident.id}>
-              <td>{incident.incidentMessage}</td>
-              <td>{incident.incidentType}</td>
-              <td>{incident.configuration}</td>
-            </tr>
-          ),
-        )}
-      </tbody>
-    </table>
+    <div class="fade-in">
+      <header class="processes-page-header">
+        <h1>{t("processes.tabs.incidents")}</h1>
+      </header>
+      <table class="processes-table">
+        <thead>
+          <tr>
+            <th>{t("processes.incidents.message")}</th>
+            <th>{t("common.type")}</th>
+            <th>{t("processes.incidents.configuration")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {state.api.history.incident.by_process_definition.value?.data?.map(
+            (incident) => (
+              <tr key={incident.id}>
+                <td>{incident.incidentMessage}</td>
+                <td>{incident.incidentType}</td>
+                <td>{incident.configuration}</td>
+              </tr>
+            ),
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
@@ -955,34 +963,39 @@ const CalledProcessDefinitions = () => {
 
   /** @namespace definition.calledFromActivityIds **/
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>{t("processes.called-definitions.called-process-definition")}</th>
-          <th>{t("common.state")}</th>
-          <th>{t("common.activity")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {state.api.process.definition.called.value?.data?.map((definition) => (
-          <tr key={definition.id}>
-            <td>
-              <a
-                href={`/processes/${definition.id}${keep_history_query(query)}`}
-              >
-                {definition.name}
-              </a>
-            </td>
-            <td>
-              {definition.suspended
-                ? t("common.suspended")
-                : t("common.running")}
-            </td>
-            <td>{definition.calledFromActivityIds.map((a) => `${a}, `)}</td>
+    <div class="fade-in">
+      <header class="processes-page-header">
+        <h1>{t("processes.tabs.called-definitions")}</h1>
+      </header>
+      <table class="processes-table">
+        <thead>
+          <tr>
+            <th>{t("processes.called-definitions.called-process-definition")}</th>
+            <th>{t("common.state")}</th>
+            <th>{t("common.activity")}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {state.api.process.definition.called.value?.data?.map((definition) => (
+            <tr key={definition.id}>
+              <td>
+                <a
+                  href={`/processes/${definition.id}${keep_history_query(query)}`}
+                >
+                  {definition.name}
+                </a>
+              </td>
+              <td>
+                {definition.suspended
+                  ? t("common.suspended")
+                  : t("common.running")}
+              </td>
+              <td>{definition.calledFromActivityIds.map((a) => `${a}, `)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
@@ -1005,8 +1018,11 @@ const JobDefinitions = () => {
   /** @namespace definition.jobConfiguration **/
   /** @namespace definition.overridingJobPriority **/
   return (
-    <div class="relative">
-      <table>
+    <div class="relative fade-in">
+      <header class="processes-page-header">
+        <h1>{t("processes.tabs.jobs")}</h1>
+      </header>
+      <table class="processes-table">
         <thead>
           <tr>
             <th>{t("common.state")}</th>
