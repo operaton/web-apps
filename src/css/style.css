@@ -323,10 +323,6 @@
         flex: 1;
         min-width: 0;
     }
-    main.split-layout {
-        display: grid;
-        grid-template-columns: max-content minmax(max-content, 1fr);
-    }
 
     #top {
         top: 0;

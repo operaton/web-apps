@@ -1,5 +1,5 @@
-import { signal, useSignal, useSignalEffect } from "@preact/signals";
-import { useContext, useEffect } from "preact/hooks";
+import { useSignal, useSignalEffect } from "@preact/signals";
+import { useContext } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
 import engine_rest, {
@@ -8,21 +8,9 @@ import engine_rest, {
 } from "../api/engine_rest.jsx";
 import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
-import { Accordion } from "../components/Accordion.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { ProcessSubNav } from "../components/ProcessSubNav.jsx";
 import { ProcessTertiaryNav } from "../components/ProcessTertiaryNav.jsx";
-
-/**
- * Save custom split view width to localstorage
- */
-const store_details_width = () => {
-  const width = window
-    .getComputedStyle(document.getElementById("selection"), null)
-    .getPropertyValue("width");
-  localStorage.setItem("details_width", width);
-  document.getElementById("canvas").style.maxWidth = `calc(100vw - ${width})`;
-};
 
 /**
  * Keep the `?history=true` query params of the URL alive as long as the history
@@ -43,14 +31,9 @@ const ProcessesPage = () => {
     { params, query, path } = useRoute(),
     { route } = useLocation(),
     [t] = useTranslation(),
-    details_width = signal(localStorage.getItem("details_width") ?? 400),
     enable_history_mode = () => {
       route(`${path}?history=true`);
       state.history_mode.value = true;
-    },
-    disable_history_mode = () => {
-      route(`${path}`);
-      state.history_mode.value = false;
     },
     // condition naming for deciding on fetching data from backend
     definition_selected = params.definition_id,
@@ -71,11 +54,6 @@ const ProcessesPage = () => {
   if (query.history) {
     enable_history_mode();
   }
-
-  /** @namespace details_width.value.data **/
-  useEffect(() => {
-    document.getElementById("selection").style.width = details_width.value.data;
-  }, [details_width.value.data]);
 
   if (definition_selected) {
     if (history_mode_disabled) {
