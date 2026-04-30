@@ -58,7 +58,13 @@ const ProcessesPage = () => {
     loaded_definition_not_matching_url_param =
       state.api.process.definition.one.value?.status ===
         RESPONSE_STATE.SUCCESS &&
-      state.api.process.definition.one.value?.data?.id !== params.definition_id;
+      state.api.process.definition.one.value?.data?.id !== params.definition_id,
+    instance_selected = params.selection_id,
+    activity_instances_signal = state.api.process.instance.activity_instances,
+    no_activity_instances_loaded = activity_instances_signal.value === null,
+    loaded_activity_instances_not_matching_url_param =
+      activity_instances_signal.value?.status === RESPONSE_STATE.SUCCESS &&
+      activity_instances_signal.value?.data?.id !== params.selection_id;
 
   if (query.history) {
     enable_history_mode();
@@ -87,6 +93,10 @@ const ProcessesPage = () => {
           state,
           params.definition_id,
         );
+        void engine_rest.process_definition.statistics(
+          state,
+          params.definition_id,
+        );
       }
     } else if (no_definition_loaded) {
       void engine_rest.process_definition.one(state, params.definition_id);
@@ -97,6 +107,18 @@ const ProcessesPage = () => {
     }
   } else if (state.api.process.definition.list.value === null) {
     void engine_rest.process_definition.list(state);
+  }
+
+  if (
+    instance_selected &&
+    history_mode_disabled &&
+    (no_activity_instances_loaded ||
+      loaded_activity_instances_not_matching_url_param)
+  ) {
+    void engine_rest.process_instance.activity_instances(
+      state,
+      params.selection_id,
+    );
   }
 
   return (
@@ -131,24 +153,69 @@ const ProcessesPage = () => {
   );
 };
 
+const flatten_activity_instances = (node, out = []) => {
+  if (!node) return out;
+  const children = node.childActivityInstances ?? [];
+  if (children.length === 0) {
+    if (node.activityId && node.parentActivityInstanceId) out.push(node);
+    return out;
+  }
+  children.forEach((c) => flatten_activity_instances(c, out));
+  return out;
+};
+
+const activity_instances_to_tokens = (root) => {
+  const leaves = flatten_activity_instances(root);
+  const grouped = new Map();
+  leaves.forEach((leaf) => {
+    const existing = grouped.get(leaf.activityId);
+    if (existing) {
+      existing.activity_instance_ids.push(leaf.id);
+      existing.instances += 1;
+    } else {
+      grouped.set(leaf.activityId, {
+        id: leaf.activityId,
+        instances: 1,
+        incidents: [],
+        activity_instance_ids: [leaf.id],
+      });
+    }
+  });
+  return Array.from(grouped.values());
+};
+
 const ProcessDiagram = () => {
   const state = useContext(AppState),
     {
       api: {
         process: {
           definition: { diagram, statistics },
+          instance: { activity_instances },
         },
       },
     } = state,
     { params } = useRoute(),
+    is_instance_view =
+      params.selection_id !== undefined && !state.history_mode.value,
     has_xml =
       diagram.value?.data?.bpmn20Xml !== null &&
       diagram.value?.data?.bpmn20Xml !== undefined,
     show_diagram = params.definition_id !== undefined && has_xml,
     has_statistics =
       statistics.value !== null && statistics.value?.data !== undefined,
-    is_ready = state.history_mode.value || has_statistics,
-    tokens = state.history_mode.value ? undefined : statistics.value?.data;
+    has_activity_instances =
+      activity_instances.value?.data !== undefined &&
+      activity_instances.value?.data !== null,
+    is_ready =
+      state.history_mode.value ||
+      (is_instance_view ? has_activity_instances : has_statistics),
+    tokens = state.history_mode.value
+      ? undefined
+      : is_instance_view
+        ? activity_instances_to_tokens(activity_instances.value?.data)
+        : statistics.value?.data,
+    mode = is_instance_view ? "instance" : "definition",
+    instance_id = is_instance_view ? params.selection_id : undefined;
 
   /** @namespace diagram.value.data.bpmn20Xml **/
   return (
@@ -158,6 +225,8 @@ const ProcessDiagram = () => {
           xml={diagram.value.data?.bpmn20Xml}
           container="canvas"
           tokens={tokens}
+          mode={mode}
+          instance_id={instance_id}
         />
       ) : (
         <> </>

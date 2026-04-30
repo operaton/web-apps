@@ -61,6 +61,21 @@ const get_process_instance_count = (state, deployment_id) =>
     state.api.process.instance.count,
   );
 
+const get_activity_instances = (state, instance_id) =>
+  GET(
+    `/process-instance/${instance_id}/activity-instances`,
+    state,
+    state.api.process.instance.activity_instances,
+  );
+
+const modify_process_instance = (state, instance_id, body) =>
+  POST(
+    `/process-instance/${instance_id}/modification`,
+    body,
+    state,
+    state.api.process.instance.modification,
+  );
+
 const process_instance = {
   one: get_process_instance,
   variables: get_process_instance_variables,
@@ -69,6 +84,8 @@ const process_instance = {
   all: get_all_process_instances,
   by_activity_ids: get_process_instances_by_activity_ids,
   by_defintion_id: get_process_instance_by_defintion_id,
+  activity_instances: get_activity_instances,
+  modify: modify_process_instance,
 };
 
 export default process_instance;

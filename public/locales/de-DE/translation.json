@@ -520,6 +520,19 @@
     "fit": "Ansicht anpassen",
     "show-instances": "Laufende Instanzen für diese Aktivität anzeigen",
     "show-incidents": "Inzidente für diese Aktivität anzeigen",
-    "show-called-activity": "Aufgerufene Aktivität (Unterprozess) anzeigen"
+    "show-called-activity": "Aufgerufene Aktivität (Unterprozess) anzeigen",
+    "modify": {
+      "drag-hint": "Auf eine andere Aktivität ziehen, um den Token zu verschieben",
+      "title": "Token verschieben",
+      "source": "Von",
+      "target": "Nach",
+      "scope-legend": "Umfang",
+      "all-instances": "Alle Aktivitätsinstanzen verschieben ({{count}})",
+      "single-instance": "Einzelne Aktivitätsinstanz verschieben",
+      "payload-summary": "Request-Payload anzeigen",
+      "copy-payload": "Payload kopieren",
+      "confirm": "Token verschieben",
+      "error": "Modifikation fehlgeschlagen"
+    }
   }
 }

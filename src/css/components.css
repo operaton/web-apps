@@ -558,6 +558,92 @@ div.accordion {
   background-color: var(--color-primary-dark, #0e559a);
 }
 
+.bpmn-token-dot {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #126bbe;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #126bbe;
+  cursor: grab;
+  z-index: 5;
+}
+
+.bpmn-token-dot:active {
+  cursor: grabbing;
+}
+
+.bpmn-token-dot.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+.bpmn-token-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #126bbe;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: bold;
+  text-align: center;
+  line-height: 16px;
+}
+
+.bpmn-drop-target .djs-visual rect,
+.bpmn-drop-target .djs-visual circle,
+.bpmn-drop-target .djs-visual polygon {
+  stroke: #16a34a !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 4 2 !important;
+}
+
+.modify-instance-dialog {
+  min-width: 480px;
+  max-width: 640px;
+  padding: var(--spacing-2, 1rem);
+}
+
+.modify-instance-dialog dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+
+.modify-instance-dialog code {
+  font-family: monospace;
+  background: var(--bg-2, #f3f4f6);
+  padding: 0.1em 0.3em;
+  border-radius: 0.2em;
+}
+
+.modify-instance-dialog .modify-payload {
+  background: var(--bg-2, #f3f4f6);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  max-height: 240px;
+  overflow: auto;
+  font-size: 0.85em;
+}
+
+.modify-instance-dialog fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.modify-instance-dialog .button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .bpmn-controls {
   position: absolute;
   top: var(--spacing-1);

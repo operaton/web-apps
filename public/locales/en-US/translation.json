@@ -520,6 +520,19 @@
     "fit": "Fit to view",
     "show-instances": "Show running instances for this activity",
     "show-incidents": "Show incidents for this activity",
-    "show-called-activity": "Show called activity (sub-process)"
+    "show-called-activity": "Show called activity (sub-process)",
+    "modify": {
+      "drag-hint": "Drag to another activity to move the token",
+      "title": "Move token",
+      "source": "From",
+      "target": "To",
+      "scope-legend": "Scope",
+      "all-instances": "Move all activity instances ({{count}})",
+      "single-instance": "Move a single activity instance",
+      "payload-summary": "Show request payload",
+      "copy-payload": "Copy payload",
+      "confirm": "Move token",
+      "error": "Modification failed"
+    }
   }
 }
