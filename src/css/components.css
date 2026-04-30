@@ -531,6 +531,7 @@ div.accordion {
 .bpmn-highlight .djs-visual polygon {
   stroke: var(--color-primary) !important;
   stroke-width: 3px !important;
+  filter: drop-shadow(0 0 6px var(--color-primary, #126bbe));
 }
 
 .bpmn-actions {
@@ -558,40 +559,35 @@ div.accordion {
   background-color: var(--color-primary-dark, #0e559a);
 }
 
-.bpmn-token-dot {
-  position: relative;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #126bbe;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px #126bbe;
+.bpmn-token-handle {
+  background: transparent;
   cursor: grab;
-  z-index: 5;
 }
 
-.bpmn-token-dot:active {
+.bpmn-token-handle:active {
   cursor: grabbing;
 }
 
-.bpmn-token-dot.dragging {
-  opacity: 0.4;
+.bpmn-token-handle.dragging {
   cursor: grabbing;
+}
+
+.bpmn-highlight.dragging .djs-visual {
+  opacity: 0.5;
 }
 
 .bpmn-token-count {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  min-width: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background: #126bbe;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--color-primary, #126bbe);
   color: #fff;
-  font-size: 0.7em;
+  font-size: 0.75em;
   font-weight: bold;
   text-align: center;
-  line-height: 16px;
+  line-height: 18px;
+  box-shadow: 0 0 0 2px #fff;
 }
 
 .bpmn-drop-target .djs-visual rect,

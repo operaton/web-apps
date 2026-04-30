@@ -103,19 +103,27 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
     const drag_state = { source_id: null, source_instance_ids: [], target_el: null }
 
     const on_drag_start = (e) => {
-      const dot = e.target.closest('.bpmn-token-dot')
-      if (!dot) return
-      drag_state.source_id = dot.dataset.activityId
-      drag_state.source_instance_ids = (dot.dataset.activityInstanceIds || '').split(',').filter(Boolean)
-      dot.classList.add('dragging')
+      const handle = e.target.closest('.bpmn-token-handle')
+      if (!handle) return
+      drag_state.source_id = handle.dataset.activityId
+      drag_state.source_instance_ids = (handle.dataset.activityInstanceIds || '').split(',').filter(Boolean)
+      handle.classList.add('dragging')
+      const elementRegistry = viewerRef.current?.get('elementRegistry')
+      const source_gfx = elementRegistry?.getGraphics(drag_state.source_id)
+      if (source_gfx) source_gfx.classList.add('dragging')
       // Required for Firefox to start drag
       e.dataTransfer.setData('text/plain', drag_state.source_id)
       e.dataTransfer.effectAllowed = 'move'
     }
 
     const on_drag_end = (e) => {
-      const dot = e.target.closest('.bpmn-token-dot')
-      if (dot) dot.classList.remove('dragging')
+      const handle = e.target.closest('.bpmn-token-handle')
+      if (handle) handle.classList.remove('dragging')
+      const elementRegistry = viewerRef.current?.get('elementRegistry')
+      if (drag_state.source_id) {
+        const source_gfx = elementRegistry?.getGraphics(drag_state.source_id)
+        if (source_gfx) source_gfx.classList.remove('dragging')
+      }
       if (drag_state.target_el) drag_state.target_el.classList.remove('bpmn-drop-target')
       drag_state.source_id = null
       drag_state.source_instance_ids = []
@@ -203,12 +211,20 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
 
         if (mode === 'instance') {
           const ids_attr = (activity_instance_ids ?? []).join(',')
-          overlays.add(id, {
-            position: { bottom: 0, left: 0 },
-            html: `<div class="bpmn-token-dot" draggable="true" data-activity-id="${id}" data-activity-instance-ids="${ids_attr}" title="${t('bpmn.modify.drag-hint')}">${instances > 1 ? `<span class="bpmn-token-count">${instances}</span>` : ''}</div>`,
-          })
           const gfx = elementRegistry.getGraphics(id)
-          if (gfx) gfx.classList.add('bpmn-token-host')
+          if (gfx) gfx.classList.add('bpmn-highlight')
+          const w = element.width ?? 100
+          const h = element.height ?? 80
+          overlays.add(id, {
+            position: { top: 0, left: 0 },
+            html: `<div class="bpmn-token-handle" draggable="true" style="width:${w}px;height:${h}px" data-activity-id="${id}" data-activity-instance-ids="${ids_attr}" title="${t('bpmn.modify.drag-hint')}"></div>`,
+          })
+          if (instances > 1) {
+            overlays.add(id, {
+              position: { top: -10, right: -10 },
+              html: `<div class="bpmn-token-count">${instances}</div>`,
+            })
+          }
           return
         }
 
