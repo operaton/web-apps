@@ -326,6 +326,39 @@ section.task-tabs {
   border-color: var(--color-primary);
 }
 
+/* Tertiary nav: horizontal tab strip below the secondary nav, when an
+   instance / incident / called definition / job is selected. */
+.processes-tertiary-nav {
+  display: flex;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) 0;
+  margin-bottom: var(--spacing-1);
+  border-bottom: var(--border);
+  font-size: var(--small-font-size);
+  flex-wrap: wrap;
+}
+
+.processes-tertiary-link {
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.15em 0;
+  border-bottom: 0.2em solid transparent;
+}
+
+.processes-tertiary-link:hover {
+  color: var(--color-primary);
+}
+
+.processes-tertiary-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.processes-tertiary-content {
+  padding-top: var(--spacing-1);
+}
+
 /* New column layout for the Processes page: sub-nav · content · diagram. */
 main#processes {
   display: flex;

@@ -11,6 +11,7 @@ import { AppState } from "../state.js";
 import { Accordion } from "../components/Accordion.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { ProcessSubNav } from "../components/ProcessSubNav.jsx";
+import { ProcessTertiaryNav } from "../components/ProcessTertiaryNav.jsx";
 
 /**
  * Save custom split view width to localstorage
@@ -514,8 +515,18 @@ const InstanceDetails = () => {
     }
   }
 
+  const { params: route_params } = useRoute();
+  const sub_panel = route_params.sub_panel;
+  const active_tab =
+    process_instance_tabs.find((tab) => tab.id === sub_panel) ??
+    process_instance_tabs[0];
+
   return (
     <div class="fade-in">
+      <ProcessTertiaryNav
+        tabs={process_instance_tabs}
+        base_path={`/processes/${definition_id}/${panel}/${selection_id}`}
+      />
       <div class="row gap-2">
         <BackToListBtn
           url={`/processes/${definition_id}/instances${keep_history_query(useRoute().query)}`}
@@ -524,13 +535,7 @@ const InstanceDetails = () => {
         />
         <InstanceDetailsDescription />
       </div>
-
-      <Accordion
-        sections={process_instance_tabs}
-        accordion_name="instance_details_accordion"
-        param_name="sub_panel"
-        base_path={`/processes/${definition_id}/${panel}/${selection_id}${keep_history_query(useRoute().query)}`}
-      />
+      <div class="processes-tertiary-content">{active_tab?.target}</div>
     </div>
   );
 };
