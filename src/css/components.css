@@ -208,6 +208,15 @@ main#processes {
       z-index: 999;
     }
   }
+
+  .space-between {
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .search-input::placeholder {
+    font-size: var(--small-font-size);
+  }
 }
 
 /* tabs */
@@ -790,3 +799,107 @@ dialog#global-search {
 }
 
 /* migrations page */
+
+
+/* search filter */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  border: 1px solid #102a5c;
+  background: #fff;
+  border-radius: 3px;
+  padding: 4px 8px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  position: relative;
+  min-height: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-pill {
+  display: flex;
+  align-items: center;
+  border: 1px solid #dcdfe4;
+  background-color: #f8f9fa;
+  color: #0052cc;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter-pill .remove-btn {
+  color: #0052cc;
+  cursor: pointer;
+  margin-right: 6px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.input-wrapper {
+  flex-grow: 1;
+  position: relative;
+  margin-left: 8px;
+}
+
+.input-wrapper input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+  font-style: italic;
+  background: transparent;
+}
+
+.input-wrapper input::placeholder {
+  color: #999;
+}
+
+.input-wrapper input.active-typing {
+  font-style: normal;
+  color: #0052cc;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  width: 200px;
+  z-index: 1000;
+}
+
+.dropdown-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f4f5f7;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 10px;
+  color: #333;
+}
+
+.action-btn {
+  cursor: pointer;
+  font-size: 16px;
+}

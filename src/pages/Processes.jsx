@@ -1,4 +1,4 @@
-import { signal, useSignalEffect } from '@preact/signals'
+import { signal, useSignal, useSignalEffect } from '@preact/signals'
 import { useContext, useEffect } from 'preact/hooks'
 import { useLocation, useRoute } from 'preact-iso'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,7 @@ import * as Icons from '../assets/icons.jsx'
 import { AppState } from '../state.js'
 import { Accordion } from '../components/Accordion.jsx'
 import { BPMNViewer } from '../components/BPMNViewer.jsx'
+import { AdvancedFilter } from '../components/AdvancedFilter'
 
 /**
  * Save custom split view width to localstorage
@@ -143,46 +144,66 @@ const ProcessDiagram = () => {
 
 
 const ProcessDefinitionSelection = () => {
-  const
-    { api: { process: { definition } } } = useContext(AppState),
-    [t] = useTranslation()
+  // 1. Grab the FULL state object from context so we can pass it to our API function
+  const state = useContext(AppState);
+  const { api: { process: { definition } } } = state;
 
-  return <div class="fade-in">
-    <h1>
-      {t("processes.title")}
-    </h1>
-    <table>
-      <thead>
-      <tr>
-        <th>{t("common.name")}</th>
-        <th>{t("processes.version")}</th>
-        <th>{t("common.key")}</th>
-        <th>{t("dashboard.instances")}</th>
-        <th>{t("processes.tabs.incidents")}</th>
-        <th>{t("common.state")}</th>
-      </tr>
-      </thead>
-      <RequestState
-        signal={definition.list}
-        on_success={() => {
+  const [t] = useTranslation();
 
-          const grouped_definitions = Object.groupBy(definition.list.value?.data, ({ definition }) => definition.key)
-          console.log(grouped_definitions)
-          const grouped_definitions_values = Object.entries(grouped_definitions)
-          console.log(grouped_definitions_values)
+  const filterFields = ['Name', 'Key', 'State', 'Tenant ID'];
+  const filterOperators = ['like', '=', '!='];
 
-          return <>
-            {grouped_definitions_values.map(([key, definition_group]) =>
-               <tbody key={key}>
-                 {definition_group.map(definition => <ProcessDefinition key={definition.id} {...definition} />)}
-              </tbody>
-            )}
-          </>
-        }
-        } />
-    </table>
-  </div>
-}
+  return (
+    <div class="fade-in">
+      <div class="row space-between p-1">
+        <h1>{t("processes.title")}</h1>
+
+        <div style={{ flexGrow: 1, maxWidth: '600px', marginLeft: '20px' }}>
+          <AdvancedFilter
+            fields={filterFields}
+            operators={filterOperators}
+            storageKey="process-def-filter-state"
+          />
+        </div>
+      </div>
+
+      <table>
+        <thead>
+        <tr>
+          <th>{t("common.name")}</th>
+          <th>{t("processes.version")}</th>
+          <th>{t("common.key")}</th>
+          <th>{t("dashboard.instances")}</th>
+          <th>{t("processes.tabs.incidents")}</th>
+          <th>{t("common.state")}</th>
+        </tr>
+        </thead>
+
+        <RequestState
+          signal={definition.list}
+          on_success={() => {
+            const data = definition.list.value?.data ?? [];
+
+            const grouped_definitions = Object.groupBy(data, ({ definition }) => definition.key);
+            const grouped_definitions_values = Object.entries(grouped_definitions);
+
+            return (
+              <>
+                {grouped_definitions_values.map(([key, definition_group]) => (
+                  <tbody key={key}>
+                  {definition_group.map(def => (
+                    <ProcessDefinition key={def.id} {...def} />
+                  ))}
+                  </tbody>
+                ))}
+              </>
+            );
+          }}
+        />
+      </table>
+    </div>
+  );
+};
 
 const ProcessDefinitionDetails = () => {
   const

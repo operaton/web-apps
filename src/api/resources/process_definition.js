@@ -1,7 +1,38 @@
-import { GET, GET_TEXT, POST } from '../helper.jsx'
+import { GET, GET_TEXT, POST, RESPONSE_STATE } from '../helper.jsx';
 
-export const get_process_definitions = (state) =>
-  GET('/process-definition/statistics', state, state.api.process.definition.list)
+export const get_process_definitions =  async (state, queryString = '') => {
+  if (!queryString) {
+    return GET('/process-definition/statistics', state, state.api.process.definition.list);
+  }
+  const defsSignal = { value: null };
+  const statsSignal = { value: null };
+
+  await Promise.all([
+    GET(`/process-definition?${queryString}`, state, defsSignal),
+    GET('/process-definition/statistics', state, statsSignal)
+  ]);
+  if (defsSignal.value.status === RESPONSE_STATE.ERROR || statsSignal.value.status === RESPONSE_STATE.ERROR) {
+    state.api.process.definition.list.value = {
+      status: RESPONSE_STATE.ERROR,
+      error: defsSignal.value.error || statsSignal.value.error
+    };
+    return;
+  }
+
+  const filteredDefs = defsSignal.value.data;
+  const allStats = statsSignal.value.data;
+
+  const validDefinitionIds = new Set(filteredDefs.map(def => def.id));
+
+  const finalFilteredStats = allStats.filter(stat =>
+    validDefinitionIds.has(stat.id || stat.definition?.id)
+  );
+
+  state.api.process.definition.list.value = {
+    status: RESPONSE_STATE.SUCCESS,
+    data: finalFilteredStats
+  };
+};
 
 export const get_process_definition_statistics_with_incidents = (state, id) =>
   GET(`/process-definition/${id}/statistics?incidents=true`, state, state.api.process.definition.statistics)
