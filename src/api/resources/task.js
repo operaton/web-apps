@@ -55,6 +55,9 @@ const get_task_rendered_form = (state, task_id) =>
 const get_task_deployed_form = (state, task_id) =>
   GET(`/task/${task_id}/deployed-form`, state, state.api.task.deployed_form);
 
+const get_task_form_variables = (state, task_id) =>
+  GET(`/task/${task_id}/form-variables`, state, state.api.task.form_variables);
+
 const claim_task = (state, task_id) =>
   POST(
     `/task/${task_id}/claim`,
@@ -191,6 +194,7 @@ const task = {
   get_task_process_definitions,
   get_task_rendered_form,
   get_task_deployed_form,
+  get_task_form_variables,
   claim_task,
   unclaim_task,
   assign_task,

@@ -212,16 +212,60 @@ main#processes {
 
 /* tabs */
 
-.tabs {
-  height: 100%;
+/* The .task-tabs section is a flex item inside #task-details (column flex).
+   We let it shrink (min-height: 0) AND establish a positioning context for
+   the absolutely-positioned .tabs child below — this is the only reliable
+   way to get the height chain to terminate, given flex-wrap on the page. */
+section.task-tabs {
+  min-height: 0;
   position: relative;
+}
+
+/* .tabs fills its parent absolutely, then arranges nav + content in a
+   flex column. .selected-tab gets the leftover space and scrolls. */
+.tabs {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  /*overflow-y: scroll;*/
-  /*overscroll-behavior: none;*/
 }
 
 .tabs #diagram {
   height: 100%;
+}
+
+/* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
+   can push sibling columns sideways. Pin it to the viewport's bottom-right. */
+.bjs-powered-by {
+  position: fixed !important;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  top: auto !important;
+  left: auto !important;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.camunda-task-form {
+  width: 100%;
+  max-width: 720px;
+}
+
+.camunda-task-form .camunda-form,
+.camunda-task-form .fjs-container {
+  width: 100%;
+}
+
+/* form-js renders its own <form class="fjs-form"> directly inside our
+   container. The global `form { display: grid; ... }` rule in style.css
+   tries to manhandle it; reset and rein in the padding. */
+.camunda-form form.fjs-form {
+  display: block !important;
+  grid-template-columns: initial !important;
+  align-items: initial !important;
+  gap: 0 !important;
+  padding: var(--spacing-1) !important;
 }
 
 .tabs > .tab-selection {
@@ -266,15 +310,17 @@ main#processes {
   text-underline-offset: 0.4em;
 }
 
+.tabs > .tab-selection {
+  flex: none;
+}
+
 .tabs > .selected-tab {
-  /*border: var(--border);*/
   border-radius: 0 var(--border-radius) var(--border-radius)
     var(--border-radius);
-
   padding: var(--spacing-1);
+  flex: 1;
+  min-height: 0;
   overflow: auto;
-  height: 100%;
-  /*position: relative;*/
 }
 
 .tabs-back {

@@ -183,7 +183,9 @@
       "complete-task": "Aufgabe abschließen",
       "save-form": "Formular speichern",
       "unknown-error": "Ein unbekannter Fehler ist aufgetreten.",
-      "form-title": "Formular"
+      "form-title": "Formular",
+      "fetch-failed": "Formular konnte nicht geladen werden",
+      "validation-error": "Bitte beheben Sie die obigen Fehler und versuchen Sie es erneut."
     },
     "start-process": {
       "title": "Aufgabe starten",

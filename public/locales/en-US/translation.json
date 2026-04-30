@@ -183,7 +183,9 @@
       "complete-task": "Complete Task",
       "save-form": "Save Form",
       "unknown-error": "An unknown error occurred.",
-      "form-title": "Form"
+      "form-title": "Form",
+      "fetch-failed": "Could not load form",
+      "validation-error": "Please fix the errors above and try again."
     },
     "start-process": {
       "title": "Start Task",

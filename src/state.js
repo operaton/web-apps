@@ -106,6 +106,7 @@ const createAppState = () => {
       form: signal(null),
       rendered_form: signal(null),
       deployed_form: signal(null),
+      form_variables: signal(null),
       claim_result: signal(null),
       unclaim_result: signal(null),
       assign_result: signal(null),

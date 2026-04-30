@@ -10,6 +10,7 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@bpmn-io/form-js-viewer": "^1.21.3",
     "@preact/signals": "^1.3.0",
     "bpmn-js": "^17.11.1",
     "bpmn-js-differ": "^3.1.0",
