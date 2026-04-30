@@ -184,6 +184,7 @@ main#processes {
 
     button {
       background: transparent;
+      color: var(--text);
       margin: 0;
     }
   }

@@ -80,8 +80,6 @@ const ProcessesPage = () => {
         void engine_rest.process_definition.diagram(state, params.definition_id)
       }
     } else {
-      void engine_rest.history.process_instance.all(state, params.definition_id)
-
       if (no_definition_loaded) {
         void engine_rest.process_definition.one(state, params.definition_id)
         void engine_rest.process_definition.diagram(state, params.definition_id)
@@ -91,12 +89,9 @@ const ProcessesPage = () => {
       }
     }
   } else {
-    // reset state
-    state.api.process.definition.one.value = null
-    state.api.process.definition.diagram.value = null
-    state.api.process.instance.list.value = null
-
-    void engine_rest.process_definition.list(state)
+    if (state.api.process.definition.list.value === null) {
+      void engine_rest.process_definition.list(state)
+    }
   }
 
   return (
@@ -128,17 +123,19 @@ const ProcessesPage = () => {
 
 const ProcessDiagram = () => {
   const
-    { api: { process: { definition: { diagram, statistics } } } } = useContext(AppState),
+    state = useContext(AppState),
+    { api: { process: { definition: { diagram, statistics } } } } = state,
     { params } = useRoute(),
-    show_diagram =
-      diagram.value !== null &&
-      params.definition_id !== undefined
+    has_xml = diagram.value?.data?.bpmn20Xml !== null && diagram.value?.data?.bpmn20Xml !== undefined,
+    show_diagram = params.definition_id !== undefined && has_xml,
+    has_statistics = statistics.value !== null && statistics.value?.data !== undefined,
+    is_ready = state.history_mode.value || has_statistics,
+    tokens = state.history_mode.value ? undefined : statistics.value?.data
 
   /** @namespace diagram.value.data.bpmn20Xml **/
   return <>
-    {show_diagram && diagram.value.data?.bpmn20Xml !== null && diagram.value.data?.bpmn20Xml !== undefined
-    && statistics.value !== null && statistics.value?.data !== undefined
-      ? <BPMNViewer xml={diagram.value.data?.bpmn20Xml} container="canvas" tokens={statistics.value.data} />
+    {show_diagram && is_ready
+      ? <BPMNViewer xml={diagram.value.data?.bpmn20Xml} container="canvas" tokens={tokens} />
       : <> </>
     }
   </>
@@ -253,7 +250,7 @@ const Instances = () => {
     if (!state.history_mode.value) {
       void engine_rest.history.process_instance.all_unfinished(state, params.definition_id)
     } else {
-      void engine_rest.process_instance.all(state, params.definition_id)
+      void engine_rest.history.process_instance.all(state, params.definition_id)
     }
   }
 
@@ -401,7 +398,7 @@ const InstanceIncidents = () => {
     void engine_rest.history.incident.by_process_instance(state, params.selection_id)
   })
 
-  /** @namespace state.api.history.incident.by_process_definition.value.data **/
+  /** @namespace state.api.history.incident.by_process_instance.value.data **/
   return (
     <table>
       <thead>
@@ -419,7 +416,7 @@ const InstanceIncidents = () => {
       </tr>
       </thead>
       <tbody>
-      {state.api.history.incident.by_process_definition.value?.data?.map(
+      {state.api.history.incident.by_process_instance.value?.data?.map(
         // eslint-disable-next-line react/jsx-key
         ({
           id,
