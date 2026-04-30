@@ -140,7 +140,7 @@ const response_data = (response) =>
     : Promise.reject(response);
 
 export const GET = async (url, state, signl) => {
-  signl.value = { status: RESPONSE_STATE.LOADING };
+  signl.value = { status: RESPONSE_STATE.LOADING, data: signl.value?.data };
 
   let headers = new Headers();
   headers.set("Authorization", get_auth_header(state));
