@@ -1,4 +1,4 @@
-import { GET } from '../helper.jsx'
+import { GET, PAGINATED_GET } from '../helper.jsx'
 
 const url_params = (definition_id) =>
   new URLSearchParams({
@@ -15,11 +15,25 @@ const url_params_unfinished = (definition_id) =>
     processDefinitionId: definition_id,
   }).toString()
 
-const get_process_instances = (state, definition_id) =>
-  GET(`/history/process-instance?${url_params(definition_id)}`, state, state.api.process.instance.list)
+const INSTANCE_PAGE_SIZE = 20
 
-const get_process_instances_unfinished = (state, definition_id) =>
-  GET(`/history/process-instance?${url_params_unfinished(definition_id)}`, state, state.api.process.instance.list)
+const get_process_instances = (state, definition_id, firstResult = 0) =>
+  PAGINATED_GET(
+    `/history/process-instance?${url_params(definition_id)}`,
+    state,
+    state.api.process.instance.list,
+    firstResult,
+    INSTANCE_PAGE_SIZE,
+  )
+
+const get_process_instances_unfinished = (state, definition_id, firstResult = 0) =>
+  PAGINATED_GET(
+    `/history/process-instance?${url_params_unfinished(definition_id)}`,
+    state,
+    state.api.process.instance.list,
+    firstResult,
+    INSTANCE_PAGE_SIZE,
+  )
 
 const get_process_instance = (state, definition_id) =>
   GET(`/history/process-instance/${definition_id}`, state, state.api.process.instance.one)

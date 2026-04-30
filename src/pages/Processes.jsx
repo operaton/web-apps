@@ -515,37 +515,33 @@ const InstanceDetails = () => {
 
   return (
     <div class="fade-in">
+      <InstanceDetailsDescription />
       <ProcessTertiaryNav
         tabs={process_instance_tabs}
         base_path={`/processes/${definition_id}/${panel}/${selection_id}`}
       />
-      <div class="row gap-2">
-        <BackToListBtn
-          url={`/processes/${definition_id}/instances${keep_history_query(useRoute().query)}`}
-          title={t("processes.change-instance")}
-          className="bg-1"
-        />
-        <InstanceDetailsDescription />
-      </div>
       <div class="processes-tertiary-content">{active_tab?.target}</div>
     </div>
   );
 };
 
 const InstanceDetailsDescription = () => {
-  const [t] = useTranslation();
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    data = state.api.process.instance.one.value?.data;
 
   return (
-    <dl>
+    <dl class="processes-definition-meta processes-instance-meta">
       <dt>{t("processes.instance-id")}</dt>
-      <dd>
-        {useContext(AppState).api.process.instance.one.value.data?.id ?? "-/-"}
+      <dd
+        class="font-mono copy-on-click"
+        onClick={copyToClipboard}
+        title={t("processes.click-to-copy")}
+      >
+        {data?.id ?? "—"}
       </dd>
       <dt>{t("processes.business-key")}</dt>
-      <dd>
-        {useContext(AppState).api.process.instance.one.value.data
-          ?.businessKey ?? "-/-"}
-      </dd>
+      <dd>{data?.businessKey ?? "—"}</dd>
     </dl>
   );
 };

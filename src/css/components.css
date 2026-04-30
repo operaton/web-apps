@@ -199,7 +199,8 @@ section.task-tabs {
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-2);
-  padding: var(--spacing-1) var(--spacing-2);
+  min-height: 2rem;
+  padding: 0 var(--spacing-2);
   border-bottom: var(--border);
   background: var(--background-1);
   font-size: var(--small-font-size);
@@ -215,8 +216,9 @@ section.task-tabs {
 .processes-subnav-link {
   color: var(--text);
   text-decoration: none;
-  padding: 0.15em 0;
-  border-bottom: 0.2em solid transparent;
+  padding: 0;
+  line-height: 2rem;
+  border-bottom: 0.15em solid transparent;
 }
 
 .processes-subnav-link:hover {
@@ -256,23 +258,27 @@ section.task-tabs {
   border-color: var(--color-primary);
 }
 
-/* Tertiary nav: horizontal tab strip below the secondary nav, when an
-   instance / incident / called definition / job is selected. */
+/* Tertiary nav: horizontal tab strip whose border spans the full width of
+   the page. We negative-margin it past .processes-content's padding. */
 .processes-tertiary-nav {
   display: flex;
+  align-items: center;
   gap: var(--spacing-2);
-  padding: var(--spacing-1) 0;
-  margin-bottom: var(--spacing-1);
+  min-height: 2rem;
+  padding: 0 var(--spacing-2);
+  margin: 0 calc(-1 * var(--spacing-2)) var(--spacing-1);
   border-bottom: var(--border);
   font-size: var(--small-font-size);
   flex-wrap: wrap;
+  background: var(--background-1);
 }
 
 .processes-tertiary-link {
   color: var(--text);
   text-decoration: none;
-  padding: 0.15em 0;
-  border-bottom: 0.2em solid transparent;
+  padding: 0;
+  line-height: 2rem;
+  border-bottom: 0.15em solid transparent;
 }
 
 .processes-tertiary-link:hover {
@@ -441,6 +447,10 @@ main#processes {
 
 .processes-definition-meta dd {
   margin: 0;
+}
+
+.processes-instance-meta {
+  margin-bottom: var(--spacing-1);
 }
 
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
