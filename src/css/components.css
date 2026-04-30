@@ -263,6 +263,69 @@ section.task-tabs {
   height: 100%;
 }
 
+/* Processes sub-nav: Definitions › Instances · Incidents · …    [history] */
+.processes-subnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-bottom: var(--border);
+  background: var(--background-1);
+  font-size: var(--small-font-size);
+}
+
+.processes-subnav-trail {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.processes-subnav-link {
+  color: var(--text);
+  text-decoration: none;
+  padding: 0.15em 0;
+  border-bottom: 0.2em solid transparent;
+}
+
+.processes-subnav-link:hover {
+  color: var(--color-primary);
+}
+
+.processes-subnav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.processes-subnav-link.disabled {
+  color: var(--text-2, var(--muted));
+  cursor: not-allowed;
+}
+
+.processes-subnav-chevron {
+  color: var(--text-2, var(--muted));
+  font-size: 1.1em;
+  user-select: none;
+}
+
+.processes-subnav-history {
+  background: transparent;
+  color: var(--text);
+  border: var(--border);
+  padding: 0.25em 0.75em;
+  border-radius: 999em;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.processes-subnav-history.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
    can push sibling columns sideways. Pin it to the viewport's bottom-right. */
 .bjs-powered-by {

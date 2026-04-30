@@ -1,4 +1,4 @@
-import { signal, useSignalEffect } from "@preact/signals";
+import { signal, useSignal, useSignalEffect } from "@preact/signals";
 import { useContext, useEffect } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { Accordion } from "../components/Accordion.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
+import { ProcessSubNav } from "../components/ProcessSubNav.jsx";
 
 /**
  * Save custom split view width to localstorage
@@ -123,27 +124,13 @@ const ProcessesPage = () => {
 
   return (
     <main id="processes" class="split-layout">
+      <ProcessSubNav />
       <div id="left-side">
         <div id="selection" onMouseUp={store_details_width}>
           {!params?.definition_id ? (
             <ProcessDefinitionSelection />
           ) : (
             <ProcessDefinitionDetails />
-          )}
-        </div>
-
-        <div
-          id="history-mode-indicator"
-          class={state.history_mode.value ? "on" : "off"}
-        >
-          {state.history_mode.value ? (
-            <button onClick={disable_history_mode}>
-              {t("processes.history-mode-active")}
-            </button>
-          ) : (
-            <button onClick={enable_history_mode}>
-              {t("processes.enable-history-mode")}
-            </button>
           )}
         </div>
       </div>
@@ -371,36 +358,59 @@ const ProcessDefinition = ({
 const Instances = () => {
   const state = useContext(AppState),
     { params } = useRoute(),
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    list = state.api.process.instance.list,
+    loaded_for = useSignal(null);
 
-  if (!params.selection_id) {
-    if (!state.history_mode.value) {
-      void engine_rest.history.process_instance.all_unfinished(
-        state,
-        params.definition_id,
-      );
-    } else {
+  const fetch_page = (firstResult) => {
+    if (state.history_mode.value) {
       void engine_rest.history.process_instance.all(
         state,
         params.definition_id,
+        firstResult,
       );
+    } else {
+      void engine_rest.history.process_instance.all_unfinished(
+        state,
+        params.definition_id,
+        firstResult,
+      );
+    }
+  };
+
+  if (!params.selection_id) {
+    const cache_key = `${params.definition_id}|${state.history_mode.value ? "h" : "l"}`;
+    if (loaded_for.value !== cache_key) {
+      loaded_for.value = cache_key;
+      fetch_page(0);
     }
   }
 
+  const load_more = () => fetch_page(list.value?.data?.length ?? 0);
+
   return !params?.selection_id ? (
-    <table class="fade-in">
-      <thead>
-        <tr>
-          <th>{t("common.id")}</th>
-          <th>{t("processes.start-time")}</th>
-          <th>{t("common.state")}</th>
-          <th>{t("processes.business-key")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <InstanceTableRows />
-      </tbody>
-    </table>
+    <div class="fade-in">
+      <table>
+        <thead>
+          <tr>
+            <th>{t("common.id")}</th>
+            <th>{t("processes.start-time")}</th>
+            <th>{t("common.state")}</th>
+            <th>{t("processes.business-key")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <InstanceTableRows />
+        </tbody>
+      </table>
+      {list.value?.hasMore === true ? (
+        <button class="load-more" onClick={load_more}>
+          {t("tasks.load-more")}
+        </button>
+      ) : list.value?.hasMore === false ? (
+        <small class="load-more-end">{t("tasks.no-more-items")}</small>
+      ) : null}
+    </div>
   ) : (
     <InstanceDetails />
   );

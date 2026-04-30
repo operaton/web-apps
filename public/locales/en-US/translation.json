@@ -260,6 +260,13 @@
       "user-tasks": "User Tasks",
       "external-tasks": "External Tasks"
     },
+    "subnav": {
+      "definitions": "Definitions",
+      "instances": "Instances",
+      "incidents": "Incidents",
+      "called-definitions": "Called Definitions",
+      "jobs": "Jobs"
+    },
     "incidents": {
       "message": "Message",
       "process-instance": "Process Instance",
