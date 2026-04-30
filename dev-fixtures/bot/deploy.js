@@ -35,9 +35,10 @@ const main = async () => {
   const files = [
     ...(await collect(resolve(root, 'processes'), (n) => n.endsWith('.bpmn'))),
     ...(await collect(resolve(root, 'rules'), (n) => n.endsWith('.dmn'))),
+    ...(await collect(resolve(root, 'forms'), (n) => n.endsWith('.form'))),
   ]
   if (files.length === 0) {
-    console.error('No .bpmn or .dmn files found under dev-fixtures/.')
+    console.error('No .bpmn / .dmn / .form files found under dev-fixtures/.')
     process.exit(1)
   }
 

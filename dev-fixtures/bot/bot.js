@@ -105,25 +105,97 @@ const make_user_task_completer = (client, rng, config) => {
   const { pollIntervalMs, completionDelayMedianMs, completionDelaySigma, stallProbability } =
     config.userTaskCompleter
   const scheduled = new Set()
+  const form_cache = new Map() // formKey/refName → schema  (null when no form)
 
-  const complete_after_delay = async (task_id) => {
-    if (scheduled.has(task_id)) return
-    scheduled.add(task_id)
-    const delay = rng.fork('userTask').logNormal(completionDelayMedianMs, completionDelaySigma)
+  const has_form = (task) =>
+    !!task.formKey ||
+    !!task.camundaFormRef ||
+    !!task.operatonFormRef
+
+  const cache_key = (task) =>
+    task.formKey || JSON.stringify(task.camundaFormRef ?? task.operatonFormRef ?? '')
+
+  const fetch_form_schema = async (task) => {
+    if (!has_form(task)) return null
+    const key = cache_key(task)
+    if (form_cache.has(key)) return form_cache.get(key)
+    try {
+      const schema = await client.get(`/task/${task.id}/deployed-form`)
+      const ok = schema && Array.isArray(schema.components) ? schema : null
+      form_cache.set(key, ok)
+      return ok
+    } catch {
+      form_cache.set(key, null)
+      return null
+    }
+  }
+
+  const synth_value = (component, topic_rng) => {
+    const required = component.validate?.required
+    if (!required && topic_rng.chance(0.5)) return undefined
+    switch (component.type) {
+      case 'textfield':
+        return component.label ? `synthetic ${component.label}` : 'synthetic'
+      case 'textarea':
+        return 'auto-completed by load bot'
+      case 'number': {
+        const lo = component.validate?.min ?? 0
+        const hi = component.validate?.max ?? Math.max(lo + 1, 100)
+        return topic_rng.int(lo, hi)
+      }
+      case 'checkbox':
+        return topic_rng.chance(0.5)
+      case 'radio':
+      case 'select':
+        return component.values?.length ? topic_rng.pick(component.values).value : undefined
+      case 'datetime':
+      case 'date':
+        return new Date().toISOString().slice(0, 10)
+      default:
+        return undefined
+    }
+  }
+
+  const synth_variables = (schema, task_rng) => {
+    const out = {}
+    for (const c of schema.components ?? []) {
+      if (!c.key || c.disabled) continue
+      const v = synth_value(c, task_rng)
+      if (v === undefined) continue
+      out[c.key] = {
+        value: v,
+        type:
+          typeof v === 'boolean' ? 'Boolean' :
+          typeof v === 'number'  ? (Number.isInteger(v) ? 'Long' : 'Double') :
+          'String',
+      }
+    }
+    return out
+  }
+
+  const complete_after_delay = async (task) => {
+    if (scheduled.has(task.id)) return
+    scheduled.add(task.id)
+    const task_rng = rng.fork('userTask:' + task.id)
+    const delay = task_rng.logNormal(completionDelayMedianMs, completionDelaySigma)
     await sleep(delay)
-    if (rng.chance(stallProbability)) {
-      // Deliberately leave it for now — claim and bail to make incidents visible.
-      scheduled.delete(task_id)
+    if (task_rng.chance(stallProbability)) {
+      scheduled.delete(task.id)
       return
     }
     try {
-      await client.post(`/task/${task_id}/complete`, { variables: {} })
-      log(`✓ user-task ${task_id.slice(0, 8)} (after ${(delay / 1000) | 0}s)`)
+      const schema = await fetch_form_schema(task)
+      if (schema) {
+        const variables = synth_variables(schema, task_rng)
+        await client.post(`/task/${task.id}/submit-form`, { variables })
+      } else {
+        await client.post(`/task/${task.id}/complete`, { variables: {} })
+      }
+      log(`✓ user-task ${task.id.slice(0, 8)} (after ${(delay / 1000) | 0}s)`)
     } catch (e) {
-      // Task may have moved on (timer boundary, etc.) — that's fine.
-      if (e.status !== 404) warn(`! user-task ${task_id.slice(0, 8)}: ${e.message}`)
+      if (e.status !== 404) warn(`! user-task ${task.id.slice(0, 8)}: ${e.message}`)
     } finally {
-      scheduled.delete(task_id)
+      scheduled.delete(task.id)
     }
   }
 
@@ -132,7 +204,7 @@ const make_user_task_completer = (client, rng, config) => {
       try {
         const tasks = await client.get('/task?maxResults=200')
         for (const t of tasks) {
-          if (!scheduled.has(t.id)) void complete_after_delay(t.id)
+          if (!scheduled.has(t.id)) void complete_after_delay(t)
         }
       } catch (e) {
         warn('user-task loop error:', e.message)

@@ -8,6 +8,7 @@ COPY bot/package.json /app/bot/package.json
 COPY bot /app/bot
 COPY processes /app/processes
 COPY rules /app/rules
+COPY forms /app/forms
 
 WORKDIR /app/bot
 
