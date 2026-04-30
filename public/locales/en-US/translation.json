@@ -267,6 +267,8 @@
       "called-definitions": "Called Definitions",
       "jobs": "Jobs"
     },
+    "diagram-maximize": "Maximize diagram",
+    "diagram-restore": "Restore diagram",
     "incidents": {
       "message": "Message",
       "process-instance": "Process Instance",

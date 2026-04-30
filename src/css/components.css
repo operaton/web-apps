@@ -326,6 +326,75 @@ section.task-tabs {
   border-color: var(--color-primary);
 }
 
+/* New column layout for the Processes page: sub-nav · content · diagram. */
+main#processes {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.processes-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.processes-content {
+  flex: 1 1 70%;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--spacing-2);
+}
+
+.processes-diagram {
+  flex: 0 0 30%;
+  min-height: 0;
+  position: relative;
+  border-top: var(--border);
+  background: var(--background-1);
+  display: flex;
+  flex-direction: column;
+}
+
+.processes-diagram.maximized {
+  flex: 1 1 100%;
+}
+
+.processes-diagram #canvas {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.diagram-maximize-btn {
+  position: absolute;
+  top: var(--spacing-1);
+  left: var(--spacing-1);
+  z-index: 10;
+  background: var(--background-1);
+  color: var(--text);
+  border: var(--border);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.diagram-maximize-btn:hover {
+  background: var(--background-2);
+}
+
+.diagram-maximize-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
    can push sibling columns sideways. Pin it to the viewport's bottom-right. */
 .bjs-powered-by {

@@ -122,20 +122,54 @@ const ProcessesPage = () => {
     );
   }
 
+  const def_selected = !!params.definition_id;
+  const diagram_maximized = useSignal(false);
+
   return (
-    <main id="processes" class="split-layout">
+    <main id="processes">
       <ProcessSubNav />
-      <div id="left-side">
-        <div id="selection" onMouseUp={store_details_width}>
-          {!params?.definition_id ? (
-            <ProcessDefinitionSelection />
-          ) : (
-            <ProcessDefinitionDetails />
-          )}
-        </div>
+      <div class="processes-body">
+        {(!def_selected || !diagram_maximized.value) && (
+          <div class="processes-content">
+            {!def_selected ? (
+              <ProcessDefinitionSelection />
+            ) : (
+              <ProcessDefinitionDetails />
+            )}
+          </div>
+        )}
+        {def_selected && (
+          <div
+            class={`processes-diagram ${diagram_maximized.value ? "maximized" : ""}`}
+          >
+            <button
+              type="button"
+              class="diagram-maximize-btn"
+              onClick={() =>
+                (diagram_maximized.value = !diagram_maximized.value)
+              }
+              title={
+                diagram_maximized.value
+                  ? t("processes.diagram-restore")
+                  : t("processes.diagram-maximize")
+              }
+              aria-label={
+                diagram_maximized.value
+                  ? t("processes.diagram-restore")
+                  : t("processes.diagram-maximize")
+              }
+            >
+              {diagram_maximized.value ? (
+                <Icons.arrows_pointing_in />
+              ) : (
+                <Icons.arrows_pointing_out />
+              )}
+            </button>
+            <div id="canvas" />
+            <ProcessDiagram />
+          </div>
+        )}
       </div>
-      <div id="canvas" />
-      <ProcessDiagram />
     </main>
   );
 };
