@@ -24,10 +24,10 @@ const get_process_instances_unfinished = (state, definition_id) =>
 const get_process_instance = (state, definition_id) =>
   GET(`/history/process-instance/${definition_id}`, state, state.api.process.instance.one)
 
-const get_process_incidents = (state, definition_id) =>
+const get_incidents_by_process_definition = (state, definition_id) =>
   GET(`/history/incident?processDefinitionId=${definition_id}`, state, state.api.history.incident.by_process_definition)
 
-const get_process_instance_incidents = (state, instance_id) =>
+const get_incidents_by_process_instance = (state, instance_id) =>
   GET(`/history/incident?processInstanceId=${instance_id}`, state, state.api.history.incident.by_process_instance)
 
 const get_process_instance_variable = (state, instance_id) =>
@@ -46,8 +46,8 @@ const history = {
     all_unfinished: get_process_instances_unfinished,
   },
   incident: {
-    by_process_definition: get_process_instance_incidents,
-    by_process_instance: get_process_incidents
+    by_process_definition: get_incidents_by_process_definition,
+    by_process_instance: get_incidents_by_process_instance
   },
   variable_instance: {
     by_process_instance: get_process_instance_variable,
