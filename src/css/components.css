@@ -273,20 +273,61 @@ section.task-tabs {
   max-width: 720px;
 }
 
-.camunda-task-form .camunda-form,
-.camunda-task-form .fjs-container {
+/* Native renderer for Camunda Forms — leans on the global form grid
+   (12em label column + content column) but tweaks alignment for tall
+   inputs (textarea, radio groups) and lets text blocks span full width. */
+form.camunda-form {
+  align-items: start;
+  padding: var(--spacing-1);
+}
+
+.camunda-form .form-fullspan {
+  grid-column: 1 / -1;
+}
+
+.camunda-form .form-input-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.camunda-form .form-input-cell input[type="text"],
+.camunda-form .form-input-cell input[type="number"],
+.camunda-form .form-input-cell input[type="date"],
+.camunda-form .form-input-cell input[type="time"],
+.camunda-form .form-input-cell input[type="datetime-local"],
+.camunda-form .form-input-cell select,
+.camunda-form .form-input-cell textarea {
   width: 100%;
 }
 
-/* form-js renders its own <form class="fjs-form"> directly inside our
-   container. The global `form { display: grid; ... }` rule in style.css
-   tries to manhandle it; reset and rein in the padding. */
-.camunda-form form.fjs-form {
-  display: block !important;
-  grid-template-columns: initial !important;
-  align-items: initial !important;
-  gap: 0 !important;
-  padding: var(--spacing-1) !important;
+.camunda-form .form-input-cell input[type="checkbox"] {
+  align-self: start;
+}
+
+.camunda-form .form-radio-group,
+.camunda-form .form-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.camunda-form .form-inline-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: normal;
+}
+
+.camunda-form .form-required-mark {
+  color: var(--err, var(--color-primary));
+  margin-left: 0.15em;
+}
+
+.camunda-form .form-unsupported {
+  color: var(--muted, var(--text-2));
+  font-style: italic;
 }
 
 .tabs > .tab-selection {
