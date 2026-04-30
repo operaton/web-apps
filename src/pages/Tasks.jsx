@@ -269,6 +269,34 @@ const Task = () => {
       },
     } = state;
 
+  const task_value = task.value;
+  const task_data = task_value?.data;
+  const is_error =
+    task_value?.status === RESPONSE_STATE.ERROR && task_data === undefined;
+
+  if (is_error) {
+    const status = task_value.error?.status;
+    return (
+      <div id="task-details" className="fade-in">
+        <div class="task-empty">
+          <h2>
+            {status === 404
+              ? t("tasks.task-not-found")
+              : t("tasks.task-load-failed")}
+          </h2>
+          <p>
+            {status === 404
+              ? t("tasks.task-not-found-hint")
+              : task_value.error?.message ?? t("tasks.form.unknown-error")}
+          </p>
+          <a href="/tasks" class="button">
+            {t("tasks.back-to-list")}
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div id="task-details" className="fade-in">
       <section id="task-data">
@@ -304,6 +332,20 @@ const Task = () => {
   );
 };
 
+const load_task_chain = async (state, task_id) => {
+  await engine_rest.task.get_task(state, task_id);
+  const task = state.api.task.one.value?.data;
+  if (!task?.id) {
+    // Task no longer exists (completed, deleted, or wrong id) — stop here so we
+    // don't feed `undefined` into downstream URLs.
+    return;
+  }
+  await engine_rest.process_definition.one(state, task.processDefinitionId);
+  await engine_rest.task.get_identity_links(state, task.id);
+  await engine_rest.history.get_user_operation(state, task.executionId);
+  await engine_rest.task.get_comments(state, task.id);
+};
+
 const TaskTabs = () => {
   const state = useContext(AppState);
   const { params } = useRoute();
@@ -316,32 +358,7 @@ const TaskTabs = () => {
 
   if (currentTaskId.value !== params.task_id) {
     currentTaskId.value = params.task_id;
-    engine_rest.task
-      .get_task(state, params.task_id)
-      .then(() =>
-        engine_rest.process_definition.one(
-          state,
-          state.api.task.one.value?.data?.processDefinitionId,
-        ),
-      )
-      .then(() =>
-        engine_rest.task.get_identity_links(
-          state,
-          state.api.task.one.value?.data?.id,
-        ),
-      )
-      .then(() =>
-        engine_rest.history.get_user_operation(
-          state,
-          state.api.task.one.value?.data?.executionId,
-        ),
-      )
-      .then(() =>
-        engine_rest.task.get_comments(
-          state,
-          state.api.task.one.value?.data?.id,
-        ),
-      );
+    void load_task_chain(state, params.task_id);
   }
 
   return (
