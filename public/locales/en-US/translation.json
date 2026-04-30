@@ -269,6 +269,14 @@
     },
     "diagram-maximize": "Maximize diagram",
     "diagram-restore": "Restore diagram",
+    "deployed-definitions": "Deployed Process Definitions",
+    "deploy": "Deploy",
+    "filter-search": "Filter & Search",
+    "empty": {
+      "heading": "No process definition deployed",
+      "upload": "Upload process definition",
+      "how-to": "How to deploy"
+    },
     "incidents": {
       "message": "Message",
       "process-instance": "Process Instance",

@@ -257,53 +257,89 @@ const ProcessDiagram = () => {
 };
 
 const ProcessDefinitionSelection = () => {
-  const {
+  const state = useContext(AppState),
+    {
       api: {
         process: { definition },
       },
-    } = useContext(AppState),
-    [t] = useTranslation();
+    } = state,
+    [t] = useTranslation(),
+    filter_value = useSignal(""),
+    last_fetched_filter = useSignal(null);
+
+  // Reload the list whenever the filter has settled on a new value.
+  if (last_fetched_filter.value !== filter_value.value) {
+    last_fetched_filter.value = filter_value.value;
+    void engine_rest.process_definition.list(state, filter_value.value);
+  }
+
+  const list_value = definition.list.value;
+  const rows = list_value?.data ?? [];
+  const has_data = list_value?.status === RESPONSE_STATE.SUCCESS;
+  const is_empty = has_data && rows.length === 0 && !filter_value.value;
 
   return (
-    <div class="fade-in">
-      <h1>{t("processes.title")}</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>{t("common.name")}</th>
-            <th>{t("processes.version")}</th>
-            <th>{t("common.key")}</th>
-            <th>{t("dashboard.instances")}</th>
-            <th>{t("processes.tabs.incidents")}</th>
-            <th>{t("common.state")}</th>
-          </tr>
-        </thead>
-        <RequestState
-          signal={definition.list}
-          on_success={() => {
-            const grouped_definitions = Object.groupBy(
-              definition.list.value?.data,
-              ({ definition }) => definition.key,
-            );
-            console.log(grouped_definitions);
-            const grouped_definitions_values =
-              Object.entries(grouped_definitions);
-            console.log(grouped_definitions_values);
+    <div class="processes-definitions fade-in">
+      <header class="processes-page-header">
+        <h1>{t("processes.deployed-definitions")}</h1>
+        <a class="button" href="/deployments">
+          {t("processes.deploy")}
+        </a>
+      </header>
 
-            return (
-              <>
-                {grouped_definitions_values.map(([key, definition_group]) => (
-                  <tbody key={key}>
-                    {definition_group.map((definition) => (
-                      <ProcessDefinition key={definition.id} {...definition} />
-                    ))}
-                  </tbody>
-                ))}
-              </>
-            );
-          }}
+      <div class="processes-action-row">
+        <div class="processes-bulk-actions">
+          {/* Bulk Remove / Activate / Suspend will be wired in the next commit. */}
+        </div>
+        <input
+          class="processes-search"
+          type="search"
+          placeholder={t("processes.filter-search")}
+          value={filter_value.value}
+          onInput={(e) => (filter_value.value = e.currentTarget.value)}
         />
-      </table>
+      </div>
+
+      {is_empty ? (
+        <DefinitionsEmpty />
+      ) : (
+        <table class="processes-table">
+          <thead>
+            <tr>
+              <th aria-label="select" />
+              <th>{t("common.name")}</th>
+              <th class="num">{t("processes.tabs.incidents")}</th>
+              <th class="num">{t("dashboard.instances")}</th>
+              <th>{t("common.key")}</th>
+              <th class="num">{t("processes.version")}</th>
+              <th>{t("common.id")}</th>
+              <th>{t("processes.tenant-id")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((entry) => (
+              <ProcessDefinition key={entry.definition.id} {...entry} />
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+};
+
+const DefinitionsEmpty = () => {
+  const [t] = useTranslation();
+  return (
+    <div class="processes-empty">
+      <p>{t("processes.empty.heading")}</p>
+      <a href="/deployments">{t("processes.empty.upload")}</a>
+      <a
+        href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
+        target="_blank"
+        rel="noopener"
+      >
+        {t("processes.empty.how-to")}
+      </a>
     </div>
   );
 };
@@ -369,25 +405,28 @@ const ProcessDefinitionDetails = () => {
 };
 
 const ProcessDefinition = ({
-  definition: { id, name, key, version },
+  definition: { id, name, key, version, tenantId },
   instances,
   incidents,
-}) => (
-  <tr>
-    <td>
-      <a
-        href={`/processes/${id}/instances${keep_history_query(useRoute().query)}`}
-      >
-        {name}
-      </a>
-    </td>
-    <td>{version}</td>
-    <td>{key}</td>
-    <td>{instances}</td>
-    <td>{incidents.length}</td>
-    <td>?</td>
-  </tr>
-);
+}) => {
+  const { query } = useRoute();
+  return (
+    <tr>
+      <td>
+        <input type="checkbox" aria-label={name ?? id} disabled />
+      </td>
+      <td>
+        <a href={`/processes/${id}${keep_history_query(query)}`}>{name ?? key}</a>
+      </td>
+      <td class="num">{incidents?.length ?? 0}</td>
+      <td class="num">{instances ?? 0}</td>
+      <td>{key}</td>
+      <td class="num">{version}</td>
+      <td class="font-mono">{id}</td>
+      <td>{tenantId ?? "—"}</td>
+    </tr>
+  );
+};
 
 const Instances = () => {
   const state = useContext(AppState),

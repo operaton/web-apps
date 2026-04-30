@@ -395,6 +395,71 @@ main#processes {
   height: 1rem;
 }
 
+/* Definitions list */
+.processes-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-1);
+}
+
+.processes-page-header h1 {
+  margin: 0;
+}
+
+.processes-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.processes-bulk-actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.processes-search {
+  flex: 0 1 24rem;
+  max-width: 40%;
+}
+
+.processes-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.processes-table th,
+.processes-table td {
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  border-bottom: var(--border);
+}
+
+.processes-table th.num,
+.processes-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.processes-table tbody tr:hover {
+  background: var(--background-2);
+}
+
+.processes-empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--background-2);
+  border-radius: var(--border-radius);
+  text-align: center;
+}
+
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
    can push sibling columns sideways. Pin it to the viewport's bottom-right. */
 .bjs-powered-by {

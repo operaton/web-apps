@@ -269,6 +269,14 @@
     },
     "diagram-maximize": "Diagramm maximieren",
     "diagram-restore": "Diagramm verkleinern",
+    "deployed-definitions": "Bereitgestellte Prozessdefinitionen",
+    "deploy": "Bereitstellen",
+    "filter-search": "Filter & Suche",
+    "empty": {
+      "heading": "Keine Prozessdefinition bereitgestellt",
+      "upload": "Prozessdefinition hochladen",
+      "how-to": "Anleitung zur Bereitstellung"
+    },
     "incidents": {
       "message": "Nachricht",
       "process-instance": "Prozessinstanz",

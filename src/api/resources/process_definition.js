@@ -1,7 +1,9 @@
 import { GET, GET_TEXT, POST } from '../helper.jsx'
 
-export const get_process_definitions = (state) =>
-  GET('/process-definition/statistics', state, state.api.process.definition.list)
+export const get_process_definitions = (state, filter = '') => {
+  const qs = filter ? `?nameLike=${encodeURIComponent(`%${filter}%`)}` : ''
+  return GET(`/process-definition/statistics${qs}`, state, state.api.process.definition.list)
+}
 
 export const get_process_definition_statistics_with_incidents = (state, id) =>
   GET(`/process-definition/${id}/statistics?incidents=true`, state, state.api.process.definition.statistics)
