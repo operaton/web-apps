@@ -346,62 +346,76 @@ const DefinitionsEmpty = () => {
 };
 
 const ProcessDefinitionDetails = () => {
+  const { params } = useRoute();
+  const active_tab = process_definition_tabs.find(
+    (tab) => tab.id === params.panel,
+  );
+
+  return (
+    <div class="fade-in">{active_tab ? active_tab.target : <DefinitionOverview />}</div>
+  );
+};
+
+const DefinitionOverview = () => {
   const {
       api: {
         process: {
-          definition: { one: process_definition },
+          definition: { one: process_definition, statistics },
         },
       },
     } = useContext(AppState),
-    { params } = useRoute(),
     [t] = useTranslation();
 
   /** @namespace process_definition.value.data.tenantId **/
+  /** @namespace process_definition.value.data.deploymentId **/
+  /** @namespace process_definition.value.data.resource **/
   return (
-    <div class="fade-in">
-      <div class="row gap-2">
-        <a
-          className="tabs-back"
-          href={`/processes${keep_history_query(useRoute().query)}`}
-          title={t("processes.change-definition")}
-        >
-          <Icons.arrow_left />
-          <Icons.list />
-        </a>
-        <RequestState
-          signal={process_definition}
-          on_success={() => (
-            <div>
-              <h1>{process_definition.value?.data.name ?? " "}</h1>
-              <dl>
-                <dt>{t("processes.definition-id")}</dt>
-                <dd
-                  className="font-mono copy-on-click"
-                  onClick={copyToClipboard}
-                  title={t("processes.click-to-copy")}
-                >
-                  {process_definition.value?.data.id ?? "-/-"}
-                </dd>
-                {process_definition.value?.data.tenantId ? (
-                  <>
-                    <dt>{t("processes.tenant-id")}</dt>
-                    <dd>{process_definition?.value.data.tenantId ?? "-/-"}</dd>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </dl>
-            </div>
-          )}
-        />
-      </div>
-
-      <Accordion
-        accordion_name="process_definition_details"
-        sections={process_definition_tabs}
-        base_path={`/processes/${params.definition_id}${keep_history_query(useRoute().query)}`}
-      />
-    </div>
+    <RequestState
+      signal={process_definition}
+      on_success={() => {
+        const def = process_definition.value?.data;
+        const stats = statistics.value?.data ?? [];
+        const total_instances = stats.reduce(
+          (n, a) => n + (a.instances ?? 0),
+          0,
+        );
+        const total_incidents = stats.reduce(
+          (n, a) => n + (a.incidents?.length ?? 0),
+          0,
+        );
+        return (
+          <div class="processes-definition-overview">
+            <header class="processes-page-header">
+              <h1>{def?.name ?? def?.key}</h1>
+            </header>
+            <dl class="processes-definition-meta">
+              <dt>{t("processes.definition-id")}</dt>
+              <dd
+                class="font-mono copy-on-click"
+                onClick={copyToClipboard}
+                title={t("processes.click-to-copy")}
+              >
+                {def?.id ?? "—"}
+              </dd>
+              <dt>{t("common.key")}</dt>
+              <dd>{def?.key ?? "—"}</dd>
+              <dt>{t("processes.version")}</dt>
+              <dd>{def?.version ?? "—"}</dd>
+              {def?.tenantId ? (
+                <>
+                  <dt>{t("processes.tenant-id")}</dt>
+                  <dd>{def.tenantId}</dd>
+                </>
+              ) : null}
+              <dt>{t("dashboard.instances")}</dt>
+              <dd>{total_instances}</dd>
+              <dt>{t("processes.tabs.incidents")}</dt>
+              <dd>{total_incidents}</dd>
+            </dl>
+          </div>
+        );
+      }}
+    />
   );
 };
 

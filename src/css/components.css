@@ -493,6 +493,26 @@ main#processes {
   text-align: center;
 }
 
+.processes-definition-overview {
+  padding: 0;
+}
+
+.processes-definition-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin-top: var(--spacing-1);
+}
+
+.processes-definition-meta dt {
+  color: var(--text-2, var(--muted));
+  font-size: var(--small-font-size);
+}
+
+.processes-definition-meta dd {
+  margin: 0;
+}
+
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
    can push sibling columns sideways. Pin it to the viewport's bottom-right. */
 .bjs-powered-by {
