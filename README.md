@@ -26,6 +26,15 @@ You require the following software to run the app
 - `npm run build` - Builds for production, emitting to `dist/`
 - `npm run preview` - Starts a server at http://localhost:4173/ (maybe 127.0.0.1 as well to avoid CORS, not tested yet) to test production build locally
 
+## Dev fixtures
+
+To populate the engine with realistic data — synthetic BPMN/DMN processes plus
+a load-generating bot that can spawn anywhere from a handful to 100 000
+instances — see [`dev-fixtures/README.md`](./dev-fixtures/README.md). The
+quickest path is `docker compose -f docker-compose.dev-fixtures.yaml up --build`,
+which brings up the engine, the bot, and a control panel at
+<http://localhost:3001> with buttons for deploy / spawn / stress.
+
 ## Documentation
 
 Documentation for the Operaton web apps can currently be found inside the [`/docs`](./docs/) folder.
