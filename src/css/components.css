@@ -221,6 +221,27 @@ section.task-tabs {
   position: relative;
 }
 
+/* TaskList chain: #task-list is flex column; the table wrapper takes
+   remaining space and scrolls; .start-process stays pinned at the bottom. */
+#task-list {
+  min-height: 0;
+}
+
+#task-list #task-actions {
+  flex: none;
+}
+
+#task-list #task-table-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+#task-list .start-process {
+  flex: none;
+  margin: var(--spacing-1) auto;
+}
+
 /* .tabs fills its parent absolutely, then arranges nav + content in a
    flex column. .selected-tab gets the leftover space and scrolls. */
 .tabs {

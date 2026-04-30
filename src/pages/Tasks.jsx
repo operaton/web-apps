@@ -3,7 +3,10 @@ import { useLocation, useRoute } from "preact-iso";
 import { useContext, useLayoutEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 
-import engine_rest, { RequestState, RESPONSE_STATE } from "../api/engine_rest.jsx";
+import engine_rest, {
+  RequestState,
+  RESPONSE_STATE,
+} from "../api/engine_rest.jsx";
 import * as Icons from "../assets/icons.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
@@ -13,7 +16,7 @@ import { StartProcessList } from "./StartProcessList.jsx";
 import { TaskForm } from "./TaskForm.jsx";
 import { formatRelativeDate } from "../helper/date_formatter.js";
 
-const TASK_PAGE_SIZE = 3;
+const TASK_PAGE_SIZE = 20;
 
 const SORT_OPTIONS = [
   { key: "priority", nameKey: "tasks.sort.priority" },
@@ -24,7 +27,10 @@ const SORT_OPTIONS = [
   { key: "processVariable", nameKey: "tasks.sort.process-variable" },
   { key: "executionVariable", nameKey: "tasks.sort.execution-variable" },
   { key: "taskVariable", nameKey: "tasks.sort.task-variable" },
-  { key: "caseExecutionVariable", nameKey: "tasks.sort.case-execution-variable" },
+  {
+    key: "caseExecutionVariable",
+    nameKey: "tasks.sort.case-execution-variable",
+  },
   { key: "caseInstanceVariable", nameKey: "tasks.sort.case-instance-variable" },
 ];
 
@@ -36,10 +42,26 @@ const load_tasks = (state, query, firstResult = 0) => {
     sortOrder = query?.sortOrder ?? "asc",
     sorting = { sortBy, sortOrder };
   if (is_saved_filter(filterValue)) {
-    void engine_rest.filter.execute_filter(state, filterValue, firstResult, TASK_PAGE_SIZE, sorting);
+    void engine_rest.filter.execute_filter(
+      state,
+      filterValue,
+      firstResult,
+      TASK_PAGE_SIZE,
+      sorting,
+    );
   } else {
-    const filter = filterValue === "my" ? { assignee: state.api.user.profile.value?.id } : {};
-    void engine_rest.task.get_tasks(state, sortBy, sortOrder, firstResult, TASK_PAGE_SIZE, filter);
+    const filter =
+      filterValue === "my"
+        ? { assignee: state.api.user.profile.value?.id }
+        : {};
+    void engine_rest.task.get_tasks(
+      state,
+      sortBy,
+      sortOrder,
+      firstResult,
+      TASK_PAGE_SIZE,
+      filter,
+    );
   }
 };
 
@@ -120,30 +142,49 @@ const TaskList = () => {
       <div id="task-actions">
         <div>
           <label for="filter-list">{t("tasks.current-filter")}</label>
-          <select id="filter-list" onChange={change_filter} value={query?.filter ?? "all"}>
+          <select
+            id="filter-list"
+            onChange={change_filter}
+            value={query?.filter ?? "all"}
+          >
             <option value="all">{t("tasks.all-tasks")}</option>
             <option value="my">{t("tasks.my-tasks")}</option>
             {savedFilters.length > 0 && <option disabled>──────────</option>}
             {savedFilters.map((f) => (
-              <option key={f.id} value={f.id}>{f.name}</option>
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
             ))}
           </select>
-          <a href="/tasks/filter" className="button">{t("tasks.edit-filters")}</a>
+          <a href="/tasks/filter" className="button">
+            {t("tasks.edit-filters")}
+          </a>
         </div>
         <div>
           <label for="sort-by">{t("tasks.sort.label")}</label>
-          <select id="sort-by" onChange={change_sort} value={query?.sortBy ?? "name"}>
+          <select
+            id="sort-by"
+            onChange={change_sort}
+            value={query?.sortBy ?? "name"}
+          >
             {SORT_OPTIONS.map((o) => (
-              <option key={o.key} value={o.key}>{t(o.nameKey)}</option>
+              <option key={o.key} value={o.key}>
+                {t(o.nameKey)}
+              </option>
             ))}
           </select>
-          <select id="sort-order" onChange={change_sort_order} value={query?.sortOrder ?? "asc"} aria-label={t("tasks.sort.order")}>
+          <select
+            id="sort-order"
+            onChange={change_sort_order}
+            value={query?.sortOrder ?? "asc"}
+            aria-label={t("tasks.sort.order")}
+          >
             <option value="asc">{t("tasks.sort.asc")}</option>
             <option value="desc">{t("tasks.sort.desc")}</option>
           </select>
         </div>
       </div>
-      <div>
+      <div id="task-table-wrapper">
         <table>
           <thead>
             <tr>
@@ -155,18 +196,29 @@ const TaskList = () => {
           <tbody>
             <RequestState
               signal={taskList}
-              on_success={() => taskList.value?.data?.map((task) => (
-                  <TaskRowEntry key={task.id} task={task} selected={task.id === selectedTaskId} />))}
+              on_success={() =>
+                taskList.value?.data?.map((task) => (
+                  <TaskRowEntry
+                    key={task.id}
+                    task={task}
+                    selected={task.id === selectedTaskId}
+                  />
+                ))
+              }
             />
           </tbody>
         </table>
         {taskList.value?.hasMore === true ? (
-          <button class="load-more" onClick={load_more}>{t("tasks.load-more")}</button>
+          <button class="load-more" onClick={load_more}>
+            {t("tasks.load-more")}
+          </button>
         ) : taskList.value?.hasMore === false ? (
           <small class="load-more-end">{t("tasks.no-more-items")}</small>
         ) : null}
       </div>
-      <a href="/tasks/start" class="button start-process">{t("tasks.start-process-label")}</a>
+      <a href="/tasks/start" class="button start-process">
+        {t("tasks.start-process-label")}
+      </a>
     </div>
   );
 };
@@ -176,7 +228,9 @@ const TaskRowEntry = ({ task, selected }) => {
 
   useLayoutEffect(() => {
     if (selected) {
-      document.getElementById(id).scrollIntoView({ behavior: "instant", block: "center" });
+      document
+        .getElementById(id)
+        .scrollIntoView({ behavior: "instant", block: "center" });
     }
   });
 
@@ -222,7 +276,8 @@ const Task = () => {
           <div>
             <h2>{task.value?.data?.name}</h2>
             <a href={`/processes/${pd.value?.data?.id}`}>
-              {pd.value?.data?.name} ({t("processes.version")} {pd.value?.data?.version})
+              {pd.value?.data?.name} ({t("processes.version")}{" "}
+              {pd.value?.data?.version})
             </a>
             {state.api.task.one.value?.data !== undefined ? (
               <p>{state.api.task.one.value?.data.description}</p>
@@ -240,6 +295,10 @@ const Task = () => {
           <SetGroupsButton />
         </div>
       </section>
+      <div>
+        <hr />
+      </div>
+
       <TaskTabs />
     </div>
   );
@@ -259,17 +318,42 @@ const TaskTabs = () => {
     currentTaskId.value = params.task_id;
     engine_rest.task
       .get_task(state, params.task_id)
-      .then(() => engine_rest.process_definition.one(state, state.api.task.one.value?.data?.processDefinitionId))
-      .then(() => engine_rest.task.get_identity_links(state, state.api.task.one.value?.data?.id))
-      .then(() => engine_rest.history.get_user_operation(state, state.api.task.one.value?.data?.executionId))
-      .then(() => engine_rest.task.get_comments(state, state.api.task.one.value?.data?.id));
+      .then(() =>
+        engine_rest.process_definition.one(
+          state,
+          state.api.task.one.value?.data?.processDefinitionId,
+        ),
+      )
+      .then(() =>
+        engine_rest.task.get_identity_links(
+          state,
+          state.api.task.one.value?.data?.id,
+        ),
+      )
+      .then(() =>
+        engine_rest.history.get_user_operation(
+          state,
+          state.api.task.one.value?.data?.executionId,
+        ),
+      )
+      .then(() =>
+        engine_rest.task.get_comments(
+          state,
+          state.api.task.one.value?.data?.id,
+        ),
+      );
   }
 
   return (
     <section className="task-tabs">
-      {state.api.task.one.value.data !== null && state.api.task.one.value.data !== undefined ? (
+      {state.api.task.one.value.data !== null &&
+      state.api.task.one.value.data !== undefined ? (
         <>
-          <Tabs tabs={task_tabs} base_url={`/tasks/${state.api.task.one.value.data.id}`} className="fade-in" />
+          <Tabs
+            tabs={task_tabs}
+            base_url={`/tasks/${state.api.task.one.value.data.id}`}
+            className="fade-in"
+          />
         </>
       ) : (
         t("common.loading")
@@ -289,9 +373,14 @@ const SetDueDateButton = () => {
     } = state,
     close = () => document.getElementById("set_due_date").close(),
     show = () => document.getElementById("set_due_date").showModal(),
-    due_date = task.value?.data?.due ? new Date(Date.parse(task.value?.data?.due)) : null,
+    due_date = task.value?.data?.due
+      ? new Date(Date.parse(task.value?.data?.due))
+      : null,
     date_state = useSignal({
-      date: due_date !== null ? due_date?.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      date:
+        due_date !== null
+          ? due_date?.toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
       time:
         due_date !== null
           ? due_date?.toISOString().split("T")[1].substring(0, 5)
@@ -300,7 +389,13 @@ const SetDueDateButton = () => {
     submit = (event) => {
       event.preventDefault();
       engine_rest.task
-        .update_task(state, { due: `${date_state.value.date}T${date_state.value.time}:0.000+0000` }, params.task_id)
+        .update_task(
+          state,
+          {
+            due: `${date_state.value.date}T${date_state.value.time}:0.000+0000`,
+          },
+          params.task_id,
+        )
         .then(() => {
           close();
         });
@@ -323,15 +418,31 @@ const SetDueDateButton = () => {
           <input
             type="date"
             id="date"
-            value={due_date !== null ? due_date?.toISOString().split("T")[0] : null}
-            onInput={(e) => (date_state.value = { ...date_state.peek(), date: e.currentTarget.value })}
+            value={
+              due_date !== null ? due_date?.toISOString().split("T")[0] : null
+            }
+            onInput={(e) =>
+              (date_state.value = {
+                ...date_state.peek(),
+                date: e.currentTarget.value,
+              })
+            }
           />
           <label for="time">{t("tasks.due-date.time")}</label>
           <input
             type="time"
             id="time"
-            value={due_date !== null ? due_date?.toISOString().split("T")[1].substring(0, 5) : null}
-            onInput={(e) => (date_state.value = { ...date_state.peek(), time: e.currentTarget.value })}
+            value={
+              due_date !== null
+                ? due_date?.toISOString().split("T")[1].substring(0, 5)
+                : null
+            }
+            onInput={(e) =>
+              (date_state.value = {
+                ...date_state.peek(),
+                time: e.currentTarget.value,
+              })
+            }
           />
           <div class="button-group">
             <button type="submit">{t("common.submit")}</button>
@@ -353,9 +464,14 @@ const SetFollowUpDateButton = () => {
     } = state,
     close = () => document.getElementById("set_follow_up_date").close(),
     show = () => document.getElementById("set_follow_up_date").showModal(),
-    followUpDate = task.value?.data?.followUp ? new Date(Date.parse(task.value?.data?.followUp)) : null,
+    followUpDate = task.value?.data?.followUp
+      ? new Date(Date.parse(task.value?.data?.followUp))
+      : null,
     date_state = useSignal({
-      date: followUpDate !== null ? followUpDate?.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      date:
+        followUpDate !== null
+          ? followUpDate?.toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
       time:
         followUpDate !== null
           ? followUpDate?.toISOString().split("T")[1].substring(0, 5)
@@ -367,7 +483,9 @@ const SetFollowUpDateButton = () => {
       engine_rest.task
         .update_task(
           state,
-          { followUp: `${date_state.value.date}T${date_state.value.time}:0.000+0000` },
+          {
+            followUp: `${date_state.value.date}T${date_state.value.time}:0.000+0000`,
+          },
           params.task_id,
         )
         .then(() => {
@@ -379,7 +497,9 @@ const SetFollowUpDateButton = () => {
     <>
       <button onClick={show} class="task-card">
         <small>{t("tasks.follow-up.label")}</small>
-        <span>{followUpDate !== null ? followUpDate.toLocaleString() : "—"}</span>
+        <span>
+          {followUpDate !== null ? followUpDate.toLocaleString() : "—"}
+        </span>
         <Icons.pencil />
       </button>
 
@@ -392,15 +512,33 @@ const SetFollowUpDateButton = () => {
           <input
             type="date"
             id="date"
-            value={followUpDate !== null ? followUpDate?.toISOString().split("T")[0] : null}
-            onInput={(e) => (date_state.value = { ...date_state.peek(), date: e.currentTarget.value })}
+            value={
+              followUpDate !== null
+                ? followUpDate?.toISOString().split("T")[0]
+                : null
+            }
+            onInput={(e) =>
+              (date_state.value = {
+                ...date_state.peek(),
+                date: e.currentTarget.value,
+              })
+            }
           />
           <label for="time">{t("tasks.due-date.time")}</label>
           <input
             type="time"
             id="time"
-            value={followUpDate !== null ? followUpDate?.toISOString().split("T")[1].substring(0, 5) : null}
-            onInput={(e) => (date_state.value = { ...date_state.peek(), time: e.currentTarget.value })}
+            value={
+              followUpDate !== null
+                ? followUpDate?.toISOString().split("T")[1].substring(0, 5)
+                : null
+            }
+            onInput={(e) =>
+              (date_state.value = {
+                ...date_state.peek(),
+                time: e.currentTarget.value,
+              })
+            }
           />
           <div class="button-group">
             <button type="submit">{t("common.submit")}</button>
@@ -415,7 +553,9 @@ const GroupsList = () => {
   const state = useContext(AppState),
     links = state.api.task.identity_links.value?.data;
   if (!links) return "—";
-  const groups = links.filter((l) => l.type === "candidate" && l.groupId).map((l) => l.groupId);
+  const groups = links
+    .filter((l) => l.type === "candidate" && l.groupId)
+    .map((l) => l.groupId);
   return groups.length > 0 ? groups.join(", ") : "—";
 };
 
@@ -432,19 +572,30 @@ const SetGroupsButton = () => {
     group_state = useSignal(null),
     submit = (event) => {
       event.preventDefault();
-      engine_rest.task.add_group(state, state.api.task.one.value.data.id, group_state.value).then(() => {
-        if (state.api.task.add_group.value.status === RESPONSE_STATE.SUCCESS) {
-          group_state.value = "";
-        }
-      });
+      engine_rest.task
+        .add_group(state, state.api.task.one.value.data.id, group_state.value)
+        .then(() => {
+          if (
+            state.api.task.add_group.value.status === RESPONSE_STATE.SUCCESS
+          ) {
+            group_state.value = "";
+          }
+        });
     },
-    delete_group = (group_id) => engine_rest.task.delete_group(state, state.api.task.one.value.data.id, group_id);
+    delete_group = (group_id) =>
+      engine_rest.task.delete_group(
+        state,
+        state.api.task.one.value.data.id,
+        group_id,
+      );
 
   return (
     <>
       <button onClick={show} class="task-card">
         <small>{t("tasks.groups.set")}</small>
-        <span><GroupsList /></span>
+        <span>
+          <GroupsList />
+        </span>
         <Icons.pencil />
       </button>
 
@@ -459,7 +610,12 @@ const SetGroupsButton = () => {
         <h3>{t("tasks.groups.add")}</h3>
         <form onSubmit={submit}>
           <label for="group_id">{t("tasks.groups.group-id")}</label>
-          <input id="group_id" key="group_id" required onInput={(e) => (group_state.value = e.currentTarget.value)} />
+          <input
+            id="group_id"
+            key="group_id"
+            required
+            onInput={(e) => (group_state.value = e.currentTarget.value)}
+          />
           <div class="button-group">
             <button type="submit">{t("tasks.groups.add-group")}</button>
           </div>
@@ -478,15 +634,18 @@ const SetGroupsButton = () => {
                 </tr>
               </thead>
               <tbody>
-                {state.api.task.identity_links.value.data.map(({ groupId, type }, index) =>
-                  type === "candidate" ? (
-                    <tr key={index}>
-                      <td>{groupId}</td>
-                      <td>
-                        <button onClick={() => delete_group(groupId)}>{t("common.delete")}</button>
-                      </td>
-                    </tr>
-                  ) : null,
+                {state.api.task.identity_links.value.data.map(
+                  ({ groupId, type }, index) =>
+                    type === "candidate" ? (
+                      <tr key={index}>
+                        <td>{groupId}</td>
+                        <td>
+                          <button onClick={() => delete_group(groupId)}>
+                            {t("common.delete")}
+                          </button>
+                        </td>
+                      </tr>
+                    ) : null,
                 )}
               </tbody>
             </table>
@@ -517,9 +676,7 @@ const CommentButton = () => {
 
   return (
     <>
-      <button onClick={show}>
-        {t("tasks.comment-add")}
-      </button>
+      <button onClick={show}>{t("tasks.comment-add")}</button>
 
       <dialog id="add_comment">
         <button onClick={close}>{t("common.close")}</button>
@@ -572,15 +729,26 @@ const ClaimButton = () => {
           <dialog id="set_assignee">
             <button onClick={close}>{t("common.close")}</button>
             {assignee_is_different && !assigned ? (
-              <button onClick={() => engine_rest.task.assign_task(state, null, task.id)} className="secondary">
+              <button
+                onClick={() =>
+                  engine_rest.task.assign_task(state, null, task.id)
+                }
+                className="secondary"
+              >
                 <Icons.user_minus /> {t("tasks.reset-assignee")}
               </button>
             ) : (user_is_assignee || claimed) && !unclaimed ? (
-              <button onClick={() => engine_rest.task.unclaim_task(state, task.id)} className="secondary">
+              <button
+                onClick={() => engine_rest.task.unclaim_task(state, task.id)}
+                className="secondary"
+              >
                 <Icons.user_minus /> {t("tasks.unclaim")}
               </button>
             ) : (
-              <button onClick={() => engine_rest.task.claim_task(state, task.id)} className="secondary">
+              <button
+                onClick={() => engine_rest.task.claim_task(state, task.id)}
+                className="secondary"
+              >
                 <Icons.user_plus /> {t("tasks.claim")}
               </button>
             )}
@@ -603,7 +771,10 @@ const Diagram = () => {
     } = state;
 
   if (selected_task !== null) {
-    void engine_rest.process_definition.diagram(state, selected_task.value.data.processDefinitionId);
+    void engine_rest.process_definition.diagram(
+      state,
+      selected_task.value.data.processDefinitionId,
+    );
   }
 
   return (
@@ -667,23 +838,53 @@ const Filter = () => {
     }),
     update = (key, value) => (form.value = { ...form.peek(), [key]: value }),
     add_criteria = () =>
-      update("criteria", [...form.peek().criteria, { key: CRITERIA_KEYS[0], value: "" }]),
+      update("criteria", [
+        ...form.peek().criteria,
+        { key: CRITERIA_KEYS[0], value: "" },
+      ]),
     remove_criteria = (index) =>
-      update("criteria", form.peek().criteria.filter((_, i) => i !== index)),
+      update(
+        "criteria",
+        form.peek().criteria.filter((_, i) => i !== index),
+      ),
     update_criteria = (index, field, value) =>
-      update("criteria", form.peek().criteria.map((c, i) => (i === index ? { ...c, [field]: value } : c))),
+      update(
+        "criteria",
+        form
+          .peek()
+          .criteria.map((c, i) => (i === index ? { ...c, [field]: value } : c)),
+      ),
     add_variable = () =>
       update("variables", [...form.peek().variables, { name: "", label: "" }]),
     remove_variable = (index) =>
-      update("variables", form.peek().variables.filter((_, i) => i !== index)),
+      update(
+        "variables",
+        form.peek().variables.filter((_, i) => i !== index),
+      ),
     update_variable = (index, field, value) =>
-      update("variables", form.peek().variables.map((v, i) => (i === index ? { ...v, [field]: value } : v))),
+      update(
+        "variables",
+        form
+          .peek()
+          .variables.map((v, i) =>
+            i === index ? { ...v, [field]: value } : v,
+          ),
+      ),
     submit = (event) => {
       event.preventDefault();
-      const { name, description, color, priority, refresh, criteria, variables } = form.value,
+      const {
+          name,
+          description,
+          color,
+          priority,
+          refresh,
+          criteria,
+          variables,
+        } = form.value,
         query = {};
       criteria.forEach(({ key, value }) => {
-        if (key === "unassigned" || key === "active" || key === "suspended") query[key] = true;
+        if (key === "unassigned" || key === "active" || key === "suspended")
+          query[key] = true;
         else if (key === "priority") query[key] = parseInt(value, 10);
         else if (value) query[key] = value;
       });
@@ -709,7 +910,9 @@ const Filter = () => {
     <div class="filter-editor">
       <header>
         <h2>{t("tasks.filter.title")}</h2>
-        <a href="/tasks" class="button">{t("common.back")}</a>
+        <a href="/tasks" class="button">
+          {t("common.back")}
+        </a>
       </header>
 
       <form onSubmit={submit}>
@@ -723,13 +926,17 @@ const Filter = () => {
               value={form.value.name}
               onInput={(e) => update("name", e.currentTarget.value)}
             />
-            <label for="filter-description">{t("tasks.filter.description")}</label>
+            <label for="filter-description">
+              {t("tasks.filter.description")}
+            </label>
             <input
               id="filter-description"
               value={form.value.description}
               onInput={(e) => update("description", e.currentTarget.value)}
             />
-            <label for="filter-priority">{t("tasks.task-list.table-headings.priority")}</label>
+            <label for="filter-priority">
+              {t("tasks.task-list.table-headings.priority")}
+            </label>
             <input
               id="filter-priority"
               type="number"
@@ -772,31 +979,44 @@ const Filter = () => {
                     <td>
                       <select
                         value={criterion.key}
-                        onChange={(e) => update_criteria(i, "key", e.currentTarget.value)}
+                        onChange={(e) =>
+                          update_criteria(i, "key", e.currentTarget.value)
+                        }
                       >
                         {CRITERIA_KEYS.map((k) => (
-                          <option key={k} value={k}>{k}</option>
+                          <option key={k} value={k}>
+                            {k}
+                          </option>
                         ))}
                       </select>
                     </td>
                     <td>
-                      {criterion.key === "unassigned" || criterion.key === "active" || criterion.key === "suspended"
-                        ? <em>{t("common.yes")}</em>
-                        : <input
-                            value={criterion.value}
-                            onInput={(e) => update_criteria(i, "value", e.currentTarget.value)}
-                          />
-                      }
+                      {criterion.key === "unassigned" ||
+                      criterion.key === "active" ||
+                      criterion.key === "suspended" ? (
+                        <em>{t("common.yes")}</em>
+                      ) : (
+                        <input
+                          value={criterion.value}
+                          onInput={(e) =>
+                            update_criteria(i, "value", e.currentTarget.value)
+                          }
+                        />
+                      )}
                     </td>
                     <td>
-                      <button type="button" onClick={() => remove_criteria(i)}>{t("common.remove")}</button>
+                      <button type="button" onClick={() => remove_criteria(i)}>
+                        {t("common.remove")}
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
-          <button type="button" onClick={add_criteria}>{t("tasks.filter.add-criteria")}</button>
+          <button type="button" onClick={add_criteria}>
+            {t("tasks.filter.add-criteria")}
+          </button>
         </fieldset>
 
         <fieldset>
@@ -817,24 +1037,32 @@ const Filter = () => {
                     <td>
                       <input
                         value={variable.name}
-                        onInput={(e) => update_variable(i, "name", e.currentTarget.value)}
+                        onInput={(e) =>
+                          update_variable(i, "name", e.currentTarget.value)
+                        }
                       />
                     </td>
                     <td>
                       <input
                         value={variable.label}
-                        onInput={(e) => update_variable(i, "label", e.currentTarget.value)}
+                        onInput={(e) =>
+                          update_variable(i, "label", e.currentTarget.value)
+                        }
                       />
                     </td>
                     <td>
-                      <button type="button" onClick={() => remove_variable(i)}>{t("common.remove")}</button>
+                      <button type="button" onClick={() => remove_variable(i)}>
+                        {t("common.remove")}
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
-          <button type="button" onClick={add_variable}>{t("tasks.filter.add-variable")}</button>
+          <button type="button" onClick={add_variable}>
+            {t("tasks.filter.add-variable")}
+          </button>
         </fieldset>
 
         <div class="filter-actions">
