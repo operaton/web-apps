@@ -87,6 +87,8 @@ const createAppState = () => {
         deployed_start_form: signal(null),
         rendered_form: signal(null),
         activity_instance_statistics: signal(null),
+        suspend: signal(null),
+        remove: signal(null),
       },
       instance: {
         called: signal(null),

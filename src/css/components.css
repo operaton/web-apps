@@ -388,6 +388,13 @@ main#processes {
 .processes-bulk-actions {
   display: flex;
   gap: var(--spacing-1);
+  align-items: center;
+}
+
+.processes-bulk-count {
+  color: var(--text-2, var(--muted));
+  font-size: var(--small-font-size);
+  margin-left: 0.25rem;
 }
 
 .processes-search {
@@ -415,6 +422,10 @@ main#processes {
 
 .processes-table tbody tr:hover {
   background: var(--background-2);
+}
+
+.processes-table tbody tr[aria-selected="true"] {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
 .processes-empty {

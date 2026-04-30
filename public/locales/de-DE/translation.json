@@ -277,6 +277,14 @@
       "upload": "Prozessdefinition hochladen",
       "how-to": "Anleitung zur Bereitstellung"
     },
+    "bulk": {
+      "remove": "Entfernen",
+      "activate": "Aktivieren",
+      "suspend": "Anhalten",
+      "select-all": "Alle auswählen",
+      "count": "{{count}} ausgewählt",
+      "confirm-remove": "{{count}} Prozessdefinition(en) und alle zugehörigen Daten löschen? Dies kann nicht rückgängig gemacht werden."
+    },
     "incidents": {
       "message": "Nachricht",
       "process-instance": "Prozessinstanz",

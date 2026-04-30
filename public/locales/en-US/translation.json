@@ -277,6 +277,14 @@
       "upload": "Upload process definition",
       "how-to": "How to deploy"
     },
+    "bulk": {
+      "remove": "Remove",
+      "activate": "Activate",
+      "suspend": "Suspend",
+      "select-all": "Select all",
+      "count": "{{count}} selected",
+      "confirm-remove": "Delete {{count}} process definition(s) and all their data? This cannot be undone."
+    },
     "incidents": {
       "message": "Message",
       "process-instance": "Process Instance",

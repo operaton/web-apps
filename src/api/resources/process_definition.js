@@ -1,4 +1,4 @@
-import { GET, GET_TEXT, POST } from '../helper.jsx'
+import { GET, GET_TEXT, POST, PUT, DELETE } from '../helper.jsx'
 
 export const get_process_definitions = (state, filter = '') => {
   const qs = filter ? `?nameLike=${encodeURIComponent(`%${filter}%`)}` : ''
@@ -90,6 +90,30 @@ export const start_process_submit_form = (state, id, body = {}) =>
 export const get_activity_instance_statistics = (state, id) =>
   GET(`/process-definition/${id}/statistics`, state, state.api.process.definition.activity_instance_statistics)
 
+const suspend_process_definition = (state, id) =>
+  PUT(
+    `/process-definition/${id}/suspended`,
+    { suspended: true, includeProcessInstances: true },
+    state,
+    state.api.process.definition.suspend,
+  )
+
+const activate_process_definition = (state, id) =>
+  PUT(
+    `/process-definition/${id}/suspended`,
+    { suspended: false, includeProcessInstances: true },
+    state,
+    state.api.process.definition.suspend,
+  )
+
+const delete_process_definition = (state, id) =>
+  DELETE(
+    `/process-definition/${id}?cascade=true`,
+    null,
+    state,
+    state.api.process.definition.remove,
+  )
+
 const process_definition = {
   list: get_process_definitions,
   one: get_process_definition,
@@ -103,6 +127,9 @@ const process_definition = {
   rendered_start_form: get_rendered_start_form,
   submit_form: start_process_submit_form,
   activity_instance_statistics: get_activity_instance_statistics,
+  suspend: suspend_process_definition,
+  activate: activate_process_definition,
+  remove: delete_process_definition,
 }
 
 export default process_definition

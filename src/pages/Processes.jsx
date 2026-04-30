@@ -244,7 +244,9 @@ const ProcessDefinitionSelection = () => {
     } = state,
     [t] = useTranslation(),
     filter_value = useSignal(""),
-    last_fetched_filter = useSignal(null);
+    last_fetched_filter = useSignal(null),
+    selected = useSignal(new Set()),
+    bulk_running = useSignal(false);
 
   // Reload the list whenever the filter has settled on a new value.
   if (last_fetched_filter.value !== filter_value.value) {
@@ -257,6 +259,43 @@ const ProcessDefinitionSelection = () => {
   const has_data = list_value?.status === RESPONSE_STATE.SUCCESS;
   const is_empty = has_data && rows.length === 0 && !filter_value.value;
 
+  const toggle_one = (id) => {
+    const next = new Set(selected.value);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    selected.value = next;
+  };
+  const toggle_all = () => {
+    if (selected.value.size === rows.length && rows.length > 0) {
+      selected.value = new Set();
+    } else {
+      selected.value = new Set(rows.map((r) => r.definition.id));
+    }
+  };
+  const all_selected = rows.length > 0 && selected.value.size === rows.length;
+
+  const run_bulk = async (op) => {
+    if (selected.value.size === 0 || bulk_running.value) return;
+    bulk_running.value = true;
+    try {
+      const ids = [...selected.value];
+      for (const id of ids) {
+        try {
+          await engine_rest.process_definition[op](state, id);
+        } catch (e) {
+          console.error(`bulk ${op} failed for ${id}`, e);
+        }
+      }
+      selected.value = new Set();
+      // Refetch to reflect new state.
+      void engine_rest.process_definition.list(state, filter_value.value);
+    } finally {
+      bulk_running.value = false;
+    }
+  };
+
+  const has_selection = selected.value.size > 0;
+
   return (
     <div class="processes-definitions fade-in">
       <header class="processes-page-header">
@@ -268,7 +307,45 @@ const ProcessDefinitionSelection = () => {
 
       <div class="processes-action-row">
         <div class="processes-bulk-actions">
-          {/* Bulk Remove / Activate / Suspend will be wired in the next commit. */}
+          <button
+            type="button"
+            class="secondary"
+            disabled={!has_selection || bulk_running.value}
+            onClick={() => {
+              if (
+                window.confirm(
+                  t("processes.bulk.confirm-remove", {
+                    count: selected.value.size,
+                  }),
+                )
+              ) {
+                void run_bulk("remove");
+              }
+            }}
+          >
+            {t("processes.bulk.remove")}
+          </button>
+          <button
+            type="button"
+            class="secondary"
+            disabled={!has_selection || bulk_running.value}
+            onClick={() => run_bulk("activate")}
+          >
+            {t("processes.bulk.activate")}
+          </button>
+          <button
+            type="button"
+            class="secondary"
+            disabled={!has_selection || bulk_running.value}
+            onClick={() => run_bulk("suspend")}
+          >
+            {t("processes.bulk.suspend")}
+          </button>
+          {has_selection && (
+            <span class="processes-bulk-count">
+              {t("processes.bulk.count", { count: selected.value.size })}
+            </span>
+          )}
         </div>
         <input
           class="processes-search"
@@ -285,7 +362,14 @@ const ProcessDefinitionSelection = () => {
         <table class="processes-table">
           <thead>
             <tr>
-              <th aria-label="select" />
+              <th>
+                <input
+                  type="checkbox"
+                  aria-label={t("processes.bulk.select-all")}
+                  checked={all_selected}
+                  onChange={toggle_all}
+                />
+              </th>
               <th>{t("common.name")}</th>
               <th class="num">{t("processes.tabs.incidents")}</th>
               <th class="num">{t("dashboard.instances")}</th>
@@ -297,7 +381,12 @@ const ProcessDefinitionSelection = () => {
           </thead>
           <tbody>
             {rows.map((entry) => (
-              <ProcessDefinition key={entry.definition.id} {...entry} />
+              <ProcessDefinition
+                key={entry.definition.id}
+                checked={selected.value.has(entry.definition.id)}
+                onToggle={() => toggle_one(entry.definition.id)}
+                {...entry}
+              />
             ))}
           </tbody>
         </table>
@@ -401,12 +490,19 @@ const ProcessDefinition = ({
   definition: { id, name, key, version, tenantId },
   instances,
   incidents,
+  checked,
+  onToggle,
 }) => {
   const { query } = useRoute();
   return (
-    <tr>
-      <td>
-        <input type="checkbox" aria-label={name ?? id} disabled />
+    <tr aria-selected={checked}>
+      <td onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
+          aria-label={name ?? id}
+          checked={!!checked}
+          onChange={onToggle}
+        />
       </td>
       <td>
         <a href={`/processes/${id}${keep_history_query(query)}`}>{name ?? key}</a>
