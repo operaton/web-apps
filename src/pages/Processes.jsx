@@ -153,6 +153,72 @@ const ProcessesPage = () => {
   );
 };
 
+const DefinitionTabHeading = ({ titleKey }) => {
+  const state = useContext(AppState);
+  const [t] = useTranslation();
+  const def = state.api.process.definition.one.value?.data;
+  const def_label = def?.name ?? def?.key;
+  return (
+    <header>
+      <h1>
+        {def_label && (
+          <>
+            <small>{def_label}</small>
+            {" / "}
+          </>
+        )}
+        {t(titleKey)}
+      </h1>
+    </header>
+  );
+};
+
+const DefinitionMetaPanel = () => {
+  const state = useContext(AppState);
+  const [t] = useTranslation();
+  const def = state.api.process.definition.one.value?.data;
+  const stats = state.api.process.definition.statistics.value?.data;
+  if (!def) return null;
+  const total_instances = stats?.reduce((n, a) => n + (a.instances ?? 0), 0);
+  const total_incidents = stats?.reduce(
+    (n, a) => n + (a.incidents?.length ?? 0),
+    0,
+  );
+  return (
+    <details open>
+      <summary>{t("processes.definition-details")}</summary>
+      <dl>
+        <dt>{t("processes.definition-id")}</dt>
+        <dd
+          class="font-mono copy-on-click"
+          onClick={copyToClipboard}
+          title={t("processes.click-to-copy")}
+        >
+          {def.id ?? "—"}
+        </dd>
+        <dt>{t("common.key")}</dt>
+        <dd>{def.key ?? "—"}</dd>
+        <dt>{t("processes.version")}</dt>
+        <dd>{def.version ?? "—"}</dd>
+        {def.tenantId ? (
+          <>
+            <dt>{t("processes.tenant-id")}</dt>
+            <dd>{def.tenantId}</dd>
+          </>
+        ) : null}
+        {stats ? (
+          <>
+            <dt>{t("dashboard.instances")}</dt>
+            <dd>{total_instances}</dd>
+            <dt>{t("processes.tabs.incidents")}</dt>
+            <dd>{total_incidents}</dd>
+          </>
+        ) : null}
+      </dl>
+    </details>
+  );
+};
+
 const flatten_activity_instances = (node, out = []) => {
   if (!node) return out;
   const children = node.childActivityInstances ?? [];
@@ -554,10 +620,9 @@ const Instances = () => {
 
   return !params?.selection_id ? (
     <div class="fade-in">
-      <header class="processes-page-header">
-        <h1>{t("processes.tabs.instances")}</h1>
-      </header>
-      <table class="processes-table">
+      <DefinitionTabHeading titleKey="processes.tabs.instances" />
+      <DefinitionMetaPanel />
+      <table>
         <thead>
           <tr>
             <th>{t("common.id")}</th>
@@ -926,10 +991,9 @@ const Incidents = () => {
   /** @namespace instance.incidentType **/
   return (
     <div class="fade-in">
-      <header class="processes-page-header">
-        <h1>{t("processes.tabs.incidents")}</h1>
-      </header>
-      <table class="processes-table">
+      <DefinitionTabHeading titleKey="processes.tabs.incidents" />
+      <DefinitionMetaPanel />
+      <table>
         <thead>
           <tr>
             <th>{t("processes.incidents.message")}</th>
@@ -966,35 +1030,38 @@ const CalledProcessDefinitions = () => {
   /** @namespace definition.calledFromActivityIds **/
   return (
     <div class="fade-in">
-      <header class="processes-page-header">
-        <h1>{t("processes.tabs.called-definitions")}</h1>
-      </header>
-      <table class="processes-table">
+      <DefinitionTabHeading titleKey="processes.tabs.called-definitions" />
+      <DefinitionMetaPanel />
+      <table>
         <thead>
           <tr>
-            <th>{t("processes.called-definitions.called-process-definition")}</th>
+            <th>
+              {t("processes.called-definitions.called-process-definition")}
+            </th>
             <th>{t("common.state")}</th>
             <th>{t("common.activity")}</th>
           </tr>
         </thead>
         <tbody>
-          {state.api.process.definition.called.value?.data?.map((definition) => (
-            <tr key={definition.id}>
-              <td>
-                <a
-                  href={`/processes/${definition.id}${keep_history_query(query)}`}
-                >
-                  {definition.name}
-                </a>
-              </td>
-              <td>
-                {definition.suspended
-                  ? t("common.suspended")
-                  : t("common.running")}
-              </td>
-              <td>{definition.calledFromActivityIds.map((a) => `${a}, `)}</td>
-            </tr>
-          ))}
+          {state.api.process.definition.called.value?.data?.map(
+            (definition) => (
+              <tr key={definition.id}>
+                <td>
+                  <a
+                    href={`/processes/${definition.id}${keep_history_query(query)}`}
+                  >
+                    {definition.name}
+                  </a>
+                </td>
+                <td>
+                  {definition.suspended
+                    ? t("common.suspended")
+                    : t("common.running")}
+                </td>
+                <td>{definition.calledFromActivityIds.map((a) => `${a}, `)}</td>
+              </tr>
+            ),
+          )}
         </tbody>
       </table>
     </div>
@@ -1021,10 +1088,9 @@ const JobDefinitions = () => {
   /** @namespace definition.overridingJobPriority **/
   return (
     <div class="relative fade-in">
-      <header class="processes-page-header">
-        <h1>{t("processes.tabs.jobs")}</h1>
-      </header>
-      <table class="processes-table">
+      <DefinitionTabHeading titleKey="processes.tabs.jobs" />
+      <DefinitionMetaPanel />
+      <table>
         <thead>
           <tr>
             <th>{t("common.state")}</th>

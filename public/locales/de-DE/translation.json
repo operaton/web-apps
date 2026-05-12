@@ -241,6 +241,7 @@
     "version": "Version",
     "change-definition": "Definition wechseln",
     "definition-id": "Definitions-ID",
+    "definition-details": "Definitionsdetails",
     "tenant-id": "Mandanten-ID",
     "click-to-copy": "Klicken zum Kopieren",
     "history-mode-active": "Verlaufsmodus aktiv",
