@@ -1,4 +1,4 @@
-import { useContext } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { AppState } from "../state.js";
 import { useLocation, useRoute } from "preact-iso";
@@ -17,55 +17,63 @@ const DeploymentsPage = () => {
       params: { deployment_id, resource_name },
     } = useRoute(),
     { route } = useLocation(),
-    [t] = useTranslation(),
-    no_deployments_loaded =
-      state.api.deployment.all.value === null ||
-      state.api.deployment.all.value === undefined,
-    no_resources_loaded =
-      state.api.deployment.resources.value === null && deployment_id;
+    [t] = useTranslation();
 
-  if (no_deployments_loaded) {
-    void engine_rest.deployment.all(state).then(() => {
-      if (deployment_id === undefined) {
-        route(`/deployments/${state.api.deployment.all.value.data[0].id}`);
+  // Load the deployment list once on mount.
+  useEffect(() => {
+    if (state.api.deployment.all.value === null) {
+      void engine_rest.deployment.all(state);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When the deployment list has loaded and the user is on /deployments with
+  // no specific deployment selected, redirect to the first one.
+  useEffect(() => {
+    const list = state.api.deployment.all.value?.data;
+    if (!deployment_id && list?.length) {
+      route(`/deployments/${list[0].id}`, true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployment_id, state.api.deployment.all.value]);
+
+  // Load the resources for the active deployment; clear stale per-deployment
+  // data on navigation so the next deployment's panel can't briefly render
+  // against the previous deployment's signals.
+  useEffect(() => {
+    if (deployment_id) {
+      void engine_rest.deployment.resources(state, deployment_id);
+    }
+    return () => {
+      selected_resource.value = null;
+      state.api.deployment.resources.value = null;
+      state.api.deployment.resource.value = null;
+      state.api.process.definition.one.value = null;
+      state.api.process.instance.count.value = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployment_id]);
+
+  // Once resources are available and a specific resource is in the URL, look
+  // up the resource by name and fetch its content + matching definition +
+  // instance count.
+  useEffect(() => {
+    const resources_data = state.api.deployment.resources.value?.data;
+    if (deployment_id && resource_name && resources_data) {
+      const resource = resources_data.find((r) => r.name === resource_name);
+      if (resource) {
+        selected_resource.value = resource;
+        void engine_rest.deployment.resource(state, deployment_id, resource.id);
+        void engine_rest.process_definition.by_deployment_id(
+          state,
+          deployment_id,
+          resource_name,
+        );
+        void engine_rest.process_instance.count(state, deployment_id);
       }
-    });
-  }
-
-  if (no_resources_loaded) {
-    void engine_rest.deployment.resources(state, deployment_id).then(() => {
-      selected_resource.value = state.api.deployment.resources.value.data.find(
-        (resource) => resource.name === resource_name,
-      );
-    });
-  }
-
-  if (
-    resource_name &&
-    state.api.deployment.resources.value?.data &&
-    !selected_resource.value
-  ) {
-    selected_resource.value = state.api.deployment.resources.value.data.find(
-      (r) => r.name === resource_name,
-    );
-  }
-
-  if (resource_name && selected_resource.value) {
-    void engine_rest.deployment.resource(
-      state,
-      deployment_id,
-      selected_resource.value.id,
-    );
-  }
-
-  if (resource_name && selected_resource.value !== null) {
-    void engine_rest.process_definition.by_deployment_id(
-      state,
-      deployment_id,
-      resource_name,
-    );
-    void engine_rest.process_instance.count(state, deployment_id);
-  }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployment_id, resource_name, state.api.deployment.resources.value]);
 
   return (
     <main id="content" class="deployments fade-in">
@@ -84,29 +92,8 @@ const DeploymentsPage = () => {
 
 const DeploymentsList = () => {
   const state = useContext(AppState),
-    {
-      deployments_page: {
-        selected_resource,
-        selected_deployment,
-        selected_process_statistics,
-      },
-    } = state,
     { params } = useRoute(),
-    [t] = useTranslation(),
-    reset_state = (deployment_id) => {
-      void engine_rest.deployment.resources(state, deployment_id).then(() => {
-        selected_resource.value =
-          state.api.deployment.resources.value.data.find(
-            (res) => res.id === params.resource_name,
-          );
-      });
-
-      state.api.process.definition.one.value = null;
-      state.api.process.instance.count.value = null;
-      selected_resource.value = null;
-      selected_deployment.value = null;
-      selected_process_statistics.value = null;
-    };
+    [t] = useTranslation();
 
   return (
     <div>
@@ -127,10 +114,7 @@ const DeploymentsList = () => {
                   aria-selected={params.deployment_id === deployment.id}
                 >
                   <th scope="row">
-                    <a
-                      href={`/deployments/${deployment.id}`}
-                      onClick={() => reset_state(deployment.id)}
-                    >
+                    <a href={`/deployments/${deployment.id}`}>
                       {deployment?.name || deployment?.id}
                     </a>
                   </th>

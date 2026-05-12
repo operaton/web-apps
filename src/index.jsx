@@ -100,13 +100,8 @@ const Routing = () => {
             component={ProcessesPage}
           />
           <Route path="/migrations" component={MigrationsPage} />
-          <Route path="/deployments" component={DeploymentsPage} />
           <Route
-            path="/deployments/:deployment_id"
-            component={DeploymentsPage}
-          />
-          <Route
-            path="/deployments/:deployment_id/:resource_name"
+            path="/deployments/:deployment_id?/:resource_name?"
             component={DeploymentsPage}
           />
           <Route path="/admin" component={AdminPage} />
