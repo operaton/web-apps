@@ -711,20 +711,26 @@
     padding: var(--spacing-2);
   }
 
+  /* Two-row, two-column layout:
+       row 1: deployments table, spans both columns
+       row 2: resources list (left) + details pane (right) */
   .deployments {
     display: grid;
-    grid-template-rows: minmax(5em, 30vh) auto;
+    grid-template-rows: minmax(5em, 30vh) 1fr;
+    grid-template-columns: minmax(15em, 25em) 1fr;
     height: 100%;
   }
-  #deployment-lists {
+  .deployments > :first-child {
+    grid-column: 1 / -1;
     overflow-y: auto;
-    position: relative;
-    overscroll-behavior: none;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    max-height: 100%;
-    border-bottom: var(--border);
-    border-width: var(--border-width-2);
+    border-bottom: var(--border-width-2) solid var(--border-color);
+  }
+  .deployments > :nth-child(2) {
+    overflow-y: auto;
+    border-right: var(--border);
+  }
+  .deployments > :nth-child(3) {
+    overflow: auto;
   }
   .deployment-empty {
     display: flex;

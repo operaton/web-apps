@@ -337,7 +337,9 @@
     "no-resource": "No resource selected",
     "no-process-name": "N/A - Process name is not defined",
     "instance-count": "Instance Count",
-    "empty-response": "Empty response"
+    "empty-response": "Empty response",
+    "form-preview": "Form preview",
+    "raw-data-json": "Raw data (JSON)"
   },
   "migrations": {
     "title": "Migrations",
