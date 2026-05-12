@@ -287,7 +287,7 @@ const Task = () => {
           <p>
             {status === 404
               ? t("tasks.task-not-found-hint")
-              : task_value.error?.message ?? t("tasks.form.unknown-error")}
+              : (task_value.error?.message ?? t("tasks.form.unknown-error"))}
           </p>
           <a href="/tasks" class="button">
             {t("tasks.back-to-list")}
@@ -300,7 +300,7 @@ const Task = () => {
   return (
     <div id="task-details" className="fade-in">
       <section id="task-data">
-        <div class="task-header">
+        <header>
           <div>
             <h2>{task.value?.data?.name}</h2>
             <a href={`/processes/${pd.value?.data?.id}`}>
@@ -314,7 +314,7 @@ const Task = () => {
             )}
           </div>
           <CommentButton />
-        </div>
+        </header>
 
         <div class="task-cards">
           <SetFollowUpDateButton />

@@ -1,9 +1,9 @@
-import { useContext } from 'preact/hooks'
-import { useRoute } from 'preact-iso'
-import { useTranslation } from 'react-i18next'
-import { AppState } from '../state.js'
+import { useContext } from "preact/hooks";
+import { useLocation, useRoute } from "preact-iso";
+import { useTranslation } from "react-i18next";
+import { AppState } from "../state.js";
 
-const PANELS = ['instances', 'incidents', 'called_definitions', 'jobs']
+const PANELS = ["instances", "incidents", "called_definitions", "jobs"];
 
 /**
  * The Processes page sub-navigation.
@@ -17,67 +17,87 @@ const PANELS = ['instances', 'incidents', 'called_definitions', 'jobs']
 export const ProcessSubNav = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
-    { params, query } = useRoute(),
-    history_query = query.history ? '?history=true' : '',
+    { params, query, path } = useRoute(),
+    { route } = useLocation(),
+    history_query = query.history ? "?history=true" : "",
     def_id = params.definition_id,
     has_def = !!def_id,
-    active_panel = params.panel ?? (has_def ? 'overview' : 'definitions'),
+    active_panel = params.panel ?? (has_def ? "overview" : "definitions"),
     on_definitions = !has_def,
-    instance_count = state.api.process.definition.statistics.value?.data?.reduce(
-      (n, a) => n + (a.instances ?? 0),
-      0,
-    ),
-    incident_count = state.api.process.definition.statistics.value?.data?.reduce(
-      (n, a) => n + (a.incidents?.length ?? 0),
-      0,
-    ),
-    history_active = state.history_mode.value
+    instance_count =
+      state.api.process.definition.statistics.value?.data?.reduce(
+        (n, a) => n + (a.instances ?? 0),
+        0,
+      ),
+    incident_count =
+      state.api.process.definition.statistics.value?.data?.reduce(
+        (n, a) => n + (a.incidents?.length ?? 0),
+        0,
+      ),
+    history_active = state.history_mode.value;
 
-  const child_link = (panel, label, count) => {
-    if (!has_def) {
-      return (
-        <span class="processes-subnav-link disabled">
-          {label}{count !== undefined && ` (${count})`}
-        </span>
-      )
-    }
-    return (
-      <a
-        href={`/processes/${def_id}/${panel}${history_query}`}
-        class={`processes-subnav-link ${active_panel === panel ? 'active' : ''}`}
-      >
-        {label}{count !== undefined && ` (${count})`}
-      </a>
-    )
-  }
+  const child_item = (panel, label, count) => (
+    <li key={panel}>
+      {has_def ? (
+        <a
+          href={`/processes/${def_id}/${panel}${history_query}`}
+          aria-current={active_panel === panel ? "page" : undefined}
+        >
+          {label}
+          {count !== undefined && ` (${count})`}
+        </a>
+      ) : (
+        <span class="disabled">{label}</span>
+      )}
+    </li>
+  );
 
   return (
-    <nav class="processes-subnav" aria-label="Processes navigation">
-      <div class="processes-subnav-trail">
-        <a
-          href={`/processes${history_query}`}
-          class={`processes-subnav-link ${on_definitions ? 'active' : ''}`}
-        >
-          {t('processes.subnav.definitions')}
-        </a>
-        <span class="processes-subnav-chevron" aria-hidden="true">›</span>
-        {child_link('instances', t('processes.subnav.instances'), instance_count)}
-        {child_link('incidents', t('processes.subnav.incidents'), incident_count)}
-        {child_link('called_definitions', t('processes.subnav.called-definitions'))}
-        {child_link('jobs', t('processes.subnav.jobs'))}
-      </div>
+    <nav aria-label="Processes navigation">
+      <menu>
+        <li>
+          <a
+            href={`/processes${history_query}`}
+            aria-current={on_definitions ? "page" : undefined}
+          >
+            {t("processes.subnav.definitions")}
+          </a>
+        </li>
+        <li class="chevron" aria-hidden="true">
+          ›
+        </li>
+        {child_item(
+          "instances",
+          t("processes.subnav.instances"),
+          instance_count,
+        )}
+        {child_item(
+          "incidents",
+          t("processes.subnav.incidents"),
+          incident_count,
+        )}
+        {child_item(
+          "called_definitions",
+          t("processes.subnav.called-definitions"),
+        )}
+        {child_item("jobs", t("processes.subnav.jobs"))}
+      </menu>
 
       <button
         type="button"
-        class={`processes-subnav-history ${history_active ? 'active' : ''}`}
-        onClick={() => (state.history_mode.value = !history_active)}
+        class={`history-toggle ${history_active ? "active" : ""}`}
+        onClick={() => {
+          const next = !history_active;
+          state.history_mode.value = next;
+          route(next ? `${path}?history=true` : path);
+        }}
       >
         {history_active
-          ? t('processes.history-mode-active')
-          : t('processes.enable-history-mode')}
+          ? t("processes.history-mode-active")
+          : t("processes.enable-history-mode")}
       </button>
     </nav>
-  )
-}
+  );
+};
 
-ProcessSubNav.PANELS = PANELS
+ProcessSubNav.PANELS = PANELS;

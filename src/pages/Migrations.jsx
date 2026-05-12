@@ -538,10 +538,9 @@ const Diagrams = () => {
     [t] = useTranslation();
 
   return (
-    // <div class="migration-diagrams">
     <section>
       <h2 class="screen-hidden">{t("migrations.diagrams")}</h2>
-      <div class="migration-diagrams">
+      <div>
         <div>
           <h3 class="screen-hidden">{t("migrations.source")}</h3>
           <RequestState

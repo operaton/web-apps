@@ -107,9 +107,9 @@ const ProcessesPage = () => {
   return (
     <main id="processes">
       <ProcessSubNav />
-      <div class="processes-body">
+      <div>
         {(!def_selected || !diagram_maximized.value) && (
-          <div class="processes-content">
+          <div class="content">
             {!def_selected ? (
               <ProcessDefinitionSelection />
             ) : (
@@ -118,9 +118,7 @@ const ProcessesPage = () => {
           </div>
         )}
         {def_selected && (
-          <div
-            class={`processes-diagram ${diagram_maximized.value ? "maximized" : ""}`}
-          >
+          <div class={`diagram ${diagram_maximized.value ? "maximized" : ""}`}>
             <button
               type="button"
               class="diagram-maximize-btn"
@@ -363,16 +361,16 @@ const ProcessDefinitionSelection = () => {
   const has_selection = selected.value.size > 0;
 
   return (
-    <div class="processes-definitions fade-in">
-      <header class="processes-page-header">
+    <div class="fade-in">
+      <header>
         <h1>{t("processes.deployed-definitions")}</h1>
         <a class="button" href="/deployments">
           {t("processes.deploy")}
         </a>
       </header>
 
-      <div class="processes-action-row">
-        <div class="processes-bulk-actions">
+      <div class="toolbar">
+        <div>
           <button
             type="button"
             class="secondary"
@@ -408,13 +406,12 @@ const ProcessDefinitionSelection = () => {
             {t("processes.bulk.suspend")}
           </button>
           {has_selection && (
-            <span class="processes-bulk-count">
+            <small>
               {t("processes.bulk.count", { count: selected.value.size })}
-            </span>
+            </small>
           )}
         </div>
         <input
-          class="processes-search"
           type="search"
           placeholder={t("processes.filter-search")}
           value={filter_value.value}
@@ -425,7 +422,7 @@ const ProcessDefinitionSelection = () => {
       {is_empty ? (
         <DefinitionsEmpty />
       ) : (
-        <table class="processes-table">
+        <table>
           <thead>
             <tr>
               <th>
@@ -464,7 +461,7 @@ const ProcessDefinitionSelection = () => {
 const DefinitionsEmpty = () => {
   const [t] = useTranslation();
   return (
-    <div class="processes-empty">
+    <div class="empty-state">
       <p>{t("processes.empty.heading")}</p>
       <a href="/deployments">{t("processes.empty.upload")}</a>
       <a
@@ -485,7 +482,9 @@ const ProcessDefinitionDetails = () => {
   );
 
   return (
-    <div class="fade-in">{active_tab ? active_tab.target : <DefinitionOverview />}</div>
+    <div class="fade-in">
+      {active_tab ? active_tab.target : <DefinitionOverview />}
+    </div>
   );
 };
 
@@ -517,11 +516,11 @@ const DefinitionOverview = () => {
           0,
         );
         return (
-          <div class="processes-definition-overview">
-            <header class="processes-page-header">
+          <div>
+            <header>
               <h1>{def?.name ?? def?.key}</h1>
             </header>
-            <dl class="processes-definition-meta">
+            <dl>
               <dt>{t("processes.definition-id")}</dt>
               <dd
                 class="font-mono copy-on-click"
@@ -649,9 +648,9 @@ const Instances = () => {
 };
 
 const InstanceTableRows = () =>
-  useContext(AppState).api.process.instance.list.value.data?.map((instance) => (
-    <ProcessInstance key={instance.id} {...instance} />
-  )) ?? <p>...</p>;
+  useContext(AppState).api.process.instance.list.value?.data?.map(
+    (instance) => <ProcessInstance key={instance.id} {...instance} />,
+  ) ?? null;
 
 const InstanceDetails = () => {
   const state = useContext(AppState),
@@ -686,7 +685,7 @@ const InstanceDetails = () => {
         tabs={process_instance_tabs}
         base_path={`/processes/${definition_id}/${panel}/${selection_id}`}
       />
-      <div class="processes-tertiary-content">{active_tab?.target}</div>
+      <div>{active_tab?.target}</div>
     </div>
   );
 };
@@ -697,7 +696,7 @@ const InstanceDetailsDescription = () => {
     data = state.api.process.instance.one.value?.data;
 
   return (
-    <dl class="processes-definition-meta processes-instance-meta">
+    <dl>
       <dt>{t("processes.instance-id")}</dt>
       <dd
         class="font-mono copy-on-click"
@@ -748,7 +747,7 @@ const InstanceVariables = () => {
   });
 
   return (
-    <table class="processes-table">
+    <table>
       <thead>
         <tr>
           <th>{t("common.name")}</th>
@@ -803,7 +802,7 @@ const InstanceIncidents = () => {
 
   /** @namespace state.api.history.incident.by_process_instance.value.data **/
   return (
-    <table class="processes-table">
+    <table>
       <thead>
         <tr>
           <th>{t("processes.incidents.message")}</th>
@@ -877,7 +876,7 @@ const InstanceUserTasks = () => {
 
   /** @namespace state.api.task.by_process_instance.value.data **/
   return (
-    <table class="processes-table">
+    <table>
       <thead>
         <tr>
           <th>{t("common.activity")}</th>
@@ -944,7 +943,7 @@ const CalledProcessInstances = () => {
   /** @namespace state.api.process.instance.called.value.data **/
   /** @namespace instance.definitionId **/
   return (
-    <table class="processes-table">
+    <table>
       <thead>
         <tr>
           <th>{t("common.state")}</th>

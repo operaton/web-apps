@@ -59,7 +59,7 @@ The backend is called Operaton which is a fork of Camunda 7. You can use Camunda
 - **CSS classes**: `class="foo bar"`, not `className={}`
 - **Semantic HTML**: `<a>` for navigation, `<button>` for actions, never `onClick` on `<div>`
 - **Variable grouping**: declare multiple `const` with commas
-- **CSS**: Vanilla CSS only, use CSS custom properties, prefer classless styling, prefer cascading over many single classes. Styles live in `public/css/style.css` and `src/css/`
+- **CSS**: Vanilla CSS only, use CSS custom properties, prefer classless styling, prefer cascading over many single classes. Styles live in `public/css/style.css` and `src/css/`. Scope page-specific tweaks under the page id (e.g. `#processes table { … }`) rather than coining a bespoke class (`processes-table`); only add a class when the element is genuinely idiosyncratic. Navs are `<nav><menu><li><a></a></li>…</menu></nav>`; active link uses `aria-current="page"`, not an `.active` class
 - **File creation**: avoid creating unnecessary files; only create new files for reusable components
 - **Tests**: `*.test.js` / `*.test.jsx` colocated with source, using `describe`/`it`/`expect` (vitest globals), `@testing-library/preact` for component tests
 - **i18n**: `react-i18next`, translations in `public/locales/{locale}/translation.json` (en-US, de-DE), always store text strings of the UI in the translation files

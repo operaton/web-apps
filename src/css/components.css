@@ -193,109 +193,31 @@ section.task-tabs {
   height: 100%;
 }
 
-/* Processes sub-nav: Definitions › Instances · Incidents · …    [history] */
-.processes-subnav {
+/* Generic utilities used across pages */
+.toolbar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-2);
-  min-height: 2rem;
-  padding: 0 var(--spacing-2);
-  border-bottom: var(--border);
-  background: var(--background-1);
-  font-size: var(--small-font-size);
-}
-
-.processes-subnav-trail {
-  display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  flex-wrap: wrap;
+  margin-bottom: var(--spacing-2);
 }
 
-.processes-subnav-link {
-  color: var(--text);
-  text-decoration: none;
-  padding: 0;
-  line-height: 2rem;
-  border-bottom: 0.15em solid transparent;
-}
-
-.processes-subnav-link:hover {
-  color: var(--color-primary);
-}
-
-.processes-subnav-link.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: 600;
-}
-
-.processes-subnav-link.disabled {
-  color: var(--text-2, var(--muted));
-  cursor: not-allowed;
-}
-
-.processes-subnav-chevron {
-  color: var(--text-2, var(--muted));
-  font-size: 1.1em;
-  user-select: none;
-}
-
-.processes-subnav-history {
-  background: transparent;
-  color: var(--text);
-  border: var(--border);
-  padding: 0.25em 0.75em;
-  border-radius: 999em;
-  font-size: inherit;
-  cursor: pointer;
-}
-
-.processes-subnav-history.active {
-  background: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-}
-
-/* Tertiary nav: horizontal tab strip whose border spans the full width of
-   the page. We negative-margin it past .processes-content's padding. */
-.processes-tertiary-nav {
+.empty-state {
   display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
   align-items: center;
-  gap: var(--spacing-2);
-  min-height: 2rem;
-  padding: 0 var(--spacing-2);
-  margin: 0 calc(-1 * var(--spacing-2)) var(--spacing-1);
-  border-bottom: var(--border);
-  font-size: var(--small-font-size);
-  flex-wrap: wrap;
-  background: var(--background-1);
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: var(--background-2);
+  border-radius: var(--border-radius);
+  text-align: center;
 }
 
-.processes-tertiary-link {
-  color: var(--text);
-  text-decoration: none;
-  padding: 0;
-  line-height: 2rem;
-  border-bottom: 0.15em solid transparent;
-}
-
-.processes-tertiary-link:hover {
-  color: var(--color-primary);
-}
-
-.processes-tertiary-link.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: 600;
-}
-
-.processes-tertiary-content {
-  padding-top: var(--spacing-1);
-}
-
-/* New column layout for the Processes page: sub-nav · content · diagram. */
+/* Processes page — column layout: top nav · content · diagram pane.
+   Page-specific styling cascades from `#processes`; only genuinely
+   idiosyncratic things (diagram pane, history-mode pill, maximize button)
+   keep their own class. */
 main#processes {
   display: flex;
   flex-direction: column;
@@ -303,21 +225,26 @@ main#processes {
   overflow: hidden;
 }
 
-.processes-body {
+/* Wrapper that holds the .content + .diagram split panes. */
+#processes > div {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-.processes-content {
+#processes .content {
   flex: 1 1 70%;
   min-height: 0;
   overflow: auto;
   padding: var(--spacing-2);
 }
 
-.processes-diagram {
+#processes .content h1 {
+  font-size: 2em;
+}
+
+#processes .diagram {
   flex: 0 0 30%;
   min-height: 0;
   position: relative;
@@ -327,11 +254,11 @@ main#processes {
   flex-direction: column;
 }
 
-.processes-diagram.maximized {
+#processes .diagram.maximized {
   flex: 1 1 100%;
 }
 
-.processes-diagram #canvas {
+#processes .diagram #canvas {
   flex: 1;
   min-height: 0;
   position: relative;
@@ -364,8 +291,90 @@ main#processes {
   height: 1rem;
 }
 
-/* Definitions list */
-.processes-page-header {
+/* Sub-nav and tertiary nav share an underline-tab pattern. */
+#processes nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: 2rem;
+  padding: 0 var(--spacing-2);
+  border-bottom: var(--border);
+  background: var(--background-1);
+  font-size: var(--small-font-size);
+  flex-wrap: wrap;
+}
+
+/* The top sub-nav puts the history toggle on the right edge. */
+#processes > nav:first-of-type {
+  justify-content: space-between;
+}
+
+/* The tertiary nav lives inside .content (which has its own padding); the
+   negative side-margins let its bottom border span edge-to-edge. */
+#processes nav.tertiary {
+  margin: 0 calc(-1 * var(--spacing-2)) var(--spacing-1);
+}
+
+#processes nav menu {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-wrap: wrap;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#processes nav a,
+#processes nav .disabled {
+  color: var(--text);
+  text-decoration: none;
+  padding: 0;
+  line-height: 2rem;
+  border-bottom: 0.15em solid transparent;
+}
+
+#processes nav a:hover {
+  color: var(--color-primary);
+}
+
+#processes nav a[aria-current] {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+#processes nav .disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+#processes nav .chevron {
+  color: var(--text-2, var(--muted));
+  font-size: 1.1em;
+  user-select: none;
+}
+
+#processes .history-toggle {
+  background: transparent;
+  color: var(--text);
+  border: var(--border);
+  padding: 0.25em 0.75em;
+  border-radius: 999em;
+  font-size: inherit;
+  cursor: pointer;
+  margin: 0;
+}
+
+#processes .history-toggle.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* Page header: title (+ optional muted breadcrumb in <small>) on the left,
+   action button on the right. */
+#processes header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -373,95 +382,83 @@ main#processes {
   margin-bottom: var(--spacing-1);
 }
 
-.processes-page-header h1 {
+#processes header h1 {
   margin: 0;
 }
 
-.processes-action-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-2);
-  margin-bottom: var(--spacing-2);
-}
-
-.processes-bulk-actions {
-  display: flex;
-  gap: var(--spacing-1);
-  align-items: center;
-}
-
-.processes-bulk-count {
+#processes header h1 small {
   color: var(--text-2, var(--muted));
-  font-size: var(--small-font-size);
-  margin-left: 0.25rem;
+  font-weight: 400;
+  font-size: inherit;
 }
 
-.processes-search {
-  flex: 0 1 24rem;
-  max-width: 40%;
-}
-
-.processes-table {
+/* Tables: only the overrides the global stylesheet doesn't already cover. */
+#processes table {
   width: 100%;
   border-collapse: collapse;
+  white-space: normal;
 }
 
-.processes-table th,
-.processes-table td {
+#processes th,
+#processes td {
   padding: 0.4rem 0.6rem;
   text-align: left;
   border-bottom: var(--border);
 }
 
-.processes-table th.num,
-.processes-table td.num {
+#processes .num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.processes-table tbody tr:hover {
+#processes tbody tr:hover {
   background: var(--background-2);
 }
 
-.processes-table tbody tr[aria-selected="true"] {
+#processes tbody tr[aria-selected="true"] {
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
-.processes-empty {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  background: var(--background-2);
-  border-radius: var(--border-radius);
-  text-align: center;
+#processes input[type="search"] {
+  flex: 0 1 24rem;
+  max-width: 40%;
 }
 
-.processes-definition-overview {
-  padding: 0;
-}
-
-.processes-definition-meta {
+/* Definition / instance metadata renders as a <dl> grid. */
+#processes dl {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 0.25rem 1rem;
   margin-top: var(--spacing-1);
+  margin-bottom: var(--spacing-1);
 }
 
-.processes-definition-meta dt {
+#processes dl dt {
   color: var(--text-2, var(--muted));
   font-size: var(--small-font-size);
-}
-
-.processes-definition-meta dd {
+  font-weight: normal;
   margin: 0;
 }
 
-.processes-instance-meta {
-  margin-bottom: var(--spacing-1);
+#processes dl dd {
+  margin: 0;
+}
+
+/* Collapsible meta panel above each tab's table. */
+#processes details {
+  margin: 0 0 var(--spacing-2);
+  font-size: var(--small-font-size);
+}
+
+#processes details > summary {
+  cursor: pointer;
+  color: var(--text-2, var(--muted));
+  user-select: none;
+  padding: 0.15rem 0;
+}
+
+#processes details > summary:hover {
+  color: var(--text);
 }
 
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
