@@ -1,4 +1,4 @@
-import { useSignal, useSignalEffect } from "@preact/signals";
+import { useSignal } from "@preact/signals";
 import { useContext, useEffect } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
@@ -26,60 +26,53 @@ const keep_history_query = (query) => {
 
 const ProcessesPage = () => {
   const state = useContext(AppState),
-    { params, query, path } = useRoute(),
-    { route } = useLocation(),
+    { params, query } = useRoute(),
     [t] = useTranslation(),
-    enable_history_mode = () => {
-      route(`${path}?history=true`);
-      state.history_mode.value = true;
-    },
-    // condition naming for deciding on fetching data from backend
-    definition_selected = params.definition_id,
-    history_mode_disabled = !state.history_mode.value,
-    no_definition_loaded = state.api.process.definition.one.value === null,
-    /** @namespace state.api.process.definition.one.value.data **/
-    loaded_definition_not_matching_url_param =
-      state.api.process.definition.one.value?.status ===
-        RESPONSE_STATE.SUCCESS &&
-      state.api.process.definition.one.value?.data?.id !== params.definition_id,
-    instance_selected = params.selection_id,
-    activity_instances_signal = state.api.process.instance.activity_instances,
-    no_activity_instances_loaded = activity_instances_signal.value === null,
-    loaded_activity_instances_not_matching_url_param =
-      activity_instances_signal.value?.status === RESPONSE_STATE.SUCCESS &&
-      activity_instances_signal.value?.data?.id !== params.selection_id;
+    history_mode = query.history === "true";
 
-  if (query.history) {
-    enable_history_mode();
-  }
-
-  if (definition_selected) {
-    if (no_definition_loaded || loaded_definition_not_matching_url_param) {
+  // Fetch per-definition data when the active definition changes. Statistics
+  // power the "active instances" diagram tokens and are fetched in both live
+  // and history mode so the tokens remain visible when toggling.
+  useEffect(() => {
+    if (params.definition_id) {
       void engine_rest.process_definition.one(state, params.definition_id);
       void engine_rest.process_definition.diagram(state, params.definition_id);
-      // Statistics are the source for the "active instances" tokens on the
-      // diagram. We fetch them even in history mode so the tokens stay
-      // visible when the user toggles history on.
       void engine_rest.process_definition.statistics(
         state,
         params.definition_id,
       );
+    } else if (state.api.process.definition.list.value === null) {
+      void engine_rest.process_definition.list(state);
     }
-  } else if (state.api.process.definition.list.value === null) {
-    void engine_rest.process_definition.list(state);
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.definition_id]);
 
-  if (
-    instance_selected &&
-    history_mode_disabled &&
-    (no_activity_instances_loaded ||
-      loaded_activity_instances_not_matching_url_param)
-  ) {
-    void engine_rest.process_instance.activity_instances(
-      state,
-      params.selection_id,
-    );
-  }
+  // Activity instances are only available for live (non-history) instances.
+  useEffect(() => {
+    if (params.selection_id && !history_mode) {
+      void engine_rest.process_instance.activity_instances(
+        state,
+        params.selection_id,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id, history_mode]);
+
+  // When the active definition changes, drop stale per-definition data so
+  // tab subtrees cannot momentarily render against the previous definition's
+  // signals (which would otherwise re-trigger fetches under the consolidated
+  // route and produce flickering counts).
+  useEffect(() => {
+    return () => {
+      state.api.process.definition.one.value = null;
+      state.api.process.definition.diagram.value = null;
+      state.api.process.definition.statistics.value = null;
+      state.api.process.instance.list.value = null;
+      state.api.process.instance.one.value = null;
+      state.api.process.instance.activity_instances.value = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.definition_id]);
 
   const def_selected = !!params.definition_id;
   const diagram_maximized = useSignal(false);
@@ -145,7 +138,8 @@ const ProcessSubNav = () => {
     [t] = useTranslation(),
     { params, query, path } = useRoute(),
     { route } = useLocation(),
-    history_query = query.history ? "?history=true" : "",
+    history_active = query.history === "true",
+    history_query = history_active ? "?history=true" : "",
     def_id = params.definition_id,
     has_def = !!def_id,
     active_panel = params.panel ?? (has_def ? "overview" : "definitions"),
@@ -159,8 +153,7 @@ const ProcessSubNav = () => {
       state.api.process.definition.statistics.value?.data?.reduce(
         (n, a) => n + (a.incidents?.length ?? 0),
         0,
-      ),
-    history_active = state.history_mode.value;
+      );
 
   const child_item = (panel, label, count) => (
     <li key={panel}>
@@ -212,11 +205,7 @@ const ProcessSubNav = () => {
       <button
         type="button"
         class={`history-toggle ${history_active ? "active" : ""}`}
-        onClick={() => {
-          const next = !history_active;
-          state.history_mode.value = next;
-          route(next ? `${path}?history=true` : path);
-        }}
+        onClick={() => route(history_active ? path : `${path}?history=true`)}
       >
         {history_active
           ? t("processes.history-mode-active")
@@ -372,9 +361,9 @@ const ProcessDiagram = () => {
         },
       },
     } = state,
-    { params } = useRoute(),
-    is_instance_view =
-      params.selection_id !== undefined && !state.history_mode.value,
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
+    is_instance_view = params.selection_id !== undefined && !history_mode,
     has_xml =
       diagram.value?.data?.bpmn20Xml !== null &&
       diagram.value?.data?.bpmn20Xml !== undefined,
@@ -602,7 +591,7 @@ const ProcessDefinitionDetails = () => {
       <DefinitionTabHeading titleKey={active_tab.nameKey} />
       <DefinitionMetaPanel />
       <div class="fade-in" key={active_tab.id}>
-        {active_tab.target}
+        <active_tab.Component />
       </div>
     </>
   );
@@ -706,13 +695,14 @@ const ProcessDefinition = ({
 
 const Instances = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
     [t] = useTranslation(),
+    history_mode = query.history === "true",
     list = state.api.process.instance.list,
     loaded_for = useSignal(null);
 
   const fetch_page = (firstResult) => {
-    if (state.history_mode.value) {
+    if (history_mode) {
       void engine_rest.history.process_instance.all(
         state,
         params.definition_id,
@@ -728,7 +718,7 @@ const Instances = () => {
   };
 
   if (!params.selection_id) {
-    const cache_key = `${params.definition_id}|${state.history_mode.value ? "h" : "l"}`;
+    const cache_key = `${params.definition_id}|${history_mode ? "h" : "l"}`;
     if (loaded_for.value !== cache_key) {
       loaded_for.value = cache_key;
       fetch_page(0);
@@ -776,7 +766,9 @@ const InstanceDetails = () => {
   const state = useContext(AppState),
     {
       params: { selection_id, definition_id, panel },
+      query,
     } = useRoute(),
+    history_mode = query.history === "true",
     [t] = useTranslation();
 
   if (selection_id) {
@@ -784,7 +776,7 @@ const InstanceDetails = () => {
       state.api.process.instance.one === undefined ||
       state.api.process.instance.one.value === null
     ) {
-      if (!state.history_mode.value) {
+      if (!history_mode) {
         void engine_rest.process_instance.one(state, selection_id);
       } else {
         void engine_rest.history.process_instance.one(state, selection_id);
@@ -805,7 +797,7 @@ const InstanceDetails = () => {
         tabs={process_instance_tabs}
         base_path={`/processes/${definition_id}/${panel}/${selection_id}`}
       />
-      <div>{active_tab?.target}</div>
+      <div>{active_tab ? <active_tab.Component /> : null}</div>
     </>
   );
 };
@@ -855,16 +847,16 @@ const ProcessInstance = ({ id, startTime, state, businessKey }) => {
 
 const InstanceVariables = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
     [t] = useTranslation(),
     selection_exists =
       state.api.process.instance.variables.value !== null &&
       state.api.process.instance.variables.value.data !== null &&
       state.api.process.instance.variables.value.data !== undefined;
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(() => {
-    if (!state.history_mode.value) {
+  useEffect(() => {
+    if (!history_mode) {
       void engine_rest.process_instance.variables(state, params.selection_id);
     } else {
       void engine_rest.history.variable_instance.by_process_instance(
@@ -872,7 +864,8 @@ const InstanceVariables = () => {
         params.selection_id,
       );
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id, history_mode]);
 
   return (
     <div>
@@ -887,7 +880,7 @@ const InstanceVariables = () => {
         </thead>
         <tbody>
           {selection_exists
-            ? !state.history_mode.value
+            ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
                 ).map(
@@ -922,13 +915,13 @@ const InstanceIncidents = () => {
     { params } = useRoute(),
     [t] = useTranslation();
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(() => {
+  useEffect(() => {
     void engine_rest.history.incident.by_process_instance(
       state,
       params.selection_id,
     );
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id]);
 
   /** @namespace state.api.history.incident.by_process_instance.value.data **/
   return (
@@ -997,14 +990,14 @@ const InstanceUserTasks = () => {
     { params } = useRoute(),
     [t] = useTranslation();
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(() => {
+  useEffect(() => {
     // void engine_rest.task.by_process_instance(state, params.selection_id)
     void engine_rest.task.get_process_instance_tasks(
       state,
       params.selection_id,
     );
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id]);
 
   /** @namespace state.api.task.by_process_instance.value.data **/
   return (
@@ -1075,10 +1068,10 @@ const CalledProcessInstances = () => {
     { selection_id, query } = useRoute(),
     [t] = useTranslation();
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(
-    () => void engine_rest.process_instance.called(state, selection_id),
-  );
+  useEffect(() => {
+    void engine_rest.process_instance.called(state, selection_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selection_id]);
 
   /** @namespace state.api.process.instance.called.value.data **/
   /** @namespace instance.definitionId **/
@@ -1123,14 +1116,13 @@ const Incidents = () => {
     { definition_id } = useRoute(),
     [t] = useTranslation();
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(
-    () =>
-      void engine_rest.history.incident.by_process_definition(
-        state,
-        definition_id,
-      ),
-  );
+  useEffect(() => {
+    void engine_rest.history.incident.by_process_definition(
+      state,
+      definition_id,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition_id]);
 
   /** @namespace instance.incidentMessage **/
   /** @namespace instance.incidentType **/
@@ -1165,10 +1157,10 @@ const CalledProcessDefinitions = () => {
     { definition_id, query } = useRoute(),
     [t] = useTranslation();
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(
-    () => void engine_rest.process_definition.called(state, definition_id),
-  );
+  useEffect(() => {
+    void engine_rest.process_definition.called(state, definition_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition_id]);
 
   /** @namespace definition.calledFromActivityIds **/
   return (
@@ -1214,14 +1206,13 @@ const JobDefinitions = () => {
     { definition_id } = useRoute(),
     [t] = useTranslation();
 
-  // fixme: rm useSignalEffect
-  useSignalEffect(
-    () =>
-      void engine_rest.job_definition.all.by_process_definition(
-        state,
-        definition_id,
-      ),
-  );
+  useEffect(() => {
+    void engine_rest.job_definition.all.by_process_definition(
+      state,
+      definition_id,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition_id]);
 
   /** @namespace state.api.job_definition.all.by_process_definition.value.data **/
   /** @namespace definition.jobType **/
@@ -1279,25 +1270,25 @@ const process_definition_tabs = [
     nameKey: "processes.tabs.instances",
     id: "instances",
     pos: 0,
-    target: <Instances />,
+    Component: Instances,
   },
   {
     nameKey: "processes.tabs.incidents",
     id: "incidents",
     pos: 1,
-    target: <Incidents />,
+    Component: Incidents,
   },
   {
     nameKey: "processes.tabs.called-definitions",
     id: "called_definitions",
     pos: 2,
-    target: <CalledProcessDefinitions />,
+    Component: CalledProcessDefinitions,
   },
   {
     nameKey: "processes.tabs.jobs",
     id: "jobs",
     pos: 3,
-    target: <JobDefinitions />,
+    Component: JobDefinitions,
   },
 ];
 
@@ -1307,44 +1298,47 @@ const UUIDLink = ({ uuid = "?", path }) => (
   </a>
 );
 
+// TODO: create Jobs example for old Camunda apps
+const InstanceJobsPlaceholder = () => <p>Jobs</p>;
+// TODO: create External Apps example for old Camunda apps
+const InstanceExternalTasksPlaceholder = () => <p>External Tasks</p>;
+
 const process_instance_tabs = [
   {
     nameKey: "processes.tabs.variables",
     id: "vars",
     pos: 0,
-    target: <InstanceVariables />,
+    Component: InstanceVariables,
   },
   {
     nameKey: "processes.tabs.instance-incidents",
     id: "instance_incidents",
     pos: 1,
-    target: <InstanceIncidents />,
+    Component: InstanceIncidents,
   },
   {
     nameKey: "processes.tabs.called-instances",
     id: "called_instances",
     pos: 2,
-    target: <CalledProcessInstances />,
+    Component: CalledProcessInstances,
   },
   {
     nameKey: "processes.tabs.user-tasks",
     id: "user_tasks",
     pos: 3,
-    target: <InstanceUserTasks />,
+    Component: InstanceUserTasks,
   },
   {
     nameKey: "processes.tabs.jobs",
     id: "jobs",
     pos: 4,
-    // TODO: create Jobs example for old Camunda apps
-    target: <p>Jobs</p>,
+    Component: InstanceJobsPlaceholder,
   },
   {
     nameKey: "processes.tabs.external-tasks",
     id: "external_tasks",
     pos: 5,
-    // TODO: create External Apps example for old Camunda apps
-    target: <p>External Tasks</p>,
+    Component: InstanceExternalTasksPlaceholder,
   },
 ];
 

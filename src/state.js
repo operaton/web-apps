@@ -33,7 +33,6 @@ const createAppState = () => {
     selected_deployment: signal(null),
     selected_process_statistics: signal(null),
   };
-  const history_mode = signal(false);
   const user_profile = signal(null);
   const task_claim_result = signal(null);
   const task_assign_result = signal(null);
@@ -159,7 +158,6 @@ const createAppState = () => {
     auth,
     api,
     deployments_page,
-    history_mode,
     user_profile,
     task_claim_result,
     task_assign_result,

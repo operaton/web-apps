@@ -93,18 +93,8 @@ const Routing = () => {
           {/*<Route path="/tasks/start/:id" component={TasksPage} />*/}
           <Route path="/tasks/:task_id" component={TasksPage} />
           <Route path="/tasks/:task_id/:tab" component={TasksPage} />
-          <Route path="/processes" component={ProcessesPage} />
-          <Route path="/processes/:definition_id" component={ProcessesPage} />
           <Route
-            path="/processes/:definition_id/:panel"
-            component={ProcessesPage}
-          />
-          <Route
-            path="/processes/:definition_id/:panel/:selection_id"
-            component={ProcessesPage}
-          />
-          <Route
-            path="/processes/:definition_id/:panel/:selection_id/:sub_panel"
+            path="/processes/:definition_id?/:panel?/:selection_id?/:sub_panel?"
             component={ProcessesPage}
           />
           <Route path="/migrations" component={MigrationsPage} />
