@@ -194,7 +194,7 @@ export const PAGINATED_GET = async (
 };
 
 export const GET = async (url, state, signl) => {
-  signl.value = { status: RESPONSE_STATE.LOADING, data: signl.peek()?.data };
+  signl.value = { status: RESPONSE_STATE.LOADING, data: signl.peek?.()?.data };
 
   let headers = new Headers();
   headers.set("Authorization", get_auth_header(state));

@@ -236,8 +236,14 @@ main#processes {
 #processes .content {
   flex: 1 1 70%;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: var(--spacing-2);
+}
+
+/* Scroll the table horizontally on its own; header and toolbar stay put. */
+#processes .content div:has(> table) {
+  overflow-x: auto;
 }
 
 #processes .content h1 {

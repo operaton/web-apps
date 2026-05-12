@@ -532,37 +532,39 @@ const ProcessDefinitionSelection = () => {
       {is_empty ? (
         <DefinitionsEmpty />
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  aria-label={t("processes.bulk.select-all")}
-                  checked={all_selected}
-                  onChange={toggle_all}
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    aria-label={t("processes.bulk.select-all")}
+                    checked={all_selected}
+                    onChange={toggle_all}
+                  />
+                </th>
+                <th>{t("common.name")}</th>
+                <th class="num">{t("processes.tabs.incidents")}</th>
+                <th class="num">{t("dashboard.instances")}</th>
+                <th>{t("common.key")}</th>
+                <th class="num">{t("processes.version")}</th>
+                <th>{t("common.id")}</th>
+                <th>{t("processes.tenant-id")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((entry) => (
+                <ProcessDefinition
+                  key={entry.definition.id}
+                  checked={selected.value.has(entry.definition.id)}
+                  onToggle={() => toggle_one(entry.definition.id)}
+                  {...entry}
                 />
-              </th>
-              <th>{t("common.name")}</th>
-              <th class="num">{t("processes.tabs.incidents")}</th>
-              <th class="num">{t("dashboard.instances")}</th>
-              <th>{t("common.key")}</th>
-              <th class="num">{t("processes.version")}</th>
-              <th>{t("common.id")}</th>
-              <th>{t("processes.tenant-id")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((entry) => (
-              <ProcessDefinition
-                key={entry.definition.id}
-                checked={selected.value.has(entry.definition.id)}
-                onToggle={() => toggle_one(entry.definition.id)}
-                {...entry}
-              />
-            ))}
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
@@ -591,10 +593,18 @@ const ProcessDefinitionDetails = () => {
     (tab) => tab.id === params.panel,
   );
 
+  if (!active_tab) return <DefinitionOverview />;
+
+  // Heading + meta panel stay mounted across tab switches; only the panel
+  // content (keyed by tab id) re-mounts so its fade-in plays.
   return (
-    <div class="fade-in">
-      {active_tab ? active_tab.target : <DefinitionOverview />}
-    </div>
+    <>
+      <DefinitionTabHeading titleKey={active_tab.nameKey} />
+      <DefinitionMetaPanel />
+      <div class="fade-in" key={active_tab.id}>
+        {active_tab.target}
+      </div>
+    </>
   );
 };
 
@@ -728,22 +738,22 @@ const Instances = () => {
   const load_more = () => fetch_page(list.value?.data?.length ?? 0);
 
   return !params?.selection_id ? (
-    <div class="fade-in">
-      <DefinitionTabHeading titleKey="processes.tabs.instances" />
-      <DefinitionMetaPanel />
-      <table>
-        <thead>
-          <tr>
-            <th>{t("common.id")}</th>
-            <th>{t("processes.start-time")}</th>
-            <th>{t("common.state")}</th>
-            <th>{t("processes.business-key")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <InstanceTableRows />
-        </tbody>
-      </table>
+    <>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th>{t("common.id")}</th>
+              <th>{t("processes.start-time")}</th>
+              <th>{t("common.state")}</th>
+              <th>{t("processes.business-key")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <InstanceTableRows />
+          </tbody>
+        </table>
+      </div>
       {list.value?.hasMore === true ? (
         <button class="load-more" onClick={load_more}>
           {t("tasks.load-more")}
@@ -751,7 +761,7 @@ const Instances = () => {
       ) : list.value?.hasMore === false ? (
         <small class="load-more-end">{t("tasks.no-more-items")}</small>
       ) : null}
-    </div>
+    </>
   ) : (
     <InstanceDetails />
   );
@@ -789,16 +799,14 @@ const InstanceDetails = () => {
     process_instance_tabs[0];
 
   return (
-    <div class="fade-in">
-      <DefinitionTabHeading titleKey="processes.tabs.instances" />
-      <DefinitionMetaPanel />
+    <>
       <InstanceDetailsDescription />
       <ProcessTertiaryNav
         tabs={process_instance_tabs}
         base_path={`/processes/${definition_id}/${panel}/${selection_id}`}
       />
       <div>{active_tab?.target}</div>
-    </div>
+    </>
   );
 };
 
@@ -823,23 +831,27 @@ const InstanceDetailsDescription = () => {
   );
 };
 
-const ProcessInstance = ({ id, startTime, state, businessKey }) => (
-  <tr>
-    <td class="font-mono">
-      <a href={`./instances/${id}/vars${keep_history_query(useRoute().query)}`}>
-        {" "}
-        {id.substring(0, 8)}
-      </a>
-    </td>
-    <td>
-      <time datetime={startTime}>
-        {new Date(Date.parse(startTime)).toLocaleString()}
-      </time>
-    </td>
-    <td>{state}</td>
-    <td>{businessKey}</td>
-  </tr>
-);
+const ProcessInstance = ({ id, startTime, state, businessKey }) => {
+  const { params, query } = useRoute();
+  return (
+    <tr>
+      <td class="font-mono">
+        <a
+          href={`/processes/${params.definition_id}/instances/${id}/vars${keep_history_query(query)}`}
+        >
+          {id.substring(0, 8)}
+        </a>
+      </td>
+      <td>
+        <time datetime={startTime}>
+          {new Date(Date.parse(startTime)).toLocaleString()}
+        </time>
+      </td>
+      <td>{state}</td>
+      <td>{businessKey}</td>
+    </tr>
+  );
+};
 
 const InstanceVariables = () => {
   const state = useContext(AppState),
@@ -863,43 +875,45 @@ const InstanceVariables = () => {
   });
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>{t("common.name")}</th>
-          <th>{t("common.type")}</th>
-          <th>{t("common.value")}</th>
-          <th>{t("common.actions")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {selection_exists
-          ? !state.history_mode.value
-            ? Object.entries(
-                state.api.process.instance.variables.value.data,
-              ).map(
-                // eslint-disable-next-line react/jsx-key
-                ([name, { type, value }]) => (
-                  <tr>
-                    <td>{name}</td>
-                    <td>{type}</td>
-                    <td>{value}</td>
-                  </tr>
-                ),
-              )
-            : state.api.process.instance.variables.value.data.map(
-                // eslint-disable-next-line react/jsx-key
-                ({ name, type, value }) => (
-                  <tr>
-                    <td>{name}</td>
-                    <td>{type}</td>
-                    <td>{value}</td>
-                  </tr>
-                ),
-              )
-          : t("common.loading")}
-      </tbody>
-    </table>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("common.name")}</th>
+            <th>{t("common.type")}</th>
+            <th>{t("common.value")}</th>
+            <th>{t("common.actions")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {selection_exists
+            ? !state.history_mode.value
+              ? Object.entries(
+                  state.api.process.instance.variables.value.data,
+                ).map(
+                  // eslint-disable-next-line react/jsx-key
+                  ([name, { type, value }]) => (
+                    <tr>
+                      <td>{name}</td>
+                      <td>{type}</td>
+                      <td>{value}</td>
+                    </tr>
+                  ),
+                )
+              : state.api.process.instance.variables.value.data.map(
+                  // eslint-disable-next-line react/jsx-key
+                  ({ name, type, value }) => (
+                    <tr>
+                      <td>{name}</td>
+                      <td>{type}</td>
+                      <td>{value}</td>
+                    </tr>
+                  ),
+                )
+            : t("common.loading")}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
@@ -918,61 +932,63 @@ const InstanceIncidents = () => {
 
   /** @namespace state.api.history.incident.by_process_instance.value.data **/
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>{t("processes.incidents.message")}</th>
-          <th>{t("processes.incidents.process-instance")}</th>
-          <th>{t("processes.incidents.timestamp")}</th>
-          <th>{t("common.activity")}</th>
-          <th>{t("processes.incidents.failing-activity")}</th>
-          <th>{t("processes.incidents.cause-process-instance-id")}</th>
-          <th>{t("processes.incidents.root-cause-process-instance-id")}</th>
-          <th>{t("common.type")}</th>
-          <th>{t("processes.incidents.annotation")}</th>
-          <th>{t("common.action")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {state.api.history.incident.by_process_instance.value?.data?.map(
-          // eslint-disable-next-line react/jsx-key
-          ({
-            id,
-            incidentMessage,
-            processInstanceId,
-            createTime,
-            activityId,
-            failedActivityId,
-            causeIncidentId,
-            rootCauseIncidentId,
-            incidentType,
-            annotation,
-          }) => (
-            <tr key={id}>
-              <td>{incidentMessage}</td>
-              <td>
-                <UUIDLink path={"/processes"} uuid={processInstanceId} />
-              </td>
-              <td>
-                <time datetime={createTime}>
-                  {createTime ? createTime.substring(0, 19) : "-/-"}
-                </time>
-              </td>
-              <td>{activityId}</td>
-              <td>{failedActivityId}</td>
-              <td>
-                <UUIDLink path={""} uuid={causeIncidentId} />
-              </td>
-              <td>
-                <UUIDLink path={""} uuid={rootCauseIncidentId} />
-              </td>
-              <td>{incidentType}</td>
-              <td>{annotation}</td>
-            </tr>
-          ),
-        )}
-      </tbody>
-    </table>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("processes.incidents.message")}</th>
+            <th>{t("processes.incidents.process-instance")}</th>
+            <th>{t("processes.incidents.timestamp")}</th>
+            <th>{t("common.activity")}</th>
+            <th>{t("processes.incidents.failing-activity")}</th>
+            <th>{t("processes.incidents.cause-process-instance-id")}</th>
+            <th>{t("processes.incidents.root-cause-process-instance-id")}</th>
+            <th>{t("common.type")}</th>
+            <th>{t("processes.incidents.annotation")}</th>
+            <th>{t("common.action")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {state.api.history.incident.by_process_instance.value?.data?.map(
+            // eslint-disable-next-line react/jsx-key
+            ({
+              id,
+              incidentMessage,
+              processInstanceId,
+              createTime,
+              activityId,
+              failedActivityId,
+              causeIncidentId,
+              rootCauseIncidentId,
+              incidentType,
+              annotation,
+            }) => (
+              <tr key={id}>
+                <td>{incidentMessage}</td>
+                <td>
+                  <UUIDLink path={"/processes"} uuid={processInstanceId} />
+                </td>
+                <td>
+                  <time datetime={createTime}>
+                    {createTime ? createTime.substring(0, 19) : "-/-"}
+                  </time>
+                </td>
+                <td>{activityId}</td>
+                <td>{failedActivityId}</td>
+                <td>
+                  <UUIDLink path={""} uuid={causeIncidentId} />
+                </td>
+                <td>
+                  <UUIDLink path={""} uuid={rootCauseIncidentId} />
+                </td>
+                <td>{incidentType}</td>
+                <td>{annotation}</td>
+              </tr>
+            ),
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
@@ -992,61 +1008,65 @@ const InstanceUserTasks = () => {
 
   /** @namespace state.api.task.by_process_instance.value.data **/
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>{t("common.activity")}</th>
-          <th>{t("dashboard.assignee")}</th>
-          <th>{t("processes.user-tasks.owner")}</th>
-          <th>{t("dashboard.created")}</th>
-          <th>{t("processes.user-tasks.due")}</th>
-          <th>{t("processes.user-tasks.follow-up")}</th>
-          <th>{t("tasks.task-list.table-headings.priority")}</th>
-          <th>{t("processes.user-tasks.delegation-state")}</th>
-          <th>{t("processes.user-tasks.task-id")}</th>
-          <th>{t("common.action")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {state.api.task.by_process_instance.value?.data?.map(
-          // eslint-disable-next-line react/jsx-key
-          ({
-            id,
-            assignee,
-            name,
-            owner,
-            created,
-            due,
-            followUp,
-            priority,
-            delegationState,
-          }) => (
-            <tr key={id}>
-              <td>{name}</td>
-              <td>{assignee}</td>
-              <td>{owner}</td>
-              <td>
-                {created ? <time datetime={created}>{created}</time> : null}
-              </td>
-              <td>{due ? <time datetime={due}>{due}</time> : null}</td>
-              <td>
-                {followUp ? <time datetime={followUp}>{followUp}</time> : null}
-              </td>
-              <td>{priority}</td>
-              <td>{priority}</td>
-              <td>{delegationState}</td>
-              <td>
-                <UUIDLink path="/" uuid={id} />
-              </td>
-              <td>
-                <button>{t("processes.user-tasks.groups")}</button>
-                <button>{t("processes.user-tasks.users")}</button>
-              </td>
-            </tr>
-          ),
-        )}
-      </tbody>
-    </table>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("common.activity")}</th>
+            <th>{t("dashboard.assignee")}</th>
+            <th>{t("processes.user-tasks.owner")}</th>
+            <th>{t("dashboard.created")}</th>
+            <th>{t("processes.user-tasks.due")}</th>
+            <th>{t("processes.user-tasks.follow-up")}</th>
+            <th>{t("tasks.task-list.table-headings.priority")}</th>
+            <th>{t("processes.user-tasks.delegation-state")}</th>
+            <th>{t("processes.user-tasks.task-id")}</th>
+            <th>{t("common.action")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {state.api.task.by_process_instance.value?.data?.map(
+            // eslint-disable-next-line react/jsx-key
+            ({
+              id,
+              assignee,
+              name,
+              owner,
+              created,
+              due,
+              followUp,
+              priority,
+              delegationState,
+            }) => (
+              <tr key={id}>
+                <td>{name}</td>
+                <td>{assignee}</td>
+                <td>{owner}</td>
+                <td>
+                  {created ? <time datetime={created}>{created}</time> : null}
+                </td>
+                <td>{due ? <time datetime={due}>{due}</time> : null}</td>
+                <td>
+                  {followUp ? (
+                    <time datetime={followUp}>{followUp}</time>
+                  ) : null}
+                </td>
+                <td>{priority}</td>
+                <td>{priority}</td>
+                <td>{delegationState}</td>
+                <td>
+                  <UUIDLink path="/" uuid={id} />
+                </td>
+                <td>
+                  <button>{t("processes.user-tasks.groups")}</button>
+                  <button>{t("processes.user-tasks.users")}</button>
+                </td>
+              </tr>
+            ),
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
@@ -1063,32 +1083,38 @@ const CalledProcessInstances = () => {
   /** @namespace state.api.process.instance.called.value.data **/
   /** @namespace instance.definitionId **/
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>{t("common.state")}</th>
-          <th>{t("processes.called-instances.called-process-instance")}</th>
-          <th>{t("processes.called-instances.process-definition")}</th>
-          <th>{t("common.activity")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {state.api.process.instance.called.value?.data?.map((instance) => (
-          <tr key={instance.id}>
-            <td>
-              {instance.suspended ? t("common.suspended") : t("common.running")}
-            </td>
-            <td>
-              <a href={`/processes/${instance.id}${keep_history_query(query)}`}>
-                {instance.id}
-              </a>
-            </td>
-            <td>{instance.definitionId}</td>
-            <td>{instance.definitionId}</td>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("common.state")}</th>
+            <th>{t("processes.called-instances.called-process-instance")}</th>
+            <th>{t("processes.called-instances.process-definition")}</th>
+            <th>{t("common.activity")}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {state.api.process.instance.called.value?.data?.map((instance) => (
+            <tr key={instance.id}>
+              <td>
+                {instance.suspended
+                  ? t("common.suspended")
+                  : t("common.running")}
+              </td>
+              <td>
+                <a
+                  href={`/processes/${instance.id}${keep_history_query(query)}`}
+                >
+                  {instance.id}
+                </a>
+              </td>
+              <td>{instance.definitionId}</td>
+              <td>{instance.definitionId}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
@@ -1109,9 +1135,7 @@ const Incidents = () => {
   /** @namespace instance.incidentMessage **/
   /** @namespace instance.incidentType **/
   return (
-    <div class="fade-in">
-      <DefinitionTabHeading titleKey="processes.tabs.incidents" />
-      <DefinitionMetaPanel />
+    <div>
       <table>
         <thead>
           <tr>
@@ -1148,9 +1172,7 @@ const CalledProcessDefinitions = () => {
 
   /** @namespace definition.calledFromActivityIds **/
   return (
-    <div class="fade-in">
-      <DefinitionTabHeading titleKey="processes.tabs.called-definitions" />
-      <DefinitionMetaPanel />
+    <div>
       <table>
         <thead>
           <tr>
@@ -1206,9 +1228,7 @@ const JobDefinitions = () => {
   /** @namespace definition.jobConfiguration **/
   /** @namespace definition.overridingJobPriority **/
   return (
-    <div class="relative fade-in">
-      <DefinitionTabHeading titleKey="processes.tabs.jobs" />
-      <DefinitionMetaPanel />
+    <div class="relative">
       <table>
         <thead>
           <tr>
