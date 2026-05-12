@@ -505,7 +505,9 @@ const ProcessDefinition = ({
         />
       </td>
       <td>
-        <a href={`/processes/${id}${keep_history_query(query)}`}>{name ?? key}</a>
+        <a href={`/processes/${id}/instances${keep_history_query(query)}`}>
+          {name ?? key}
+        </a>
       </td>
       <td class="num">{incidents?.length ?? 0}</td>
       <td class="num">{instances ?? 0}</td>

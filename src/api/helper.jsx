@@ -139,6 +139,60 @@ const response_data = (response) =>
       : response.json()
     : Promise.reject(response);
 
+/**
+ * Paginated GET. Appends results to the prior data when `firstResult > 0`,
+ * otherwise replaces. Sets a `hasMore` flag based on whether the engine
+ * returned a full page. Page size defaults to 20.
+ *
+ * The signal value shape becomes:
+ *   { status, data: <array>, hasMore, ...prior fields }
+ */
+export const PAGINATED_GET = async (
+  url,
+  state,
+  signl,
+  firstResult = 0,
+  maxResults = 20,
+) => {
+  const prev = signl.peek();
+  signl.value = {
+    status: RESPONSE_STATE.LOADING,
+    data: prev?.data,
+    hasMore: prev?.hasMore,
+  };
+
+  const sep = url.includes("?") ? "&" : "?";
+  const paged_url = `${url}${sep}firstResult=${firstResult}&maxResults=${maxResults}`;
+
+  let headers = new Headers();
+  headers.set("Authorization", get_auth_header(state));
+
+  try {
+    const response = await fetch(`${_url_engine_rest(state)}${paged_url}`, {
+      headers,
+    });
+    const json = await (response.ok
+      ? response.json()
+      : Promise.reject(response));
+
+    const existing = firstResult > 0 ? (prev?.data ?? []) : [];
+    const existing_ids = new Set(
+      existing.map((i) => i.id ?? JSON.stringify(i)),
+    );
+    const fresh = json.filter(
+      (i) => !existing_ids.has(i.id ?? JSON.stringify(i)),
+    );
+
+    return (signl.value = {
+      status: RESPONSE_STATE.SUCCESS,
+      data: [...existing, ...fresh],
+      hasMore: json.length === maxResults,
+    });
+  } catch (error) {
+    return (signl.value = { status: RESPONSE_STATE.ERROR, error });
+  }
+};
+
 export const GET = async (url, state, signl) => {
   signl.value = { status: RESPONSE_STATE.LOADING, data: signl.peek()?.data };
 

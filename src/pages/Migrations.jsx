@@ -40,7 +40,9 @@ const MigrationState = createContext(undefined);
 const MigrationsPage = () => {
   const state = useContext(AppState);
 
-  void engine_rest.process_definition.list(state);
+  if (state.api.process.definition.list.peek() === null) {
+    void engine_rest.process_definition.list(state);
+  }
 
   return (
     <MigrationState.Provider value={create_mirgation_state()}>
@@ -134,12 +136,36 @@ const generate_abstract = (migration_state, state) =>
     : null;
 
 const QUERY_FIELDS_KEYS = [
-  { name: "processInstanceIds", labelKey: "migrations.query-fields.id", type: "array" },
-  { name: "businessKey", labelKey: "migrations.query-fields.business-key", type: "text" },
-  { name: "superProcessInstance", labelKey: "migrations.query-fields.parent-id", type: "text" },
-  { name: "subProcessInstance", labelKey: "migrations.query-fields.sub-id", type: "text" },
-  { name: "active", labelKey: "migrations.query-fields.active", type: "boolean" },
-  { name: "suspended", labelKey: "migrations.query-fields.suspended", type: "boolean" },
+  {
+    name: "processInstanceIds",
+    labelKey: "migrations.query-fields.id",
+    type: "array",
+  },
+  {
+    name: "businessKey",
+    labelKey: "migrations.query-fields.business-key",
+    type: "text",
+  },
+  {
+    name: "superProcessInstance",
+    labelKey: "migrations.query-fields.parent-id",
+    type: "text",
+  },
+  {
+    name: "subProcessInstance",
+    labelKey: "migrations.query-fields.sub-id",
+    type: "text",
+  },
+  {
+    name: "active",
+    labelKey: "migrations.query-fields.active",
+    type: "boolean",
+  },
+  {
+    name: "suspended",
+    labelKey: "migrations.query-fields.suspended",
+    type: "boolean",
+  },
   {
     name: "rootProcessInstances",
     labelKey: "migrations.query-fields.root-instances-only",
@@ -150,13 +176,41 @@ const QUERY_FIELDS_KEYS = [
     labelKey: "migrations.query-fields.leaf-instances-only",
     type: "boolean",
   },
-  { name: "withIncident", labelKey: "migrations.query-fields.with-incidents-only", type: "boolean" },
-  { name: "incidentId", labelKey: "migrations.query-fields.incident-id", type: "text" },
-  { name: "incidentType", labelKey: "migrations.query-fields.incident-type", type: "text" },
-  { name: "incidentMessage", labelKey: "migrations.query-fields.incident-message", type: "text" },
-  { name: "tenantIdIn", labelKey: "migrations.query-fields.tenant-id", type: "array" },
-  { name: "activityIdIn", labelKey: "migrations.query-fields.activity-id", type: "array" },
-  { name: "withoutTenantId", labelKey: "migrations.query-fields.without-tenant-id", type: "boolean" },
+  {
+    name: "withIncident",
+    labelKey: "migrations.query-fields.with-incidents-only",
+    type: "boolean",
+  },
+  {
+    name: "incidentId",
+    labelKey: "migrations.query-fields.incident-id",
+    type: "text",
+  },
+  {
+    name: "incidentType",
+    labelKey: "migrations.query-fields.incident-type",
+    type: "text",
+  },
+  {
+    name: "incidentMessage",
+    labelKey: "migrations.query-fields.incident-message",
+    type: "text",
+  },
+  {
+    name: "tenantIdIn",
+    labelKey: "migrations.query-fields.tenant-id",
+    type: "array",
+  },
+  {
+    name: "activityIdIn",
+    labelKey: "migrations.query-fields.activity-id",
+    type: "array",
+  },
+  {
+    name: "withoutTenantId",
+    labelKey: "migrations.query-fields.without-tenant-id",
+    type: "boolean",
+  },
 ];
 
 const VARIABLE_TYPES = [
@@ -170,11 +224,18 @@ const VARIABLE_TYPES = [
 
 const ProcessSelection = () => {
   const state = useContext(AppState),
-    { api: { process: { definition: { list }, }, }, } = state,
+    {
+      api: {
+        process: {
+          definition: { list },
+        },
+      },
+    } = state,
     migration_state = useContext(MigrationState),
     { route, url, query, path } = useLocation(),
     [t] = useTranslation(),
-    add_query_params = (name, value) => add_query_params_abstract(query, url, route, path, name, value),
+    add_query_params = (name, value) =>
+      add_query_params_abstract(query, url, route, path, name, value),
     generate = () => generate_abstract(migration_state, state),
     execute_form_data = signal({
       async: false,
@@ -288,8 +349,11 @@ const ProcessSelection = () => {
                     migration_state.target_diagram,
                   );
                   generate().then(() => validate(state, migration_state));
-                }}>
-                <option disabled selected>{t("migrations.select-target")}</option>
+                }}
+              >
+                <option disabled selected>
+                  {t("migrations.select-target")}
+                </option>
                 <RequestState
                   signal={list}
                   on_success={() =>
@@ -319,9 +383,7 @@ const ProcessSelection = () => {
           signal={migration_state.target_activities}
           on_nothing={() => (
             <p>
-              <small>
-                {t("migrations.select-definitions-hint")}
-              </small>
+              <small>{t("migrations.select-definitions-hint")}</small>
             </p>
           )}
           on_success={() => <Mappings />}
@@ -432,7 +494,9 @@ const ProcessSelection = () => {
             }
           />
 
-          <label for="skip_custom_listeners">{t("migrations.skip-custom-listeners")}</label>
+          <label for="skip_custom_listeners">
+            {t("migrations.skip-custom-listeners")}
+          </label>
           <input
             type="checkbox"
             id="skip_custom_listeners"
@@ -445,7 +509,9 @@ const ProcessSelection = () => {
             }
           />
 
-          <label for="skip_io_mappings">{t("migrations.skip-io-mappings")}</label>
+          <label for="skip_io_mappings">
+            {t("migrations.skip-io-mappings")}
+          </label>
           <input
             type="checkbox"
             id="skip_io_mappings"
@@ -615,9 +681,7 @@ const Mappings = () => {
       <RequestState
         signal={state.api.migration.generate}
         on_nothing={() => (
-          <small>
-            {t("migrations.select-definitions-hint")}
-          </small>
+          <small>{t("migrations.select-definitions-hint")}</small>
         )}
         on_success={() => (
           <>
@@ -828,7 +892,9 @@ const ProcessInstanceQuery = () => {
           </thead>
           <tbody>
             {migration_state.process_instance_query.value.map((row, index) => {
-              const field_def = QUERY_FIELDS_KEYS.find((f) => f.name === row.field);
+              const field_def = QUERY_FIELDS_KEYS.find(
+                (f) => f.name === row.field,
+              );
               return (
                 <tr key={index}>
                   <td>
@@ -920,14 +986,10 @@ const ProcessInstanceSelection = () => {
         state.api.process.instance.by_defintion_id,
         state.api.migration.validation,
       ]}
-      on_nothing={() => (
-        <small>{t("migrations.define-mappings-hint")}</small>
-      )}
+      on_nothing={() => <small>{t("migrations.define-mappings-hint")}</small>}
       on_success={() =>
         has_errors() ? (
-          <p>
-            {t("migrations.invalid-mappings")}
-          </p>
+          <p>{t("migrations.invalid-mappings")}</p>
         ) : (
           <>
             <h2>{t("migrations.select-instances")}</h2>
