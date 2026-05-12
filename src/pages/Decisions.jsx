@@ -1,25 +1,33 @@
-import { useContext } from 'preact/hooks'
+import { useContext, useEffect } from 'preact/hooks'
 import { useTranslation } from 'react-i18next'
 import { AppState } from '../state.js'
-import { useLocation, useRoute } from 'preact-iso'
+import { useRoute } from 'preact-iso'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
 import { DmnViewer } from '../components/DMNViewer.jsx'
 
 const DecisionsPage = () => {
   const state = useContext(AppState),
-    { api: { decision: { definitions, definition, dmn } } } = state,
+    { api: { decision: { definition, dmn } } } = state,
     { params: { decision_id } } = useRoute()
-  if (definitions.value === null) {
+
+  useEffect(() => {
     void engine_rest.decision.get_decision_definitions(state)
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  if (decision_id && definition.value === null) {
-    void engine_rest.decision.get_decision_definition(state, decision_id)
-  }
-
-  if (decision_id && dmn.value === null) {
-    void engine_rest.decision.get_dmn_xml(state, decision_id)
-  }
+  useEffect(() => {
+    if (decision_id) {
+      void engine_rest.decision.get_decision_definition(state, decision_id)
+      void engine_rest.decision.get_dmn_xml(state, decision_id)
+    }
+    // Clear stale per-decision data so navigating between decisions doesn't
+    // render the previous decision's metadata or DMN diagram briefly.
+    return () => {
+      definition.value = null
+      dmn.value = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [decision_id])
 
   return (
     <main id="content" class="decisions fade-in">
@@ -32,15 +40,9 @@ const DecisionsPage = () => {
 const DecisionsList = () => {
   const
     state = useContext(AppState),
-    { api: { decision: { definitions, definition, dmn } } } = state,
+    { api: { decision: { definitions } } } = state,
     { params } = useRoute(),
-    { route } = useLocation(),
-    [t] = useTranslation(),
-    reset_state = (decision_id) => {
-      route(`/decisions/${decision_id}`)
-      definition.value = null
-      dmn.value = null
-    }
+    [t] = useTranslation()
 
   return (
     <div id="decision-list">
@@ -64,7 +66,7 @@ const DecisionsList = () => {
                   key={decision.id}
                   class={params.decision_id === decision.id ? 'selected' : null}
                 >
-                  <td><a href={`/decisions/${decision.id}`} onClick={() => reset_state(decision.id)}>
+                  <td><a href={`/decisions/${decision.id}`}>
                     {decision?.name || decision?.id}
                   </a></td>
                   <td>{decision.key}</td>
