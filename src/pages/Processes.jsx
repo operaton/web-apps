@@ -140,10 +140,7 @@ const ProcessSubNav = () => {
     { route } = useLocation(),
     history_active = query.history === "true",
     history_query = history_active ? "?history=true" : "",
-    def_id = params.definition_id,
-    has_def = !!def_id,
-    active_panel = params.panel ?? (has_def ? "overview" : "definitions"),
-    on_definitions = !has_def,
+    on_definitions = !params.definition_id,
     instance_count =
       state.api.process.definition.statistics.value?.data?.reduce(
         (n, a) => n + (a.instances ?? 0),
@@ -154,22 +151,6 @@ const ProcessSubNav = () => {
         (n, a) => n + (a.incidents?.length ?? 0),
         0,
       );
-
-  const child_item = (panel, label, count) => (
-    <li key={panel}>
-      {has_def ? (
-        <a
-          href={`/processes/${def_id}/${panel}${history_query}`}
-          aria-current={active_panel === panel ? "page" : undefined}
-        >
-          {label}
-          {count !== undefined && ` (${count})`}
-        </a>
-      ) : (
-        <span class="disabled">{label}</span>
-      )}
-    </li>
-  );
 
   return (
     <nav aria-label="Processes navigation">
@@ -185,21 +166,21 @@ const ProcessSubNav = () => {
         <li class="chevron" aria-hidden="true">
           ›
         </li>
-        {child_item(
-          "instances",
-          t("processes.subnav.instances"),
-          instance_count,
-        )}
-        {child_item(
-          "incidents",
-          t("processes.subnav.incidents"),
-          incident_count,
-        )}
-        {child_item(
-          "called_definitions",
-          t("processes.subnav.called-definitions"),
-        )}
-        {child_item("jobs", t("processes.subnav.jobs"))}
+        <NavEntry
+          panel="instances"
+          label={t("processes.subnav.instances")}
+          count={instance_count}
+        />
+        <NavEntry
+          panel="incidents"
+          label={t("processes.subnav.incidents")}
+          count={incident_count}
+        />
+        <NavEntry
+          panel="called_definitions"
+          label={t("processes.subnav.called-definitions")}
+        />
+        <NavEntry panel="jobs" label={t("processes.subnav.jobs")} />
       </menu>
 
       <button
@@ -212,6 +193,33 @@ const ProcessSubNav = () => {
           : t("processes.enable-history-mode")}
       </button>
     </nav>
+  );
+};
+
+const NavEntry = ({ panel, label, count }) => {
+  const { params, query } = useRoute(),
+    def_id = params.definition_id,
+    has_def = !!def_id,
+    active_panel = params.panel ?? (has_def ? "overview" : "definitions"),
+    history_query = query.history === "true" ? "?history=true" : "";
+
+  if (!has_def) {
+    return (
+      <li>
+        <span class="disabled">{label}</span>
+      </li>
+    );
+  }
+  return (
+    <li>
+      <a
+        href={`/processes/${def_id}/${panel}${history_query}`}
+        aria-current={active_panel === panel ? "page" : undefined}
+      >
+        {label}
+        {count !== undefined && ` (${count})`}
+      </a>
+    </li>
   );
 };
 
