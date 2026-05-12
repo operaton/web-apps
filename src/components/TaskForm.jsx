@@ -5,7 +5,7 @@ import { AppState } from '../state.js'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
 import * as Icons from '../assets/icons.jsx'
 import { useRoute, useLocation } from 'preact-iso'
-import { CamundaForm } from '../components/CamundaForm.jsx'
+import { CamundaForm } from './CamundaForm.jsx'
 
 const TaskForm = () => {
   const

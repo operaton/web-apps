@@ -13,7 +13,7 @@ import { Tabs } from "../components/Tabs.jsx";
 import * as formatter from "../helper/date_formatter.js";
 import { AppState } from "../state.js";
 import { StartProcessList } from "./StartProcessList.jsx";
-import { TaskForm } from "./TaskForm.jsx";
+import { TaskForm } from "../components/TaskForm.jsx";
 import { formatRelativeDate } from "../helper/date_formatter.js";
 
 const TASK_PAGE_SIZE = 20;
