@@ -2,7 +2,7 @@ import { useLocation, useRoute } from 'preact-iso'
 import { useTranslation } from 'react-i18next'
 import { AppState } from '../state.js'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
-import { useContext } from 'preact/hooks'
+import { useContext, useEffect } from 'preact/hooks'
 import { useComputed, useSignal } from '@preact/signals'
 
 const AccountPage = () => {
@@ -11,9 +11,12 @@ const AccountPage = () => {
     { route } = useLocation(),
     [t] = useTranslation()
 
-  if (page_id === undefined) {
-    route('account/profile')
-  }
+  useEffect(() => {
+    if (page_id === undefined) {
+      route('/account/profile', true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page_id])
 
   const is_selected = (page) => (page_id === page) ? 'selected' : ''
 
@@ -43,9 +46,12 @@ const ProfileAccountPage = () => {
     { params: { selection_id } } = useRoute(),
     state = useContext(AppState)
 
-  if (!state.api.user.profile.value) {
-    void engine_rest.user.profile.get(state)
-  }
+  useEffect(() => {
+    if (!state.api.user.profile.value) {
+      void engine_rest.user.profile.get(state)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return <RequestState
     signal={state.api.user.profile}
     on_success={() => selection_id === 'edit' ? <ProfileEditPage /> : <ProfileDetails />
@@ -59,7 +65,10 @@ const ProfileEditPage = () => {
     { user_profile, user_profile_edit, user_profile_edit_response } = state,
     [t] = useTranslation()
 
-  user_profile_edit.value = { ...user_profile.value.data }
+  useEffect(() => {
+    user_profile_edit.value = { ...user_profile.value?.data }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user_profile.value?.data])
 
   const
     set_value = (k, v) => user_profile_edit.value = { ...user_profile_edit.peek(), [k]: v.currentTarget.value },
@@ -172,9 +181,12 @@ const GroupAccountPage = () => {
     { api: { user: { group: { list: groups } } } } = state,
     [t] = useTranslation()
 
-  if (!groups.value) {
-    void engine_rest.group.by_member(state, null)
+  useEffect(() => {
+    if (!groups.value) {
+      void engine_rest.group.by_member(state, null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return <section>
     <h2>{t("account.your-groups")}</h2>
@@ -217,12 +229,15 @@ const TenantsAccountPage = () => {
       document.getElementById('add-tenant-dialog').showModal()
     },
     //button handlers
-    handle_add_tenant = (tenant_id) => api.add_tenant(state, tenant_id).then(() => api.get_user_tenants(state, null)),
-    handle_remove_tenant = (tenant_id) => api.remove_tenant(state, tenant_id).then(() => api.get_user_tenants(state, null))
+    handle_add_tenant = (tenant_id) => engine_rest.tenant.add_user(state, tenant_id, null).then(() => engine_rest.tenant.by_member(state, null)),
+    handle_remove_tenant = (tenant_id) => engine_rest.tenant.delete(state, tenant_id, null).then(() => engine_rest.tenant.by_member(state, null))
 
-  if (!user_tenants.value) {
-    void void engine_rest.tenant.by_member(state)
-  }
+  useEffect(() => {
+    if (!user_tenants.value) {
+      void engine_rest.tenant.by_member(state)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return <section>
     <h2>{t("account.your-tenants")}</h2>

@@ -112,10 +112,8 @@ const Routing = () => {
           <Route path="/admin" component={AdminPage} />
           <Route path="/admin/:page_id" component={AdminPage} />
           <Route path="/admin/:page_id/:selection_id" component={AdminPage} />
-          <Route path="/account" component={AccountPage} />
-          <Route path="/account/:page_id" component={AccountPage} />
           <Route
-            path="/account/:page_id/:selection_id"
+            path="/account/:page_id?/:selection_id?"
             component={AccountPage}
           />
           <Route path="/help" component={Home} />
