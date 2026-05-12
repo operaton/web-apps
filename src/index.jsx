@@ -104,9 +104,10 @@ const Routing = () => {
             path="/deployments/:deployment_id?/:resource_name?"
             component={DeploymentsPage}
           />
-          <Route path="/admin" component={AdminPage} />
-          <Route path="/admin/:page_id" component={AdminPage} />
-          <Route path="/admin/:page_id/:selection_id" component={AdminPage} />
+          <Route
+            path="/admin/:page_id?/:selection_id?"
+            component={AdminPage}
+          />
           <Route
             path="/account/:page_id?/:selection_id?"
             component={AccountPage}

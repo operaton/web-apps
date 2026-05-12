@@ -1,4 +1,4 @@
-import { useContext } from 'preact/hooks'
+import { useContext, useEffect } from 'preact/hooks'
 import { useRoute, useLocation } from 'preact-iso'
 import { useTranslation } from 'react-i18next'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
@@ -14,18 +14,16 @@ const AdminPage = () => {
     state = useContext(AppState),
     [t] = useTranslation()
 
-  if (page_id === undefined) {
-    route('/admin/users')
-  }
-  if (page_id === 'system') {
-    void engine_rest.engine.telemetry(state)
-  }
-  if (page_id === 'groups') {
-    void engine_rest.group.all(state)
-  }
-  if (page_id === 'tenants') {
-    void engine_rest.tenant.all(state)
-  }
+  useEffect(() => {
+    if (page_id === undefined) {
+      route('/admin/users', true)
+      return
+    }
+    if (page_id === 'system') void engine_rest.engine.telemetry(state)
+    else if (page_id === 'groups') void engine_rest.group.all(state)
+    else if (page_id === 'tenants') void engine_rest.tenant.all(state)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page_id])
 
   const is_selected = (page) => (page_id === page) ? 'selected' : ''
 
@@ -63,14 +61,17 @@ const TenantsPage = () => {
       : <TenantDetails tenant_id={selection_id} />
 }
 
-const TenantDetails = (tenant_id) => {
+const TenantDetails = ({ tenant_id }) => {
   const
     state = useContext(AppState),
     [t] = useTranslation()
 
-  void engine_rest.user.profile.get(state, tenant_id.value)
-  void engine_rest.group.by_member(state, tenant_id.value)
-  void engine_rest.tenant.by_member(state, tenant_id.value)
+  useEffect(() => {
+    void engine_rest.user.profile.get(state, tenant_id)
+    void engine_rest.group.by_member(state, tenant_id)
+    void engine_rest.tenant.by_member(state, tenant_id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenant_id])
 
   return <div class="content fade-in">
     <Breadcrumbs paths={[
@@ -258,14 +259,17 @@ const GroupsList = () => {
   </div>
 }
 
-const GroupDetails = (user_id) => {
+const GroupDetails = ({ user_id }) => {
   const
     state = useContext(AppState),
     [t] = useTranslation()
 
-  void engine_rest.user.profile.get(state, user_id.value)
-  void engine_rest.group.by_member(state, user_id.value)
-  void engine_rest.tenant.by_member(state, user_id.value)
+  useEffect(() => {
+    void engine_rest.user.profile.get(state, user_id)
+    void engine_rest.group.by_member(state, user_id)
+    void engine_rest.tenant.by_member(state, user_id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user_id])
 
   return <div class="content fade-in">
     <Breadcrumbs paths={[
@@ -305,8 +309,12 @@ const UserPage = () => {
     state = useContext(AppState),
     { params: { selection_id } } = useRoute()
 
-  // selection_id === undefined ? void api.get_users(state) : null
-  selection_id === undefined ? void engine_rest.user.all(state) : null
+  useEffect(() => {
+    if (selection_id === undefined) {
+      void engine_rest.user.all(state)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selection_id])
 
   return (selection_id === 'new')
     ? <UserCreate />
@@ -352,14 +360,17 @@ const UserList = () => {
   </div>
 }
 
-const UserDetails = (user_id) => {
+const UserDetails = ({ user_id }) => {
   const
     state = useContext(AppState),
     [t] = useTranslation()
 
-  void engine_rest.user.profile.get(state, user_id.value)
-  void engine_rest.group.by_member(state, user_id.value)
-  void engine_rest.tenant.by_member(state, user_id.value)
+  useEffect(() => {
+    void engine_rest.user.profile.get(state, user_id)
+    void engine_rest.group.by_member(state, user_id)
+    void engine_rest.tenant.by_member(state, user_id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user_id])
 
   return <div class="content fade-in">
     <Breadcrumbs paths={[
@@ -520,9 +531,12 @@ const AuthorizationsPage = () => {
     [t] = useTranslation(),
     show_create_authorization = useSignal(false)
 
-  if (resource_type !== undefined || state.api.authorization.all.value === null) {
-    void engine_rest.authorization.all(state, resource_type)
-  }
+  useEffect(() => {
+    if (resource_type !== undefined || state.api.authorization.all.value === null) {
+      void engine_rest.authorization.all(state, resource_type)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resource_type])
 
   return <div>
     <Breadcrumbs paths={[
