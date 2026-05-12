@@ -1,5 +1,5 @@
 import { useSignal, useSignalEffect } from "@preact/signals";
-import { useContext } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
 import engine_rest, {
@@ -9,8 +9,6 @@ import engine_rest, {
 import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
-import { ProcessSubNav } from "../components/ProcessSubNav.jsx";
-import { ProcessTertiaryNav } from "../components/ProcessTertiaryNav.jsx";
 
 /**
  * Keep the `?history=true` query params of the URL alive as long as the history
@@ -56,34 +54,16 @@ const ProcessesPage = () => {
   }
 
   if (definition_selected) {
-    if (history_mode_disabled) {
-      if (no_definition_loaded) {
-        void engine_rest.process_definition.one(state, params.definition_id);
-        void engine_rest.process_definition.diagram(
-          state,
-          params.definition_id,
-        );
-        void engine_rest.process_definition.statistics(
-          state,
-          params.definition_id,
-        );
-      } else if (loaded_definition_not_matching_url_param) {
-        void engine_rest.process_definition.one(state, params.definition_id);
-        void engine_rest.process_definition.diagram(
-          state,
-          params.definition_id,
-        );
-        void engine_rest.process_definition.statistics(
-          state,
-          params.definition_id,
-        );
-      }
-    } else if (no_definition_loaded) {
+    if (no_definition_loaded || loaded_definition_not_matching_url_param) {
       void engine_rest.process_definition.one(state, params.definition_id);
       void engine_rest.process_definition.diagram(state, params.definition_id);
-    } else if (loaded_definition_not_matching_url_param) {
-      void engine_rest.process_definition.one(state, params.definition_id);
-      void engine_rest.process_definition.diagram(state, params.definition_id);
+      // Statistics are the source for the "active instances" tokens on the
+      // diagram. We fetch them even in history mode so the tokens stay
+      // visible when the user toggles history on.
+      void engine_rest.process_definition.statistics(
+        state,
+        params.definition_id,
+      );
     }
   } else if (state.api.process.definition.list.value === null) {
     void engine_rest.process_definition.list(state);
@@ -148,6 +128,140 @@ const ProcessesPage = () => {
         )}
       </div>
     </main>
+  );
+};
+
+/**
+ * The Processes page sub-navigation.
+ *
+ *   Definitions  ›  Instances (N)   Incidents (M)   Called Definitions   Jobs                [history toggle]
+ *
+ * The chevron after `Definitions` indicates that the rest are *children of
+ * the selected definition*. They are dimmed (and unclickable) until a
+ * definition is selected. The history-mode toggle is pinned to the right.
+ */
+const ProcessSubNav = () => {
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    { params, query, path } = useRoute(),
+    { route } = useLocation(),
+    history_query = query.history ? "?history=true" : "",
+    def_id = params.definition_id,
+    has_def = !!def_id,
+    active_panel = params.panel ?? (has_def ? "overview" : "definitions"),
+    on_definitions = !has_def,
+    instance_count =
+      state.api.process.definition.statistics.value?.data?.reduce(
+        (n, a) => n + (a.instances ?? 0),
+        0,
+      ),
+    incident_count =
+      state.api.process.definition.statistics.value?.data?.reduce(
+        (n, a) => n + (a.incidents?.length ?? 0),
+        0,
+      ),
+    history_active = state.history_mode.value;
+
+  const child_item = (panel, label, count) => (
+    <li key={panel}>
+      {has_def ? (
+        <a
+          href={`/processes/${def_id}/${panel}${history_query}`}
+          aria-current={active_panel === panel ? "page" : undefined}
+        >
+          {label}
+          {count !== undefined && ` (${count})`}
+        </a>
+      ) : (
+        <span class="disabled">{label}</span>
+      )}
+    </li>
+  );
+
+  return (
+    <nav aria-label="Processes navigation">
+      <menu>
+        <li>
+          <a
+            href={`/processes${history_query}`}
+            aria-current={on_definitions ? "page" : undefined}
+          >
+            {t("processes.subnav.definitions")}
+          </a>
+        </li>
+        <li class="chevron" aria-hidden="true">
+          ›
+        </li>
+        {child_item(
+          "instances",
+          t("processes.subnav.instances"),
+          instance_count,
+        )}
+        {child_item(
+          "incidents",
+          t("processes.subnav.incidents"),
+          incident_count,
+        )}
+        {child_item(
+          "called_definitions",
+          t("processes.subnav.called-definitions"),
+        )}
+        {child_item("jobs", t("processes.subnav.jobs"))}
+      </menu>
+
+      <button
+        type="button"
+        class={`history-toggle ${history_active ? "active" : ""}`}
+        onClick={() => {
+          const next = !history_active;
+          state.history_mode.value = next;
+          route(next ? `${path}?history=true` : path);
+        }}
+      >
+        {history_active
+          ? t("processes.history-mode-active")
+          : t("processes.enable-history-mode")}
+      </button>
+    </nav>
+  );
+};
+
+/**
+ * Tertiary nav for selected children of a definition (instance, incident,
+ * called definition, job). Renders a horizontal row of links and resolves
+ * the URL to the default tab when none is selected yet.
+ */
+const ProcessTertiaryNav = ({ tabs, base_path, param = "sub_panel" }) => {
+  const { params, query } = useRoute();
+  const { route } = useLocation();
+  const [t] = useTranslation();
+
+  const active = params[param];
+  const hist_q = query.history ? "?history=true" : "";
+
+  // If we land on the parent path with no tab in the URL, push the default.
+  useEffect(() => {
+    if (!active && tabs.length) {
+      route(`${base_path}/${tabs[0].id}${hist_q}`, true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [base_path, active]);
+
+  return (
+    <nav class="tertiary" aria-label="Sub-section navigation">
+      <menu>
+        {tabs.map((tab) => (
+          <li key={tab.id}>
+            <a
+              href={`${base_path}/${tab.id}${hist_q}`}
+              aria-current={active === tab.id ? "page" : undefined}
+            >
+              {tab.nameKey ? t(tab.nameKey) : tab.name}
+            </a>
+          </li>
+        ))}
+      </menu>
+    </nav>
   );
 };
 
@@ -270,14 +384,10 @@ const ProcessDiagram = () => {
     has_activity_instances =
       activity_instances.value?.data !== undefined &&
       activity_instances.value?.data !== null,
-    is_ready =
-      state.history_mode.value ||
-      (is_instance_view ? has_activity_instances : has_statistics),
-    tokens = state.history_mode.value
-      ? undefined
-      : is_instance_view
-        ? activity_instances_to_tokens(activity_instances.value?.data)
-        : statistics.value?.data,
+    is_ready = is_instance_view ? has_activity_instances : has_statistics,
+    tokens = is_instance_view
+      ? activity_instances_to_tokens(activity_instances.value?.data)
+      : statistics.value?.data,
     mode = is_instance_view ? "instance" : "definition",
     instance_id = is_instance_view ? params.selection_id : undefined;
 
@@ -680,6 +790,8 @@ const InstanceDetails = () => {
 
   return (
     <div class="fade-in">
+      <DefinitionTabHeading titleKey="processes.tabs.instances" />
+      <DefinitionMetaPanel />
       <InstanceDetailsDescription />
       <ProcessTertiaryNav
         tabs={process_instance_tabs}
@@ -719,7 +831,11 @@ const ProcessInstance = ({ id, startTime, state, businessKey }) => (
         {id.substring(0, 8)}
       </a>
     </td>
-    <td>{new Date(Date.parse(startTime)).toLocaleString()}</td>
+    <td>
+      <time datetime={startTime}>
+        {new Date(Date.parse(startTime)).toLocaleString()}
+      </time>
+    </td>
     <td>{state}</td>
     <td>{businessKey}</td>
   </tr>
@@ -909,9 +1025,13 @@ const InstanceUserTasks = () => {
               <td>{name}</td>
               <td>{assignee}</td>
               <td>{owner}</td>
-              <td>{created}</td>
-              <td>{due}</td>
-              <td>{followUp}</td>
+              <td>
+                {created ? <time datetime={created}>{created}</time> : null}
+              </td>
+              <td>{due ? <time datetime={due}>{due}</time> : null}</td>
+              <td>
+                {followUp ? <time datetime={followUp}>{followUp}</time> : null}
+              </td>
               <td>{priority}</td>
               <td>{priority}</td>
               <td>{delegationState}</td>

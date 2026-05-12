@@ -242,7 +242,9 @@ const TaskRowEntry = ({ task, selected }) => {
         </a>
       </th>
       <td>{assignee ? assignee : "—"}</td>
-      <td>{due ? formatRelativeDate(due) : "—"}</td>
+      <td>
+        {due ? <time datetime={due}>{formatRelativeDate(due)}</time> : "—"}
+      </td>
     </tr>
   );
 };
@@ -1150,7 +1152,11 @@ const HistoryTab = () => {
           {ready ? (
             entries.map((entry, i) => (
               <tr key={i}>
-                <td>{formatRelativeDate(entry.timestamp)}</td>
+                <td>
+                  <time datetime={entry.timestamp}>
+                    {formatRelativeDate(entry.timestamp)}
+                  </time>
+                </td>
                 <td>{entry.user}</td>
                 <td>{entry.type}</td>
                 <td>{entry.detail}</td>

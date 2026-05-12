@@ -169,9 +169,13 @@ export const DashboardPage = () => {
                       </td>
                       <td>{task.assignee ?? "–"}</td>
                       <td>
-                        {task.created
-                          ? new Date(task.created).toLocaleDateString()
-                          : "–"}
+                        {task.created ? (
+                          <time datetime={task.created}>
+                            {new Date(task.created).toLocaleDateString()}
+                          </time>
+                        ) : (
+                          "–"
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -860,7 +860,8 @@
     margin: 0;
   }
 
-  .font-mono {
+  .font-mono,
+  time {
     font-family: "Courier New", Courier, monospace;
   }
 
