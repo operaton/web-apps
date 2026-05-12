@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { useLocation, useRoute } from "preact-iso";
-import { useContext, useLayoutEffect } from "preact/hooks";
+import { useContext, useEffect, useLayoutEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 
 import engine_rest, {
@@ -69,13 +69,19 @@ const TasksPage = () => {
   const state = useContext(AppState);
   const { params, query } = useRoute();
 
-  if (state.api.filter.list.value === null) {
-    void engine_rest.filter.get_filters(state);
-  }
+  useEffect(() => {
+    if (state.api.filter.list.value === null) {
+      void engine_rest.filter.get_filters(state);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (state.api.task.list.value === null) {
+  useEffect(() => {
     load_tasks(state, query);
-  }
+    // Re-load when filter/sort change. `query` keys we care about: filter,
+    // sortBy, sortOrder. JSON-stringify is the simplest stable dep here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.filter, query.sortBy, query.sortOrder]);
 
   if (params?.task_id === "start") {
     return (
@@ -352,28 +358,31 @@ const TaskTabs = () => {
   const state = useContext(AppState);
   const { params } = useRoute();
   const [t] = useTranslation();
-  const currentTaskId = useSignal(null);
 
-  // reset error/result state (optional)
-  state.task_claim_result.value = null;
-  state.task_assign_result.value = null;
-
-  if (currentTaskId.value !== params.task_id) {
-    currentTaskId.value = params.task_id;
+  // Load the task and reset claim/assign result state whenever the active
+  // task changes. Clean stale per-task data on unmount so the next task's
+  // panes don't render against the previous task's signals.
+  useEffect(() => {
+    state.task_claim_result.value = null;
+    state.task_assign_result.value = null;
     void load_task_chain(state, params.task_id);
-  }
+    return () => {
+      state.api.task.one.value = null;
+      state.api.task.comment.list.value = null;
+      state.api.task.identity_links.value = null;
+      state.api.history.user_operation.value = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.task_id]);
 
   return (
     <section className="task-tabs">
-      {state.api.task.one.value.data !== null &&
-      state.api.task.one.value.data !== undefined ? (
-        <>
-          <Tabs
-            tabs={task_tabs}
-            base_url={`/tasks/${state.api.task.one.value.data.id}`}
-            className="fade-in"
-          />
-        </>
+      {state.api.task.one.value?.data != null ? (
+        <Tabs
+          tabs={task_tabs}
+          base_url={`/tasks/${state.api.task.one.value.data.id}`}
+          className="fade-in"
+        />
       ) : (
         t("common.loading")
       )}
@@ -789,12 +798,13 @@ const Diagram = () => {
       },
     } = state;
 
-  if (selected_task !== null) {
-    void engine_rest.process_definition.diagram(
-      state,
-      selected_task.value.data.processDefinitionId,
-    );
-  }
+  const process_definition_id = selected_task.value?.data?.processDefinitionId;
+  useEffect(() => {
+    if (process_definition_id) {
+      void engine_rest.process_definition.diagram(state, process_definition_id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [process_definition_id]);
 
   return (
     <>
@@ -1178,19 +1188,19 @@ const task_tabs = [
     nameKey: "tasks.tabs.form",
     id: "form",
     pos: 0,
-    target: <TaskForm />,
+    Component: TaskForm,
   },
   {
     nameKey: "tasks.tabs.history",
     id: "history",
     pos: 1,
-    target: <HistoryTab />,
+    Component: HistoryTab,
   },
   {
     nameKey: "tasks.tabs.diagram",
     id: "diagram",
     pos: 2,
-    target: <Diagram />,
+    Component: Diagram,
   },
 ];
 

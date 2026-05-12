@@ -56,7 +56,10 @@ const Tabs = ({ base_url, tabs, param_name = 'tab', className = '' }) => {
            role="tabpanel"
            tabIndex="0"
            aria-labelledby={`${param_name}-${tab}`}>
-        {tabs.find(tab_ => tab === tab_.id)?.target || t("common.select-page")}
+        {(() => {
+          const active = tabs.find(tab_ => tab === tab_.id)
+          return active ? <active.Component /> : t("common.select-page")
+        })()}
       </div>
     </div>
   )
