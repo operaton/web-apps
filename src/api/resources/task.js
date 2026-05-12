@@ -104,16 +104,18 @@ const delete_group = (state, task_id, groupId) =>
 const tasks_with_process_definitions = async (tasks, state) => {
   const definition_ids = [
     ...new Set(tasks.map((task) => task.processDefinitionId)),
-  ];
+  ].filter(Boolean);
 
-  await get_task_process_definitions(state, definition_ids).then((defList) => {
-    const defMap = new Map(defList.map((def) => [def.id, def]));
+  if (definition_ids.length === 0) return tasks;
 
-    tasks.forEach((task) => {
-      const def = defMap.get(task.processDefinitionId);
-      task.definitionName = def?.name ?? "";
-      task.definitionVersion = def?.version ?? "";
-    });
+  const defList = await get_task_process_definitions(state, definition_ids);
+  if (!Array.isArray(defList)) return tasks;
+
+  const defMap = new Map(defList.map((def) => [def.id, def]));
+  tasks.forEach((task) => {
+    const def = defMap.get(task.processDefinitionId);
+    task.definitionName = def?.name ?? "";
+    task.definitionVersion = def?.version ?? "";
   });
 
   return tasks;
@@ -121,6 +123,11 @@ const tasks_with_process_definitions = async (tasks, state) => {
 
 const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0, maxResults = 3, filter = {}) => {
   const prev = state.api.task.list.value;
+  state.api.task.list.value = {
+    status: RESPONSE_STATE.LOADING,
+    data: prev?.data,
+    hasMore: prev?.hasMore,
+  };
   let headers = new Headers();
   headers.set(
     "Authorization",
