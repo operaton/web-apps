@@ -17,7 +17,7 @@ import { DeploymentsPage } from "./pages/Deployments.jsx";
 import { NotFound } from "./pages/_404.jsx";
 import { AccountPage } from "./pages/Account.jsx";
 
-import "./css/style.css"
+import "./css/style.css";
 import "./css/components.css";
 
 import { DecisionsPage } from "./pages/Decisions.jsx";
@@ -46,22 +46,14 @@ const swap_server = (e, state) => {
   localStorage.setItem("server", JSON.stringify(server));
 };
 
-const get_cookie = (/** @type {string} */ name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-};
-
 const Routing = () => {
-  const cookie = get_cookie("credentials"),
-    state = useContext(AppState),
+  const state = useContext(AppState),
     {
       auth: { logged_in },
     } = state,
     credentials = useSignal({
       username: null,
       password: null,
-      remember_login: false,
     }),
     login = (event) => {
       event.preventDefault();
@@ -69,17 +61,8 @@ const Routing = () => {
         state,
         credentials.value.username,
         credentials.value.password,
-        credentials.value.remember_login,
       );
     };
-
-  if (
-    cookie !== undefined &&
-    state.auth.logged_in.value.data !== "authenticated"
-  ) {
-    const { username, password } = JSON.parse(cookie);
-    void engine_rest.auth.login(state, username, password, true);
-  }
 
   if (logged_in.value.data === "authenticated") {
     return (
@@ -119,14 +102,17 @@ const Routing = () => {
         <GoTo />
       </LocationProvider>
     );
-  } else if (logged_in.value.data === "unknown" && cookie === undefined) {
+  } else if (logged_in.value.data === "unknown") {
     void engine_rest.auth.is_authenticated(state);
   } else if (logged_in.value.data === "unauthenticated") {
     return (
       <section class="login-page">
         <h1>Operaton Web Apps Login</h1>
         <span>
-          <a href="https://docs.operaton.org/docs/documentation/webapps/">Documentation</a>&nbsp;-&nbsp;
+          <a href="https://docs.operaton.org/docs/documentation/webapps/">
+            Documentation
+          </a>
+          &nbsp;-&nbsp;
           <a href="https://github.com/operaton/web-apps">Source</a>
         </span>
         <br />
@@ -147,53 +133,45 @@ const Routing = () => {
             ))}
           </select>
         </label>
-        {is_oauth
-          ? <button type="button" onClick={() => engine_rest.auth.start_oauth_login()}>
-              Login with SSO
-            </button>
-          : <form onSubmit={login} class=".form-horizontal">
-              <label for="username">User name*</label>
-              <input
-                name="username"
-                id="username"
-                onInput={(e) =>
-                  (credentials.value = {
-                    ...credentials.peek(),
-                    username: e.currentTarget.value,
-                  })
-                }
-                required
-              />
+        {is_oauth ? (
+          <button
+            type="button"
+            onClick={() => engine_rest.auth.start_oauth_login()}
+          >
+            Login with SSO
+          </button>
+        ) : (
+          <form onSubmit={login} class=".form-horizontal">
+            <label for="username">User name*</label>
+            <input
+              name="username"
+              id="username"
+              onInput={(e) =>
+                (credentials.value = {
+                  ...credentials.peek(),
+                  username: e.currentTarget.value,
+                })
+              }
+              required
+            />
 
-              <label for="password">Password*</label>
-              <input
-                name="password"
-                type="password"
-                id="password"
-                onInput={(e) =>
-                  (credentials.value = {
-                    ...credentials.peek(),
-                    password: e.currentTarget.value,
-                  })
-                }
-                required
-              />
+            <label for="password">Password*</label>
+            <input
+              name="password"
+              type="password"
+              id="password"
+              onInput={(e) =>
+                (credentials.value = {
+                  ...credentials.peek(),
+                  password: e.currentTarget.value,
+                })
+              }
+              required
+            />
 
-              <label>Remember login? (DEVELOPMENT ONLY)</label>
-              <input
-                type="checkbox"
-                name="remember_credentials"
-                onInput={(e) =>
-                  (credentials.value = {
-                    ...credentials.peek(),
-                    remember_login: e.currentTarget.checked,
-                  })
-                }
-              />
-
-              <button type="submit">Login</button>
-            </form>
-        }
+            <button type="submit">Login</button>
+          </form>
+        )}
       </section>
     );
   }
