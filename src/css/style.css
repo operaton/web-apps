@@ -459,30 +459,108 @@
     gap: var(--spacing-1);
   }
 
-  #migration > div > section > div {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-2);
-  }
-
   #migration .djs-parent {
     height: 40vh;
   }
 
-  #migration #execute {
-    background: var(--background-1);
-    border-top: var(--border);
+  .migration-steps {
     display: flex;
-    justify-content: end;
-    padding: var(--spacing-1);
+    flex-direction: column;
+    /* override the generic `form` grid layout (align-items: center) so
+       steps fill the content width and stay left-aligned */
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+
+  .migration-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .migration-step:not(:last-child) {
+    border-bottom: var(--border);
+    padding-bottom: var(--spacing-2);
+  }
+
+  .migration-step > h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+  }
+
+  .migration-step .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 50%;
+    background: var(--background-1);
+    border: var(--border);
+    font-size: 0.8em;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2);
   }
 
   #migration table {
     table-layout: fixed;
   }
 
+  .instance-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--spacing-1);
+  }
+
+  .instance-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--spacing-1);
+    max-height: 18em;
+    overflow: auto;
+    border: var(--border);
+    border-radius: var(--border-radius-2);
+  }
+
+  .instance-list label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+  }
+
+  #migration #execute {
+    background: var(--background-1);
+    padding: var(--spacing-1);
+  }
+
+  .execute-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .execute-options > div {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  #migration .button-group {
+    justify-content: start;
+  }
+
   #migration #execute button {
     margin: 0;
+  }
+
+  .execute-disabled-hint {
+    display: block;
   }
 
   .tasks {
@@ -1081,9 +1159,19 @@
   }
 
   :where(input, select, textarea, button):disabled,
-  form :where(input, select, textarea):read-only {
+  form :where(input, textarea)[readonly] {
     background: var(--background-2);
     color: var(--text-disabled);
+  }
+
+  fieldset {
+    border: var(--border);
+    border-radius: var(--border-radius-2);
+  }
+
+  legend {
+    font-weight: 600;
+    padding: 0 var(--spacing-1);
   }
 
   option {

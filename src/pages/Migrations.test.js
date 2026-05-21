@@ -1,68 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { signal } from "@preact/signals";
-
-// --- Reimplemented logic from Migrations.jsx for unit testing ---
-
-const build_migration_plan = (generate_data, mappings) => ({
-  ...generate_data,
-  instructions: Object.keys(mappings).map((key) => ({
-    sourceActivityIds: [key],
-    targetActivityIds: [mappings[key]],
-    updateEventTrigger: false,
-  })),
-});
-
-const build_migration_plan_with_variables = (
-  generate_data,
-  mappings,
-  variables,
-) => {
-  const variables_map = {};
-  for (const v of variables) {
-    if (v.name.trim() !== "")
-      variables_map[v.name] = { type: v.type, value: v.value };
-  }
-  return { ...build_migration_plan(generate_data, mappings), variables: variables_map };
-};
-
-const add_variable = (migration_state) =>
-  (migration_state.variables.value = [
-    ...migration_state.variables.value,
-    { name: "", type: "String", value: "" },
-  ]);
-
-const remove_variable = (migration_state, index) =>
-  (migration_state.variables.value = migration_state.variables.value.filter(
-    (_, i) => i !== index,
-  ));
-
-const update_variable = (migration_state, index, field, value) => {
-  const updated = [...migration_state.variables.value];
-  updated[index] = { ...updated[index], [field]: value };
-  migration_state.variables.value = updated;
-};
-
-const update_mapping = (target_value, source_activity_id, mappings) => {
-  if (target_value !== "") {
-    return { ...mappings, [source_activity_id]: target_value };
-  }
-  const { [source_activity_id]: _, ...rest } = mappings;
-  return rest;
-};
-
-const add_query_params_abstract = (query, url, route, path, name, value) => {
-  if (Object.keys(query).length === 0) {
-    route(`${url}?${name}=${value}`);
-  } else if (query[name] !== null) {
-    query[name] = value;
-    const params_as_string = Object.entries(query)
-      .map(([k, v]) => `&${k}=${v}`)
-      .join("");
-    route(`${path}?${params_as_string}`);
-  } else {
-    route(`${url}&${name}=${value}`);
-  }
-};
+import {
+  build_migration_plan,
+  build_migration_plan_with_variables,
+  add_variable,
+  remove_variable,
+  update_variable,
+  update_mapping,
+  add_query_params_abstract,
+} from "./migration_helpers.js";
 
 // --- Tests ---
 
@@ -155,11 +101,7 @@ describe("Migrations", () => {
     });
 
     it("should produce empty variables from empty list", () => {
-      const plan = build_migration_plan_with_variables(
-        generate_data,
-        {},
-        [],
-      );
+      const plan = build_migration_plan_with_variables(generate_data, {}, []);
       expect(plan.variables).toEqual({});
     });
 
@@ -252,7 +194,9 @@ describe("Migrations", () => {
     });
 
     it("should replace signal value (not mutate in place)", () => {
-      const state = { variables: signal([{ name: "a", type: "String", value: "" }]) };
+      const state = {
+        variables: signal([{ name: "a", type: "String", value: "" }]),
+      };
       const before = state.variables.value;
       update_variable(state, 0, "name", "b");
       expect(state.variables.value).not.toBe(before);
