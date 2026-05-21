@@ -35,6 +35,22 @@ quickest path is `docker compose -f docker-compose.dev-fixtures.yaml up --build`
 which brings up the engine, the bot, and a control panel at
 <http://localhost:3001> with buttons for deploy / spawn / stress.
 
+## Testing
+
+Unit and component tests use [Vitest](https://vitest.dev/) with
+[`@testing-library/preact`]; browser end-to-end tests use
+[Playwright](https://playwright.dev/).
+
+- `npx vitest run` - Runs all unit/component tests once
+- `npm test` - Runs the unit/component tests in watch mode
+- `npx vitest run src/path/to/file.test.js` - Runs a single test file
+- `npm run test:coverage` - Runs the unit/component tests with a coverage report
+- `npm run test:e2e` - Runs the Playwright end-to-end tests
+
+The e2e tests need the backend running (`docker compose up`, or `podman compose
+up`) and drive the dev server, which they start automatically. They log in with
+`demo`/`demo`. Use `npx playwright test --ui` to watch the flows interactively.
+
 ## Documentation
 
 Documentation for the Operaton web apps can currently be found inside the [`/docs`](./docs/) folder.

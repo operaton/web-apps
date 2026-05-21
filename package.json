@@ -6,8 +6,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
+    "test:run": "vitest run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@bpmn-io/feelin": "^6.1.0",
@@ -28,6 +30,7 @@
     "react-i18next": "^15.6.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@preact/preset-vite": "^2.9.0",
     "@testing-library/preact": "^3.2.4",
     "@vitest/ui": "^4.0.7",
