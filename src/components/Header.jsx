@@ -75,7 +75,6 @@ export function Header() {
               <menu>
                 <li><a href="/help">   {t("nav.help")}</a></li>
                 <li><a href="/account">{t("nav.account")}</a></li>
-                <li><button id="logout" onClick={logout}>{t("nav.logout")}</button></li>
               </menu>
             </nav>
             <button id="go-to" onClick={showSearch}>
@@ -91,6 +90,7 @@ export function Header() {
                   </option>)}
               </select>
             </label>
+            <button id="logout" onClick={logout}>{t("nav.logout")}</button>
           </div>
         </div>
       </header>

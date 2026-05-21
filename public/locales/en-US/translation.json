@@ -416,6 +416,7 @@
     "system": "System",
     "details": "Details",
     "danger-zone": "Danger Zone",
+    "confirm-remove-member": "Do you really want to remove this member?",
     "user": {
       "title": "Users",
       "create": "Create New User",
@@ -432,8 +433,15 @@
       "new-password-repeat": "New Password (repeat)",
       "change-password": "Change Password",
       "success-created": "Successfully created new user.",
+      "success-updated": "Profile updated.",
+      "password-success": "Password changed.",
+      "password-mismatch": "Passwords do not match.",
       "remove-from-group": "Remove from group",
-      "add-to-group": "Add to group"
+      "confirm-remove-from-group": "Do you really want to remove the user from this group?",
+      "add-to-group": "Add to group",
+      "no-tenants": "User is currently not a member of any tenant.",
+      "delete": "Delete User",
+      "confirm-delete": "Do you really want to delete this user?"
     },
     "group": {
       "title": "Groups",
@@ -444,8 +452,16 @@
       "no-groups": "User is currently not a member of any group.",
       "details": "Group Details",
       "profile": "Profile",
+      "information": "Information",
       "user-groups": "User Groups",
-      "success-created": "Successfully created new group."
+      "members": "Members",
+      "no-members": "This group has no members.",
+      "add-member": "Add member",
+      "success-created": "Successfully created new group.",
+      "success-updated": "Group updated.",
+      "success-deleted": "Group deleted.",
+      "delete": "Delete Group",
+      "confirm-delete": "Do you really want to delete this group?"
     },
     "tenant": {
       "title": "Tenants",
@@ -456,7 +472,16 @@
       "no-tenants": "No tenants",
       "details": "Tenant Details",
       "information": "Information",
-      "success-created": "Successfully created new tenant."
+      "users": "Users",
+      "groups": "Groups",
+      "no-users": "This tenant has no users.",
+      "no-groups": "This tenant has no groups.",
+      "add-user": "Add user",
+      "add-group": "Add group",
+      "success-created": "Successfully created new tenant.",
+      "success-updated": "Tenant updated.",
+      "delete": "Delete Tenant",
+      "confirm-delete": "Do you really want to delete this tenant?"
     },
     "authorization": {
       "title": "Authorization",
@@ -473,6 +498,7 @@
       "deny-display": "Deny",
       "available-permissions": "Available Permissions",
       "confirm-delete": "Do you really want to delete this authorization?",
+      "success-created": "Successfully created new authorization.",
       "select-resource": "Select a authorization resource"
     },
     "authorization-resources": {

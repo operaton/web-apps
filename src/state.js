@@ -42,6 +42,7 @@ const createAppState = () => {
   const api = {
     authorization: {
       all: signal(null),
+      create: signal(null),
       update: signal(null),
       delete: signal(null),
     },
@@ -54,6 +55,8 @@ const createAppState = () => {
       create: signal(null),
       // todo: remove demo user when login is implemented
       profile: signal({ id: "demo" }),
+      update: signal(null),
+      delete: signal(null),
       group: {
         list: signal(null),
       },
@@ -63,7 +66,11 @@ const createAppState = () => {
     group: {
       list: signal(null),
       create: signal(null),
+      update: signal(null),
+      delete: signal(null),
+      members: signal(null),
       add_user: signal(null),
+      remove_member: signal(null),
     },
     migration: {
       generate: signal(null),
@@ -74,7 +81,14 @@ const createAppState = () => {
       list: signal(null),
       by_member: signal(null),
       create: signal(null),
+      update: signal(null),
+      delete: signal(null),
+      user_members: signal(null),
+      group_members: signal(null),
       add_user: signal(null),
+      remove_user: signal(null),
+      add_group: signal(null),
+      remove_group: signal(null),
     },
     process: {
       definition: {

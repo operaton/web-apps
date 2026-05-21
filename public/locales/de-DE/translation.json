@@ -416,6 +416,7 @@
     "system": "System",
     "details": "Details",
     "danger-zone": "Gefahrenzone",
+    "confirm-remove-member": "Möchten Sie dieses Mitglied wirklich entfernen?",
     "user": {
       "title": "Benutzer",
       "create": "Neuen Benutzer erstellen",
@@ -432,8 +433,15 @@
       "new-password-repeat": "Neues Passwort (wiederholen)",
       "change-password": "Passwort ändern",
       "success-created": "Neuer Benutzer erfolgreich erstellt.",
+      "success-updated": "Profil aktualisiert.",
+      "password-success": "Passwort geändert.",
+      "password-mismatch": "Die Passwörter stimmen nicht überein.",
       "remove-from-group": "Aus Gruppe entfernen",
-      "add-to-group": "Zur Gruppe hinzufügen"
+      "confirm-remove-from-group": "Möchten Sie den Benutzer wirklich aus dieser Gruppe entfernen?",
+      "add-to-group": "Zur Gruppe hinzufügen",
+      "no-tenants": "Der Benutzer ist derzeit kein Mitglied eines Mandanten.",
+      "delete": "Benutzer löschen",
+      "confirm-delete": "Möchten Sie diesen Benutzer wirklich löschen?"
     },
     "group": {
       "title": "Gruppen",
@@ -444,8 +452,16 @@
       "no-groups": "Der Benutzer ist derzeit kein Mitglied einer Gruppe.",
       "details": "Gruppendetails",
       "profile": "Profil",
+      "information": "Informationen",
       "user-groups": "Benutzergruppen",
-      "success-created": "Neue Gruppe erfolgreich erstellt."
+      "members": "Mitglieder",
+      "no-members": "Diese Gruppe hat keine Mitglieder.",
+      "add-member": "Mitglied hinzufügen",
+      "success-created": "Neue Gruppe erfolgreich erstellt.",
+      "success-updated": "Gruppe aktualisiert.",
+      "success-deleted": "Gruppe gelöscht.",
+      "delete": "Gruppe löschen",
+      "confirm-delete": "Möchten Sie diese Gruppe wirklich löschen?"
     },
     "tenant": {
       "title": "Mandanten",
@@ -456,7 +472,16 @@
       "no-tenants": "Keine Mandanten",
       "details": "Mandantendetails",
       "information": "Informationen",
-      "success-created": "Neuer Mandant erfolgreich erstellt."
+      "users": "Benutzer",
+      "groups": "Gruppen",
+      "no-users": "Dieser Mandant hat keine Benutzer.",
+      "no-groups": "Dieser Mandant hat keine Gruppen.",
+      "add-user": "Benutzer hinzufügen",
+      "add-group": "Gruppe hinzufügen",
+      "success-created": "Neuer Mandant erfolgreich erstellt.",
+      "success-updated": "Mandant aktualisiert.",
+      "delete": "Mandant löschen",
+      "confirm-delete": "Möchten Sie diesen Mandanten wirklich löschen?"
     },
     "authorization": {
       "title": "Autorisierung",
@@ -473,6 +498,7 @@
       "deny-display": "Verweigern",
       "available-permissions": "Verfügbare Berechtigungen",
       "confirm-delete": "Möchten Sie diese Autorisierung wirklich löschen?",
+      "success-created": "Neue Autorisierung erfolgreich erstellt.",
       "select-resource": "Wählen Sie eine Autorisierungsressource aus"
     },
     "authorization-resources": {

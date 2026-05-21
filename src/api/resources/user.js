@@ -22,9 +22,9 @@ const get_user_profile = (state, user_name) =>
   // TODO remove `?? 'demo'` when we have working authentication
   GET(`/user/${user_name ?? 'demo'}/profile`, state, state.api.user.profile)
 
-const update_user_profile = (state, user_name) =>
+const update_user_profile = (state, user_name, profile) =>
   // TODO remove `?? 'demo'` when we have working authentication
-  PUT(`/user/${user_name ?? 'demo'}/profile`, state.api.user.profile, state, state.api.user.profile)
+  PUT(`/user/${user_name ?? 'demo'}/profile`, profile, state, state.api.user.update)
 
 const update_credentials = (state, user_name, credentials_body) =>
   // TODO remove `?? 'demo'` when we have working authentication

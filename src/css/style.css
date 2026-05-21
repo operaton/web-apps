@@ -822,6 +822,8 @@
 
   #admin-page {
     display: flex;
+    flex: 1;
+    min-height: 0;
   }
   #admin-page > div {
     padding: var(--spacing-2);
@@ -829,6 +831,33 @@
     width: calc(100% - var(--spacing-3));
     flex: 1;
     background-clip: padding-box;
+  }
+
+  /* keep the hover/selected background, but drop the negative margin shift */
+  #admin-page tbody tr:hover :where(td, th),
+  #admin-page tbody tr[aria-selected="true"] :where(td, th) {
+    margin: 0;
+  }
+
+  .auth-table :where(td, th) {
+    vertical-align: top;
+  }
+
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--spacing-1) 0;
+    max-width: 40em;
+  }
+  .link-list li a {
+    display: block;
+    padding: var(--spacing-1);
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: var(--border);
+  }
+  .link-list li a:hover {
+    background: var(--background-2);
   }
 
   /* Dashboard — card grid + content sections, all cascaded from .dashboard. */
@@ -1058,6 +1087,10 @@
     margin-top: 0;
   }
 
+  #logout {
+    margin-top: 0;
+  }
+
   button.link {
     background-color: transparent;
     padding: 0;
@@ -1122,14 +1155,9 @@
     align-items: center;
   }
 
-  td.button-group {
-    padding: 0;
-    flex-wrap: nowrap;
-    justify-content: start;
-  }
-
-  td button {
-    margin-top: 0;
+  td button,
+  td .button {
+    margin: 0;
   }
 
   input,
@@ -1144,7 +1172,7 @@
     max-width: 100%;
   }
   select {
-    border-radius: 999em;
+    border-radius: var(--border-radius);
     font-size: var(--small-font-size);
     padding: 0.3em 0.7em;
   }

@@ -89,7 +89,7 @@ const Routing = () => {
             component={DeploymentsPage}
           />
           <Route
-            path="/admin/:page_id?/:selection_id?"
+            path="/admin/:page_id?/:selection_id?/:sub_selection_id?"
             component={AdminPage}
           />
           <Route
