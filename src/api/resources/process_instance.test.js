@@ -99,4 +99,27 @@ describe("api/resources/process_instance", () => {
       signal: state.api.process.instance.modification,
     });
   });
+
+  it("modify_async() POSTs a batch modification to /modification/executeAsync", () => {
+    const instructions = [
+      { type: "cancel", activityId: "a" },
+      { type: "startBeforeActivity", activityId: "b" },
+    ];
+    const query = { processDefinitionId: "def:1:x", activityIdIn: ["a"] };
+    process_instance.modify_async(state, "def:1:x", instructions, { query });
+    expect_api_call(POST, {
+      url: "/modification/executeAsync",
+      body: {
+        processDefinitionId: "def:1:x",
+        instructions,
+        processInstanceQuery: query,
+        processInstanceIds: null,
+        skipCustomListeners: false,
+        skipIoMappings: false,
+        annotation: undefined,
+      },
+      state,
+      signal: state.api.process.instance.modification,
+    });
+  });
 });

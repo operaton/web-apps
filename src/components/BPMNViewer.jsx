@@ -10,6 +10,12 @@ import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
 import * as Icons from '../assets/icons.jsx'
+import {
+  build_single_modification,
+  build_batch_instructions,
+  build_batch_query,
+  build_batch_modification,
+} from './BPMNViewer_helpers.js'
 
 const FLOW_NODE_TYPES = new Set([
   'bpmn:Task',
@@ -99,14 +105,15 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
       }
     }
 
-    // Instance-mode: drag-and-drop modification
-    const drag_state = { source_id: null, source_instance_ids: [], target_el: null }
+    // Drag-and-drop modification (both modes).
+    const drag_state = { source_id: null, source_instance_ids: [], source_instances_count: 0, target_el: null }
 
     const on_drag_start = (e) => {
       const handle = e.target.closest('.bpmn-token-handle')
       if (!handle) return
       drag_state.source_id = handle.dataset.activityId
       drag_state.source_instance_ids = (handle.dataset.activityInstanceIds || '').split(',').filter(Boolean)
+      drag_state.source_instances_count = parseInt(handle.dataset.instances || '0', 10)
       handle.classList.add('dragging')
       const elementRegistry = viewerRef.current?.get('elementRegistry')
       const source_gfx = elementRegistry?.getGraphics(drag_state.source_id)
@@ -127,6 +134,7 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
       if (drag_state.target_el) drag_state.target_el.classList.remove('bpmn-drop-target')
       drag_state.source_id = null
       drag_state.source_instance_ids = []
+      drag_state.source_instances_count = 0
       drag_state.target_el = null
     }
 
@@ -172,20 +180,22 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
       modify_request.value = {
         source_activity_id: drag_state.source_id,
         source_activity_instance_ids: drag_state.source_instance_ids,
+        source_instances_count: drag_state.source_instances_count,
         target_activity_id: target.id,
         target_activity_name: target.businessObject?.name || target.id,
-        scope: drag_state.source_instance_ids.length > 1 ? 'all' : 'all',
+        scope: 'all',
         picked_instance_id: null,
       }
     }
 
+    // Drag-to-modify works in both modes; action-button clicks only in
+    // definition mode.
+    containerEl.addEventListener('dragstart', on_drag_start)
+    containerEl.addEventListener('dragend', on_drag_end)
+    containerEl.addEventListener('dragover', on_drag_over)
+    containerEl.addEventListener('drop', on_drop)
     if (mode === 'definition') {
       containerEl.addEventListener('click', on_action_click)
-    } else if (mode === 'instance') {
-      containerEl.addEventListener('dragstart', on_drag_start)
-      containerEl.addEventListener('dragend', on_drag_end)
-      containerEl.addEventListener('dragover', on_drag_over)
-      containerEl.addEventListener('drop', on_drop)
     }
 
     const load = async () => {
@@ -209,16 +219,20 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
         if (!element) return
         const is_call_activity = element.type === 'bpmn:CallActivity'
 
+        // Draggable token handle — both modes support drag-to-modify. In
+        // instance mode the drag modifies the selected instance; in definition
+        // mode it creates a batch modification across all instances here.
+        const ids_attr = (activity_instance_ids ?? []).join(',')
+        const gfx = elementRegistry.getGraphics(id)
+        if (gfx) gfx.classList.add('bpmn-highlight')
+        const w = element.width ?? 100
+        const h = element.height ?? 80
+        overlays.add(id, {
+          position: { top: 0, left: 0 },
+          html: `<div class="bpmn-token-handle" draggable="true" style="width:${w}px;height:${h}px" data-activity-id="${id}" data-activity-instance-ids="${ids_attr}" data-instances="${instances ?? 0}" title="${t('bpmn.modify.drag-hint')}"></div>`,
+        })
+
         if (mode === 'instance') {
-          const ids_attr = (activity_instance_ids ?? []).join(',')
-          const gfx = elementRegistry.getGraphics(id)
-          if (gfx) gfx.classList.add('bpmn-highlight')
-          const w = element.width ?? 100
-          const h = element.height ?? 80
-          overlays.add(id, {
-            position: { top: 0, left: 0 },
-            html: `<div class="bpmn-token-handle" draggable="true" style="width:${w}px;height:${h}px" data-activity-id="${id}" data-activity-instance-ids="${ids_attr}" title="${t('bpmn.modify.drag-hint')}"></div>`,
-          })
           if (instances > 1) {
             overlays.add(id, {
               position: { top: -10, right: -10 },
@@ -228,7 +242,8 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
           return
         }
 
-        // definition mode
+        // definition mode: incident badge + action buttons rendered above the
+        // handle (.bpmn-actions has z-index so the buttons stay clickable).
         if (incidents?.length > 0) {
           overlays.add(id, {
             position: { top: -10, left: -10 },
@@ -250,9 +265,6 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
           position: { bottom: 0, left: 0 },
           html: `<div class="bpmn-actions">${actions_html}</div>`,
         })
-
-        const gfx = elementRegistry.getGraphics(id)
-        if (gfx) gfx.classList.add('c-hand')
       })
 
       highlight?.forEach((elementId) => {
@@ -273,13 +285,12 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
     void load()
 
     return () => {
+      containerEl.removeEventListener('dragstart', on_drag_start)
+      containerEl.removeEventListener('dragend', on_drag_end)
+      containerEl.removeEventListener('dragover', on_drag_over)
+      containerEl.removeEventListener('drop', on_drop)
       if (mode === 'definition') {
         containerEl.removeEventListener('click', on_action_click)
-      } else if (mode === 'instance') {
-        containerEl.removeEventListener('dragstart', on_drag_start)
-        containerEl.removeEventListener('dragend', on_drag_end)
-        containerEl.removeEventListener('dragover', on_drag_over)
-        containerEl.removeEventListener('drop', on_drop)
       }
       viewer.destroy()
       viewerRef.current = null
@@ -303,28 +314,34 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
   return (
     <>
       {createPortal(controls, containerEl)}
-      {mode === 'instance' && (
-        <ModifyInstanceDialog
-          request={modify_request}
-          instance_id={instance_id}
-          definition_id={definition_id}
-        />
-      )}
+      <ModifyInstanceDialog
+        request={modify_request}
+        mode={mode}
+        instance_id={instance_id}
+        definition_id={definition_id}
+      />
     </>
   )
 }
 
-const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
+const ModifyInstanceDialog = ({ request, mode, instance_id, definition_id }) => {
   const state = useContext(AppState),
     [t] = useTranslation(),
+    { route } = useLocation(),
     dialogRef = useRef(null),
+    created_batch = useSignal(null),
+    is_batch = mode === 'definition',
     error_signal = state.api.process.instance.modification
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
-    if (request.value && !dialog.open) dialog.showModal()
+    if (request.value && !dialog.open) {
+      created_batch.value = null
+      dialog.showModal()
+    }
     if (!request.value && dialog.open) dialog.close()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request.value])
 
   if (!request.value) return <dialog ref={dialogRef} class="modify-instance-dialog" />
@@ -332,6 +349,7 @@ const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
   const {
     source_activity_id,
     source_activity_instance_ids,
+    source_instances_count,
     target_activity_id,
     target_activity_name,
     scope,
@@ -344,21 +362,24 @@ const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
       ? [picked_instance_id]
       : source_activity_instance_ids
 
-  const body = {
-    skipCustomListeners: false,
-    skipIoMappings: false,
-    instructions: [
-      ...cancel_ids.map((aid) => ({
-        type: 'cancel',
-        activityInstanceId: aid,
-      })),
-      { type: 'startBeforeActivity', activityId: target_activity_id },
-    ],
-  }
+  const batch_instructions = build_batch_instructions(
+    source_activity_id,
+    target_activity_id,
+  )
+  const batch_query = build_batch_query(definition_id, source_activity_id)
+
+  const body = is_batch
+    ? build_batch_modification(
+        definition_id,
+        source_activity_id,
+        target_activity_id,
+      )
+    : build_single_modification(cancel_ids, target_activity_id)
 
   const close_dialog = () => {
     request.value = null
     error_signal.value = null
+    created_batch.value = null
   }
 
   const update_request = (patch) => {
@@ -366,6 +387,25 @@ const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
   }
 
   const submit = async () => {
+    if (is_batch) {
+      await engine_rest.process_instance.modify_async(
+        state,
+        definition_id,
+        batch_instructions,
+        { query: batch_query },
+      )
+      if (
+        state.api.process.instance.modification.value?.status ===
+        RESPONSE_STATE.SUCCESS
+      ) {
+        created_batch.value = state.api.process.instance.modification.value.data
+        if (definition_id) {
+          void engine_rest.process_definition.statistics(state, definition_id)
+        }
+      }
+      return
+    }
+
     await engine_rest.process_instance.modify(state, instance_id, body)
     if (
       state.api.process.instance.modification.value?.status ===
@@ -381,6 +421,12 @@ const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
     }
   }
 
+  const view_batch = () => {
+    const id = created_batch.value?.id
+    close_dialog()
+    route(id ? `/batches/${id}` : '/batches')
+  }
+
   const copy_payload = () => {
     void navigator.clipboard.writeText(JSON.stringify(body, null, 2))
   }
@@ -391,6 +437,8 @@ const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
       : null
   const error_message =
     error?.message || error?.type || (error ? t('bpmn.modify.error') : null)
+
+  const batch_done = is_batch && created_batch.value
 
   return (
     <dialog ref={dialogRef} class="modify-instance-dialog">
@@ -406,68 +454,95 @@ const ModifyInstanceDialog = ({ request, instance_id, definition_id }) => {
         </dd>
       </dl>
 
-      {has_multiple && (
-        <fieldset>
-          <legend>{t('bpmn.modify.scope-legend')}</legend>
-          <label>
-            <input
-              type="radio"
-              name="scope"
-              checked={scope === 'all'}
-              onChange={() =>
-                update_request({ scope: 'all', picked_instance_id: null })
-              }
-            />
-            {t('bpmn.modify.all-instances', { count: source_activity_instance_ids.length })}
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="scope"
-              checked={scope === 'one'}
-              onChange={() =>
-                update_request({
-                  scope: 'one',
-                  picked_instance_id: source_activity_instance_ids[0],
-                })
-              }
-            />
-            {t('bpmn.modify.single-instance')}
-          </label>
-          {scope === 'one' && (
-            <select
-              value={picked_instance_id}
-              onChange={(e) =>
-                update_request({ picked_instance_id: e.currentTarget.value })
-              }
-            >
-              {source_activity_instance_ids.map((aid) => (
-                <option key={aid} value={aid}>
-                  {aid}
-                </option>
-              ))}
-            </select>
+      {batch_done ? (
+        <p class="info-box">
+          {t('bpmn.modify.batch-created')} <code>{created_batch.value.id}</code>
+        </p>
+      ) : (
+        <>
+          {is_batch && (
+            <p class="info-box">
+              {t('bpmn.modify.batch-note', { count: source_instances_count ?? 0 })}
+            </p>
           )}
-        </fieldset>
-      )}
 
-      <details>
-        <summary>{t('bpmn.modify.payload-summary')}</summary>
-        <pre class="modify-payload">{JSON.stringify(body, null, 2)}</pre>
-      </details>
+          {!is_batch && has_multiple && (
+            <fieldset>
+              <legend>{t('bpmn.modify.scope-legend')}</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="scope"
+                  checked={scope === 'all'}
+                  onChange={() =>
+                    update_request({ scope: 'all', picked_instance_id: null })
+                  }
+                />
+                {t('bpmn.modify.all-instances', { count: source_activity_instance_ids.length })}
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="scope"
+                  checked={scope === 'one'}
+                  onChange={() =>
+                    update_request({
+                      scope: 'one',
+                      picked_instance_id: source_activity_instance_ids[0],
+                    })
+                  }
+                />
+                {t('bpmn.modify.single-instance')}
+              </label>
+              {scope === 'one' && (
+                <select
+                  value={picked_instance_id}
+                  onChange={(e) =>
+                    update_request({ picked_instance_id: e.currentTarget.value })
+                  }
+                >
+                  {source_activity_instance_ids.map((aid) => (
+                    <option key={aid} value={aid}>
+                      {aid}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </fieldset>
+          )}
+
+          <details>
+            <summary>{t('bpmn.modify.payload-summary')}</summary>
+            <pre class="modify-payload">{JSON.stringify(body, null, 2)}</pre>
+          </details>
+        </>
+      )}
 
       {error_message && <p class="error">{error_message}</p>}
 
       <div class="button-group">
-        <button type="button" onClick={copy_payload}>
-          {t('bpmn.modify.copy-payload')}
-        </button>
-        <button type="button" onClick={close_dialog}>
-          {t('common.cancel')}
-        </button>
-        <button type="button" class="primary" onClick={submit}>
-          {t('bpmn.modify.confirm')}
-        </button>
+        {batch_done ? (
+          <>
+            <button type="button" onClick={close_dialog}>
+              {t('common.close')}
+            </button>
+            <button type="button" class="primary" onClick={view_batch}>
+              {t('bpmn.modify.view-batch')}
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={copy_payload}>
+              {t('bpmn.modify.copy-payload')}
+            </button>
+            <button type="button" onClick={close_dialog}>
+              {t('common.cancel')}
+            </button>
+            <button type="button" class="primary" onClick={submit}>
+              {t('bpmn.modify.confirm')}
+            </button>
+          </>
+        )}
       </div>
     </dialog>
   )

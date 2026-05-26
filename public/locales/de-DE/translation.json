@@ -625,7 +625,10 @@
       "payload-summary": "Request-Payload anzeigen",
       "copy-payload": "Payload kopieren",
       "confirm": "Token verschieben",
-      "error": "Modifikation fehlgeschlagen"
+      "error": "Modifikation fehlgeschlagen",
+      "batch-note": "Verschiebt alle {{count}} laufenden Instanz(en) auf der Quellaktivität und läuft als asynchroner Batch.",
+      "batch-created": "Batch erstellt:",
+      "view-batch": "Batch anzeigen"
     }
   }
 }

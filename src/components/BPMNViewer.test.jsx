@@ -189,4 +189,24 @@ describe("BPMNViewer", () => {
     const html = overlays_add.mock.calls[0][1].html;
     expect(html).toContain("bpmn-token-handle");
   });
+
+  it("also renders a drag handle in definition mode (alongside action buttons)", async () => {
+    renderViewer({
+      xml: "<bpmn/>",
+      container: "diagram",
+      tokens: [{ id: "act1", instances: 3, incidents: [] }],
+    });
+    await flush();
+    const htmls = overlays_add.mock.calls.map((c) => c[1].html);
+    expect(htmls.some((h) => h.includes("bpmn-token-handle"))).toBe(true);
+    expect(htmls.some((h) => h.includes("bpmn-actions"))).toBe(true);
+    // The definition handle carries the running-instance count.
+    const handle = htmls.find((h) => h.includes("bpmn-token-handle"));
+    expect(handle).toContain('data-instances="3"');
+  });
+
+  // NOTE: the full drag→drop→batch flow can't be simulated here — happy-dom
+  // does not support synthetic drag events. The batch request shape the dialog
+  // builds is covered by BPMNViewer_helpers.test.js, and the API wiring by
+  // process_instance.test.js (modify_async).
 });

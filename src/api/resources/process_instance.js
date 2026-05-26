@@ -76,6 +76,32 @@ const modify_process_instance = (state, instance_id, body) =>
     state.api.process.instance.modification,
   );
 
+/**
+ * Asynchronous (batch) modification across many instances of a definition.
+ * Returns a Batch the user can monitor on the Batches page.
+ * @see https://docs.operaton.org/reference/latest/rest-api/#tag/Modification
+ */
+const modify_process_instance_async = (
+  state,
+  definition_id,
+  instructions,
+  options = {},
+) =>
+  POST(
+    `/modification/executeAsync`,
+    {
+      processDefinitionId: definition_id,
+      instructions,
+      processInstanceQuery: options.query ?? null,
+      processInstanceIds: options.instanceIds ?? null,
+      skipCustomListeners: options.skipCustomListeners ?? false,
+      skipIoMappings: options.skipIoMappings ?? false,
+      annotation: options.annotation,
+    },
+    state,
+    state.api.process.instance.modification,
+  );
+
 const process_instance = {
   one: get_process_instance,
   variables: get_process_instance_variables,
@@ -86,6 +112,7 @@ const process_instance = {
   by_defintion_id: get_process_instance_by_defintion_id,
   activity_instances: get_activity_instances,
   modify: modify_process_instance,
+  modify_async: modify_process_instance_async,
 };
 
 export default process_instance;

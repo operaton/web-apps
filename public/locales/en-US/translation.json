@@ -625,7 +625,10 @@
       "payload-summary": "Show request payload",
       "copy-payload": "Copy payload",
       "confirm": "Move token",
-      "error": "Modification failed"
+      "error": "Modification failed",
+      "batch-note": "This moves all {{count}} running instance(s) on the source activity and runs as an asynchronous batch.",
+      "batch-created": "Batch created:",
+      "view-batch": "View batch"
     }
   }
 }
