@@ -77,6 +77,12 @@ const createAppState = () => {
       validation: signal(null),
       execution: signal(null),
     },
+    batch: {
+      list: signal(null),
+      one: signal(null),
+      delete: signal(null),
+      update: signal(null),
+    },
     tenant: {
       list: signal(null),
       by_member: signal(null),

@@ -65,7 +65,7 @@ export function Header() {
               <li><a href="/processes"   class={url.startsWith("/processes")   && "active"}>{t("nav.processes")}</a></li>
               <li><a href="/decisions"   class={url.startsWith("/decisions")   && "active"}>{t("nav.decisions")}</a></li>
               <li><a href="/deployments" class={url.startsWith("/deployments") && "active"}>{t("nav.deployments")}</a></li>
-              <li><a href="/">                                                              {t("nav.batches")}</a></li>
+              <li><a href="/batches"     class={url.startsWith("/batches")     && "active"}>{t("nav.batches")}</a></li>
               <li><a href="/migrations"  class={url.startsWith("/migrations")  && "active"}>{t("nav.migrations")}</a></li>
               <li><a href="/admin"       class={url.startsWith("/admin")       && "active"}>{t("nav.admin")}</a></li>
             </menu>
@@ -134,7 +134,9 @@ export function Header() {
               </a>
             </li>
             <li>
-              <a href="/">{t("nav.batches")}</a>
+              <a href="/batches" class={url.startsWith("/batches") && "active"}>
+                {t("nav.batches")}
+              </a>
             </li>
             <li>
               <a

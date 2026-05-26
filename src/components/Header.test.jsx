@@ -60,7 +60,7 @@ describe("Header", () => {
     const hrefs = Array.from(nav.querySelectorAll("li > a")).map((a) =>
       a.getAttribute("href"),
     );
-    // Logo (/), tasks, processes, decisions, deployments, batches (/),
+    // Logo (/), tasks, processes, decisions, deployments, batches,
     // migrations, admin.
     expect(hrefs).toEqual([
       "/",
@@ -68,7 +68,7 @@ describe("Header", () => {
       "/processes",
       "/decisions",
       "/deployments",
-      "/",
+      "/batches",
       "/migrations",
       "/admin",
     ]);

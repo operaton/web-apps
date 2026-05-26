@@ -820,6 +820,31 @@
     text-align: center;
   }
 
+  /* Batches: list (left) + details pane (right). */
+  .batches {
+    display: grid;
+    grid-template-columns: minmax(20em, 32em) 1fr;
+    height: 100%;
+  }
+  .batches > :first-child {
+    overflow-y: auto;
+    border-right: var(--border);
+    padding: var(--spacing-2);
+  }
+  .batches > :nth-child(2) {
+    overflow: auto;
+    padding: var(--spacing-2);
+  }
+  .batch-empty {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    font-size: var(--small-font-size);
+    text-align: center;
+  }
+
   #admin-page {
     display: flex;
     flex: 1;

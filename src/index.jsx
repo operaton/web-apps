@@ -14,6 +14,7 @@ import { ProcessesPage } from "./pages/Processes.jsx";
 import { MigrationsPage } from "./pages/Migrations.jsx";
 import { AdminPage } from "./pages/Admin.jsx";
 import { DeploymentsPage } from "./pages/Deployments.jsx";
+import { BatchesPage } from "./pages/Batches.jsx";
 import { NotFound } from "./pages/_404.jsx";
 import { AccountPage } from "./pages/Account.jsx";
 
@@ -88,6 +89,7 @@ const Routing = () => {
             path="/deployments/:deployment_id?/:resource_name?"
             component={DeploymentsPage}
           />
+          <Route path="/batches/:batch_id?" component={BatchesPage} />
           <Route
             path="/admin/:page_id?/:selection_id?/:sub_selection_id?"
             component={AdminPage}

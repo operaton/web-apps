@@ -3,6 +3,7 @@ import {
   RESPONSE_STATE as response_state,
 } from "./helper.jsx";
 import auth from "./resources/auth.js";
+import batch from "./resources/batch.js";
 import engine from "./resources/engine.js";
 import user from "./resources/user.js";
 import group from "./resources/group.js";
@@ -21,6 +22,7 @@ import filter from "./resources/filter.js";
 const engine_rest = {
   auth,
   authorization,
+  batch,
   decision,
   deployment,
   engine,

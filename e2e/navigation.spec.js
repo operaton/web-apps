@@ -12,6 +12,7 @@ test.describe("navigation", () => {
       "/processes",
       "/decisions",
       "/deployments",
+      "/batches",
       "/migrations",
       "/admin",
       "/account",

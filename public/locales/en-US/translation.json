@@ -342,6 +342,27 @@
     "form-preview": "Form preview",
     "raw-data-json": "Raw data (JSON)"
   },
+  "batches": {
+    "title": "Batches",
+    "select-batch": "Select a batch to show its details.",
+    "empty": "No batches are currently running.",
+    "refresh": "Refresh",
+    "id": "Batch ID",
+    "type": "Type",
+    "progress": "Progress",
+    "total-jobs": "Total jobs",
+    "remaining-jobs": "Remaining",
+    "completed-jobs": "Completed",
+    "failed-jobs": "Failed",
+    "created-by": "Created by",
+    "state": "State",
+    "running": "Running",
+    "suspended": "Suspended",
+    "suspend": "Suspend",
+    "resume": "Resume",
+    "delete": "Delete",
+    "confirm-delete": "Delete this batch and cancel its remaining jobs?"
+  },
   "migrations": {
     "title": "Migrations",
     "process-selection": "Process Definition Selection",

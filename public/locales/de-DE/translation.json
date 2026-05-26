@@ -342,6 +342,27 @@
     "form-preview": "Formularvorschau",
     "raw-data-json": "Rohdaten (JSON)"
   },
+  "batches": {
+    "title": "Stapelverarbeitung",
+    "select-batch": "Wählen Sie einen Batch aus, um seine Details anzuzeigen.",
+    "empty": "Derzeit laufen keine Batches.",
+    "refresh": "Aktualisieren",
+    "id": "Batch-ID",
+    "type": "Typ",
+    "progress": "Fortschritt",
+    "total-jobs": "Jobs gesamt",
+    "remaining-jobs": "Verbleibend",
+    "completed-jobs": "Abgeschlossen",
+    "failed-jobs": "Fehlgeschlagen",
+    "created-by": "Erstellt von",
+    "state": "Status",
+    "running": "Läuft",
+    "suspended": "Ausgesetzt",
+    "suspend": "Aussetzen",
+    "resume": "Fortsetzen",
+    "delete": "Löschen",
+    "confirm-delete": "Diesen Batch löschen und seine verbleibenden Jobs abbrechen?"
+  },
   "migrations": {
     "title": "Migrationen",
     "process-selection": "Prozessdefinitionsauswahl",
