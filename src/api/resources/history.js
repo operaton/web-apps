@@ -43,6 +43,12 @@ const get_incidents_by_process_instance = (state, instance_id) =>
 const get_process_instance_variable = (state, instance_id) =>
   GET(`/history/variable-instance?processInstanceId=${instance_id}`, state, state.api.process.instance.variables)
 
+const get_historic_tasks_by_instance = (state, instance_id) =>
+  GET(`/history/task?processInstanceId=${instance_id}`, state, state.api.history.task.by_process_instance)
+
+const get_historic_called_instances = (state, instance_id) =>
+  GET(`/history/process-instance?superProcessInstanceId=${instance_id}`, state, state.api.history.process_instance.called)
+
 /**
  * Task History
  */
@@ -54,6 +60,7 @@ const history = {
     all: get_process_instances,
     one: get_process_instance,
     all_unfinished: get_process_instances_unfinished,
+    called: get_historic_called_instances,
   },
   incident: {
     by_process_definition: get_incidents_by_process_definition,
@@ -61,6 +68,9 @@ const history = {
   },
   variable_instance: {
     by_process_instance: get_process_instance_variable,
+  },
+  task: {
+    by_process_instance: get_historic_tasks_by_instance,
   },
   get_user_operation
 }

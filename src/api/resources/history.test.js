@@ -100,4 +100,22 @@ describe("api/resources/history", () => {
       signal: state.api.history.user_operation,
     });
   });
+
+  it("task.by_process_instance() GETs historic tasks filtered by instance", () => {
+    history.task.by_process_instance(state, "inst-1");
+    expect_api_call(GET, {
+      url: "/history/task?processInstanceId=inst-1",
+      state,
+      signal: state.api.history.task.by_process_instance,
+    });
+  });
+
+  it("process_instance.called() GETs historic child instances of an instance", () => {
+    history.process_instance.called(state, "inst-1");
+    expect_api_call(GET, {
+      url: "/history/process-instance?superProcessInstanceId=inst-1",
+      state,
+      signal: state.api.history.process_instance.called,
+    });
+  });
 });

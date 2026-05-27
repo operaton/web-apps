@@ -171,6 +171,12 @@ const createAppState = () => {
         by_process_definition: signal(null),
         by_process_instance: signal(null),
       },
+      task: {
+        by_process_instance: signal(null),
+      },
+      process_instance: {
+        called: signal(null),
+      },
       user_operation: signal(null),
     },
     job_definition: {
