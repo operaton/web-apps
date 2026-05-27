@@ -397,7 +397,27 @@
     "version-tag": "Versions-Tag",
     "deployment-id": "Deployment-ID",
     "decision-requirements-id": "Entscheidungsanforderungs-Definitions-ID",
-    "history-ttl": "Verlaufs-Aufbewahrungsdauer"
+    "history-ttl": "Verlaufs-Aufbewahrungsdauer",
+    "sort": {
+      "name": "Name",
+      "key": "Schlüssel",
+      "category": "Kategorie",
+      "id": "ID",
+      "version": "Version",
+      "deploymentId": "Deployment-ID",
+      "tenantId": "Mandanten-ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "key": "key",
+      "keyLike": "keyLike",
+      "category": "category",
+      "categoryLike": "categoryLike",
+      "versionTag": "versionTag",
+      "latestVersion": "latestVersion",
+      "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    }
   },
   "deployments": {
     "deployed": "Bereitgestellt",
@@ -409,7 +429,21 @@
     "instance-count": "Instanzanzahl",
     "empty-response": "Leere Antwort",
     "form-preview": "Formularvorschau",
-    "raw-data-json": "Rohdaten (JSON)"
+    "raw-data-json": "Rohdaten (JSON)",
+    "sort": {
+      "deploymentTime": "Deployment-Zeit",
+      "name": "Name",
+      "id": "ID",
+      "tenantId": "Mandanten-ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "source": "source",
+      "tenantIdIn": "tenantIdIn",
+      "after": "after",
+      "before": "before"
+    }
   },
   "batches": {
     "title": "Stapelverarbeitung",

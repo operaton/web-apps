@@ -397,7 +397,27 @@
     "version-tag": "Version Tag",
     "deployment-id": "Deployment ID",
     "decision-requirements-id": "Decision Requirements Definition ID",
-    "history-ttl": "History Time To Live"
+    "history-ttl": "History Time To Live",
+    "sort": {
+      "name": "Name",
+      "key": "Key",
+      "category": "Category",
+      "id": "ID",
+      "version": "Version",
+      "deploymentId": "Deployment ID",
+      "tenantId": "Tenant ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "key": "key",
+      "keyLike": "keyLike",
+      "category": "category",
+      "categoryLike": "categoryLike",
+      "versionTag": "versionTag",
+      "latestVersion": "latestVersion",
+      "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    }
   },
   "deployments": {
     "deployed": "Deployed",
@@ -409,7 +429,21 @@
     "instance-count": "Instance Count",
     "empty-response": "Empty response",
     "form-preview": "Form preview",
-    "raw-data-json": "Raw data (JSON)"
+    "raw-data-json": "Raw data (JSON)",
+    "sort": {
+      "deploymentTime": "Deployment time",
+      "name": "Name",
+      "id": "ID",
+      "tenantId": "Tenant ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "source": "source",
+      "tenantIdIn": "tenantIdIn",
+      "after": "after",
+      "before": "before"
+    }
   },
   "batches": {
     "title": "Batches",

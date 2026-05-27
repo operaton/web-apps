@@ -364,7 +364,27 @@
     "version-tag": "Tag de version",
     "deployment-id": "ID de déploiement",
     "decision-requirements-id": "ID de définition des exigences de décision",
-    "history-ttl": "Durée de conservation de l'historique"
+    "history-ttl": "Durée de conservation de l'historique",
+    "sort": {
+      "name": "Nom",
+      "key": "Clé",
+      "category": "Catégorie",
+      "id": "ID",
+      "version": "Version",
+      "deploymentId": "ID de déploiement",
+      "tenantId": "ID de locataire"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "key": "key",
+      "keyLike": "keyLike",
+      "category": "category",
+      "categoryLike": "categoryLike",
+      "versionTag": "versionTag",
+      "latestVersion": "latestVersion",
+      "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    }
   },
   "deployments": {
     "deployed": "Déployé",
@@ -374,7 +394,21 @@
     "no-resource": "Aucune ressource sélectionnée",
     "no-process-name": "N/A – Le nom du processus n'est pas défini",
     "instance-count": "Nombre d'instances",
-    "empty-response": "Réponse vide"
+    "empty-response": "Réponse vide",
+    "sort": {
+      "deploymentTime": "Heure de déploiement",
+      "name": "Nom",
+      "id": "ID",
+      "tenantId": "ID de locataire"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "source": "source",
+      "tenantIdIn": "tenantIdIn",
+      "after": "after",
+      "before": "before"
+    }
   },
   "migrations": {
     "title": "Migrations",

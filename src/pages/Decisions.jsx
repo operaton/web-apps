@@ -1,19 +1,77 @@
 import { useContext, useEffect } from 'preact/hooks'
 import { useTranslation } from 'react-i18next'
 import { AppState } from '../state.js'
-import { useRoute } from 'preact-iso'
+import { useLocation, useRoute } from 'preact-iso'
 import engine_rest, { RequestState } from '../api/engine_rest.jsx'
 import { DmnViewer } from '../components/DMNViewer.jsx'
+import { ListFilter } from '../components/ListFilter.jsx'
+import {
+  build_share_link,
+  parse_list_query,
+  write_list_query,
+} from '../helper/list_query.js'
+import {
+  create_saved_filter,
+  delete_saved_filter,
+  hydrate_signal,
+  update_saved_filter,
+} from '../helper/saved_filters.js'
+
+const RESOURCE_TYPE = 'decision_definition'
+
+const SORT_OPTIONS = [
+  { key: 'name', nameKey: 'decisions.sort.name' },
+  { key: 'key', nameKey: 'decisions.sort.key' },
+  { key: 'category', nameKey: 'decisions.sort.category' },
+  { key: 'id', nameKey: 'decisions.sort.id' },
+  { key: 'version', nameKey: 'decisions.sort.version' },
+  { key: 'deploymentId', nameKey: 'decisions.sort.deploymentId' },
+  { key: 'tenantId', nameKey: 'decisions.sort.tenantId' },
+]
+
+const FILTER_KEYS = [
+  { key: 'name', nameKey: 'decisions.filter_keys.name', type: 'string' },
+  { key: 'nameLike', nameKey: 'decisions.filter_keys.nameLike', type: 'string' },
+  { key: 'key', nameKey: 'decisions.filter_keys.key', type: 'string' },
+  { key: 'keyLike', nameKey: 'decisions.filter_keys.keyLike', type: 'string' },
+  { key: 'category', nameKey: 'decisions.filter_keys.category', type: 'string' },
+  { key: 'categoryLike', nameKey: 'decisions.filter_keys.categoryLike', type: 'string' },
+  { key: 'versionTag', nameKey: 'decisions.filter_keys.versionTag', type: 'string' },
+  { key: 'latestVersion', nameKey: 'decisions.filter_keys.latestVersion', type: 'boolean' },
+  { key: 'decisionRequirementsDefinitionKey', nameKey: 'decisions.filter_keys.decisionRequirementsDefinitionKey', type: 'string' },
+]
+
+const find_saved = (signal, id) => {
+  if (!id || id === 'all') return null
+  return (signal.value?.data ?? []).find((f) => f.id === id) ?? null
+}
+
+const load_decisions = (state, query) => {
+  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query)
+  const saved = find_saved(state.api.decision.saved_filters, saved_filter_id)
+  const params = {
+    ...(saved?.query ?? {}),
+    ...criteria,
+    ...(sortBy ? { sortBy } : {}),
+    ...(sortOrder ? { sortOrder } : {}),
+  }
+  void engine_rest.decision.get_decision_definitions(state, params)
+}
 
 const DecisionsPage = () => {
   const state = useContext(AppState),
     { api: { decision: { definition, dmn } } } = state,
-    { params: { decision_id } } = useRoute()
+    { params: { decision_id }, query } = useRoute()
 
   useEffect(() => {
-    void engine_rest.decision.get_decision_definitions(state)
+    hydrate_signal(RESOURCE_TYPE, state.api.decision.saved_filters)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    load_decisions(state, query)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)])
 
   useEffect(() => {
     if (decision_id) {
@@ -40,13 +98,54 @@ const DecisionsPage = () => {
 const DecisionsList = () => {
   const
     state = useContext(AppState),
-    { api: { decision: { definitions } } } = state,
-    { params } = useRoute(),
+    { api: { decision: { definitions, saved_filters } } } = state,
+    { params, query } = useRoute(),
+    { route } = useLocation(),
     [t] = useTranslation()
+
+  const parsed = parse_list_query(query)
+  const list_current = {
+    saved_filter_id: parsed.saved_filter_id,
+    sortBy: parsed.sortBy ?? 'name',
+    sortOrder: parsed.sortOrder ?? 'asc',
+    criteria: parsed.criteria,
+  }
+
+  const apply_patch = (patch) => {
+    route(write_list_query(window.location.href, patch), true)
+  }
+  const save_filter = (filter) => {
+    create_saved_filter(RESOURCE_TYPE, filter)
+    hydrate_signal(RESOURCE_TYPE, saved_filters)
+  }
+  const on_update_filter = (id, filter) => {
+    update_saved_filter(RESOURCE_TYPE, id, filter)
+    hydrate_signal(RESOURCE_TYPE, saved_filters)
+  }
+  const on_delete_filter = (id) => {
+    delete_saved_filter(RESOURCE_TYPE, id)
+    hydrate_signal(RESOURCE_TYPE, saved_filters)
+  }
+  const share_link = () => {
+    const link = build_share_link()
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link)
+  }
 
   return (
     <div id="decision-list">
       <h2 class="screen-hidden">{t("decisions.queried-decisions")}</h2>
+      <ListFilter
+        sort_options={SORT_OPTIONS}
+        filter_keys={FILTER_KEYS}
+        saved_filters_signal={saved_filters}
+        current={list_current}
+        defaults={{ sortBy: 'name', sortOrder: 'asc' }}
+        on_change={apply_patch}
+        on_save={save_filter}
+        on_update={on_update_filter}
+        on_delete={on_delete_filter}
+        on_share={share_link}
+      />
       <RequestState
         signal={definitions}
         on_success={() =>

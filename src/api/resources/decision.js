@@ -4,8 +4,10 @@ import { GET, GET_TEXT } from '../helper.jsx'
 const get_decision_definition = (state, id) =>
   GET(`/decision-definition/${id}`, state, state.api.decision.definition)
 
-const get_decision_definitions = (state) =>
-  GET("/decision-definition", state, state.api.decision.definitions)
+const get_decision_definitions = (state, params = {}) => {
+  const qs = new URLSearchParams(params).toString()
+  return GET(`/decision-definition${qs ? `?${qs}` : ''}`, state, state.api.decision.definitions)
+}
 
 
 const get_dmn_xml = (state, id) =>

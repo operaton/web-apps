@@ -364,7 +364,27 @@
     "version-tag": "Versietag",
     "deployment-id": "Deployment-ID",
     "decision-requirements-id": "Beslissingsvereisten-definitie-ID",
-    "history-ttl": "Bewaartermijn geschiedenis"
+    "history-ttl": "Bewaartermijn geschiedenis",
+    "sort": {
+      "name": "Naam",
+      "key": "Sleutel",
+      "category": "Categorie",
+      "id": "ID",
+      "version": "Versie",
+      "deploymentId": "Deployment-ID",
+      "tenantId": "Tenant-ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "key": "key",
+      "keyLike": "keyLike",
+      "category": "category",
+      "categoryLike": "categoryLike",
+      "versionTag": "versionTag",
+      "latestVersion": "latestVersion",
+      "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    }
   },
   "deployments": {
     "deployed": "Gedeployd",
@@ -374,7 +394,21 @@
     "no-resource": "Geen bron geselecteerd",
     "no-process-name": "N.v.t. – Procesnaam is niet gedefinieerd",
     "instance-count": "Aantal instanties",
-    "empty-response": "Leeg antwoord"
+    "empty-response": "Leeg antwoord",
+    "sort": {
+      "deploymentTime": "Deployment-tijd",
+      "name": "Naam",
+      "id": "ID",
+      "tenantId": "Tenant-ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "source": "source",
+      "tenantIdIn": "tenantIdIn",
+      "after": "after",
+      "before": "before"
+    }
   },
   "migrations": {
     "title": "Migraties",

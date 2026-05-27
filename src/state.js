@@ -157,11 +157,13 @@ const createAppState = () => {
       resources: signal(null),
       resource: signal(null),
       delete: signal(null),
+      saved_filters: signal(null),
     },
     decision: {
       definitions: signal(null),
       definition: signal(null),
       dmn: signal(null),
+      saved_filters: signal(null),
     },
     history: {
       incident: {

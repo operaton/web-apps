@@ -4,8 +4,10 @@ import { GET, DELETE, GET_TEXT } from '../helper.jsx'
  * Fetches deployments sorted by deployment time, sets the first as selected
  * @sideeffects Updates `state.deployments`, triggers `get_deployment_resources`
  */
-const get_deployments = (state) =>
-  GET("/deployment?sortBy=deploymentTime&sortOrder=desc", state, state.api.deployment.all)
+const get_deployments = (state, params = { sortBy: 'deploymentTime', sortOrder: 'desc' }) => {
+  const qs = new URLSearchParams(params).toString()
+  return GET(`/deployment${qs ? `?${qs}` : ''}`, state, state.api.deployment.all)
+}
 
 /**
  * Fetches resources for a deployment and triggers BPMN diagram fetch

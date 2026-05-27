@@ -7,6 +7,56 @@ import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { CamundaForm } from "../components/CamundaForm.jsx";
 import { DmnViewer } from "../components/DMNViewer.jsx";
 import { formatRelativeDate } from "../helper/date_formatter.js";
+import { ListFilter } from "../components/ListFilter.jsx";
+import {
+  build_share_link,
+  parse_list_query,
+  write_list_query,
+} from "../helper/list_query.js";
+import {
+  create_saved_filter,
+  delete_saved_filter,
+  hydrate_signal,
+  update_saved_filter,
+} from "../helper/saved_filters.js";
+
+const RESOURCE_TYPE = "deployment";
+
+const SORT_OPTIONS = [
+  { key: "deploymentTime", nameKey: "deployments.sort.deploymentTime" },
+  { key: "name", nameKey: "deployments.sort.name" },
+  { key: "id", nameKey: "deployments.sort.id" },
+  { key: "tenantId", nameKey: "deployments.sort.tenantId" },
+];
+
+const FILTER_KEYS = [
+  { key: "name", nameKey: "deployments.filter_keys.name", type: "string" },
+  { key: "nameLike", nameKey: "deployments.filter_keys.nameLike", type: "string" },
+  { key: "source", nameKey: "deployments.filter_keys.source", type: "string" },
+  { key: "tenantIdIn", nameKey: "deployments.filter_keys.tenantIdIn", type: "string" },
+  { key: "after", nameKey: "deployments.filter_keys.after", type: "date" },
+  { key: "before", nameKey: "deployments.filter_keys.before", type: "date" },
+];
+
+const DEPLOYMENT_DEFAULTS = { sortBy: "deploymentTime", sortOrder: "desc" };
+
+const find_saved = (signal, id) => {
+  if (!id || id === "all") return null;
+  return (signal.value?.data ?? []).find((f) => f.id === id) ?? null;
+};
+
+const load_deployments = (state, query) => {
+  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
+  const saved = find_saved(state.api.deployment.saved_filters, saved_filter_id);
+  const params = {
+    ...DEPLOYMENT_DEFAULTS,
+    ...(saved?.query ?? {}),
+    ...criteria,
+    ...(sortBy ? { sortBy } : {}),
+    ...(sortOrder ? { sortOrder } : {}),
+  };
+  void engine_rest.deployment.all(state, params);
+};
 
 const DeploymentsPage = () => {
   const state = useContext(AppState),
@@ -15,17 +65,21 @@ const DeploymentsPage = () => {
     } = state,
     {
       params: { deployment_id, resource_name },
+      query,
     } = useRoute(),
     { route } = useLocation(),
     [t] = useTranslation();
 
   // Load the deployment list once on mount.
   useEffect(() => {
-    if (state.api.deployment.all.value === null) {
-      void engine_rest.deployment.all(state);
-    }
+    hydrate_signal(RESOURCE_TYPE, state.api.deployment.saved_filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    load_deployments(state, query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)]);
 
   // When the deployment list has loaded and the user is on /deployments with
   // no specific deployment selected, redirect to the first one.
@@ -92,11 +146,52 @@ const DeploymentsPage = () => {
 
 const DeploymentsList = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    { route } = useLocation(),
     [t] = useTranslation();
+
+  const parsed = parse_list_query(query);
+  const list_current = {
+    saved_filter_id: parsed.saved_filter_id,
+    sortBy: parsed.sortBy ?? DEPLOYMENT_DEFAULTS.sortBy,
+    sortOrder: parsed.sortOrder ?? DEPLOYMENT_DEFAULTS.sortOrder,
+    criteria: parsed.criteria,
+  };
+
+  const apply_patch = (patch) => {
+    route(write_list_query(window.location.href, patch), true);
+  };
+  const save_filter = (filter) => {
+    create_saved_filter(RESOURCE_TYPE, filter);
+    hydrate_signal(RESOURCE_TYPE, state.api.deployment.saved_filters);
+  };
+  const on_update_filter = (id, filter) => {
+    update_saved_filter(RESOURCE_TYPE, id, filter);
+    hydrate_signal(RESOURCE_TYPE, state.api.deployment.saved_filters);
+  };
+  const on_delete_filter = (id) => {
+    delete_saved_filter(RESOURCE_TYPE, id);
+    hydrate_signal(RESOURCE_TYPE, state.api.deployment.saved_filters);
+  };
+  const share_link = () => {
+    const link = build_share_link();
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
+  };
 
   return (
     <div>
+      <ListFilter
+        sort_options={SORT_OPTIONS}
+        filter_keys={FILTER_KEYS}
+        saved_filters_signal={state.api.deployment.saved_filters}
+        current={list_current}
+        defaults={DEPLOYMENT_DEFAULTS}
+        on_change={apply_patch}
+        on_save={save_filter}
+        on_update={on_update_filter}
+        on_delete={on_delete_filter}
+        on_share={share_link}
+      />
       <table>
         <thead>
           <tr>
