@@ -6,9 +6,12 @@ import { AppState } from "../state.js";
 import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { ConfirmDialog } from "../components/Dialog.jsx";
 import { ListFilter } from "../components/ListFilter.jsx";
+import { ManageFilters } from "../components/ManageFilters.jsx";
 import {
-  build_share_link,
+  filter_share_link,
   parse_list_query,
+  with_manage,
+  without_manage,
   write_list_query,
 } from "../helper/list_query.js";
 import {
@@ -121,22 +124,9 @@ const BatchesList = () => {
   const apply_patch = (patch) => {
     route(write_list_query(window.location.href, patch), true);
   };
-  const save_filter = (filter) => {
-    create_saved_filter(RESOURCE_TYPE, filter);
-    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
-  };
-  const on_update_filter = (id, filter) => {
-    update_saved_filter(RESOURCE_TYPE, id, filter);
-    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
-  };
-  const on_delete_filter = (id) => {
-    delete_saved_filter(RESOURCE_TYPE, id);
-    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
-  };
-  const share_link = () => {
-    const link = build_share_link();
-    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
-  };
+  const open_manage = () => route(with_manage(), false);
+
+  if (query?.filters === "manage") return <BatchesManage />;
 
   return (
     <div>
@@ -152,15 +142,11 @@ const BatchesList = () => {
       </header>
       <ListFilter
         sort_options={SORT_OPTIONS}
-        filter_keys={FILTER_KEYS}
         saved_filters_signal={state.api.batch.saved_filters}
         current={list_current}
         defaults={BATCH_DEFAULTS}
         on_change={apply_patch}
-        on_save={save_filter}
-        on_update={on_update_filter}
-        on_delete={on_delete_filter}
-        on_share={share_link}
+        on_manage={open_manage}
       />
       <RequestState
         signal={state.api.batch.list}
@@ -296,6 +282,39 @@ const BatchDetails = () => {
             </div>
           );
         }}
+      />
+    </div>
+  );
+};
+
+const BatchesManage = () => {
+  const state = useContext(AppState),
+    { route } = useLocation(),
+    [t] = useTranslation();
+
+  const refresh = () =>
+    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
+  return (
+    <div class="fade-in">
+      <ManageFilters
+        title={t("batches.filter.manage_title")}
+        saved_filters_signal={state.api.batch.saved_filters}
+        filter_keys={FILTER_KEYS}
+        sort_options={SORT_OPTIONS}
+        on_save={(f) => {
+          create_saved_filter(RESOURCE_TYPE, f);
+          refresh();
+        }}
+        on_update={(id, f) => {
+          update_saved_filter(RESOURCE_TYPE, id, f);
+          refresh();
+        }}
+        on_delete={(id) => {
+          delete_saved_filter(RESOURCE_TYPE, id);
+          refresh();
+        }}
+        on_close={() => route(without_manage(), true)}
+        build_share_link={(f) => filter_share_link(window.location.href, f)}
       />
     </div>
   );

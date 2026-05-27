@@ -161,11 +161,12 @@ section.task-tabs {
   flex: none;
 }
 
-/* Shared toolbar used by every list page (Tasks today; Processes/Decisions/
-   Deployments/Batches next). Two flex groups: saved-filter + edit/share, and
-   sort key + sort order. Wraps on narrow viewports. */
+/* Shared toolbar used by every list page. Two flex groups: saved-filter +
+   Edit on the left, sort key + sort order on the right (space-between).
+   Wraps on narrow viewports. */
 #list-filter {
   display: flex;
+  justify-content: space-between;
   gap: var(--spacing-1);
   align-items: center;
   padding: var(--spacing-1);
@@ -182,8 +183,76 @@ section.task-tabs {
   margin: 0;
 }
 
-#list-filter .share {
-  margin-left: auto;
+/* The manage-filters page that opens when ?filters=manage is present. */
+#manage-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1);
+}
+
+#manage-filters header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--spacing-2);
+}
+
+#manage-filters .manage-filters-actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+#manage-filters table {
+  width: 100%;
+}
+
+#manage-filters td.actions {
+  display: flex;
+  gap: var(--spacing-1);
+  flex-wrap: wrap;
+}
+
+#manage-filters td.actions button {
+  margin: 0;
+}
+
+/* The dialog form used by <ListFilter> for create/edit. The global `form`
+   rule sets a 2-column label/input grid, which would put the criteria
+   fieldset and the sort-override fieldset side-by-side and overlap them
+   inside the dialog. Force a single-column stack and align controls to
+   the start so labels sit above their inputs. */
+.filter-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  align-items: stretch;
+}
+
+.filter-edit-form fieldset {
+  padding: var(--spacing-1);
+}
+
+.filter-edit-form fieldset > label {
+  margin-right: var(--spacing-1);
+}
+
+.filter-edit-form fieldset > select {
+  margin-right: var(--spacing-1);
+}
+
+.filter-edit-form fieldset > button {
+  margin-top: var(--spacing-1);
+}
+
+.filter-edit-form table {
+  width: 100%;
+}
+
+.filter-edit-form .button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
 }
 
 #task-list #task-table-wrapper {

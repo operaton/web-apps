@@ -211,7 +211,8 @@
       "variables-hint": "Las variables que defina aquí se mostrarán en la vista de lista de tareas.",
       "show-undefined": "Mostrar variables no definidas",
       "add-variable": "Añadir variable",
-      "label": "Etiqueta"
+      "label": "Etiqueta",
+      "manage_title": "Gestionar filtros de tareas"
     },
     "sort": {
       "label": "Ordenar por",
@@ -353,9 +354,13 @@
         "startedBefore": "startedBefore",
         "startedAfter": "startedAfter",
         "finished": "finished"
-      }
+      },
+      "manage_title": "Gestionar filtros de instancia de proceso"
     },
-    "history-mode-na": "Datos en vivo: el modo histórico no se aplica aquí."
+    "history-mode-na": "Datos en vivo: el modo histórico no se aplica aquí.",
+    "filter": {
+      "manage_title": "Gestionar filtros de definición de proceso"
+    }
   },
   "decisions": {
     "title": "Decisiones",
@@ -386,6 +391,9 @@
       "versionTag": "versionTag",
       "latestVersion": "latestVersion",
       "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    },
+    "filter": {
+      "manage_title": "Gestionar filtros de definición de decisión"
     }
   },
   "deployments": {
@@ -410,6 +418,9 @@
       "tenantIdIn": "tenantIdIn",
       "after": "after",
       "before": "before"
+    },
+    "filter": {
+      "manage_title": "Gestionar filtros de despliegues"
     }
   },
   "migrations": {
@@ -650,7 +661,12 @@
     "sort_override": "Orden por defecto",
     "sort_override_by": "Ordenar por",
     "sort_override_order": "Orden",
-    "no_override": "Ninguno"
+    "no_override": "Ninguno",
+    "back": "Volver a la lista",
+    "duplicate": "Duplicar",
+    "duplicate_suffix": "(copia)",
+    "share_link_copied": "Enlace copiado",
+    "empty": "Aún no hay filtros guardados."
   },
   "batches": {
     "sort": {
@@ -663,6 +679,9 @@
       "tenantIdIn": "tenantIdIn",
       "suspended": "suspended",
       "withoutTenantId": "withoutTenantId"
+    },
+    "filter": {
+      "manage_title": "Gestionar filtros de lotes"
     }
   }
 }

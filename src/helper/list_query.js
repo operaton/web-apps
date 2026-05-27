@@ -74,5 +74,47 @@ export const criteria_to_params = (criteria = {}) => {
 export const build_share_link = (current_url = window.location.href) =>
   new URL(current_url).toString();
 
+const serialize = (url) => {
+  const search = url.searchParams.toString();
+  return url.pathname + (search ? `?${search}` : "");
+};
+
+/** Toggle the list page into the "manage filters" view. */
+export const with_manage = (current_url = window.location.href) => {
+  const url = new URL(current_url, "http://_");
+  url.searchParams.set("filters", "manage");
+  return serialize(url);
+};
+
+/** Drop the manage flag (i.e. go back to the list). */
+export const without_manage = (current_url = window.location.href) => {
+  const url = new URL(current_url, "http://_");
+  url.searchParams.delete("filters");
+  return serialize(url);
+};
+
+/**
+ * Build a shareable URL that applies a saved filter's resolved query + sort
+ * to the current list page. The recipient lands on the same view without
+ * needing the saved filter present locally (important for our
+ * localStorage-backed non-Task filters).
+ */
+export const filter_share_link = (current_url, filter) => {
+  const url = new URL(current_url, "http://_");
+  url.searchParams.delete("filters");
+  url.searchParams.delete("filter");
+  for (const key of Array.from(url.searchParams.keys())) {
+    if (key.startsWith(CRITERION_PREFIX)) url.searchParams.delete(key);
+  }
+  if (filter.sort?.sortBy) url.searchParams.set("sortBy", filter.sort.sortBy);
+  if (filter.sort?.sortOrder)
+    url.searchParams.set("sortOrder", filter.sort.sortOrder);
+  for (const [k, v] of Object.entries(filter.query ?? {})) {
+    if (!is_empty(v))
+      url.searchParams.set(`${CRITERION_PREFIX}${k}`, String(v));
+  }
+  return url.host === "_" ? serialize(url) : url.toString();
+};
+
 export const RESERVED_LIST_QUERY_KEYS = RESERVED_KEYS;
 export const LIST_QUERY_CRITERION_PREFIX = CRITERION_PREFIX;

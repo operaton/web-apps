@@ -11,10 +11,13 @@ import * as Icons from "../assets/icons.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
 import { ListFilter } from "../components/ListFilter.jsx";
+import { ManageFilters } from "../components/ManageFilters.jsx";
 import * as formatter from "../helper/date_formatter.js";
 import {
-  build_share_link,
+  filter_share_link,
   parse_list_query,
+  with_manage,
+  without_manage,
   write_list_query,
 } from "../helper/list_query.js";
 import { AppState } from "../state.js";
@@ -147,11 +150,78 @@ const TasksPage = () => {
     );
   }
 
+  if (query?.filters === "manage") {
+    return (
+      <main id="content" class="fade-in">
+        <TasksManage />
+      </main>
+    );
+  }
+
   return (
     <main id="content" class="tasks fade-in">
       <TaskList />
       {params?.task_id === undefined ? <NoSelectedTask /> : <Task />}
     </main>
+  );
+};
+
+const TasksManage = () => {
+  const state = useContext(AppState),
+    { route } = useLocation(),
+    [t] = useTranslation();
+
+  useEffect(() => {
+    if (state.api.filter.list.value === null) {
+      void engine_rest.filter.get_filters(state);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const refresh = () => engine_rest.filter.get_filters(state);
+  const on_save = (filter) => {
+    const body = {
+      resourceType: "Task",
+      name: filter.name,
+      owner: state.api.user.profile.value?.id,
+      query: filter.query,
+      properties: {},
+    };
+    const result = engine_rest.filter.create_filter(state, body);
+    if (result && typeof result.then === "function") result.then(refresh);
+    else refresh();
+  };
+  const on_update = (id, filter) => {
+    const body = {
+      resourceType: "Task",
+      name: filter.name,
+      owner: state.api.user.profile.value?.id,
+      query: filter.query,
+      properties: {},
+    };
+    const result = engine_rest.filter.update_filter(state, id, body);
+    if (result && typeof result.then === "function") result.then(refresh);
+    else refresh();
+  };
+  const on_delete = (id) => {
+    const result = engine_rest.filter.delete_filter(state, id);
+    if (result && typeof result.then === "function") result.then(refresh);
+    else refresh();
+  };
+
+  return (
+    <ManageFilters
+      title={t("tasks.filter.manage_title")}
+      saved_filters_signal={state.api.filter.list}
+      filter_keys={FILTER_KEYS}
+      sort_options={SORT_OPTIONS}
+      on_save={on_save}
+      on_update={on_update}
+      on_delete={on_delete}
+      on_close={() => route(without_manage(), true)}
+      build_share_link={(f) => filter_share_link(window.location.href, f)}
+      advanced_editor_href="/tasks/filter"
+    />
   );
 };
 
@@ -171,48 +241,7 @@ const TaskList = () => {
       route(next_pathname, true);
       load_tasks(state, derive_query(query, patch));
     },
-    save_filter = (filter) => {
-      const body = {
-        resourceType: "Task",
-        name: filter.name,
-        owner: state.api.user.profile.value?.id,
-        query: filter.query,
-        properties: {},
-      };
-      const result = engine_rest.filter.create_filter(state, body);
-      if (result && typeof result.then === "function") {
-        result.then(() => engine_rest.filter.get_filters(state));
-      } else {
-        engine_rest.filter.get_filters(state);
-      }
-    },
-    update_filter = (id, filter) => {
-      const body = {
-        resourceType: "Task",
-        name: filter.name,
-        owner: state.api.user.profile.value?.id,
-        query: filter.query,
-        properties: {},
-      };
-      const result = engine_rest.filter.update_filter(state, id, body);
-      if (result && typeof result.then === "function") {
-        result.then(() => engine_rest.filter.get_filters(state));
-      } else {
-        engine_rest.filter.get_filters(state);
-      }
-    },
-    delete_filter = (id) => {
-      const result = engine_rest.filter.delete_filter(state, id);
-      if (result && typeof result.then === "function") {
-        result.then(() => engine_rest.filter.get_filters(state));
-      } else {
-        engine_rest.filter.get_filters(state);
-      }
-    },
-    share_link = () => {
-      const link = build_share_link();
-      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
-    };
+    open_manage = () => route(with_manage(), false);
 
   const list_current = {
     saved_filter_id: query?.filter ?? null,
@@ -226,7 +255,6 @@ const TaskList = () => {
       <h2 class="screen-hidden">{t("tasks.title")}</h2>
       <ListFilter
         sort_options={SORT_OPTIONS}
-        filter_keys={FILTER_KEYS}
         saved_filters_signal={state.api.filter.list}
         filter_predicate={(f) =>
           f && f.id && Object.keys(f.query ?? {}).length > 0
@@ -234,12 +262,8 @@ const TaskList = () => {
         current={list_current}
         defaults={{ sortBy: "name", sortOrder: "asc" }}
         include_my_filter
-        advanced_editor_href="/tasks/filter"
         on_change={apply_patch}
-        on_save={save_filter}
-        on_update={update_filter}
-        on_delete={delete_filter}
-        on_share={share_link}
+        on_manage={open_manage}
       />
       <div id="task-table-wrapper">
         <table>

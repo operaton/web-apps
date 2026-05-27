@@ -27,6 +27,7 @@ const Dialog = ({ open, title, children }) => {
         {title ? <h2>{title}</h2> : <span />}
         <button type="button" onClick={() => (open.value = false)} aria-label={t("common.close")}>
           <Icons.close />
+          {t("common.close")}
         </button>
       </header>
       {children}

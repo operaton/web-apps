@@ -211,7 +211,8 @@
       "variables-hint": "Les variables définies ici seront affichées dans la vue de la liste des tâches.",
       "show-undefined": "Afficher les variables non définies",
       "add-variable": "Ajouter une variable",
-      "label": "Libellé"
+      "label": "Libellé",
+      "manage_title": "Gérer les filtres de tâches"
     },
     "sort": {
       "label": "Trier par",
@@ -353,9 +354,13 @@
         "startedBefore": "startedBefore",
         "startedAfter": "startedAfter",
         "finished": "finished"
-      }
+      },
+      "manage_title": "Gérer les filtres d'instance de processus"
     },
-    "history-mode-na": "Données en direct – le mode historique ne s'applique pas ici."
+    "history-mode-na": "Données en direct – le mode historique ne s'applique pas ici.",
+    "filter": {
+      "manage_title": "Gérer les filtres de définition de processus"
+    }
   },
   "decisions": {
     "title": "Décisions",
@@ -386,6 +391,9 @@
       "versionTag": "versionTag",
       "latestVersion": "latestVersion",
       "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    },
+    "filter": {
+      "manage_title": "Gérer les filtres de décision"
     }
   },
   "deployments": {
@@ -410,6 +418,9 @@
       "tenantIdIn": "tenantIdIn",
       "after": "after",
       "before": "before"
+    },
+    "filter": {
+      "manage_title": "Gérer les filtres de déploiement"
     }
   },
   "migrations": {
@@ -650,7 +661,12 @@
     "sort_override": "Tri par défaut",
     "sort_override_by": "Trier par",
     "sort_override_order": "Ordre de tri",
-    "no_override": "Aucun"
+    "no_override": "Aucun",
+    "back": "Retour à la liste",
+    "duplicate": "Dupliquer",
+    "duplicate_suffix": "(copie)",
+    "share_link_copied": "Lien copié",
+    "empty": "Aucun filtre enregistré pour le moment."
   },
   "batches": {
     "sort": {
@@ -663,6 +679,9 @@
       "tenantIdIn": "tenantIdIn",
       "suspended": "suspended",
       "withoutTenantId": "withoutTenantId"
+    },
+    "filter": {
+      "manage_title": "Gérer les filtres de lots"
     }
   }
 }

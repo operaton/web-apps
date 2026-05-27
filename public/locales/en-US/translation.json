@@ -218,7 +218,8 @@
       "variables-hint": "The variables you set here will be shown in the task list view.",
       "show-undefined": "Show undefined variables",
       "add-variable": "Add Variable",
-      "label": "Label"
+      "label": "Label",
+      "manage_title": "Manage task filters"
     },
     "sort": {
       "label": "Sort by",
@@ -386,9 +387,13 @@
         "startedBefore": "startedBefore",
         "startedAfter": "startedAfter",
         "finished": "finished"
-      }
+      },
+      "manage_title": "Manage process-instance filters"
     },
-    "history-mode-na": "Live data — history mode does not apply here."
+    "history-mode-na": "Live data — history mode does not apply here.",
+    "filter": {
+      "manage_title": "Manage process-definition filters"
+    }
   },
   "decisions": {
     "title": "Decisions",
@@ -419,6 +424,9 @@
       "versionTag": "versionTag",
       "latestVersion": "latestVersion",
       "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    },
+    "filter": {
+      "manage_title": "Manage decision-definition filters"
     }
   },
   "deployments": {
@@ -445,6 +453,9 @@
       "tenantIdIn": "tenantIdIn",
       "after": "after",
       "before": "before"
+    },
+    "filter": {
+      "manage_title": "Manage deployment filters"
     }
   },
   "batches": {
@@ -477,6 +488,9 @@
       "tenantIdIn": "tenantIdIn",
       "suspended": "suspended",
       "withoutTenantId": "withoutTenantId"
+    },
+    "filter": {
+      "manage_title": "Manage batch filters"
     }
   },
   "migrations": {
@@ -770,6 +784,11 @@
     "sort_override": "Default sort",
     "sort_override_by": "Sort by",
     "sort_override_order": "Sort order",
-    "no_override": "None"
+    "no_override": "None",
+    "back": "Back to list",
+    "duplicate": "Duplicate",
+    "duplicate_suffix": "(copy)",
+    "share_link_copied": "Link copied",
+    "empty": "No saved filters yet."
   }
 }

@@ -211,7 +211,8 @@
       "variables-hint": "De variabelen die u hier instelt worden getoond in de takenlijstweergave.",
       "show-undefined": "Ongedefinieerde variabelen tonen",
       "add-variable": "Variabele toevoegen",
-      "label": "Label"
+      "label": "Label",
+      "manage_title": "Taakfilters beheren"
     },
     "sort": {
       "label": "Sorteren op",
@@ -353,9 +354,13 @@
         "startedBefore": "startedBefore",
         "startedAfter": "startedAfter",
         "finished": "finished"
-      }
+      },
+      "manage_title": "Procesinstantiefilters beheren"
     },
-    "history-mode-na": "Live data – geschiedenismodus is hier niet van toepassing."
+    "history-mode-na": "Live data – geschiedenismodus is hier niet van toepassing.",
+    "filter": {
+      "manage_title": "Procesdefinitiefilters beheren"
+    }
   },
   "decisions": {
     "title": "Beslissingen",
@@ -386,6 +391,9 @@
       "versionTag": "versionTag",
       "latestVersion": "latestVersion",
       "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
+    },
+    "filter": {
+      "manage_title": "Beslisdefinitiefilters beheren"
     }
   },
   "deployments": {
@@ -410,6 +418,9 @@
       "tenantIdIn": "tenantIdIn",
       "after": "after",
       "before": "before"
+    },
+    "filter": {
+      "manage_title": "Deploymentfilters beheren"
     }
   },
   "migrations": {
@@ -650,7 +661,12 @@
     "sort_override": "Standaardsortering",
     "sort_override_by": "Sorteren op",
     "sort_override_order": "Sorteervolgorde",
-    "no_override": "Geen"
+    "no_override": "Geen",
+    "back": "Terug naar lijst",
+    "duplicate": "Dupliceren",
+    "duplicate_suffix": "(kopie)",
+    "share_link_copied": "Link gekopieerd",
+    "empty": "Nog geen opgeslagen filters."
   },
   "batches": {
     "sort": {
@@ -663,6 +679,9 @@
       "tenantIdIn": "tenantIdIn",
       "suspended": "suspended",
       "withoutTenantId": "withoutTenantId"
+    },
+    "filter": {
+      "manage_title": "Batchfilters beheren"
     }
   }
 }
