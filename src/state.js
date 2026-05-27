@@ -110,6 +110,7 @@ const createAppState = () => {
         activity_instance_statistics: signal(null),
         suspend: signal(null),
         remove: signal(null),
+        saved_filters: signal(null),
       },
       instance: {
         called: signal(null),
@@ -120,6 +121,7 @@ const createAppState = () => {
         by_defintion_id: signal(null),
         activity_instances: signal(null),
         modification: signal(null),
+        saved_filters: signal(null),
       },
     },
     task: {

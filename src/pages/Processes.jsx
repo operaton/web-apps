@@ -9,6 +9,94 @@ import engine_rest, {
 import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
+import { ListFilter } from "../components/ListFilter.jsx";
+import {
+  build_share_link,
+  parse_list_query,
+  write_list_query,
+} from "../helper/list_query.js";
+import {
+  create_saved_filter,
+  delete_saved_filter,
+  hydrate_signal,
+  update_saved_filter,
+} from "../helper/saved_filters.js";
+
+const RESOURCE_TYPE = "process_definition";
+const INSTANCE_RESOURCE_TYPE = "process_instance";
+
+const INSTANCE_SORT_OPTIONS = [
+  { key: "startTime", nameKey: "processes.instance.sort.startTime" },
+  { key: "instanceId", nameKey: "processes.instance.sort.instanceId" },
+  { key: "definitionKey", nameKey: "processes.instance.sort.definitionKey" },
+  { key: "businessKey", nameKey: "processes.instance.sort.businessKey" },
+  { key: "tenantId", nameKey: "processes.instance.sort.tenantId" },
+];
+
+const INSTANCE_FILTER_KEYS = [
+  { key: "businessKey", nameKey: "processes.instance.filter_keys.businessKey", type: "string" },
+  { key: "businessKeyLike", nameKey: "processes.instance.filter_keys.businessKeyLike", type: "string" },
+  { key: "active", nameKey: "processes.instance.filter_keys.active", type: "boolean" },
+  { key: "suspended", nameKey: "processes.instance.filter_keys.suspended", type: "boolean" },
+  { key: "withIncidents", nameKey: "processes.instance.filter_keys.withIncidents", type: "boolean" },
+  { key: "withoutIncidents", nameKey: "processes.instance.filter_keys.withoutIncidents", type: "boolean" },
+  { key: "startedBefore", nameKey: "processes.instance.filter_keys.startedBefore", type: "date" },
+  { key: "startedAfter", nameKey: "processes.instance.filter_keys.startedAfter", type: "date" },
+];
+
+const INSTANCE_DEFAULTS = { sortBy: "startTime", sortOrder: "asc" };
+
+const instance_params_from_query = (state, query) => {
+  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
+  const saved = find_saved(state.api.process.instance.saved_filters, saved_filter_id);
+  return {
+    ...(saved?.query ?? {}),
+    ...criteria,
+    ...(sortBy ? { sortBy } : {}),
+    ...(sortOrder ? { sortOrder } : {}),
+  };
+};
+
+const SORT_OPTIONS = [
+  { key: "name", nameKey: "processes.sort.name" },
+  { key: "key", nameKey: "processes.sort.key" },
+  { key: "category", nameKey: "processes.sort.category" },
+  { key: "id", nameKey: "processes.sort.id" },
+  { key: "version", nameKey: "processes.sort.version" },
+  { key: "deploymentId", nameKey: "processes.sort.deploymentId" },
+  { key: "tenantId", nameKey: "processes.sort.tenantId" },
+];
+
+const FILTER_KEYS = [
+  { key: "name", nameKey: "processes.filter_keys.name", type: "string" },
+  { key: "nameLike", nameKey: "processes.filter_keys.nameLike", type: "string" },
+  { key: "key", nameKey: "processes.filter_keys.key", type: "string" },
+  { key: "keyLike", nameKey: "processes.filter_keys.keyLike", type: "string" },
+  { key: "category", nameKey: "processes.filter_keys.category", type: "string" },
+  { key: "categoryLike", nameKey: "processes.filter_keys.categoryLike", type: "string" },
+  { key: "versionTag", nameKey: "processes.filter_keys.versionTag", type: "string" },
+  { key: "active", nameKey: "processes.filter_keys.active", type: "boolean" },
+  { key: "suspended", nameKey: "processes.filter_keys.suspended", type: "boolean" },
+  { key: "latestVersion", nameKey: "processes.filter_keys.latestVersion", type: "boolean" },
+  { key: "startableInTasklist", nameKey: "processes.filter_keys.startableInTasklist", type: "boolean" },
+];
+
+const find_saved = (signal, id) => {
+  if (!id || id === "all") return null;
+  return (signal.value?.data ?? []).find((f) => f.id === id) ?? null;
+};
+
+const load_definitions = (state, query) => {
+  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
+  const saved = find_saved(state.api.process.definition.saved_filters, saved_filter_id);
+  const params = {
+    ...(saved?.query ?? {}),
+    ...criteria,
+    ...(sortBy ? { sortBy } : {}),
+    ...(sortOrder ? { sortOrder } : {}),
+  };
+  void engine_rest.process_definition.list(state, params);
+};
 
 /**
  * Keep the `?history=true` query params of the URL alive as long as the history
@@ -41,11 +129,16 @@ const ProcessesPage = () => {
         state,
         params.definition_id,
       );
-    } else if (state.api.process.definition.list.value === null) {
-      void engine_rest.process_definition.list(state);
+    } else {
+      load_definitions(state, query);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.definition_id]);
+  }, [params.definition_id, JSON.stringify(query)]);
+
+  useEffect(() => {
+    hydrate_signal(RESOURCE_TYPE, state.api.process.definition.saved_filters);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Activity instances are only available for live (non-history) instances.
   useEffect(() => {
@@ -414,21 +507,45 @@ const ProcessDefinitionSelection = () => {
       },
     } = state,
     [t] = useTranslation(),
-    filter_value = useSignal(""),
-    last_fetched_filter = useSignal(null),
+    { query } = useRoute(),
+    { route } = useLocation(),
     selected = useSignal(new Set()),
     bulk_running = useSignal(false);
 
-  // Reload the list whenever the filter has settled on a new value.
-  if (last_fetched_filter.value !== filter_value.value) {
-    last_fetched_filter.value = filter_value.value;
-    void engine_rest.process_definition.list(state, filter_value.value);
-  }
+  const parsed = parse_list_query(query);
+  const has_criteria = Object.keys(parsed.criteria).length > 0;
 
   const list_value = definition.list.value;
   const rows = list_value?.data ?? [];
   const has_data = list_value?.status === RESPONSE_STATE.SUCCESS;
-  const is_empty = has_data && rows.length === 0 && !filter_value.value;
+  const is_empty = has_data && rows.length === 0 && !has_criteria;
+
+  const apply_patch = (patch) => {
+    const next = write_list_query(window.location.href, patch);
+    route(next, true);
+  };
+  const save_filter = (filter) => {
+    create_saved_filter(RESOURCE_TYPE, filter);
+    hydrate_signal(RESOURCE_TYPE, definition.saved_filters);
+  };
+  const on_update_filter = (id, filter) => {
+    update_saved_filter(RESOURCE_TYPE, id, filter);
+    hydrate_signal(RESOURCE_TYPE, definition.saved_filters);
+  };
+  const on_delete_filter = (id) => {
+    delete_saved_filter(RESOURCE_TYPE, id);
+    hydrate_signal(RESOURCE_TYPE, definition.saved_filters);
+  };
+  const share_link = () => {
+    const link = build_share_link();
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
+  };
+  const list_current = {
+    saved_filter_id: parsed.saved_filter_id,
+    sortBy: parsed.sortBy ?? "name",
+    sortOrder: parsed.sortOrder ?? "asc",
+    criteria: parsed.criteria,
+  };
 
   const toggle_one = (id) => {
     const next = new Set(selected.value);
@@ -459,7 +576,7 @@ const ProcessDefinitionSelection = () => {
       }
       selected.value = new Set();
       // Refetch to reflect new state.
-      void engine_rest.process_definition.list(state, filter_value.value);
+      load_definitions(state, query);
     } finally {
       bulk_running.value = false;
     }
@@ -518,13 +635,19 @@ const ProcessDefinitionSelection = () => {
             </small>
           )}
         </div>
-        <input
-          type="search"
-          placeholder={t("processes.filter-search")}
-          value={filter_value.value}
-          onInput={(e) => (filter_value.value = e.currentTarget.value)}
-        />
       </div>
+      <ListFilter
+        sort_options={SORT_OPTIONS}
+        filter_keys={FILTER_KEYS}
+        saved_filters_signal={definition.saved_filters}
+        current={list_current}
+        defaults={{ sortBy: "name", sortOrder: "asc" }}
+        on_change={apply_patch}
+        on_save={save_filter}
+        on_update={on_update_filter}
+        on_delete={on_delete_filter}
+        on_share={share_link}
+      />
 
       {is_empty ? (
         <DefinitionsEmpty />
@@ -704,29 +827,51 @@ const ProcessDefinition = ({
 const Instances = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
+    { route } = useLocation(),
     [t] = useTranslation(),
     history_mode = query.history === "true",
     list = state.api.process.instance.list,
     loaded_for = useSignal(null);
 
+  useEffect(() => {
+    hydrate_signal(
+      INSTANCE_RESOURCE_TYPE,
+      state.api.process.instance.saved_filters,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const fetch_page = (firstResult) => {
+    const extra = instance_params_from_query(state, query);
     if (history_mode) {
       void engine_rest.history.process_instance.all(
         state,
         params.definition_id,
+        extra,
         firstResult,
       );
     } else {
       void engine_rest.history.process_instance.all_unfinished(
         state,
         params.definition_id,
+        extra,
         firstResult,
       );
     }
   };
 
+  const reserved_keys = ["filter", "sortBy", "sortOrder", "history"];
+  const criteria_signature = Object.entries(query ?? {})
+    .filter(
+      ([k]) =>
+        reserved_keys.includes(k) || k.startsWith("q."),
+    )
+    .map(([k, v]) => `${k}=${v}`)
+    .sort()
+    .join("&");
+
   if (!params.selection_id) {
-    const cache_key = `${params.definition_id}|${history_mode ? "h" : "l"}`;
+    const cache_key = `${params.definition_id}|${history_mode ? "h" : "l"}|${criteria_signature}`;
     if (loaded_for.value !== cache_key) {
       loaded_for.value = cache_key;
       fetch_page(0);
@@ -735,8 +880,56 @@ const Instances = () => {
 
   const load_more = () => fetch_page(list.value?.data?.length ?? 0);
 
+  const parsed = parse_list_query(query);
+  const list_current = {
+    saved_filter_id: parsed.saved_filter_id,
+    sortBy: parsed.sortBy ?? INSTANCE_DEFAULTS.sortBy,
+    sortOrder: parsed.sortOrder ?? INSTANCE_DEFAULTS.sortOrder,
+    criteria: parsed.criteria,
+  };
+  const apply_patch = (patch) => {
+    route(write_list_query(window.location.href, patch), true);
+  };
+  const save_filter = (filter) => {
+    create_saved_filter(INSTANCE_RESOURCE_TYPE, filter);
+    hydrate_signal(
+      INSTANCE_RESOURCE_TYPE,
+      state.api.process.instance.saved_filters,
+    );
+  };
+  const on_update_filter = (id, filter) => {
+    update_saved_filter(INSTANCE_RESOURCE_TYPE, id, filter);
+    hydrate_signal(
+      INSTANCE_RESOURCE_TYPE,
+      state.api.process.instance.saved_filters,
+    );
+  };
+  const on_delete_filter = (id) => {
+    delete_saved_filter(INSTANCE_RESOURCE_TYPE, id);
+    hydrate_signal(
+      INSTANCE_RESOURCE_TYPE,
+      state.api.process.instance.saved_filters,
+    );
+  };
+  const share_link = () => {
+    const link = build_share_link();
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
+  };
+
   return !params?.selection_id ? (
     <>
+      <ListFilter
+        sort_options={INSTANCE_SORT_OPTIONS}
+        filter_keys={INSTANCE_FILTER_KEYS}
+        saved_filters_signal={state.api.process.instance.saved_filters}
+        current={list_current}
+        defaults={INSTANCE_DEFAULTS}
+        on_change={apply_patch}
+        on_save={save_filter}
+        on_update={on_update_filter}
+        on_delete={on_delete_filter}
+        on_share={share_link}
+      />
       <div>
         <table>
           <thead>

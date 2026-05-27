@@ -27,10 +27,15 @@ describe("api/resources/process_definition", () => {
     });
   });
 
-  it("list() encodes the nameLike filter", () => {
-    process_definition.list(state, "foo bar");
+  it("list() forwards arbitrary Camunda 7 query params", () => {
+    process_definition.list(state, {
+      nameLike: "%foo%",
+      active: "true",
+      sortBy: "name",
+      sortOrder: "asc",
+    });
     expect_api_call(GET, {
-      url: "/process-definition/statistics?nameLike=%25foo%20bar%25",
+      url: "/process-definition/statistics?nameLike=%25foo%25&active=true&sortBy=name&sortOrder=asc",
       state,
       signal: state.api.process.definition.list,
     });

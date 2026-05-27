@@ -1,34 +1,30 @@
 import { GET, PAGINATED_GET } from '../helper.jsx'
 
-const url_params = (definition_id) =>
-  new URLSearchParams({
-    sortBy: 'startTime',
-    sortOrder: 'asc',
-    processDefinitionId: definition_id,
-  }).toString()
-
-const url_params_unfinished = (definition_id) =>
-  new URLSearchParams({
-    unfinished: true,
-    sortBy: 'startTime',
-    sortOrder: 'asc',
-    processDefinitionId: definition_id,
-  }).toString()
-
 const INSTANCE_PAGE_SIZE = 20
 
-const get_process_instances = (state, definition_id, firstResult = 0) =>
+const instance_url = (definition_id, params = {}, { unfinished = false } = {}) => {
+  const merged = {
+    sortBy: 'startTime',
+    sortOrder: 'asc',
+    ...(unfinished ? { unfinished: true } : {}),
+    processDefinitionId: definition_id,
+    ...params,
+  }
+  return new URLSearchParams(merged).toString()
+}
+
+const get_process_instances = (state, definition_id, params = {}, firstResult = 0) =>
   PAGINATED_GET(
-    `/history/process-instance?${url_params(definition_id)}`,
+    `/history/process-instance?${instance_url(definition_id, params)}`,
     state,
     state.api.process.instance.list,
     firstResult,
     INSTANCE_PAGE_SIZE,
   )
 
-const get_process_instances_unfinished = (state, definition_id, firstResult = 0) =>
+const get_process_instances_unfinished = (state, definition_id, params = {}, firstResult = 0) =>
   PAGINATED_GET(
-    `/history/process-instance?${url_params_unfinished(definition_id)}`,
+    `/history/process-instance?${instance_url(definition_id, params, { unfinished: true })}`,
     state,
     state.api.process.instance.list,
     firstResult,

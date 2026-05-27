@@ -312,6 +312,47 @@
       "overriding-job-priority": "Overschreven jobprioriteit",
       "suspend": "Opschorten",
       "change-priority": "Jobprioriteit wijzigen"
+    },
+    "sort": {
+      "name": "Naam",
+      "key": "Sleutel",
+      "category": "Categorie",
+      "id": "ID",
+      "version": "Versie",
+      "deploymentId": "Deployment-ID",
+      "tenantId": "Tenant-ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "key": "key",
+      "keyLike": "keyLike",
+      "category": "category",
+      "categoryLike": "categoryLike",
+      "versionTag": "versionTag",
+      "active": "active",
+      "suspended": "suspended",
+      "latestVersion": "latestVersion",
+      "startableInTasklist": "startableInTasklist"
+    },
+    "instance": {
+      "sort": {
+        "startTime": "Starttijd",
+        "instanceId": "Instance-ID",
+        "definitionKey": "Definitiesleutel",
+        "businessKey": "Business key",
+        "tenantId": "Tenant-ID"
+      },
+      "filter_keys": {
+        "businessKey": "businessKey",
+        "businessKeyLike": "businessKeyLike",
+        "active": "active",
+        "suspended": "suspended",
+        "withIncidents": "withIncidents",
+        "withoutIncidents": "withoutIncidents",
+        "startedBefore": "startedBefore",
+        "startedAfter": "startedAfter"
+      }
     }
   },
   "decisions": {

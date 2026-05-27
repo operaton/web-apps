@@ -16,7 +16,7 @@ describe("api/resources/history", () => {
   });
 
   it("process_instance.all() PAGINATED_GETs the instance list", () => {
-    history.process_instance.all(state, "def-1", 40);
+    history.process_instance.all(state, "def-1", {}, 40);
     expect_api_call(PAGINATED_GET, {
       url: "/history/process-instance?sortBy=startTime&sortOrder=asc&processDefinitionId=def-1",
       state,
@@ -32,6 +32,19 @@ describe("api/resources/history", () => {
     expect(PAGINATED_GET.mock.lastCall[4]).toBe(20);
   });
 
+  it("process_instance.all() forwards extra filter params and lets them override defaults", () => {
+    history.process_instance.all(
+      state,
+      "def-1",
+      { businessKeyLike: "%foo%", sortBy: "businessKey", sortOrder: "desc" },
+    );
+    expect_api_call(PAGINATED_GET, {
+      url: "/history/process-instance?sortBy=businessKey&sortOrder=desc&processDefinitionId=def-1&businessKeyLike=%25foo%25",
+      state,
+      signal: state.api.process.instance.list,
+    });
+  });
+
   it("process_instance.one() GETs a single instance", () => {
     history.process_instance.one(state, "inst-1");
     expect_api_call(GET, {
@@ -42,9 +55,9 @@ describe("api/resources/history", () => {
   });
 
   it("process_instance.all_unfinished() PAGINATED_GETs with unfinished=true", () => {
-    history.process_instance.all_unfinished(state, "def-1", 60);
+    history.process_instance.all_unfinished(state, "def-1", {}, 60);
     expect_api_call(PAGINATED_GET, {
-      url: "/history/process-instance?unfinished=true&sortBy=startTime&sortOrder=asc&processDefinitionId=def-1",
+      url: "/history/process-instance?sortBy=startTime&sortOrder=asc&unfinished=true&processDefinitionId=def-1",
       state,
       signal: state.api.process.instance.list,
     });

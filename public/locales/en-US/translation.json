@@ -345,6 +345,47 @@
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
       "change-priority": "Change Overriding Job Priority"
+    },
+    "sort": {
+      "name": "Name",
+      "key": "Key",
+      "category": "Category",
+      "id": "ID",
+      "version": "Version",
+      "deploymentId": "Deployment ID",
+      "tenantId": "Tenant ID"
+    },
+    "filter_keys": {
+      "name": "name",
+      "nameLike": "nameLike",
+      "key": "key",
+      "keyLike": "keyLike",
+      "category": "category",
+      "categoryLike": "categoryLike",
+      "versionTag": "versionTag",
+      "active": "active",
+      "suspended": "suspended",
+      "latestVersion": "latestVersion",
+      "startableInTasklist": "startableInTasklist"
+    },
+    "instance": {
+      "sort": {
+        "startTime": "Start time",
+        "instanceId": "Instance ID",
+        "definitionKey": "Definition key",
+        "businessKey": "Business key",
+        "tenantId": "Tenant ID"
+      },
+      "filter_keys": {
+        "businessKey": "businessKey",
+        "businessKeyLike": "businessKeyLike",
+        "active": "active",
+        "suspended": "suspended",
+        "withIncidents": "withIncidents",
+        "withoutIncidents": "withoutIncidents",
+        "startedBefore": "startedBefore",
+        "startedAfter": "startedAfter"
+      }
     }
   },
   "decisions": {
