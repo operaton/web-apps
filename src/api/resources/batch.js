@@ -9,14 +9,20 @@ import { GET, DELETE, PUT, PAGINATED_GET } from "../helper.jsx";
  * @see https://docs.operaton.org/reference/latest/rest-api/#tag/Batch
  */
 
-const get_batches = (state, firstResult = 0) =>
-  PAGINATED_GET(
-    `/batch/statistics?sortBy=batchId&sortOrder=desc`,
+const get_batches = (
+  state,
+  params = { sortBy: "batchId", sortOrder: "desc" },
+  firstResult = 0,
+) => {
+  const qs = new URLSearchParams(params).toString();
+  return PAGINATED_GET(
+    `/batch/statistics${qs ? `?${qs}` : ""}`,
     state,
     state.api.batch.list,
     firstResult,
     20,
   );
+};
 
 const get_batch = (state, id) =>
   GET(`/batch/statistics?batchId=${id}`, state, state.api.batch.one);

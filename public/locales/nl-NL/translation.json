@@ -649,5 +649,18 @@
     "sort_override_by": "Sorteren op",
     "sort_override_order": "Sorteervolgorde",
     "no_override": "Geen"
+  },
+  "batches": {
+    "sort": {
+      "batchId": "Batch-ID",
+      "tenantId": "Tenant-ID"
+    },
+    "filter_keys": {
+      "batchId": "batchId",
+      "type": "type",
+      "tenantIdIn": "tenantIdIn",
+      "suspended": "suspended",
+      "withoutTenantId": "withoutTenantId"
+    }
   }
 }

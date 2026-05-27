@@ -18,7 +18,7 @@ describe("api/resources/batch", () => {
   });
 
   it("all() paginates batch statistics into the list signal", () => {
-    batch.all(state, 40);
+    batch.all(state, { sortBy: "batchId", sortOrder: "desc" }, 40);
     expect_api_call(PAGINATED_GET, {
       url: "/batch/statistics?sortBy=batchId&sortOrder=desc",
       state,
@@ -31,6 +31,15 @@ describe("api/resources/batch", () => {
   it("all() defaults firstResult to 0", () => {
     batch.all(state);
     expect(PAGINATED_GET.mock.lastCall[3]).toBe(0);
+  });
+
+  it("all() forwards arbitrary query params alongside pagination", () => {
+    batch.all(state, { type: "instance-modification", suspended: "true" }, 20);
+    expect_api_call(PAGINATED_GET, {
+      url: "/batch/statistics?type=instance-modification&suspended=true",
+      state,
+      signal: state.api.batch.list,
+    });
   });
 
   it("one() GETs statistics filtered by batchId", () => {

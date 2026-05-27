@@ -649,5 +649,18 @@
     "sort_override_by": "Trier par",
     "sort_override_order": "Ordre de tri",
     "no_override": "Aucun"
+  },
+  "batches": {
+    "sort": {
+      "batchId": "ID de lot",
+      "tenantId": "ID de locataire"
+    },
+    "filter_keys": {
+      "batchId": "batchId",
+      "type": "type",
+      "tenantIdIn": "tenantIdIn",
+      "suspended": "suspended",
+      "withoutTenantId": "withoutTenantId"
+    }
   }
 }

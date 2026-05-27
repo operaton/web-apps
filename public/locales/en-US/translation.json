@@ -464,7 +464,18 @@
     "suspend": "Suspend",
     "resume": "Resume",
     "delete": "Delete",
-    "confirm-delete": "Delete this batch and cancel its remaining jobs?"
+    "confirm-delete": "Delete this batch and cancel its remaining jobs?",
+    "sort": {
+      "batchId": "Batch ID",
+      "tenantId": "Tenant ID"
+    },
+    "filter_keys": {
+      "batchId": "batchId",
+      "type": "type",
+      "tenantIdIn": "tenantIdIn",
+      "suspended": "suspended",
+      "withoutTenantId": "withoutTenantId"
+    }
   },
   "migrations": {
     "title": "Migrations",

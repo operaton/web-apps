@@ -1,23 +1,75 @@
 import { useContext, useEffect } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { useTranslation } from "react-i18next";
-import { useRoute } from "preact-iso";
+import { useLocation, useRoute } from "preact-iso";
 import { AppState } from "../state.js";
 import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { ConfirmDialog } from "../components/Dialog.jsx";
+import { ListFilter } from "../components/ListFilter.jsx";
+import {
+  build_share_link,
+  parse_list_query,
+  write_list_query,
+} from "../helper/list_query.js";
+import {
+  create_saved_filter,
+  delete_saved_filter,
+  hydrate_signal,
+  update_saved_filter,
+} from "../helper/saved_filters.js";
+
+const RESOURCE_TYPE = "batch";
+
+const SORT_OPTIONS = [
+  { key: "batchId", nameKey: "batches.sort.batchId" },
+  { key: "tenantId", nameKey: "batches.sort.tenantId" },
+];
+
+const FILTER_KEYS = [
+  { key: "batchId", nameKey: "batches.filter_keys.batchId", type: "string" },
+  { key: "type", nameKey: "batches.filter_keys.type", type: "string" },
+  { key: "tenantIdIn", nameKey: "batches.filter_keys.tenantIdIn", type: "string" },
+  { key: "suspended", nameKey: "batches.filter_keys.suspended", type: "boolean" },
+  { key: "withoutTenantId", nameKey: "batches.filter_keys.withoutTenantId", type: "boolean" },
+];
+
+const BATCH_DEFAULTS = { sortBy: "batchId", sortOrder: "desc" };
+
+const find_saved = (signal, id) => {
+  if (!id || id === "all") return null;
+  return (signal.value?.data ?? []).find((f) => f.id === id) ?? null;
+};
+
+const load_batches = (state, query, firstResult = 0) => {
+  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
+  const saved = find_saved(state.api.batch.saved_filters, saved_filter_id);
+  const params = {
+    ...BATCH_DEFAULTS,
+    ...(saved?.query ?? {}),
+    ...criteria,
+    ...(sortBy ? { sortBy } : {}),
+    ...(sortOrder ? { sortOrder } : {}),
+  };
+  void engine_rest.batch.all(state, params, firstResult);
+};
 
 const BatchesPage = () => {
   const state = useContext(AppState),
     {
       params: { batch_id },
+      query,
     } = useRoute(),
     [t] = useTranslation();
 
-  // Load the batch list on mount.
   useEffect(() => {
-    void engine_rest.batch.all(state);
+    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    load_batches(state, query);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(query)]);
 
   // Load the selected batch's statistics; clear on navigation.
   useEffect(() => {
@@ -54,8 +106,37 @@ const Progress = ({ batch }) => {
 
 const BatchesList = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    { route } = useLocation(),
     [t] = useTranslation();
+
+  const parsed = parse_list_query(query);
+  const list_current = {
+    saved_filter_id: parsed.saved_filter_id,
+    sortBy: parsed.sortBy ?? BATCH_DEFAULTS.sortBy,
+    sortOrder: parsed.sortOrder ?? BATCH_DEFAULTS.sortOrder,
+    criteria: parsed.criteria,
+  };
+
+  const apply_patch = (patch) => {
+    route(write_list_query(window.location.href, patch), true);
+  };
+  const save_filter = (filter) => {
+    create_saved_filter(RESOURCE_TYPE, filter);
+    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
+  };
+  const on_update_filter = (id, filter) => {
+    update_saved_filter(RESOURCE_TYPE, id, filter);
+    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
+  };
+  const on_delete_filter = (id) => {
+    delete_saved_filter(RESOURCE_TYPE, id);
+    hydrate_signal(RESOURCE_TYPE, state.api.batch.saved_filters);
+  };
+  const share_link = () => {
+    const link = build_share_link();
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
+  };
 
   return (
     <div>
@@ -64,11 +145,23 @@ const BatchesList = () => {
         <button
           type="button"
           class="secondary"
-          onClick={() => engine_rest.batch.all(state)}
+          onClick={() => load_batches(state, query)}
         >
           {t("batches.refresh")}
         </button>
       </header>
+      <ListFilter
+        sort_options={SORT_OPTIONS}
+        filter_keys={FILTER_KEYS}
+        saved_filters_signal={state.api.batch.saved_filters}
+        current={list_current}
+        defaults={BATCH_DEFAULTS}
+        on_change={apply_patch}
+        on_save={save_filter}
+        on_update={on_update_filter}
+        on_delete={on_delete_filter}
+        on_share={share_link}
+      />
       <RequestState
         signal={state.api.batch.list}
         on_success={() => {
