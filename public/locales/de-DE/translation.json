@@ -235,6 +235,34 @@
       "task-variable": "Aufgabenvariable",
       "case-execution-variable": "Fallausführungsvariable",
       "case-instance-variable": "Fallinstanzvariable"
+    },
+    "filter_keys": {
+      "assignee": "assignee",
+      "assigneeLike": "assigneeLike",
+      "candidateGroup": "candidateGroup",
+      "candidateUser": "candidateUser",
+      "involvedUser": "involvedUser",
+      "unassigned": "unassigned",
+      "processDefinitionKey": "processDefinitionKey",
+      "processDefinitionName": "processDefinitionName",
+      "processDefinitionNameLike": "processDefinitionNameLike",
+      "processInstanceBusinessKey": "processInstanceBusinessKey",
+      "processInstanceBusinessKeyLike": "processInstanceBusinessKeyLike",
+      "taskDefinitionKey": "taskDefinitionKey",
+      "taskDefinitionKeyLike": "taskDefinitionKeyLike",
+      "name": "name",
+      "nameLike": "nameLike",
+      "description": "description",
+      "descriptionLike": "descriptionLike",
+      "priority": "priority",
+      "dueBefore": "dueBefore",
+      "dueAfter": "dueAfter",
+      "followUpBefore": "followUpBefore",
+      "followUpAfter": "followUpAfter",
+      "createdBefore": "createdBefore",
+      "createdAfter": "createdAfter",
+      "active": "active",
+      "suspended": "suspended"
     }
   },
   "processes": {
@@ -630,5 +658,30 @@
       "batch-created": "Batch erstellt:",
       "view-batch": "Batch anzeigen"
     }
+  },
+  "list_filter": {
+    "saved_filter": "Filter",
+    "all": "Alle",
+    "my": "Meine",
+    "sort_by": "Sortieren nach",
+    "sort_order": "Sortierreihenfolge",
+    "asc": "Aufsteigend",
+    "desc": "Absteigend",
+    "new_filter": "Neuer Filter",
+    "new_filter_title": "Neuer Filter",
+    "edit": "Bearbeiten",
+    "edit_filter_title": "Filter bearbeiten",
+    "delete": "Löschen",
+    "confirm_delete": "Filter löschen",
+    "delete_confirm": "Diesen gespeicherten Filter löschen?",
+    "share_link": "Link teilen",
+    "advanced": "Erweiterter Editor",
+    "name": "Name",
+    "criteria": "Kriterien",
+    "add_criterion": "Kriterium hinzufügen",
+    "sort_override": "Standardsortierung",
+    "sort_override_by": "Sortieren nach",
+    "sort_override_order": "Sortierreihenfolge",
+    "no_override": "Keine"
   }
 }

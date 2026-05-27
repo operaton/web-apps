@@ -119,7 +119,7 @@ describe("TasksPage", () => {
         { id: "f1", name: "Urgent", query: { priority: 50 } },
       ]);
       const { container } = renderPage(state);
-      const select = container.querySelector("#filter-list");
+      const select = container.querySelector("#list-filter-saved");
       fireEvent.change(select, { target: { value: "f1" } });
       expect(engine_rest.filter.execute_filter).toHaveBeenCalled();
       expect(engine_rest.filter.execute_filter.mock.lastCall[0]).toBe(state);
@@ -129,7 +129,7 @@ describe("TasksPage", () => {
     it("re-fetches via get_tasks when switching to 'my tasks'", () => {
       const { container } = renderPage(state);
       engine_rest.task.get_tasks.mockClear();
-      const select = container.querySelector("#filter-list");
+      const select = container.querySelector("#list-filter-saved");
       fireEvent.change(select, { target: { value: "my" } });
       expect(engine_rest.task.get_tasks).toHaveBeenCalled();
     });
@@ -137,7 +137,7 @@ describe("TasksPage", () => {
     it("re-fetches when the sort key changes", () => {
       const { container } = renderPage(state);
       engine_rest.task.get_tasks.mockClear();
-      const select = container.querySelector("#sort-by");
+      const select = container.querySelector("#list-filter-sort-by");
       fireEvent.change(select, { target: { value: "priority" } });
       expect(engine_rest.task.get_tasks).toHaveBeenCalled();
       // sortBy is the 2nd positional arg of get_tasks(state, sortBy, ...)

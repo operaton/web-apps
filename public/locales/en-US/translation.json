@@ -235,6 +235,34 @@
       "task-variable": "Task Variable",
       "case-execution-variable": "Case Execution Variable",
       "case-instance-variable": "Case Instance Variable"
+    },
+    "filter_keys": {
+      "assignee": "assignee",
+      "assigneeLike": "assigneeLike",
+      "candidateGroup": "candidateGroup",
+      "candidateUser": "candidateUser",
+      "involvedUser": "involvedUser",
+      "unassigned": "unassigned",
+      "processDefinitionKey": "processDefinitionKey",
+      "processDefinitionName": "processDefinitionName",
+      "processDefinitionNameLike": "processDefinitionNameLike",
+      "processInstanceBusinessKey": "processInstanceBusinessKey",
+      "processInstanceBusinessKeyLike": "processInstanceBusinessKeyLike",
+      "taskDefinitionKey": "taskDefinitionKey",
+      "taskDefinitionKeyLike": "taskDefinitionKeyLike",
+      "name": "name",
+      "nameLike": "nameLike",
+      "description": "description",
+      "descriptionLike": "descriptionLike",
+      "priority": "priority",
+      "dueBefore": "dueBefore",
+      "dueAfter": "dueAfter",
+      "followUpBefore": "followUpBefore",
+      "followUpAfter": "followUpAfter",
+      "createdBefore": "createdBefore",
+      "createdAfter": "createdAfter",
+      "active": "active",
+      "suspended": "suspended"
     }
   },
   "processes": {
@@ -630,5 +658,30 @@
       "batch-created": "Batch created:",
       "view-batch": "View batch"
     }
+  },
+  "list_filter": {
+    "saved_filter": "Filter",
+    "all": "All",
+    "my": "Mine",
+    "sort_by": "Sort by",
+    "sort_order": "Sort order",
+    "asc": "Ascending",
+    "desc": "Descending",
+    "new_filter": "New filter",
+    "new_filter_title": "New filter",
+    "edit": "Edit",
+    "edit_filter_title": "Edit filter",
+    "delete": "Delete",
+    "confirm_delete": "Delete filter",
+    "delete_confirm": "Delete this saved filter?",
+    "share_link": "Share link",
+    "advanced": "Advanced editor",
+    "name": "Name",
+    "criteria": "Criteria",
+    "add_criterion": "Add criterion",
+    "sort_override": "Default sort",
+    "sort_override_by": "Sort by",
+    "sort_override_order": "Sort order",
+    "no_override": "None"
   }
 }

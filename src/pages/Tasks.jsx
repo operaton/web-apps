@@ -10,7 +10,13 @@ import engine_rest, {
 import * as Icons from "../assets/icons.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
+import { ListFilter } from "../components/ListFilter.jsx";
 import * as formatter from "../helper/date_formatter.js";
+import {
+  build_share_link,
+  parse_list_query,
+  write_list_query,
+} from "../helper/list_query.js";
 import { AppState } from "../state.js";
 import { StartProcessList } from "./StartProcessList.jsx";
 import { TaskForm } from "../components/TaskForm.jsx";
@@ -34,7 +40,49 @@ const SORT_OPTIONS = [
   { key: "caseInstanceVariable", nameKey: "tasks.sort.case-instance-variable" },
 ];
 
+const FILTER_KEYS = [
+  { key: "assignee", nameKey: "tasks.filter_keys.assignee", type: "string" },
+  { key: "assigneeLike", nameKey: "tasks.filter_keys.assigneeLike", type: "string" },
+  { key: "candidateGroup", nameKey: "tasks.filter_keys.candidateGroup", type: "string" },
+  { key: "candidateUser", nameKey: "tasks.filter_keys.candidateUser", type: "string" },
+  { key: "involvedUser", nameKey: "tasks.filter_keys.involvedUser", type: "string" },
+  { key: "unassigned", nameKey: "tasks.filter_keys.unassigned", type: "boolean" },
+  { key: "processDefinitionKey", nameKey: "tasks.filter_keys.processDefinitionKey", type: "string" },
+  { key: "processDefinitionName", nameKey: "tasks.filter_keys.processDefinitionName", type: "string" },
+  { key: "processDefinitionNameLike", nameKey: "tasks.filter_keys.processDefinitionNameLike", type: "string" },
+  { key: "processInstanceBusinessKey", nameKey: "tasks.filter_keys.processInstanceBusinessKey", type: "string" },
+  { key: "processInstanceBusinessKeyLike", nameKey: "tasks.filter_keys.processInstanceBusinessKeyLike", type: "string" },
+  { key: "taskDefinitionKey", nameKey: "tasks.filter_keys.taskDefinitionKey", type: "string" },
+  { key: "taskDefinitionKeyLike", nameKey: "tasks.filter_keys.taskDefinitionKeyLike", type: "string" },
+  { key: "name", nameKey: "tasks.filter_keys.name", type: "string" },
+  { key: "nameLike", nameKey: "tasks.filter_keys.nameLike", type: "string" },
+  { key: "description", nameKey: "tasks.filter_keys.description", type: "string" },
+  { key: "descriptionLike", nameKey: "tasks.filter_keys.descriptionLike", type: "string" },
+  { key: "priority", nameKey: "tasks.filter_keys.priority", type: "number" },
+  { key: "dueBefore", nameKey: "tasks.filter_keys.dueBefore", type: "date" },
+  { key: "dueAfter", nameKey: "tasks.filter_keys.dueAfter", type: "date" },
+  { key: "followUpBefore", nameKey: "tasks.filter_keys.followUpBefore", type: "date" },
+  { key: "followUpAfter", nameKey: "tasks.filter_keys.followUpAfter", type: "date" },
+  { key: "createdBefore", nameKey: "tasks.filter_keys.createdBefore", type: "date" },
+  { key: "createdAfter", nameKey: "tasks.filter_keys.createdAfter", type: "date" },
+  { key: "active", nameKey: "tasks.filter_keys.active", type: "boolean" },
+  { key: "suspended", nameKey: "tasks.filter_keys.suspended", type: "boolean" },
+];
+
 const is_saved_filter = (value) => value && value !== "all" && value !== "my";
+
+const derive_query = (current_query, patch) => {
+  const out = { ...current_query };
+  if ("saved_filter_id" in patch) {
+    if (patch.saved_filter_id == null || patch.saved_filter_id === "all")
+      delete out.filter;
+    else out.filter = patch.saved_filter_id;
+  }
+  if ("sortBy" in patch && patch.sortBy != null) out.sortBy = patch.sortBy;
+  if ("sortOrder" in patch && patch.sortOrder != null)
+    out.sortOrder = patch.sortOrder;
+  return out;
+};
 
 const load_tasks = (state, query, firstResult = 0) => {
   const filterValue = query?.filter,
@@ -118,78 +166,81 @@ const TaskList = () => {
       const current = taskList.value?.data?.length ?? 0;
       load_tasks(state, query, current);
     },
-    change_filter = (e) => {
-      const value = e.currentTarget.value;
-      const url = new URL(window.location.href);
-      if (value === "all") url.searchParams.delete("filter");
-      else url.searchParams.set("filter", value);
-      route(url.pathname + url.search, true);
-      load_tasks(state, { ...query, filter: value });
+    apply_patch = (patch) => {
+      const next_pathname = write_list_query(window.location.href, patch);
+      route(next_pathname, true);
+      load_tasks(state, derive_query(query, patch));
     },
-    change_sort = (e) => {
-      const url = new URL(window.location.href);
-      url.searchParams.set("sortBy", e.currentTarget.value);
-      route(url.pathname + url.search, true);
-      load_tasks(state, { ...query, sortBy: e.currentTarget.value });
+    save_filter = (filter) => {
+      const body = {
+        resourceType: "Task",
+        name: filter.name,
+        owner: state.api.user.profile.value?.id,
+        query: filter.query,
+        properties: {},
+      };
+      const result = engine_rest.filter.create_filter(state, body);
+      if (result && typeof result.then === "function") {
+        result.then(() => engine_rest.filter.get_filters(state));
+      } else {
+        engine_rest.filter.get_filters(state);
+      }
     },
-    change_sort_order = (e) => {
-      const url = new URL(window.location.href);
-      url.searchParams.set("sortOrder", e.currentTarget.value);
-      route(url.pathname + url.search, true);
-      load_tasks(state, { ...query, sortOrder: e.currentTarget.value });
+    update_filter = (id, filter) => {
+      const body = {
+        resourceType: "Task",
+        name: filter.name,
+        owner: state.api.user.profile.value?.id,
+        query: filter.query,
+        properties: {},
+      };
+      const result = engine_rest.filter.update_filter(state, id, body);
+      if (result && typeof result.then === "function") {
+        result.then(() => engine_rest.filter.get_filters(state));
+      } else {
+        engine_rest.filter.get_filters(state);
+      }
     },
-    savedFilters = (state.api.filter.list.value?.data ?? []).filter(
-      (f) => Object.keys(f.query ?? {}).length > 0,
-    );
+    delete_filter = (id) => {
+      const result = engine_rest.filter.delete_filter(state, id);
+      if (result && typeof result.then === "function") {
+        result.then(() => engine_rest.filter.get_filters(state));
+      } else {
+        engine_rest.filter.get_filters(state);
+      }
+    },
+    share_link = () => {
+      const link = build_share_link();
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link);
+    };
+
+  const list_current = {
+    saved_filter_id: query?.filter ?? null,
+    sortBy: query?.sortBy ?? "name",
+    sortOrder: query?.sortOrder ?? "asc",
+    criteria: parse_list_query(query).criteria,
+  };
 
   return (
     <div id="task-list">
       <h2 class="screen-hidden">{t("tasks.title")}</h2>
-      <div id="task-actions">
-        <div>
-          <label for="filter-list">{t("tasks.current-filter")}</label>
-          <select
-            id="filter-list"
-            onChange={change_filter}
-            value={query?.filter ?? "all"}
-          >
-            <option value="all">{t("tasks.all-tasks")}</option>
-            <option value="my">{t("tasks.my-tasks")}</option>
-            {savedFilters.length > 0 && <option disabled>──────────</option>}
-            {savedFilters.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </select>
-          <a href="/tasks/filter" className="button">
-            {t("tasks.edit-filters")}
-          </a>
-        </div>
-        <div>
-          <label for="sort-by">{t("tasks.sort.label")}</label>
-          <select
-            id="sort-by"
-            onChange={change_sort}
-            value={query?.sortBy ?? "name"}
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.key} value={o.key}>
-                {t(o.nameKey)}
-              </option>
-            ))}
-          </select>
-          <select
-            id="sort-order"
-            onChange={change_sort_order}
-            value={query?.sortOrder ?? "asc"}
-            aria-label={t("tasks.sort.order")}
-          >
-            <option value="asc">{t("tasks.sort.asc")}</option>
-            <option value="desc">{t("tasks.sort.desc")}</option>
-          </select>
-        </div>
-      </div>
+      <ListFilter
+        sort_options={SORT_OPTIONS}
+        filter_keys={FILTER_KEYS}
+        saved_filters_signal={state.api.filter.list}
+        filter_predicate={(f) =>
+          f && f.id && Object.keys(f.query ?? {}).length > 0
+        }
+        current={list_current}
+        defaults={{ sortBy: "name", sortOrder: "asc" }}
+        include_my_filter
+        advanced_editor_href="/tasks/filter"
+        on_change={apply_patch}
+        on_save={save_filter}
+        on_update={update_filter}
+        on_delete={delete_filter}
+        on_share={share_link}
+      />
       <div id="task-table-wrapper">
         <table>
           <thead>

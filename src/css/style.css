@@ -583,23 +583,6 @@
     > div {
       box-sizing: content-box;
     }
-    #task-actions {
-      display: flex;
-      gap: var(--spacing-1);
-      align-items: center;
-      padding: var(--spacing-1);
-      flex-wrap: wrap;
-
-      > div {
-        display: flex;
-        gap: var(--spacing-1);
-        align-items: center;
-
-        > * {
-          margin: 0;
-        }
-      }
-    }
     table {
       width: 100%;
 
