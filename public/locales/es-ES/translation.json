@@ -351,9 +351,11 @@
         "withIncidents": "withIncidents",
         "withoutIncidents": "withoutIncidents",
         "startedBefore": "startedBefore",
-        "startedAfter": "startedAfter"
+        "startedAfter": "startedAfter",
+        "finished": "finished"
       }
-    }
+    },
+    "history-mode-na": "Datos en vivo: el modo histórico no se aplica aquí."
   },
   "decisions": {
     "title": "Decisiones",

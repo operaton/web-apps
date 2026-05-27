@@ -38,6 +38,7 @@ const INSTANCE_FILTER_KEYS = [
   { key: "businessKeyLike", nameKey: "processes.instance.filter_keys.businessKeyLike", type: "string" },
   { key: "active", nameKey: "processes.instance.filter_keys.active", type: "boolean" },
   { key: "suspended", nameKey: "processes.instance.filter_keys.suspended", type: "boolean" },
+  { key: "finished", nameKey: "processes.instance.filter_keys.finished", type: "boolean" },
   { key: "withIncidents", nameKey: "processes.instance.filter_keys.withIncidents", type: "boolean" },
   { key: "withoutIncidents", nameKey: "processes.instance.filter_keys.withoutIncidents", type: "boolean" },
   { key: "startedBefore", nameKey: "processes.instance.filter_keys.startedBefore", type: "date" },
@@ -830,8 +831,7 @@ const Instances = () => {
     { route } = useLocation(),
     [t] = useTranslation(),
     history_mode = query.history === "true",
-    list = state.api.process.instance.list,
-    loaded_for = useSignal(null);
+    list = state.api.process.instance.list;
 
   useEffect(() => {
     hydrate_signal(
@@ -860,23 +860,20 @@ const Instances = () => {
     }
   };
 
-  const reserved_keys = ["filter", "sortBy", "sortOrder", "history"];
+  // Signature of the filter-relevant slice of the URL: changes drive a refetch
+  // via the effect below. Keeping the reserved keys + q.* keys in scope lets
+  // history toggle, sort changes, saved-filter pick and criteria edits all
+  // funnel through the same reload path.
   const criteria_signature = Object.entries(query ?? {})
-    .filter(
-      ([k]) =>
-        reserved_keys.includes(k) || k.startsWith("q."),
-    )
+    .filter(([k]) => ["filter", "sortBy", "sortOrder"].includes(k) || k.startsWith("q."))
     .map(([k, v]) => `${k}=${v}`)
     .sort()
     .join("&");
 
-  if (!params.selection_id) {
-    const cache_key = `${params.definition_id}|${history_mode ? "h" : "l"}|${criteria_signature}`;
-    if (loaded_for.value !== cache_key) {
-      loaded_for.value = cache_key;
-      fetch_page(0);
-    }
-  }
+  useEffect(() => {
+    if (!params.selection_id) fetch_page(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.definition_id, params.selection_id, history_mode, criteria_signature]);
 
   const load_more = () => fetch_page(list.value?.data?.length ?? 0);
 
@@ -1113,16 +1110,20 @@ const InstanceVariables = () => {
 
 const InstanceIncidents = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
     [t] = useTranslation();
 
+  // The incident endpoint is history-only in Camunda 7, but timestamp filters
+  // applied via history mode (e.g. closed instance window) can change the
+  // returned set — re-fetch on toggle.
   useEffect(() => {
     void engine_rest.history.incident.by_process_instance(
       state,
       params.selection_id,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.selection_id]);
+  }, [params.selection_id, history_mode]);
 
   /** @namespace state.api.history.incident.by_process_instance.value.data **/
   return (
@@ -1188,17 +1189,35 @@ const InstanceIncidents = () => {
 
 const InstanceUserTasks = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
     [t] = useTranslation();
 
   useEffect(() => {
-    // void engine_rest.task.by_process_instance(state, params.selection_id)
-    void engine_rest.task.get_process_instance_tasks(
-      state,
-      params.selection_id,
-    );
+    if (history_mode) {
+      void engine_rest.history.task.by_process_instance(
+        state,
+        params.selection_id,
+      );
+    } else {
+      void engine_rest.task.get_process_instance_tasks(
+        state,
+        params.selection_id,
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.selection_id]);
+  }, [params.selection_id, history_mode]);
+
+  // /history/task returns `startTime` instead of `created` and omits
+  // `delegationState`; normalise to the live shape so the table render below
+  // doesn't need a second code path.
+  const rows = history_mode
+    ? (state.api.history.task.by_process_instance.value?.data ?? []).map((t) => ({
+        ...t,
+        created: t.startTime,
+        delegationState: t.delegationState ?? null,
+      }))
+    : (state.api.task.by_process_instance.value?.data ?? []);
 
   /** @namespace state.api.task.by_process_instance.value.data **/
   return (
@@ -1219,7 +1238,7 @@ const InstanceUserTasks = () => {
           </tr>
         </thead>
         <tbody>
-          {state.api.task.by_process_instance.value?.data?.map(
+          {rows.map(
             // eslint-disable-next-line react/jsx-key
             ({
               id,
@@ -1267,12 +1286,24 @@ const InstanceUserTasks = () => {
 const CalledProcessInstances = () => {
   const state = useContext(AppState),
     { selection_id, query } = useRoute(),
+    history_mode = query.history === "true",
     [t] = useTranslation();
 
   useEffect(() => {
-    void engine_rest.process_instance.called(state, selection_id);
+    if (history_mode) {
+      void engine_rest.history.process_instance.called(state, selection_id);
+    } else {
+      void engine_rest.process_instance.called(state, selection_id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selection_id]);
+  }, [selection_id, history_mode]);
+
+  // /history/process-instance uses `state` ("ACTIVE"/"COMPLETED"/...) and
+  // `processDefinitionId`; the live endpoint uses `suspended` (bool) and
+  // `definitionId`. Normalise to one shape for rendering.
+  const rows = (history_mode
+    ? state.api.history.process_instance.called.value?.data
+    : state.api.process.instance.called.value?.data) ?? [];
 
   /** @namespace state.api.process.instance.called.value.data **/
   /** @namespace instance.definitionId **/
@@ -1288,24 +1319,28 @@ const CalledProcessInstances = () => {
           </tr>
         </thead>
         <tbody>
-          {state.api.process.instance.called.value?.data?.map((instance) => (
-            <tr key={instance.id}>
-              <td>
-                {instance.suspended
-                  ? t("common.suspended")
-                  : t("common.running")}
-              </td>
-              <td>
-                <a
-                  href={`/processes/${instance.id}${keep_history_query(query)}`}
-                >
-                  {instance.id}
-                </a>
-              </td>
-              <td>{instance.definitionId}</td>
-              <td>{instance.definitionId}</td>
-            </tr>
-          ))}
+          {rows.map((instance) => {
+            const definition_id = instance.processDefinitionId ?? instance.definitionId;
+            const state_label = history_mode
+              ? instance.state
+              : instance.suspended
+                ? t("common.suspended")
+                : t("common.running");
+            return (
+              <tr key={instance.id}>
+                <td>{state_label}</td>
+                <td>
+                  <a
+                    href={`/processes/${instance.id}${keep_history_query(query)}`}
+                  >
+                    {instance.id}
+                  </a>
+                </td>
+                <td>{definition_id}</td>
+                <td>{definition_id}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -1356,6 +1391,7 @@ const Incidents = () => {
 const CalledProcessDefinitions = () => {
   const state = useContext(AppState),
     { definition_id, query } = useRoute(),
+    history_mode = query?.history === "true",
     [t] = useTranslation();
 
   useEffect(() => {
@@ -1366,6 +1402,9 @@ const CalledProcessDefinitions = () => {
   /** @namespace definition.calledFromActivityIds **/
   return (
     <div>
+      {history_mode && (
+        <small class="history-na">{t("processes.history-mode-na")}</small>
+      )}
       <table>
         <thead>
           <tr>
@@ -1404,7 +1443,8 @@ const CalledProcessDefinitions = () => {
 
 const JobDefinitions = () => {
   const state = useContext(AppState),
-    { definition_id } = useRoute(),
+    { definition_id, query } = useRoute(),
+    history_mode = query?.history === "true",
     [t] = useTranslation();
 
   useEffect(() => {
@@ -1421,6 +1461,9 @@ const JobDefinitions = () => {
   /** @namespace definition.overridingJobPriority **/
   return (
     <div class="relative">
+      {history_mode && (
+        <small class="history-na">{t("processes.history-mode-na")}</small>
+      )}
       <table>
         <thead>
           <tr>

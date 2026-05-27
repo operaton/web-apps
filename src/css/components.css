@@ -403,6 +403,15 @@ main#processes {
   border-color: var(--color-primary);
 }
 
+/* Caption rendered on tabs that have no historic equivalent (job
+   definitions, called definitions) when the history toggle is on. */
+#processes .history-na {
+  display: block;
+  margin: 0 0 var(--spacing-1);
+  color: var(--text-2, var(--muted));
+  font-style: italic;
+}
+
 /* Page header: title (+ optional muted breadcrumb in <small>) on the left,
    action button on the right. */
 #processes header {

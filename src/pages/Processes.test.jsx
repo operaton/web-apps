@@ -277,6 +277,15 @@ describe("ProcessesPage — definition tabs", () => {
     expect(engine_rest.history.process_instance.all).toHaveBeenCalled();
   });
 
+  it("instances tab forwards the finished filter from the URL into params", () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    mockQuery = { history: "true", "q.finished": "true" };
+    renderPage(state);
+    expect(engine_rest.history.process_instance.all).toHaveBeenCalled();
+    const params_arg = engine_rest.history.process_instance.all.mock.lastCall[2];
+    expect(params_arg.finished).toBe("true");
+  });
+
   it("instances tab renders rows from the instance list signal", () => {
     mockParams = { definition_id: "proc:1", panel: "instances" };
     signal_response(state.api.process.instance.list, [
@@ -472,6 +481,50 @@ describe("ProcessesPage — instance details", () => {
     expect(engine_rest.task.get_process_instance_tasks).toHaveBeenCalled();
     expect(getByText("Approve")).toBeTruthy();
     expect(getByText("boss")).toBeTruthy();
+  });
+
+  it("user-tasks sub-panel uses the historic task endpoint in history mode", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "user_tasks",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.history.task.by_process_instance, [
+      {
+        id: "ht-1",
+        name: "Approve (historic)",
+        assignee: "demo",
+        owner: "boss",
+        startTime: "2024-01-01T00:00:00Z",
+        priority: 50,
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.history.task.by_process_instance).toHaveBeenCalled();
+    expect(getByText("Approve (historic)")).toBeTruthy();
+  });
+
+  it("called-instances sub-panel uses the historic endpoint in history mode", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "called_instances",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.history.process_instance.called, [
+      {
+        id: "hist-child-1",
+        state: "COMPLETED",
+        processDefinitionId: "child:def",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.history.process_instance.called).toHaveBeenCalled();
+    expect(getByText("hist-child-1")).toBeTruthy();
+    expect(getByText("COMPLETED")).toBeTruthy();
   });
 
   it("fetches activity-instances for a live selected instance", () => {

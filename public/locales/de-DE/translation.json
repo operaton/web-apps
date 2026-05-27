@@ -384,9 +384,11 @@
         "withIncidents": "withIncidents",
         "withoutIncidents": "withoutIncidents",
         "startedBefore": "startedBefore",
-        "startedAfter": "startedAfter"
+        "startedAfter": "startedAfter",
+        "finished": "finished"
       }
-    }
+    },
+    "history-mode-na": "Live-Daten – der Verlaufsmodus gilt hier nicht."
   },
   "decisions": {
     "title": "Entscheidungen",
