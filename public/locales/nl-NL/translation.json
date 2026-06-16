@@ -405,6 +405,8 @@
     "no-process-name": "N.v.t. – Procesnaam is niet gedefinieerd",
     "instance-count": "Aantal instanties",
     "empty-response": "Leeg antwoord",
+    "delete": "Deployment verwijderen",
+    "confirm-delete": "Deze deployment en alle bijbehorende procesinstanties, historische instanties en jobs verwijderen?",
     "sort": {
       "deploymentTime": "Deployment-tijd",
       "name": "Naam",

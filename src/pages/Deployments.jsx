@@ -1,3 +1,4 @@
+import { useSignal } from "@preact/signals";
 import { useContext, useEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { AppState } from "../state.js";
@@ -5,6 +6,7 @@ import { useLocation, useRoute } from "preact-iso";
 import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { CamundaForm } from "../components/CamundaForm.jsx";
+import { ConfirmDialog } from "../components/Dialog.jsx";
 import { DmnViewer } from "../components/DMNViewer.jsx";
 import { formatRelativeDate } from "../helper/date_formatter.js";
 import { ListFilter } from "../components/ListFilter.jsx";
@@ -217,7 +219,19 @@ const DeploymentsList = () => {
 const ResourcesList = () => {
   const state = useContext(AppState),
     { params } = useRoute(),
-    [t] = useTranslation();
+    { route } = useLocation(),
+    [t] = useTranslation(),
+    confirm_delete = useSignal(false);
+
+  const remove = async () => {
+    await engine_rest.deployment.delete(state, params.deployment_id, {
+      cascade: true,
+    });
+    state.api.deployment.resources.value = null;
+    state.api.deployment.resource.value = null;
+    route("/deployments", true);
+    void engine_rest.deployment.all(state);
+  };
 
   if (!params.deployment_id) {
     return (
@@ -227,6 +241,21 @@ const ResourcesList = () => {
 
   return (
     <div>
+      <div class="button-group">
+        <button
+          type="button"
+          class="danger"
+          onClick={() => (confirm_delete.value = true)}
+        >
+          {t("deployments.delete")}
+        </button>
+      </div>
+      <ConfirmDialog
+        open={confirm_delete}
+        message={t("deployments.confirm-delete")}
+        confirm_label={t("deployments.delete")}
+        on_confirm={remove}
+      />
       <table>
         <thead>
           <tr>

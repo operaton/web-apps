@@ -440,6 +440,8 @@
     "empty-response": "Leere Antwort",
     "form-preview": "Formularvorschau",
     "raw-data-json": "Rohdaten (JSON)",
+    "delete": "Deployment löschen",
+    "confirm-delete": "Dieses Deployment und alle zugehörigen Prozessinstanzen, historischen Prozessinstanzen und Jobs löschen?",
     "sort": {
       "deploymentTime": "Deployment-Zeit",
       "name": "Name",

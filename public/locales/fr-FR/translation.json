@@ -405,6 +405,8 @@
     "no-process-name": "N/A – Le nom du processus n'est pas défini",
     "instance-count": "Nombre d'instances",
     "empty-response": "Réponse vide",
+    "delete": "Supprimer le déploiement",
+    "confirm-delete": "Supprimer ce déploiement ainsi que toutes ses instances de processus, instances historiques et jobs ?",
     "sort": {
       "deploymentTime": "Heure de déploiement",
       "name": "Nom",

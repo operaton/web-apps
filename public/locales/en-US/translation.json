@@ -440,6 +440,8 @@
     "empty-response": "Empty response",
     "form-preview": "Form preview",
     "raw-data-json": "Raw data (JSON)",
+    "delete": "Delete deployment",
+    "confirm-delete": "Delete this deployment and all process instances, historic process instances, and jobs for it?",
     "sort": {
       "deploymentTime": "Deployment time",
       "name": "Name",

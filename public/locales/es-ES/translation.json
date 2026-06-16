@@ -405,6 +405,8 @@
     "no-process-name": "N/A – El nombre del proceso no está definido",
     "instance-count": "Cantidad de instancias",
     "empty-response": "Respuesta vacía",
+    "delete": "Eliminar despliegue",
+    "confirm-delete": "¿Eliminar este despliegue y todas sus instancias de proceso, instancias históricas y jobs?",
     "sort": {
       "deploymentTime": "Hora de despliegue",
       "name": "Nombre",

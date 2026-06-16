@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { h } from "preact";
-import { render, cleanup } from "@testing-library/preact";
+import { render, cleanup, fireEvent } from "@testing-library/preact";
 
 // Spy all engine_rest API functions but keep RequestState/RESPONSE_STATE real.
 vi.mock("../api/engine_rest.jsx", async (importOriginal) => {
@@ -86,6 +86,24 @@ describe("DeploymentsPage", () => {
     expect(engine_rest.deployment.resources).toHaveBeenCalled();
     expect(engine_rest.deployment.resources.mock.lastCall[0]).toBe(state);
     expect(engine_rest.deployment.resources.mock.lastCall[1]).toBe("dep1");
+  });
+
+  it("deletes the selected deployment after confirmation", async () => {
+    mockParams = { deployment_id: "dep1" };
+    signal_response(state.api.deployment.resources, []);
+    const { getAllByText } = renderPage(state);
+
+    const deleteButtons = getAllByText("deployments.delete");
+    fireEvent.click(deleteButtons[0]);
+    fireEvent.click(deleteButtons[deleteButtons.length - 1]);
+    await Promise.resolve();
+
+    expect(engine_rest.deployment.delete).toHaveBeenCalled();
+    const call = engine_rest.deployment.delete.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toBe("dep1");
+    expect(call[2]).toEqual({ cascade: true });
+    expect(routeFn).toHaveBeenCalledWith("/deployments", true);
   });
 
   it("renders the resource list for the active deployment", () => {
