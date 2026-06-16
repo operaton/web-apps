@@ -122,6 +122,7 @@ const createAppState = () => {
         by_defintion_id: signal(null),
         activity_instances: signal(null),
         modification: signal(null),
+        delete_async: signal(null),
         saved_filters: signal(null),
       },
     },

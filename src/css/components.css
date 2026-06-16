@@ -869,6 +869,58 @@ div.accordion {
   color: var(--text-2);
 }
 
+/* process instance bulk actions */
+
+.bulk-instance-delete {
+  margin-bottom: var(--spacing-2);
+  padding: var(--spacing-1);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--background-1);
+}
+
+.bulk-instance-delete fieldset {
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) repeat(3, max-content);
+  gap: var(--spacing-1);
+  align-items: end;
+}
+
+.bulk-instance-delete legend {
+  grid-column: 1 / -1;
+}
+
+.bulk-instance-delete label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-half);
+}
+
+.bulk-instance-delete label:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+}
+
+.bulk-instance-delete input[type="checkbox"] {
+  width: auto;
+}
+
+.bulk-instance-delete .button-group {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.bulk-instance-delete .info-box {
+  margin-top: var(--spacing-1);
+}
+
+@media (max-width: 840px) {
+  .bulk-instance-delete fieldset {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* task detail cards */
 
 .task-cards {

@@ -388,7 +388,21 @@
         "startedAfter": "startedAfter",
         "finished": "finished"
       },
-      "manage_title": "Prozessinstanz-Filter verwalten"
+      "manage_title": "Prozessinstanz-Filter verwalten",
+      "delete": {
+        "open": "Auswahl löschen",
+        "title": "Laufende Prozessinstanzen löschen",
+        "reason": "Löschgrund",
+        "skip-custom-listeners": "Benutzerdefinierte Listener überspringen",
+        "skip-subprocesses": "Unterprozesse überspringen",
+        "skip-io-mappings": "IO-Mappings überspringen",
+        "confirm": "Instanzen löschen",
+        "select-all": "Alle Instanzen auswählen",
+        "count": "{{count}} ausgewählt",
+        "batch-created": "Batch erstellt:",
+        "view-batch": "Batch anzeigen",
+        "success": "Lösch-Batch gestartet."
+      }
     },
     "history-mode-na": "Live-Daten – der Verlaufsmodus gilt hier nicht.",
     "filter": {

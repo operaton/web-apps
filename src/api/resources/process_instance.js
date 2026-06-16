@@ -102,6 +102,19 @@ const modify_process_instance_async = (
     state.api.process.instance.modification,
   );
 
+/**
+ * Deletes multiple running process instances asynchronously.
+ * Returns a Batch the user can monitor on the Batches page.
+ * @see https://docs.camunda.org/manual/latest/reference/rest/process-instance/post-delete/
+ */
+const delete_process_instances_async = (state, body) =>
+  POST(
+    "/process-instance/delete",
+    body,
+    state,
+    state.api.process.instance.delete_async,
+  );
+
 const process_instance = {
   one: get_process_instance,
   variables: get_process_instance_variables,
@@ -113,6 +126,7 @@ const process_instance = {
   activity_instances: get_activity_instances,
   modify: modify_process_instance,
   modify_async: modify_process_instance_async,
+  delete_async: delete_process_instances_async,
 };
 
 export default process_instance;

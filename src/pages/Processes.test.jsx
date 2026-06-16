@@ -304,6 +304,93 @@ describe("ProcessesPage — definition tabs", () => {
     expect(getByText("BK-1")).toBeTruthy();
   });
 
+  it("instances tab disables bulk delete until an instance is selected", () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "abcdef1234567890",
+        startTime: "2024-01-01T00:00:00Z",
+        state: "ACTIVE",
+        businessKey: "BK-1",
+      },
+    ]);
+    const { container, getByText } = renderPage(state);
+    const open_delete = getByText("processes.instance.delete.open");
+    expect(open_delete.disabled).toBe(true);
+    fireEvent.click(container.querySelector('tbody input[type="checkbox"]'));
+    expect(open_delete.disabled).toBe(false);
+  });
+
+  it("instances tab sends selected instances to the async delete endpoint", async () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "abcdef1234567890",
+        startTime: "2024-01-01T00:00:00Z",
+        state: "ACTIVE",
+        businessKey: "BK-1",
+      },
+      {
+        id: "fedcba0987654321",
+        startTime: "2024-01-02T00:00:00Z",
+        state: "ACTIVE",
+        businessKey: "BK-2",
+      },
+    ]);
+    engine_rest.process_instance.delete_async.mockImplementationOnce(
+      async (next_state) => {
+        signal_response(next_state.api.process.instance.delete_async, {
+          id: "batch-1",
+        });
+      },
+    );
+
+    const { container, getByText } = renderPage(state);
+    fireEvent.click(container.querySelector('tbody input[type="checkbox"]'));
+    fireEvent.click(getByText("processes.instance.delete.open"));
+    fireEvent.input(container.querySelector('input[name="deleteReason"]'), {
+      target: { value: "obsolete" },
+    });
+    fireEvent.click(
+      container.querySelector('input[name="skipCustomListeners"]'),
+    );
+    fireEvent.click(container.querySelector('input[name="skipSubprocesses"]'));
+    fireEvent.submit(container.querySelector(".bulk-instance-delete"));
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.process_instance.delete_async).toHaveBeenCalled();
+    const call = engine_rest.process_instance.delete_async.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toEqual({
+      processInstanceIds: ["abcdef1234567890"],
+      deleteReason: "obsolete",
+      skipCustomListeners: true,
+      skipSubprocesses: true,
+      skipIoMappings: false,
+    });
+    expect(
+      getByText("processes.instance.delete.view-batch").getAttribute("href"),
+    ).toBe("/batches/batch-1");
+  });
+
+  it("instances tab hides bulk delete in history mode", () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    mockQuery = { history: "true" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "abcdef1234567890",
+        startTime: "2024-01-01T00:00:00Z",
+        state: "COMPLETED",
+        businessKey: "BK-1",
+      },
+    ]);
+    const { container, queryByText } = renderPage(state);
+    expect(queryByText("processes.instance.delete.open")).toBeNull();
+    expect(container.querySelector('tbody input[type="checkbox"]')).toBeNull();
+  });
+
   it("incidents tab fetches and renders definition incidents", () => {
     mockParams = { definition_id: "proc:1", panel: "incidents" };
     signal_response(state.api.history.incident.by_process_definition, [

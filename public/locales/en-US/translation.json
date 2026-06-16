@@ -388,7 +388,21 @@
         "startedAfter": "startedAfter",
         "finished": "finished"
       },
-      "manage_title": "Manage process-instance filters"
+      "manage_title": "Manage process-instance filters",
+      "delete": {
+        "open": "Delete selected",
+        "title": "Delete running process instances",
+        "reason": "Delete reason",
+        "skip-custom-listeners": "Skip custom listeners",
+        "skip-subprocesses": "Skip subprocesses",
+        "skip-io-mappings": "Skip IO mappings",
+        "confirm": "Delete instances",
+        "select-all": "Select all instances",
+        "count": "{{count}} selected",
+        "batch-created": "Batch created:",
+        "view-batch": "View batch",
+        "success": "Delete batch started."
+      }
     },
     "history-mode-na": "Live data — history mode does not apply here.",
     "filter": {

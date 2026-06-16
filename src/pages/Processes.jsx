@@ -61,6 +61,19 @@ const instance_params_from_query = (state, query) => {
   };
 };
 
+const process_instance_delete_body = (form, processInstanceIds) => {
+  const data = new FormData(form),
+    deleteReason = String(data.get("deleteReason") ?? "").trim();
+
+  return {
+    processInstanceIds,
+    ...(deleteReason ? { deleteReason } : {}),
+    skipCustomListeners: data.has("skipCustomListeners"),
+    skipSubprocesses: data.has("skipSubprocesses"),
+    skipIoMappings: data.has("skipIoMappings"),
+  };
+};
+
 const SORT_OPTIONS = [
   { key: "name", nameKey: "processes.sort.name" },
   { key: "key", nameKey: "processes.sort.key" },
@@ -686,7 +699,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -817,7 +830,10 @@ const Instances = () => {
     { route } = useLocation(),
     [t] = useTranslation(),
     history_mode = query.history === "true",
-    list = state.api.process.instance.list;
+    list = state.api.process.instance.list,
+    delete_result = state.api.process.instance.delete_async,
+    selected = useSignal(new Set()),
+    delete_open = useSignal(false);
 
   useEffect(() => {
     hydrate_signal(
@@ -857,9 +873,17 @@ const Instances = () => {
     .join("&");
 
   useEffect(() => {
+    selected.value = new Set();
+    delete_open.value = false;
+    delete_result.value = null;
     if (!params.selection_id) fetch_page(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.definition_id, params.selection_id, history_mode, criteria_signature]);
+  }, [
+    params.definition_id,
+    params.selection_id,
+    history_mode,
+    criteria_signature,
+  ]);
 
   const load_more = () => fetch_page(list.value?.data?.length ?? 0);
 
@@ -879,6 +903,51 @@ const Instances = () => {
     return <InstancesManage />;
   }
 
+  const rows = list.value?.data ?? [];
+  const selected_ids = [...selected.value];
+  const has_selection = selected_ids.length > 0;
+  const all_selected =
+    rows.length > 0 && rows.every((row) => selected.value.has(row.id));
+  const delete_loading = delete_result.value?.status === RESPONSE_STATE.LOADING;
+
+  const toggle_instance = (id) => {
+    const next = new Set(selected.value);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    selected.value = next;
+  };
+
+  const toggle_all_instances = () => {
+    const next = new Set(selected.value);
+    if (all_selected) rows.forEach((row) => next.delete(row.id));
+    else rows.forEach((row) => next.add(row.id));
+    selected.value = next;
+  };
+
+  const open_delete = () => {
+    if (!has_selection) return;
+    delete_result.value = null;
+    delete_open.value = true;
+  };
+
+  const cancel_delete = () => {
+    delete_open.value = false;
+    delete_result.value = null;
+  };
+
+  const submit_delete = async (event) => {
+    event.preventDefault();
+    if (!has_selection || delete_loading) return;
+
+    const body = process_instance_delete_body(
+      event.currentTarget,
+      selected_ids,
+    );
+    await engine_rest.process_instance.delete_async(state, body);
+    selected.value = new Set();
+    fetch_page(0);
+  };
+
   return !params?.selection_id ? (
     <>
       <ListFilter
@@ -889,10 +958,89 @@ const Instances = () => {
         on_change={apply_patch}
         on_manage={open_manage}
       />
+      {!history_mode ? (
+        <div class="toolbar instance-toolbar">
+          <div>
+            <button
+              type="button"
+              class="secondary"
+              disabled={!has_selection || delete_loading}
+              onClick={open_delete}
+            >
+              {t("processes.instance.delete.open")}
+            </button>
+            {has_selection ? (
+              <small>
+                {t("processes.instance.delete.count", {
+                  count: selected_ids.length,
+                })}
+              </small>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+      {delete_open.value ? (
+        <form class="bulk-instance-delete" onSubmit={submit_delete}>
+          <fieldset>
+            <legend>{t("processes.instance.delete.title")}</legend>
+            <label>
+              {t("processes.instance.delete.reason")}
+              <input type="text" name="deleteReason" />
+            </label>
+            <label>
+              <input type="checkbox" name="skipCustomListeners" />
+              {t("processes.instance.delete.skip-custom-listeners")}
+            </label>
+            <label>
+              <input type="checkbox" name="skipSubprocesses" />
+              {t("processes.instance.delete.skip-subprocesses")}
+            </label>
+            <label>
+              <input type="checkbox" name="skipIoMappings" />
+              {t("processes.instance.delete.skip-io-mappings")}
+            </label>
+            <div class="button-group">
+              <button type="submit" class="danger" disabled={delete_loading}>
+                {t("processes.instance.delete.confirm")}
+              </button>
+              <button type="button" onClick={cancel_delete}>
+                {t("common.cancel")}
+              </button>
+            </div>
+          </fieldset>
+          <RequestState
+            signal={delete_result}
+            on_nothing={() => null}
+            on_success={() => {
+              const batch = delete_result.value?.data;
+              return batch?.id ? (
+                <p class="info-box">
+                  {t("processes.instance.delete.batch-created")}{" "}
+                  <a href={`/batches/${batch.id}`}>
+                    {t("processes.instance.delete.view-batch")}
+                  </a>
+                </p>
+              ) : (
+                <p class="info-box">{t("processes.instance.delete.success")}</p>
+              );
+            }}
+          />
+        </form>
+      ) : null}
       <div>
         <table>
           <thead>
             <tr>
+              {!history_mode ? (
+                <th>
+                  <input
+                    type="checkbox"
+                    aria-label={t("processes.instance.delete.select-all")}
+                    checked={all_selected}
+                    onChange={toggle_all_instances}
+                  />
+                </th>
+              ) : null}
               <th>{t("common.id")}</th>
               <th>{t("processes.start-time")}</th>
               <th>{t("common.state")}</th>
@@ -900,7 +1048,11 @@ const Instances = () => {
             </tr>
           </thead>
           <tbody>
-            <InstanceTableRows />
+            <InstanceTableRows
+              selectable={!history_mode}
+              selected={selected}
+              on_toggle={toggle_instance}
+            />
           </tbody>
         </table>
       </div>
@@ -917,9 +1069,17 @@ const Instances = () => {
   );
 };
 
-const InstanceTableRows = () =>
+const InstanceTableRows = ({ selectable = false, selected, on_toggle }) =>
   useContext(AppState).api.process.instance.list.value?.data?.map(
-    (instance) => <ProcessInstance key={instance.id} {...instance} />,
+    (instance) => (
+      <ProcessInstance
+        key={instance.id}
+        selectable={selectable}
+        checked={selected?.value.has(instance.id)}
+        on_toggle={() => on_toggle?.(instance.id)}
+        {...instance}
+      />
+    ),
   ) ?? null;
 
 const InstanceDetails = () => {
@@ -928,8 +1088,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -983,10 +1142,28 @@ const InstanceDetailsDescription = () => {
   );
 };
 
-const ProcessInstance = ({ id, startTime, state, businessKey }) => {
+const ProcessInstance = ({
+  id,
+  startTime,
+  state,
+  businessKey,
+  selectable = false,
+  checked = false,
+  on_toggle,
+}) => {
   const { params, query } = useRoute();
   return (
-    <tr>
+    <tr aria-selected={checked}>
+      {selectable ? (
+        <td onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            aria-label={id}
+            checked={checked}
+            onChange={on_toggle}
+          />
+        </td>
+      ) : null}
       <td class="font-mono">
         <a
           href={`/processes/${params.definition_id}/instances/${id}/vars${keep_history_query(query)}`}
@@ -1043,20 +1220,16 @@ const InstanceVariables = () => {
             ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+                ).map(([name, { type, value }]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{value}</td>
+                  </tr>
+                ))
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1463,13 +1636,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

@@ -122,4 +122,21 @@ describe("api/resources/process_instance", () => {
       signal: state.api.process.instance.modification,
     });
   });
+
+  it("delete_async() POSTs a batch delete to /process-instance/delete", () => {
+    const body = {
+      processInstanceIds: ["inst-1", "inst-2"],
+      deleteReason: "obsolete",
+      skipCustomListeners: true,
+      skipSubprocesses: true,
+      skipIoMappings: false,
+    };
+    process_instance.delete_async(state, body);
+    expect_api_call(POST, {
+      url: "/process-instance/delete",
+      body,
+      state,
+      signal: state.api.process.instance.delete_async,
+    });
+  });
 });
