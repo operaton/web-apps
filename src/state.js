@@ -171,6 +171,12 @@ const createAppState = () => {
         by_process_definition: signal(null),
         by_process_instance: signal(null),
       },
+      operation_log: {
+        list: signal(null),
+        count: signal(null),
+        update: signal(null),
+        saved_filters: signal(null),
+      },
       task: {
         by_process_instance: signal(null),
       },

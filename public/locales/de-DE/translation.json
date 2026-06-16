@@ -39,6 +39,7 @@
     "deployments": "Deployments",
     "batches": "Stapelverarbeitung",
     "migrations": "Migrationen",
+    "operation-log": "Operationsprotokoll",
     "admin": "Admin",
     "help": "Hilfe",
     "account": "Konto",
@@ -77,6 +78,7 @@
       "decisions": "Entscheidungen",
       "deployments": "Deployments",
       "migrations": "Migrationen",
+      "operation-log": "Operationsprotokoll",
       "admin": "Admin",
       "admin-users": "Admin – Benutzer",
       "admin-groups": "Admin – Gruppen",
@@ -759,6 +761,56 @@
       "batch-note": "Verschiebt alle {{count}} laufenden Instanz(en) auf der Quellaktivität und läuft als asynchroner Batch.",
       "batch-created": "Batch erstellt:",
       "view-batch": "Batch anzeigen"
+    }
+  },
+  "operation_log": {
+    "title": "Operationsprotokoll",
+    "refresh": "Aktualisieren",
+    "matching-entries": "{{count}} passende Einträge",
+    "empty": "Keine Operationen entsprechen diesem Filter.",
+    "timestamp": "Zeitstempel",
+    "user": "Benutzer",
+    "operation": "Operation",
+    "entity": "Entität",
+    "annotation": "Anmerkung",
+    "annotate": "Anmerken",
+    "annotation-title": "Anmerkung bearbeiten",
+    "clear-annotation": "Anmerkung entfernen",
+    "details": "Eintragsdetails",
+    "property": "Eigenschaft",
+    "original-value": "Ursprünglicher Wert",
+    "new-value": "Neuer Wert",
+    "category": "Kategorie",
+    "apply-filters": "Filter anwenden",
+    "clear-filters": "Filter zurücksetzen",
+    "filters": {
+      "user": "Benutzer-ID",
+      "operation": "Operationstyp",
+      "after": "Nach",
+      "before": "Vor"
+    },
+    "sort": {
+      "timestamp": "Zeitstempel",
+      "operationId": "Operations-ID",
+      "userId": "Benutzer-ID",
+      "operationType": "Operationstyp",
+      "entityType": "Entitätstyp",
+      "category": "Kategorie"
+    },
+    "filter_keys": {
+      "userId": "userId",
+      "operationType": "operationType",
+      "entityType": "entityType",
+      "category": "category",
+      "timestampAfter": "timestampAfter",
+      "timestampBefore": "timestampBefore",
+      "processInstanceId": "processInstanceId",
+      "processDefinitionId": "processDefinitionId",
+      "taskId": "taskId",
+      "operationId": "operationId"
+    },
+    "filter": {
+      "manage_title": "Operationsprotokoll-Filter verwalten"
     }
   },
   "list_filter": {

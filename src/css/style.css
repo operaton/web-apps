@@ -828,6 +828,59 @@
     text-align: center;
   }
 
+  .operation-log {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    height: 100%;
+    padding: var(--spacing-2);
+  }
+  .operation-log > header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--spacing-2);
+  }
+  .operation-log > header button {
+    margin: 0;
+  }
+  .operation-log-filter {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--spacing-1);
+    align-items: end;
+  }
+  .operation-log-filter label,
+  .operation-log-annotation label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .operation-log table {
+    width: 100%;
+  }
+  .operation-log td {
+    vertical-align: top;
+  }
+  .operation-log details {
+    padding: var(--spacing-1) 0;
+  }
+  .operation-log details table {
+    background: var(--background-2);
+    margin-top: var(--spacing-1);
+  }
+  .operation-log-entities {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .operation-log-annotation textarea {
+    box-sizing: border-box;
+    min-height: 8rem;
+    width: min(28rem, 100%);
+  }
+
   #admin-page {
     display: flex;
     flex: 1;

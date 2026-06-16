@@ -74,6 +74,7 @@ export function Header() {
             <nav id="secondary-navigation">
               <menu>
                 <li><a href="/help">   {t("nav.help")}</a></li>
+                <li><a href="/operation-log">{t("nav.operation-log")}</a></li>
                 <li><a href="/account">{t("nav.account")}</a></li>
               </menu>
             </nav>
@@ -144,6 +145,14 @@ export function Header() {
                 class={url.startsWith("/migrations") && "active"}
               >
                 {t("nav.migrations")}
+              </a>
+            </li>
+            <li>
+              <a
+                href="/operation-log"
+                class={url.startsWith("/operation-log") && "active"}
+              >
+                {t("nav.operation-log")}
               </a>
             </li>
             <li>

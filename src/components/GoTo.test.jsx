@@ -53,6 +53,13 @@ describe("GoTo", () => {
         a.getAttribute("href"),
       ),
     ).not.toContain("/tasks");
+
+    type(input, "operation-log");
+    expect(
+      Array.from(container.querySelectorAll(".goto-item")).map((a) =>
+        a.getAttribute("href"),
+      ),
+    ).toContain("/operation-log");
   });
 
   it("navigates and closes when a result is clicked", () => {

@@ -41,6 +41,7 @@
     "migrations": "Migrations",
     "admin": "Admin",
     "help": "Help",
+    "operation-log": "Operation Log",
     "account": "Account",
     "logout": "Logout",
     "menu": "Menu",
@@ -77,6 +78,7 @@
       "decisions": "Decisions",
       "deployments": "Deployments",
       "migrations": "Migrations",
+      "operation-log": "Operation Log",
       "admin": "Admin",
       "admin-users": "Admin – Users",
       "admin-groups": "Admin – Groups",
@@ -759,6 +761,56 @@
       "batch-note": "This moves all {{count}} running instance(s) on the source activity and runs as an asynchronous batch.",
       "batch-created": "Batch created:",
       "view-batch": "View batch"
+    }
+  },
+  "operation_log": {
+    "title": "Operation Log",
+    "refresh": "Refresh",
+    "matching-entries": "{{count}} matching entries",
+    "empty": "No operations match this filter.",
+    "timestamp": "Timestamp",
+    "user": "User",
+    "operation": "Operation",
+    "entity": "Entity",
+    "annotation": "Annotation",
+    "annotate": "Annotate",
+    "annotation-title": "Edit annotation",
+    "clear-annotation": "Clear annotation",
+    "details": "Entry details",
+    "property": "Property",
+    "original-value": "Original value",
+    "new-value": "New value",
+    "category": "Category",
+    "apply-filters": "Apply filters",
+    "clear-filters": "Clear filters",
+    "filters": {
+      "user": "User ID",
+      "operation": "Operation type",
+      "after": "After",
+      "before": "Before"
+    },
+    "sort": {
+      "timestamp": "Timestamp",
+      "operationId": "Operation ID",
+      "userId": "User ID",
+      "operationType": "Operation type",
+      "entityType": "Entity type",
+      "category": "Category"
+    },
+    "filter_keys": {
+      "userId": "userId",
+      "operationType": "operationType",
+      "entityType": "entityType",
+      "category": "category",
+      "timestampAfter": "timestampAfter",
+      "timestampBefore": "timestampBefore",
+      "processInstanceId": "processInstanceId",
+      "processDefinitionId": "processDefinitionId",
+      "taskId": "taskId",
+      "operationId": "operationId"
+    },
+    "filter": {
+      "manage_title": "Manage operation-log filters"
     }
   },
   "list_filter": {
