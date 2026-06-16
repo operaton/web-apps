@@ -1,4 +1,5 @@
 import { useContext, useEffect } from 'preact/hooks'
+import { useSignal, useSignalEffect } from '@preact/signals'
 import { useTranslation } from 'react-i18next'
 import { AppState } from '../state.js'
 import { useLocation, useRoute } from 'preact-iso'
@@ -170,9 +171,24 @@ const DecisionsList = () => {
 
 const DecisionDetails = () => {
   const state = useContext(AppState),
-    { api: { decision: { definition, dmn } } } = state,
-    { params: { decision_id } } = useRoute(),
-    [t] = useTranslation()
+    { api: { decision: { definition, dmn, update_history_ttl } } } = state,
+    [t] = useTranslation(),
+    history_ttl = useSignal('')
+
+  useSignalEffect(() => {
+    history_ttl.value = definition.value?.data?.historyTimeToLive ?? ''
+  })
+
+  const submit_history_ttl = async (e, id) => {
+    e.preventDefault()
+    const raw = history_ttl.peek()
+    await engine_rest.decision.update_history_ttl(
+      state,
+      id,
+      raw === '' ? null : Number(raw),
+    )
+    void engine_rest.decision.get_decision_definition(state, id)
+  }
 
   return <div id="decision-details">
     <RequestState
@@ -182,7 +198,6 @@ const DecisionDetails = () => {
         const {
           id, key, name, version, versionTag, tenantId, deploymentId,
           decisionRequirementsDefinitionId, historyTimeToLive,
-          resource
         } = definition.value.data
 
         return <div>
@@ -207,6 +222,17 @@ const DecisionDetails = () => {
             <dt>{t("decisions.history-ttl")}</dt>
             <dd>{historyTimeToLive}</dd>
           </dl>
+          <RequestState
+            signal={update_history_ttl}
+            on_nothing={() => <></>}
+            on_success={() => <p class="success">{t("decisions.history-ttl-updated")}</p>} />
+          <form class="history-ttl-form" onSubmit={(e) => submit_history_ttl(e, id)}>
+            <label for="decision-history-ttl">{t("decisions.history-ttl")}</label>
+            <input id="decision-history-ttl" name="historyTimeToLive" type="number" min="0" step="1"
+                   value={history_ttl.value}
+                   onInput={(e) => (history_ttl.value = e.currentTarget.value)} />
+            <button type="submit">{t("common.save")}</button>
+          </form>
         </div>
       }} />
 

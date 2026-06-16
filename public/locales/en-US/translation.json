@@ -405,6 +405,7 @@
     "deployment-id": "Deployment ID",
     "decision-requirements-id": "Decision Requirements Definition ID",
     "history-ttl": "History Time To Live",
+    "history-ttl-updated": "History time to live updated.",
     "sort": {
       "name": "Name",
       "key": "Key",

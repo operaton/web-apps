@@ -372,6 +372,7 @@
     "deployment-id": "ID de despliegue",
     "decision-requirements-id": "ID de definición de requisitos de decisión",
     "history-ttl": "Tiempo de vida del historial",
+    "history-ttl-updated": "Tiempo de vida del historial actualizado.",
     "sort": {
       "name": "Nombre",
       "key": "Clave",

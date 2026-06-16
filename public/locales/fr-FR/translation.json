@@ -372,6 +372,7 @@
     "deployment-id": "ID de déploiement",
     "decision-requirements-id": "ID de définition des exigences de décision",
     "history-ttl": "Durée de conservation de l'historique",
+    "history-ttl-updated": "Durée de conservation de l'historique mise à jour.",
     "sort": {
       "name": "Nom",
       "key": "Clé",

@@ -3,9 +3,10 @@ import { describe, it, vi, beforeEach } from "vitest";
 vi.mock("../helper.jsx", () => ({
   GET: vi.fn(),
   GET_TEXT: vi.fn(),
+  PUT: vi.fn(),
 }));
 
-import { GET } from "../helper.jsx";
+import { GET, PUT } from "../helper.jsx";
 import { create_mock_state, expect_api_call } from "../../test/helpers.js";
 import decision from "./decision.js";
 
@@ -39,6 +40,16 @@ describe("api/resources/decision", () => {
       url: "/decision-definition/dec-1/xml",
       state,
       signal: state.api.decision.dmn,
+    });
+  });
+
+  it("update_history_ttl() PUTs the history time to live", () => {
+    decision.update_history_ttl(state, "dec-1", 30);
+    expect_api_call(PUT, {
+      url: "/decision-definition/dec-1/history-time-to-live",
+      body: { historyTimeToLive: 30 },
+      state,
+      signal: state.api.decision.update_history_ttl,
     });
   });
 });

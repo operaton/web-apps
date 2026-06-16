@@ -372,6 +372,7 @@
     "deployment-id": "Deployment-ID",
     "decision-requirements-id": "Beslissingsvereisten-definitie-ID",
     "history-ttl": "Bewaartermijn geschiedenis",
+    "history-ttl-updated": "Bewaartermijn geschiedenis bijgewerkt.",
     "sort": {
       "name": "Naam",
       "key": "Sleutel",

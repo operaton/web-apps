@@ -405,6 +405,7 @@
     "deployment-id": "Deployment-ID",
     "decision-requirements-id": "Entscheidungsanforderungs-Definitions-ID",
     "history-ttl": "Verlaufs-Aufbewahrungsdauer",
+    "history-ttl-updated": "Verlaufs-Aufbewahrungsdauer aktualisiert.",
     "sort": {
       "name": "Name",
       "key": "Schlüssel",

@@ -1,4 +1,4 @@
-import { GET, GET_TEXT } from '../helper.jsx'
+import { GET, PUT } from '../helper.jsx'
 
 
 const get_decision_definition = (state, id) =>
@@ -13,11 +13,20 @@ const get_decision_definitions = (state, params = {}) => {
 const get_dmn_xml = (state, id) =>
   GET(`/decision-definition/${id}/xml`, state, state.api.decision.dmn)
 
+const update_history_ttl = (state, id, historyTimeToLive) =>
+  PUT(
+    `/decision-definition/${id}/history-time-to-live`,
+    { historyTimeToLive },
+    state,
+    state.api.decision.update_history_ttl,
+  )
+
 
 const decision = {
   get_decision_definition,
   get_decision_definitions,
   get_dmn_xml,
+  update_history_ttl,
 }
 
 export default decision
