@@ -57,6 +57,7 @@ describe("state", () => {
       expect(api.authorization.all.value).toBeNull();
       expect(api.batch.list.value).toBeNull();
       expect(api.batch.one.value).toBeNull();
+      expect(api.job_definition.update.value).toBeNull();
     });
   });
 });

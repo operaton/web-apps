@@ -356,6 +356,59 @@ describe("ProcessesPage — definition tabs", () => {
     expect(getByText("timer")).toBeTruthy();
     expect(getByText("R/PT5M")).toBeTruthy();
   });
+
+  it("jobs tab suspends an active job definition", async () => {
+    mockParams = { definition_id: "proc:1", panel: "jobs" };
+    signal_response(state.api.job_definition.all.by_process_definition, [
+      {
+        id: "jd1",
+        suspended: false,
+        jobType: "timer",
+        jobConfiguration: "R/PT5M",
+      },
+    ]);
+    engine_rest.job_definition.set_suspended.mockResolvedValue(undefined);
+    const { container, getByText } = renderPage(state);
+    fireEvent.click(
+      container.querySelector(
+        '.job-definition-actions input[type="checkbox"]',
+      ),
+    );
+    fireEvent.click(getByText("processes.jobs.suspend"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(engine_rest.job_definition.set_suspended).toHaveBeenCalled();
+    expect(engine_rest.job_definition.set_suspended.mock.lastCall).toEqual([
+      state,
+      "jd1",
+      true,
+      true,
+    ]);
+  });
+
+  it("jobs tab activates a suspended job definition", async () => {
+    mockParams = { definition_id: "proc:1", panel: "jobs" };
+    signal_response(state.api.job_definition.all.by_process_definition, [
+      {
+        id: "jd1",
+        suspended: true,
+        jobType: "timer",
+        jobConfiguration: "R/PT5M",
+      },
+    ]);
+    engine_rest.job_definition.set_suspended.mockResolvedValue(undefined);
+    const { getByText } = renderPage(state);
+    fireEvent.click(getByText("processes.jobs.activate"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(engine_rest.job_definition.set_suspended).toHaveBeenCalled();
+    expect(engine_rest.job_definition.set_suspended.mock.lastCall).toEqual([
+      state,
+      "jd1",
+      false,
+      false,
+    ]);
+  });
 });
 
 describe("ProcessesPage — instance details", () => {

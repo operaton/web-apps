@@ -345,6 +345,9 @@
     "jobs": {
       "overriding-job-priority": "Überschriebene Job-Priorität",
       "suspend": "Anhalten",
+      "activate": "Aktivieren",
+      "include-jobs": "Bestehende Jobs einbeziehen",
+      "suspension-updated": "Status der Job-Definition aktualisiert.",
       "change-priority": "Job-Priorität ändern"
     },
     "sort": {

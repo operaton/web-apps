@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1043,20 +1042,16 @@ const InstanceVariables = () => {
             ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+                ).map(([name, { type, value }]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{value}</td>
+                  </tr>
+                ))
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1407,7 +1402,9 @@ const JobDefinitions = () => {
   const state = useContext(AppState),
     { definition_id, query } = useRoute(),
     history_mode = query?.history === "true",
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    include_jobs = useSignal(false),
+    update = state.api.job_definition.update;
 
   useEffect(() => {
     void engine_rest.job_definition.all.by_process_definition(
@@ -1416,6 +1413,19 @@ const JobDefinitions = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [definition_id]);
+
+  const set_suspended = async (id, suspended) => {
+    await engine_rest.job_definition.set_suspended(
+      state,
+      id,
+      suspended,
+      include_jobs.value,
+    );
+    void engine_rest.job_definition.all.by_process_definition(
+      state,
+      definition_id,
+    );
+  };
 
   /** @namespace state.api.job_definition.all.by_process_definition.value.data **/
   /** @namespace definition.jobType **/
@@ -1426,6 +1436,23 @@ const JobDefinitions = () => {
       {history_mode && (
         <small class="history-na">{t("processes.history-mode-na")}</small>
       )}
+      <div class="job-definition-actions">
+        <label>
+          <input
+            type="checkbox"
+            checked={include_jobs.value}
+            onChange={(e) => (include_jobs.value = e.currentTarget.checked)}
+          />
+          {t("processes.jobs.include-jobs")}
+        </label>
+      </div>
+      <RequestState
+        signal={update}
+        on_nothing={() => null}
+        on_success={() => (
+          <p class="info-box">{t("processes.jobs.suspension-updated")}</p>
+        )}
+      />
       <table>
         <thead>
           <tr>
@@ -1452,8 +1479,21 @@ const JobDefinitions = () => {
                 <td>{definition.jobConfiguration}</td>
                 <td>{definition.overridingJobPriority ?? "-"}</td>
                 <td>
-                  <button>{t("processes.jobs.suspend")}</button>
-                  <button>{t("processes.jobs.change-priority")}</button>
+                  {definition.suspended ? (
+                    <button
+                      type="button"
+                      onClick={() => set_suspended(definition.id, false)}
+                    >
+                      {t("processes.jobs.activate")}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => set_suspended(definition.id, true)}
+                    >
+                      {t("processes.jobs.suspend")}
+                    </button>
+                  )}
                 </td>
               </tr>
             ),
@@ -1463,13 +1503,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

@@ -869,6 +869,25 @@ div.accordion {
   color: var(--text-2);
 }
 
+/* process job definitions */
+
+.job-definition-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-1);
+}
+
+.job-definition-actions label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-half);
+}
+
+.job-definition-actions input[type="checkbox"] {
+  width: auto;
+}
+
 /* task detail cards */
 
 .task-cards {

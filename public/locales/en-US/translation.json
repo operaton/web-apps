@@ -345,6 +345,9 @@
     "jobs": {
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
+      "activate": "Activate",
+      "include-jobs": "Include existing jobs",
+      "suspension-updated": "Job definition state updated.",
       "change-priority": "Change Overriding Job Priority"
     },
     "sort": {
