@@ -57,6 +57,9 @@ describe("state", () => {
       expect(api.authorization.all.value).toBeNull();
       expect(api.batch.list.value).toBeNull();
       expect(api.batch.one.value).toBeNull();
+      expect(api.cleanup.configuration.value).toBeNull();
+      expect(api.cleanup.cleanable.process_definitions.value).toBeNull();
+      expect(api.cleanup.metrics.process_instances.value).toBeNull();
     });
   });
 });

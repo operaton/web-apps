@@ -84,6 +84,22 @@ const createAppState = () => {
       update: signal(null),
       saved_filters: signal(null),
     },
+    cleanup: {
+      configuration: signal(null),
+      jobs: signal(null),
+      run: signal(null),
+      update_ttl: signal(null),
+      cleanable: {
+        process_definitions: signal(null),
+        decision_definitions: signal(null),
+        batches: signal(null),
+      },
+      metrics: {
+        process_instances: signal(null),
+        decision_instances: signal(null),
+        batch_operations: signal(null),
+      },
+    },
     tenant: {
       list: signal(null),
       by_member: signal(null),

@@ -39,6 +39,7 @@
     "deployments": "Deployments",
     "batches": "Batches",
     "migrations": "Migrations",
+    "cleanup": "Cleanup",
     "admin": "Admin",
     "help": "Help",
     "account": "Account",
@@ -77,6 +78,7 @@
       "decisions": "Decisions",
       "deployments": "Deployments",
       "migrations": "Migrations",
+      "cleanup": "Cleanup",
       "admin": "Admin",
       "admin-users": "Admin – Users",
       "admin-groups": "Admin – Groups",
@@ -557,6 +559,37 @@
       "tenant-id": "Tenant ID",
       "activity-id": "Activity ID",
       "without-tenant-id": "Without Tenant ID"
+    }
+  },
+  "cleanup": {
+    "title": "Cleanup",
+    "subtitle": "Monitor history cleanup, review cleanable data, and adjust history time to live.",
+    "refresh": "Refresh",
+    "run-now": "Run cleanup now",
+    "configuration": "Configuration",
+    "enabled": "Enabled",
+    "strategy": "Strategy",
+    "batch-window": "Batch window",
+    "parallelism": "Parallelism",
+    "deleted-data": "Deleted data in the last {{days}} days",
+    "jobs": "Cleanup jobs",
+    "no-jobs": "No cleanup jobs are scheduled.",
+    "due-date": "Due date",
+    "retries": "Retries",
+    "exception": "Exception",
+    "process-definitions": "Cleanable process definitions",
+    "decision-definitions": "Cleanable decision definitions",
+    "batches": "Cleanable batches",
+    "no-cleanable-data": "No cleanable data reported.",
+    "version": "Version",
+    "finished": "Finished",
+    "cleanable": "Cleanable",
+    "ttl": "History TTL",
+    "save-ttl": "Save TTL",
+    "metrics": {
+      "process-instances": "Process instances",
+      "decision-instances": "Decision instances",
+      "batch-operations": "Batch operations"
     }
   },
   "admin": {

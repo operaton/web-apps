@@ -828,6 +828,65 @@
     text-align: center;
   }
 
+  .cleanup {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    height: 100%;
+    padding: var(--spacing-2);
+  }
+  .cleanup > header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--spacing-2);
+  }
+  .cleanup > header p {
+    color: var(--text-2);
+    margin: 0;
+  }
+  .cleanup > section,
+  .cleanup > section > section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  .cleanup table {
+    width: 100%;
+  }
+  .cleanup :where(td, th) {
+    vertical-align: top;
+  }
+  .cleanup-summary,
+  .cleanup-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--spacing-1);
+  }
+  .cleanup-summary dt,
+  .cleanup-metrics dt {
+    color: var(--text-2);
+    font-size: var(--small-font-size);
+  }
+  .cleanup-summary dd,
+  .cleanup-metrics dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .cleanup-ttl {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-1);
+  }
+  .cleanup-ttl input {
+    width: 7rem;
+  }
+  .cleanup-ttl button {
+    margin: 0;
+  }
+
   #admin-page {
     display: flex;
     flex: 1;

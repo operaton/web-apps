@@ -4,6 +4,7 @@ import {
 } from "./helper.jsx";
 import auth from "./resources/auth.js";
 import batch from "./resources/batch.js";
+import cleanup from "./resources/cleanup.js";
 import engine from "./resources/engine.js";
 import user from "./resources/user.js";
 import group from "./resources/group.js";
@@ -23,6 +24,7 @@ const engine_rest = {
   auth,
   authorization,
   batch,
+  cleanup,
   decision,
   deployment,
   engine,

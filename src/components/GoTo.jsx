@@ -30,6 +30,7 @@ const PAGES = [
   { nameKey: "goto.pages.decisions", href: "/decisions" },
   { nameKey: "goto.pages.deployments", href: "/deployments" },
   { nameKey: "goto.pages.migrations", href: "/migrations" },
+  { nameKey: "goto.pages.cleanup", href: "/cleanup" },
   { nameKey: "goto.pages.admin", href: "/admin" },
   { nameKey: "goto.pages.admin-users", href: "/admin/users" },
   { nameKey: "goto.pages.admin-groups", href: "/admin/groups" },

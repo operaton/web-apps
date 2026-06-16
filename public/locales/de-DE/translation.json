@@ -39,6 +39,7 @@
     "deployments": "Deployments",
     "batches": "Stapelverarbeitung",
     "migrations": "Migrationen",
+    "cleanup": "Cleanup",
     "admin": "Admin",
     "help": "Hilfe",
     "account": "Konto",
@@ -77,6 +78,7 @@
       "decisions": "Entscheidungen",
       "deployments": "Deployments",
       "migrations": "Migrationen",
+      "cleanup": "Cleanup",
       "admin": "Admin",
       "admin-users": "Admin – Benutzer",
       "admin-groups": "Admin – Gruppen",
@@ -557,6 +559,37 @@
       "tenant-id": "Mandanten-ID",
       "activity-id": "Aktivitäts-ID",
       "without-tenant-id": "Ohne Mandanten-ID"
+    }
+  },
+  "cleanup": {
+    "title": "Cleanup",
+    "subtitle": "History Cleanup überwachen, bereinigbare Daten prüfen und die History Time To Live anpassen.",
+    "refresh": "Aktualisieren",
+    "run-now": "Cleanup jetzt starten",
+    "configuration": "Konfiguration",
+    "enabled": "Aktiviert",
+    "strategy": "Strategie",
+    "batch-window": "Batch-Fenster",
+    "parallelism": "Parallelität",
+    "deleted-data": "Gelöschte Daten in den letzten {{days}} Tagen",
+    "jobs": "Cleanup-Jobs",
+    "no-jobs": "Es sind keine Cleanup-Jobs geplant.",
+    "due-date": "Fälligkeitsdatum",
+    "retries": "Retries",
+    "exception": "Exception",
+    "process-definitions": "Bereinigbare Prozessdefinitionen",
+    "decision-definitions": "Bereinigbare Entscheidungsdefinitionen",
+    "batches": "Bereinigbare Batches",
+    "no-cleanable-data": "Keine bereinigbaren Daten gemeldet.",
+    "version": "Version",
+    "finished": "Beendet",
+    "cleanable": "Bereinigbar",
+    "ttl": "History TTL",
+    "save-ttl": "TTL speichern",
+    "metrics": {
+      "process-instances": "Prozessinstanzen",
+      "decision-instances": "Entscheidungsinstanzen",
+      "batch-operations": "Batch-Operationen"
     }
   },
   "admin": {
