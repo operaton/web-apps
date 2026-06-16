@@ -145,6 +145,9 @@ const createAppState = () => {
         create: signal(null),
       },
     },
+    job: {
+      by_process_instance: signal(null),
+    },
     filter: {
       list: signal(null),
       one: signal(null),
@@ -172,6 +175,9 @@ const createAppState = () => {
         by_process_instance: signal(null),
       },
       task: {
+        by_process_instance: signal(null),
+      },
+      job_log: {
         by_process_instance: signal(null),
       },
       process_instance: {

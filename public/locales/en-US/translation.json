@@ -345,7 +345,18 @@
     "jobs": {
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
-      "change-priority": "Change Overriding Job Priority"
+      "change-priority": "Change Overriding Job Priority",
+      "due-date": "Due Date",
+      "timestamp": "Timestamp",
+      "retries": "Retries",
+      "exception-message": "Exception Message",
+      "event": "Event",
+      "created": "Created",
+      "failed": "Failed",
+      "succeeded": "Succeeded",
+      "deleted": "Deleted",
+      "log": "Log",
+      "empty": "No jobs found."
     },
     "sort": {
       "name": "Name",

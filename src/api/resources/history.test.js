@@ -110,6 +110,15 @@ describe("api/resources/history", () => {
     });
   });
 
+  it("job_log.by_process_instance() GETs historic job logs filtered by instance", () => {
+    history.job_log.by_process_instance(state, "inst-1");
+    expect_api_call(GET, {
+      url: "/history/job-log?processInstanceId=inst-1",
+      state,
+      signal: state.api.history.job_log.by_process_instance,
+    });
+  });
+
   it("process_instance.called() GETs historic child instances of an instance", () => {
     history.process_instance.called(state, "inst-1");
     expect_api_call(GET, {

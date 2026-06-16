@@ -46,6 +46,9 @@ const get_process_instance_variable = (state, instance_id) =>
 const get_historic_tasks_by_instance = (state, instance_id) =>
   GET(`/history/task?processInstanceId=${instance_id}`, state, state.api.history.task.by_process_instance)
 
+const get_job_logs_by_process_instance = (state, instance_id) =>
+  GET(`/history/job-log?processInstanceId=${instance_id}`, state, state.api.history.job_log.by_process_instance)
+
 const get_historic_called_instances = (state, instance_id) =>
   GET(`/history/process-instance?superProcessInstanceId=${instance_id}`, state, state.api.history.process_instance.called)
 
@@ -71,6 +74,9 @@ const history = {
   },
   task: {
     by_process_instance: get_historic_tasks_by_instance,
+  },
+  job_log: {
+    by_process_instance: get_job_logs_by_process_instance,
   },
   get_user_operation
 }

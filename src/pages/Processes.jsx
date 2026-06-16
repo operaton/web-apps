@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1043,20 +1042,16 @@ const InstanceVariables = () => {
             ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+                ).map(([name, { type, value }]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{value}</td>
+                  </tr>
+                ))
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1464,13 +1459,6 @@ const JobDefinitions = () => {
   );
 };
 
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
-
 const DefinitionsManage = () => {
   const state = useContext(AppState),
     { route } = useLocation(),
@@ -1571,8 +1559,103 @@ const UUIDLink = ({ uuid = "?", path }) => (
   </a>
 );
 
-// TODO: create Jobs example for old Camunda apps
-const InstanceJobsPlaceholder = () => <p>Jobs</p>;
+const job_log_event = (job_log) => {
+  if (job_log.creationLog) return "created";
+  if (job_log.failureLog) return "failed";
+  if (job_log.successLog) return "succeeded";
+  if (job_log.deletionLog) return "deleted";
+  return "log";
+};
+
+const InstanceJobs = () => {
+  const state = useContext(AppState),
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
+    [t] = useTranslation();
+
+  useEffect(() => {
+    if (history_mode) {
+      void engine_rest.history.job_log.by_process_instance(
+        state,
+        params.selection_id,
+      );
+    } else {
+      void engine_rest.job.by_process_instance(state, params.selection_id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id, history_mode]);
+
+  const rows = history_mode
+    ? (state.api.history.job_log.by_process_instance.value?.data ?? [])
+    : (state.api.job.by_process_instance.value?.data ?? []);
+
+  return (
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>{t("common.id")}</th>
+            <th>
+              {history_mode ? t("processes.jobs.event") : t("common.state")}
+            </th>
+            <th>{t("common.activity")}</th>
+            <th>
+              {history_mode
+                ? t("processes.jobs.timestamp")
+                : t("processes.jobs.due-date")}
+            </th>
+            <th>{t("processes.jobs.retries")}</th>
+            <th>{t("tasks.task-list.table-headings.priority")}</th>
+            <th>{t("processes.jobs.exception-message")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
+            <tr>
+              <td colspan="7">{t("processes.jobs.empty")}</td>
+            </tr>
+          ) : (
+            rows.map((job) => {
+              const id = history_mode ? (job.jobId ?? job.id) : job.id,
+                state_or_event = history_mode
+                  ? t(`processes.jobs.${job_log_event(job)}`)
+                  : job.suspended
+                    ? t("common.suspended")
+                    : t("common.active"),
+                activity = job.activityId ?? job.failedActivityId ?? "—",
+                due_date = history_mode
+                  ? (job.timestamp ?? job.jobDueDate)
+                  : job.dueDate,
+                retries = history_mode ? job.jobRetries : job.retries,
+                priority = history_mode ? job.jobPriority : job.priority,
+                exception_message = history_mode
+                  ? job.jobExceptionMessage
+                  : job.exceptionMessage;
+
+              return (
+                <tr key={job.id}>
+                  <td class="font-mono">{id?.substring(0, 8) ?? "—"}</td>
+                  <td>{state_or_event}</td>
+                  <td>{activity}</td>
+                  <td>
+                    {due_date ? (
+                      <time datetime={due_date}>{due_date}</time>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>{retries ?? "—"}</td>
+                  <td>{priority ?? "—"}</td>
+                  <td>{exception_message ?? "—"}</td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 // TODO: create External Apps example for old Camunda apps
 const InstanceExternalTasksPlaceholder = () => <p>External Tasks</p>;
 
@@ -1605,7 +1688,7 @@ const process_instance_tabs = [
     nameKey: "processes.tabs.jobs",
     id: "jobs",
     pos: 4,
-    Component: InstanceJobsPlaceholder,
+    Component: InstanceJobs,
   },
   {
     nameKey: "processes.tabs.external-tasks",

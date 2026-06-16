@@ -506,6 +506,61 @@ describe("ProcessesPage — instance details", () => {
     expect(getByText("Approve (historic)")).toBeTruthy();
   });
 
+  it("jobs sub-panel fetches and renders live jobs", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "jobs",
+    };
+    signal_response(state.api.job.by_process_instance, [
+      {
+        id: "job-1",
+        activityId: "timerEvent",
+        dueDate: "2024-01-01T00:00:00Z",
+        retries: 3,
+        priority: 50,
+        suspended: false,
+        exceptionMessage: "live boom",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.job.by_process_instance).toHaveBeenCalled();
+    expect(getByText("job-1")).toBeTruthy();
+    expect(getByText("timerEvent")).toBeTruthy();
+    expect(getByText("live boom")).toBeTruthy();
+  });
+
+  it("jobs sub-panel fetches and renders historic job logs in history mode", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "jobs",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.history.job_log.by_process_instance, [
+      {
+        id: "job-log-1",
+        jobId: "job-77",
+        activityId: "serviceTask",
+        timestamp: "2024-01-01T00:00:00Z",
+        jobRetries: 0,
+        jobPriority: 80,
+        jobExceptionMessage: "history boom",
+        failureLog: true,
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.history.job_log.by_process_instance).toHaveBeenCalled();
+    expect(engine_rest.job.by_process_instance).not.toHaveBeenCalled();
+    expect(getByText("job-77")).toBeTruthy();
+    expect(getByText("serviceTask")).toBeTruthy();
+    expect(getByText("2024-01-01T00:00:00Z")).toBeTruthy();
+    expect(getByText("processes.jobs.failed")).toBeTruthy();
+    expect(getByText("history boom")).toBeTruthy();
+  });
+
   it("called-instances sub-panel uses the historic endpoint in history mode", () => {
     mockParams = {
       definition_id: "proc:1",
