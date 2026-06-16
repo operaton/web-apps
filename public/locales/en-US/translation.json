@@ -345,7 +345,11 @@
     "jobs": {
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
-      "change-priority": "Change Overriding Job Priority"
+      "change-priority": "Change Overriding Job Priority",
+      "priority": "Priority",
+      "include-jobs": "Apply to existing jobs",
+      "reset-priority": "Reset Priority",
+      "priority-success": "Job definition priority updated."
     },
     "sort": {
       "name": "Name",

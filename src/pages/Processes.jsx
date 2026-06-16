@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1044,9 +1043,8 @@ const InstanceVariables = () => {
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
                 ).map(
-                  // eslint-disable-next-line react/jsx-key
                   ([name, { type, value }]) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1054,9 +1052,8 @@ const InstanceVariables = () => {
                   ),
                 )
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1426,6 +1423,14 @@ const JobDefinitions = () => {
       {history_mode && (
         <small class="history-na">{t("processes.history-mode-na")}</small>
       )}
+      {state.api.job_definition.priority.value ? (
+        <RequestState
+          signal={state.api.job_definition.priority}
+          on_success={() => (
+            <p class="success">{t("processes.jobs.priority-success")}</p>
+          )}
+        />
+      ) : null}
       <table>
         <thead>
           <tr>
@@ -1440,22 +1445,7 @@ const JobDefinitions = () => {
         <tbody>
           {state.api.job_definition.all.by_process_definition.value?.data?.map(
             (definition) => (
-              <tr key={definition.id}>
-                <td>
-                  {definition.suspended
-                    ? t("common.suspended")
-                    : t("common.active")}
-                </td>
-                <td>?</td>
-                {/*<td>{definition.calledFromActivityIds.map(a => `${a}, `)}</td>*/}
-                <td>{definition.jobType}</td>
-                <td>{definition.jobConfiguration}</td>
-                <td>{definition.overridingJobPriority ?? "-"}</td>
-                <td>
-                  <button>{t("processes.jobs.suspend")}</button>
-                  <button>{t("processes.jobs.change-priority")}</button>
-                </td>
-              </tr>
+              <JobDefinitionRow key={definition.id} definition={definition} />
             ),
           )}
         </tbody>
@@ -1464,12 +1454,80 @@ const JobDefinitions = () => {
   );
 };
 
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
+const JobDefinitionRow = ({ definition }) => {
+  const state = useContext(AppState),
+    { definition_id } = useRoute(),
+    [t] = useTranslation(),
+    priority = useSignal(definition.overridingJobPriority ?? ""),
+    include_jobs = useSignal(false),
+    input_id = `job-priority-${definition.id}`;
+
+  const refresh = () =>
+      engine_rest.job_definition.all.by_process_definition(
+        state,
+        definition_id,
+      ),
+    on_submit = (e) => {
+      e.preventDefault();
+      const raw = String(priority.value).trim();
+      if (raw === "") return;
+      const parsed = Number(raw);
+      if (!Number.isFinite(parsed)) return;
+      void engine_rest.job_definition.set_priority(
+        state,
+        definition.id,
+        parsed,
+        include_jobs.value,
+      ).then(refresh);
+    },
+    on_reset = () =>
+      engine_rest.job_definition.set_priority(
+        state,
+        definition.id,
+        null,
+        false,
+      ).then(refresh);
+
+  return (
+    <tr>
+      <td>
+        {definition.suspended
+          ? t("common.suspended")
+          : t("common.active")}
+      </td>
+      <td>{definition.activityId ?? "—"}</td>
+      <td>{definition.jobType}</td>
+      <td>{definition.jobConfiguration}</td>
+      <td>{definition.overridingJobPriority ?? "-"}</td>
+      <td>
+        <form onSubmit={on_submit}>
+          <label for={input_id}>{t("processes.jobs.priority")}</label>
+          <input
+            id={input_id}
+            type="number"
+            value={priority.value}
+            onInput={(e) => (priority.value = e.currentTarget.value)}
+            required
+          />
+          <label>
+            <input
+              type="checkbox"
+              checked={include_jobs.value}
+              onChange={(e) => (include_jobs.value = e.currentTarget.checked)}
+            />
+            {t("processes.jobs.include-jobs")}
+          </label>
+          <div class="button-group">
+            <button type="submit">{t("processes.jobs.change-priority")}</button>
+            <button type="button" class="secondary" onClick={on_reset}>
+              {t("processes.jobs.reset-priority")}
+            </button>
+          </div>
+        </form>
+      </td>
+    </tr>
+  );
+};
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

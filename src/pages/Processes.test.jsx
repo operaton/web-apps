@@ -356,6 +356,70 @@ describe("ProcessesPage — definition tabs", () => {
     expect(getByText("timer")).toBeTruthy();
     expect(getByText("R/PT5M")).toBeTruthy();
   });
+
+  it("sets an overriding job definition priority", async () => {
+    mockParams = { definition_id: "proc:1", panel: "jobs" };
+    engine_rest.job_definition.set_priority.mockResolvedValue(undefined);
+    signal_response(state.api.job_definition.all.by_process_definition, [
+      {
+        id: "jd1",
+        suspended: false,
+        activityId: "timer_start",
+        jobType: "timer",
+        jobConfiguration: "R/PT5M",
+        overridingJobPriority: null,
+      },
+    ]);
+    const { container, getByLabelText, getByText } = renderPage(state);
+
+    fireEvent.input(getByLabelText("processes.jobs.priority"), {
+      target: { value: "42" },
+    });
+    fireEvent.click(getByLabelText("processes.jobs.include-jobs"));
+    fireEvent.submit(container.querySelector("form"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.job_definition.set_priority).toHaveBeenCalled();
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[0]).toBe(
+      state,
+    );
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[1]).toBe(
+      "jd1",
+    );
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[2]).toBe(42);
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[3]).toBe(true);
+    expect(getByText("timer_start")).toBeTruthy();
+  });
+
+  it("resets an overriding job definition priority", async () => {
+    mockParams = { definition_id: "proc:1", panel: "jobs" };
+    engine_rest.job_definition.set_priority.mockResolvedValue(undefined);
+    signal_response(state.api.job_definition.all.by_process_definition, [
+      {
+        id: "jd1",
+        suspended: false,
+        activityId: "timer_start",
+        jobType: "timer",
+        jobConfiguration: "R/PT5M",
+        overridingJobPriority: 10,
+      },
+    ]);
+    const { getByText } = renderPage(state);
+
+    fireEvent.click(getByText("processes.jobs.reset-priority"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.job_definition.set_priority).toHaveBeenCalled();
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[1]).toBe(
+      "jd1",
+    );
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[2]).toBe(null);
+    expect(engine_rest.job_definition.set_priority.mock.lastCall[3]).toBe(
+      false,
+    );
+  });
 });
 
 describe("ProcessesPage — instance details", () => {
