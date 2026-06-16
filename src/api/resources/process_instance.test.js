@@ -1,11 +1,13 @@
 import { describe, it, vi, beforeEach } from "vitest";
 
 vi.mock("../helper.jsx", () => ({
+  DELETE: vi.fn(),
   GET: vi.fn(),
   POST: vi.fn(),
+  PUT: vi.fn(),
 }));
 
-import { GET, POST } from "../helper.jsx";
+import { DELETE, GET, POST, PUT } from "../helper.jsx";
 import { create_mock_state, expect_api_call } from "../../test/helpers.js";
 import process_instance from "./process_instance.js";
 
@@ -30,6 +32,27 @@ describe("api/resources/process_instance", () => {
       url: "/process-instance/inst-1/variables",
       state,
       signal: state.api.process.instance.variables,
+    });
+  });
+
+  it("update_variable() PUTs a variable payload", () => {
+    const body = { type: "Integer", value: 42 };
+    process_instance.update_variable(state, "inst-1", "amount total", body);
+    expect_api_call(PUT, {
+      url: "/process-instance/inst-1/variables/amount%20total",
+      body,
+      state,
+      signal: state.api.process.instance.variable_update,
+    });
+  });
+
+  it("delete_variable() DELETEs the variable endpoint", () => {
+    process_instance.delete_variable(state, "inst-1", "amount total");
+    expect_api_call(DELETE, {
+      url: "/process-instance/inst-1/variables/amount%20total",
+      body: null,
+      state,
+      signal: state.api.process.instance.variable_delete,
     });
   });
 

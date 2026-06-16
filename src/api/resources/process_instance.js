@@ -1,4 +1,4 @@
-import { GET, POST } from "../helper.jsx";
+import { DELETE, GET, POST, PUT } from "../helper.jsx";
 
 const get_process_instance = (state, instance_id) =>
   GET(
@@ -31,6 +31,22 @@ const get_process_instance_variables = (state, instance_id) =>
     `/process-instance/${instance_id}/variables`,
     state,
     state.api.process.instance.variables,
+  );
+
+const update_process_instance_variable = (state, instance_id, variable_name, body) =>
+  PUT(
+    `/process-instance/${instance_id}/variables/${encodeURIComponent(variable_name)}`,
+    body,
+    state,
+    state.api.process.instance.variable_update,
+  );
+
+const delete_process_instance_variable = (state, instance_id, variable_name) =>
+  DELETE(
+    `/process-instance/${instance_id}/variables/${encodeURIComponent(variable_name)}`,
+    null,
+    state,
+    state.api.process.instance.variable_delete,
   );
 
 const get_called_process_instances = (state, instance_id) =>
@@ -105,6 +121,8 @@ const modify_process_instance_async = (
 const process_instance = {
   one: get_process_instance,
   variables: get_process_instance_variables,
+  update_variable: update_process_instance_variable,
+  delete_variable: delete_process_instance_variable,
   called: get_called_process_instances,
   count: get_process_instance_count,
   all: get_all_process_instances,

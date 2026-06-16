@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1005,11 +1004,47 @@ const ProcessInstance = ({ id, startTime, state, businessKey }) => {
   );
 };
 
+const parse_variable_value = (type, value) => {
+  if (value === "") return value;
+  const normalized = type?.toLowerCase();
+  if (normalized === "boolean") {
+    if (value.toLowerCase() === "true") return true;
+    if (value.toLowerCase() === "false") return false;
+  }
+  if (["integer", "long", "short"].includes(normalized)) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isNaN(parsed) ? value : parsed;
+  }
+  if (normalized === "double") {
+    const parsed = Number.parseFloat(value);
+    return Number.isNaN(parsed) ? value : parsed;
+  }
+  return value;
+};
+
+const format_variable_value = (value) => {
+  if (value === null) return "null";
+  if (typeof value === "object") return JSON.stringify(value);
+  return `${value}`;
+};
+
+const VariableActionResult = ({ signal, success }) => (
+  <RequestState
+    signal={signal}
+    on_nothing={() => null}
+    on_success={() => <p class="success">{success}</p>}
+  />
+);
+
 const InstanceVariables = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
     history_mode = query.history === "true",
     [t] = useTranslation(),
+    creating = useSignal(false),
+    editing = useSignal(null),
+    create_form = useSignal({ name: "", type: "String", value: "" }),
+    edit_form = useSignal({ type: "", value: "", valueInfo: undefined }),
     selection_exists =
       state.api.process.instance.variables.value !== null &&
       state.api.process.instance.variables.value.data !== null &&
@@ -1027,42 +1062,232 @@ const InstanceVariables = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selection_id, history_mode]);
 
+  const refresh = () =>
+    engine_rest.process_instance.variables(state, params.selection_id);
+
+  const variable_payload = (form) => ({
+    type: form.type,
+    value: parse_variable_value(form.type, form.value),
+    ...(form.valueInfo ? { valueInfo: form.valueInfo } : {}),
+  });
+
+  const update_variable = (name, form) =>
+    Promise.resolve(
+      engine_rest.process_instance.update_variable(
+        state,
+        params.selection_id,
+        name,
+        variable_payload(form),
+      ),
+    ).then(() => refresh());
+
+  const start_edit = (name, variable) => {
+    editing.value = name;
+    edit_form.value = {
+      type: variable.type,
+      value: format_variable_value(variable.value),
+      valueInfo: variable.valueInfo,
+    };
+  };
+
+  const submit_create = (e) => {
+    e.preventDefault();
+    void update_variable(create_form.value.name, create_form.value).then(() => {
+      creating.value = false;
+      create_form.value = { name: "", type: "String", value: "" };
+    });
+  };
+
+  const submit_edit = (e, name) => {
+    e.preventDefault();
+    void update_variable(name, edit_form.value).then(() => {
+      editing.value = null;
+    });
+  };
+
+  const delete_variable = (name) => {
+    if (!window.confirm(t("processes.variables.confirm-delete", { name }))) {
+      return;
+    }
+    void Promise.resolve(
+      engine_rest.process_instance.delete_variable(
+        state,
+        params.selection_id,
+        name,
+      ),
+    ).then(() => refresh());
+  };
+
+  const live_rows = () =>
+    Object.entries(state.api.process.instance.variables.value.data).map(
+      ([name, variable], index) => {
+        const form_id = `variable-edit-${index}`;
+        return (
+          <tr key={name}>
+            <td>{name}</td>
+            {editing.value === name ? (
+              <>
+                <td>
+                  <input
+                    form={form_id}
+                    aria-label={t("processes.variables.type")}
+                    value={edit_form.value.type}
+                    onInput={(e) =>
+                      (edit_form.value = {
+                        ...edit_form.peek(),
+                        type: e.currentTarget.value,
+                      })
+                    }
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    form={form_id}
+                    aria-label={t("processes.variables.value")}
+                    value={edit_form.value.value}
+                    onInput={(e) =>
+                      (edit_form.value = {
+                        ...edit_form.peek(),
+                        value: e.currentTarget.value,
+                      })
+                    }
+                  />
+                </td>
+                <td>
+                  <form id={form_id} onSubmit={(e) => submit_edit(e, name)}>
+                    <div class="button-group">
+                      <button type="submit">{t("common.save")}</button>
+                      <button
+                        type="button"
+                        class="secondary"
+                        onClick={() => (editing.value = null)}
+                      >
+                        {t("common.cancel")}
+                      </button>
+                    </div>
+                  </form>
+                </td>
+              </>
+            ) : (
+              <>
+                <td>{variable.type}</td>
+                <td>{format_variable_value(variable.value)}</td>
+                <td>
+                  <div class="button-group">
+                    <button
+                      type="button"
+                      onClick={() => start_edit(name, variable)}
+                    >
+                      {t("common.edit")}
+                    </button>
+                    <button
+                      type="button"
+                      class="danger"
+                      onClick={() => delete_variable(name)}
+                    >
+                      {t("common.delete")}
+                    </button>
+                  </div>
+                </td>
+              </>
+            )}
+          </tr>
+        );
+      },
+    );
+
+  const history_rows = () =>
+    state.api.process.instance.variables.value.data.map(
+      ({ name, type, value }) => (
+        <tr key={name}>
+          <td>{name}</td>
+          <td>{type}</td>
+          <td>{format_variable_value(value)}</td>
+        </tr>
+      ),
+    );
+
   return (
     <div>
+      {!history_mode ? (
+        <>
+          <VariableActionResult
+            signal={state.api.process.instance.variable_update}
+            success={t("processes.variables.success-updated")}
+          />
+          <VariableActionResult
+            signal={state.api.process.instance.variable_delete}
+            success={t("processes.variables.success-deleted")}
+          />
+          <div class="button-group">
+            <button type="button" onClick={() => (creating.value = true)}>
+              {t("processes.variables.add")}
+            </button>
+          </div>
+          {creating.value ? (
+            <form onSubmit={submit_create}>
+              <label for="new-variable-name">{t("processes.variables.name")}</label>
+              <input
+                id="new-variable-name"
+                value={create_form.value.name}
+                onInput={(e) =>
+                  (create_form.value = {
+                    ...create_form.peek(),
+                    name: e.currentTarget.value,
+                  })
+                }
+                required
+              />
+              <label for="new-variable-type">{t("processes.variables.type")}</label>
+              <input
+                id="new-variable-type"
+                value={create_form.value.type}
+                onInput={(e) =>
+                  (create_form.value = {
+                    ...create_form.peek(),
+                    type: e.currentTarget.value,
+                  })
+                }
+                required
+              />
+              <label for="new-variable-value">{t("processes.variables.value")}</label>
+              <input
+                id="new-variable-value"
+                value={create_form.value.value}
+                onInput={(e) =>
+                  (create_form.value = {
+                    ...create_form.peek(),
+                    value: e.currentTarget.value,
+                  })
+                }
+              />
+              <div class="button-group">
+                <button type="submit">{t("common.save")}</button>
+                <button
+                  type="button"
+                  class="secondary"
+                  onClick={() => (creating.value = false)}
+                >
+                  {t("common.cancel")}
+                </button>
+              </div>
+            </form>
+          ) : null}
+        </>
+      ) : null}
       <table>
         <thead>
           <tr>
             <th>{t("common.name")}</th>
             <th>{t("common.type")}</th>
             <th>{t("common.value")}</th>
-            <th>{t("common.actions")}</th>
+            {!history_mode ? <th>{t("common.actions")}</th> : null}
           </tr>
         </thead>
         <tbody>
           {selection_exists
-            ? !history_mode
-              ? Object.entries(
-                  state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
-              : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
-                  ({ name, type, value }) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+            ? !history_mode ? live_rows() : history_rows()
             : t("common.loading")}
         </tbody>
       </table>
@@ -1463,13 +1688,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

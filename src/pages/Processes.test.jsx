@@ -405,6 +405,106 @@ describe("ProcessesPage — instance details", () => {
     expect(getByText("42")).toBeTruthy();
   });
 
+  it("adds a live variable", async () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    signal_response(state.api.process.instance.variables, {});
+    const { container, getByLabelText, getByText } = renderPage(state);
+
+    fireEvent.click(getByText("processes.variables.add"));
+    fireEvent.input(getByLabelText("processes.variables.name"), {
+      target: { value: "priority" },
+    });
+    fireEvent.input(getByLabelText("processes.variables.type"), {
+      target: { value: "Integer" },
+    });
+    fireEvent.input(getByLabelText("processes.variables.value"), {
+      target: { value: "100" },
+    });
+    fireEvent.submit(container.querySelector("form"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.process_instance.update_variable).toHaveBeenCalled();
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[0]).toBe(
+      state,
+    );
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[1]).toBe(
+      "inst-9999",
+    );
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[2]).toBe(
+      "priority",
+    );
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[3]).toEqual(
+      { type: "Integer", value: 100 },
+    );
+  });
+
+  it("updates a live variable", async () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    signal_response(state.api.process.instance.variables, {
+      amount: { type: "Integer", value: 42 },
+    });
+    const { container, getByLabelText, getByText } = renderPage(state);
+
+    fireEvent.click(getByText("common.edit"));
+    fireEvent.input(getByLabelText("processes.variables.value"), {
+      target: { value: "99" },
+    });
+    fireEvent.submit(container.querySelector("form"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.process_instance.update_variable).toHaveBeenCalled();
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[1]).toBe(
+      "inst-9999",
+    );
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[2]).toBe(
+      "amount",
+    );
+    expect(engine_rest.process_instance.update_variable.mock.lastCall[3]).toEqual(
+      { type: "Integer", value: 99 },
+    );
+  });
+
+  it("deletes a live variable after confirmation", async () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    signal_response(state.api.process.instance.variables, {
+      amount: { type: "Integer", value: 42 },
+    });
+    const prev = window.confirm;
+    window.confirm = vi.fn(() => true);
+    const { getByText } = renderPage(state);
+
+    fireEvent.click(getByText("common.delete"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(window.confirm).toHaveBeenCalled();
+    expect(engine_rest.process_instance.delete_variable).toHaveBeenCalled();
+    expect(engine_rest.process_instance.delete_variable.mock.lastCall[1]).toBe(
+      "inst-9999",
+    );
+    expect(engine_rest.process_instance.delete_variable.mock.lastCall[2]).toBe(
+      "amount",
+    );
+    window.confirm = prev;
+  });
+
   it("variables sub-panel fetches history variables in history mode", () => {
     mockParams = {
       definition_id: "proc:1",
@@ -421,6 +521,23 @@ describe("ProcessesPage — instance details", () => {
       engine_rest.history.variable_instance.by_process_instance,
     ).toHaveBeenCalled();
     expect(getByText("amount")).toBeTruthy();
+  });
+
+  it("keeps history variables read-only", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.process.instance.variables, [
+      { name: "amount", type: "Integer", value: 7 },
+    ]);
+    const { queryByText } = renderPage(state);
+
+    expect(queryByText("processes.variables.add")).toBeNull();
+    expect(queryByText("common.actions")).toBeNull();
   });
 
   it("instance-incidents sub-panel fetches and renders incidents", () => {

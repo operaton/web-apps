@@ -335,6 +335,15 @@
       "groups": "Gruppen",
       "users": "Benutzer"
     },
+    "variables": {
+      "add": "Variable hinzufügen",
+      "name": "Variablenname",
+      "type": "Variablentyp",
+      "value": "Variablenwert",
+      "confirm-delete": "Variable {{name}} löschen?",
+      "success-updated": "Variable aktualisiert.",
+      "success-deleted": "Variable gelöscht."
+    },
     "called-instances": {
       "called-process-instance": "Aufgerufene Prozessinstanz",
       "process-definition": "Prozessdefinition"
