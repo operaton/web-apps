@@ -39,6 +39,7 @@
     "deployments": "Deployments",
     "batches": "Batches",
     "migrations": "Migrations",
+    "reports": "Reports",
     "admin": "Admin",
     "help": "Help",
     "account": "Account",
@@ -77,6 +78,7 @@
       "decisions": "Decisions",
       "deployments": "Deployments",
       "migrations": "Migrations",
+      "reports": "Reports",
       "admin": "Admin",
       "admin-users": "Admin – Users",
       "admin-groups": "Admin – Groups",
@@ -557,6 +559,46 @@
       "tenant-id": "Tenant ID",
       "activity-id": "Activity ID",
       "without-tenant-id": "Without Tenant ID"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Analyze completed process and task history with Cockpit Enterprise reports.",
+    "refresh": "Refresh",
+    "run": "Run report",
+    "export-csv": "Export CSV",
+    "export-json": "Export JSON",
+    "no-results": "No report rows found for the selected filters.",
+    "started-after": "Started after",
+    "started-before": "Started before",
+    "completed-after": "Completed after",
+    "completed-before": "Completed before",
+    "minimum": "Minimum",
+    "average": "Average",
+    "maximum": "Maximum",
+    "count": "Count",
+    "period": {
+      "title": "Period",
+      "month": "Month",
+      "quarter": "Quarter",
+      "month-value": "Month {{month}}",
+      "quarter-value": "Quarter {{quarter}}"
+    },
+    "process": {
+      "title": "Process Instance Duration Report",
+      "period": "Aggregation",
+      "keys": "Process definition keys"
+    },
+    "task": {
+      "title": "Completed Task Instance Report",
+      "type": "Report type",
+      "count": "Completed tasks",
+      "duration": "Task duration",
+      "period": "Aggregation",
+      "group-by": "Group by",
+      "process-definition": "Process definition",
+      "task-name": "Task name",
+      "group": "Group"
     }
   },
   "admin": {

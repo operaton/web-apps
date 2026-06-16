@@ -828,6 +828,57 @@
     text-align: center;
   }
 
+  .reports {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    height: 100%;
+    padding: var(--spacing-2);
+  }
+  .reports > header,
+  .reports > section > header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: start;
+    gap: var(--spacing-2);
+  }
+  .reports > header p {
+    color: var(--text-2);
+    margin: 0;
+  }
+  .reports > section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+  .reports-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--spacing-1);
+  }
+  .reports-filter label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 12rem;
+  }
+  .reports-filter input,
+  .reports-filter select {
+    width: 100%;
+  }
+  .reports-filter button {
+    margin: 0;
+  }
+  .reports table {
+    width: 100%;
+  }
+  .reports :where(td, th) {
+    vertical-align: top;
+  }
+
   #admin-page {
     display: flex;
     flex: 1;

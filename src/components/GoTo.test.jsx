@@ -46,6 +46,12 @@ describe("GoTo", () => {
     const items = Array.from(container.querySelectorAll(".goto-item"));
     const hrefs = items.map((a) => a.getAttribute("href"));
     expect(hrefs).toContain("/tasks");
+    type(input, "reports");
+    expect(
+      Array.from(container.querySelectorAll(".goto-item")).map((a) =>
+        a.getAttribute("href"),
+      ),
+    ).toContain("/reports");
     // A non-matching query should yield no page entries.
     type(input, "zzzznotarealpage");
     expect(

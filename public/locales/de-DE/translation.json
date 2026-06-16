@@ -39,6 +39,7 @@
     "deployments": "Deployments",
     "batches": "Stapelverarbeitung",
     "migrations": "Migrationen",
+    "reports": "Reports",
     "admin": "Admin",
     "help": "Hilfe",
     "account": "Konto",
@@ -77,6 +78,7 @@
       "decisions": "Entscheidungen",
       "deployments": "Deployments",
       "migrations": "Migrationen",
+      "reports": "Reports",
       "admin": "Admin",
       "admin-users": "Admin – Benutzer",
       "admin-groups": "Admin – Gruppen",
@@ -557,6 +559,46 @@
       "tenant-id": "Mandanten-ID",
       "activity-id": "Aktivitäts-ID",
       "without-tenant-id": "Ohne Mandanten-ID"
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "Abgeschlossene Prozess- und Aufgabenhistorie mit Cockpit Enterprise Reports auswerten.",
+    "refresh": "Aktualisieren",
+    "run": "Report ausführen",
+    "export-csv": "CSV exportieren",
+    "export-json": "JSON exportieren",
+    "no-results": "Für die gewählten Filter wurden keine Report-Zeilen gefunden.",
+    "started-after": "Gestartet nach",
+    "started-before": "Gestartet vor",
+    "completed-after": "Abgeschlossen nach",
+    "completed-before": "Abgeschlossen vor",
+    "minimum": "Minimum",
+    "average": "Durchschnitt",
+    "maximum": "Maximum",
+    "count": "Anzahl",
+    "period": {
+      "title": "Zeitraum",
+      "month": "Monat",
+      "quarter": "Quartal",
+      "month-value": "Monat {{month}}",
+      "quarter-value": "Quartal {{quarter}}"
+    },
+    "process": {
+      "title": "Prozessinstanz-Dauer-Report",
+      "period": "Aggregation",
+      "keys": "Prozessdefinitionsschlüssel"
+    },
+    "task": {
+      "title": "Report für abgeschlossene Aufgaben",
+      "type": "Report-Typ",
+      "count": "Abgeschlossene Aufgaben",
+      "duration": "Aufgabendauer",
+      "period": "Aggregation",
+      "group-by": "Gruppieren nach",
+      "process-definition": "Prozessdefinition",
+      "task-name": "Aufgabenname",
+      "group": "Gruppe"
     }
   },
   "admin": {

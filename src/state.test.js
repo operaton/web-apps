@@ -57,6 +57,8 @@ describe("state", () => {
       expect(api.authorization.all.value).toBeNull();
       expect(api.batch.list.value).toBeNull();
       expect(api.batch.one.value).toBeNull();
+      expect(api.report.process_duration.value).toBeNull();
+      expect(api.report.task.value).toBeNull();
     });
   });
 });

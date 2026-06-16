@@ -84,6 +84,10 @@ const createAppState = () => {
       update: signal(null),
       saved_filters: signal(null),
     },
+    report: {
+      process_duration: signal(null),
+      task: signal(null),
+    },
     tenant: {
       list: signal(null),
       by_member: signal(null),

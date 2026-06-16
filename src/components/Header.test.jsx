@@ -61,7 +61,7 @@ describe("Header", () => {
       a.getAttribute("href"),
     );
     // Logo (/), tasks, processes, decisions, deployments, batches,
-    // migrations, admin.
+    // migrations, reports, admin.
     expect(hrefs).toEqual([
       "/",
       "/tasks",
@@ -70,6 +70,7 @@ describe("Header", () => {
       "/deployments",
       "/batches",
       "/migrations",
+      "/reports",
       "/admin",
     ]);
   });
