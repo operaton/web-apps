@@ -506,6 +506,47 @@ describe("ProcessesPage — instance details", () => {
     expect(getByText("Approve (historic)")).toBeTruthy();
   });
 
+  it("external-tasks sub-panel fetches and renders external tasks", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "external_tasks",
+    };
+    signal_response(state.api.external_task.by_process_instance, [
+      {
+        id: "external-task-1",
+        activityId: "serviceTask",
+        topicName: "billing-topic",
+        workerId: "worker-1",
+        lockExpirationTime: "2024-01-01T00:00:00Z",
+        retries: 3,
+        priority: 50,
+        errorMessage: "boom",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.external_task.by_process_instance).toHaveBeenCalled();
+    expect(getByText("external")).toBeTruthy();
+    expect(getByText("serviceTask")).toBeTruthy();
+    expect(getByText("billing-topic")).toBeTruthy();
+    expect(getByText("worker-1")).toBeTruthy();
+    expect(getByText("boom")).toBeTruthy();
+  });
+
+  it("external-tasks sub-panel does not fetch live external tasks in history mode", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "external_tasks",
+    };
+    mockQuery = { history: "true" };
+    const { getByText } = renderPage(state);
+    expect(engine_rest.external_task.by_process_instance).not.toHaveBeenCalled();
+    expect(getByText("processes.history-mode-na")).toBeTruthy();
+  });
+
   it("called-instances sub-panel uses the historic endpoint in history mode", () => {
     mockParams = {
       definition_id: "proc:1",

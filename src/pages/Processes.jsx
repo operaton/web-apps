@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1043,20 +1042,16 @@ const InstanceVariables = () => {
             ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+                ).map(([name, { type, value }]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{value}</td>
+                  </tr>
+                ))
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1464,13 +1459,6 @@ const JobDefinitions = () => {
   );
 };
 
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
-
 const DefinitionsManage = () => {
   const state = useContext(AppState),
     { route } = useLocation(),
@@ -1573,8 +1561,75 @@ const UUIDLink = ({ uuid = "?", path }) => (
 
 // TODO: create Jobs example for old Camunda apps
 const InstanceJobsPlaceholder = () => <p>Jobs</p>;
-// TODO: create External Apps example for old Camunda apps
-const InstanceExternalTasksPlaceholder = () => <p>External Tasks</p>;
+const InstanceExternalTasks = () => {
+  const state = useContext(AppState),
+    { selection_id, query } = useRoute(),
+    history_mode = query.history === "true",
+    [t] = useTranslation();
+
+  useEffect(() => {
+    if (!history_mode) {
+      void engine_rest.external_task.by_process_instance(state, selection_id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selection_id, history_mode]);
+
+  if (history_mode) {
+    return <p class="info-box">{t("processes.history-mode-na")}</p>;
+  }
+
+  /** @namespace state.api.external_task.by_process_instance.value.data **/
+  return (
+    <RequestState
+      signal={state.api.external_task.by_process_instance}
+      on_success={() => {
+        const rows =
+          state.api.external_task.by_process_instance.value?.data ?? [];
+        if (rows.length === 0) {
+          return <p class="info-box">{t("processes.external-tasks.empty")}</p>;
+        }
+        return (
+          <table>
+            <thead>
+              <tr>
+                <th>{t("common.id")}</th>
+                <th>{t("common.activity")}</th>
+                <th>{t("processes.external-tasks.topic")}</th>
+                <th>{t("processes.external-tasks.worker")}</th>
+                <th>{t("processes.external-tasks.lock-expiration")}</th>
+                <th>{t("processes.external-tasks.retries")}</th>
+                <th>{t("tasks.task-list.table-headings.priority")}</th>
+                <th>{t("processes.external-tasks.error-message")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((task) => (
+                <tr key={task.id}>
+                  <td class="font-mono">{task.id?.substring(0, 8)}</td>
+                  <td>{task.activityId ?? "—"}</td>
+                  <td>{task.topicName ?? "—"}</td>
+                  <td>{task.workerId ?? "—"}</td>
+                  <td>
+                    {task.lockExpirationTime ? (
+                      <time datetime={task.lockExpirationTime}>
+                        {task.lockExpirationTime}
+                      </time>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>{task.retries ?? "—"}</td>
+                  <td>{task.priority ?? "—"}</td>
+                  <td>{task.errorMessage ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      }}
+    />
+  );
+};
 
 const process_instance_tabs = [
   {
@@ -1611,7 +1666,7 @@ const process_instance_tabs = [
     nameKey: "processes.tabs.external-tasks",
     id: "external_tasks",
     pos: 5,
-    Component: InstanceExternalTasksPlaceholder,
+    Component: InstanceExternalTasks,
   },
 ];
 

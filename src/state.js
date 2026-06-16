@@ -160,6 +160,9 @@ const createAppState = () => {
       delete: signal(null),
       saved_filters: signal(null),
     },
+    external_task: {
+      by_process_instance: signal(null),
+    },
     decision: {
       definitions: signal(null),
       definition: signal(null),

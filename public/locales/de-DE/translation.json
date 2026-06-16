@@ -342,6 +342,14 @@
     "called-definitions": {
       "called-process-definition": "Aufgerufene Prozessdefinition"
     },
+    "external-tasks": {
+      "topic": "Thema",
+      "worker": "Worker",
+      "lock-expiration": "Sperrablauf",
+      "retries": "Retries",
+      "error-message": "Fehlermeldung",
+      "empty": "Keine externen Aufgaben gefunden."
+    },
     "jobs": {
       "overriding-job-priority": "Überschriebene Job-Priorität",
       "suspend": "Anhalten",

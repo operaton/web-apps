@@ -342,6 +342,14 @@
     "called-definitions": {
       "called-process-definition": "Called Process Definition"
     },
+    "external-tasks": {
+      "topic": "Topic",
+      "worker": "Worker",
+      "lock-expiration": "Lock Expiration",
+      "retries": "Retries",
+      "error-message": "Error Message",
+      "empty": "No external tasks found."
+    },
     "jobs": {
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
