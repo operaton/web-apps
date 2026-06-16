@@ -1,4 +1,4 @@
-import { GET, PAGINATED_GET } from '../helper.jsx'
+import { GET, PAGINATED_GET, POST } from '../helper.jsx'
 
 const INSTANCE_PAGE_SIZE = 20
 
@@ -49,6 +49,9 @@ const get_historic_tasks_by_instance = (state, instance_id) =>
 const get_historic_called_instances = (state, instance_id) =>
   GET(`/history/process-instance?superProcessInstanceId=${instance_id}`, state, state.api.history.process_instance.called)
 
+const delete_historic_process_instances_async = (state, body) =>
+  POST('/history/process-instance/delete', body, state, state.api.history.process_instance.delete_async)
+
 /**
  * Task History
  */
@@ -61,6 +64,7 @@ const history = {
     one: get_process_instance,
     all_unfinished: get_process_instances_unfinished,
     called: get_historic_called_instances,
+    delete_async: delete_historic_process_instances_async,
   },
   incident: {
     by_process_definition: get_incidents_by_process_definition,

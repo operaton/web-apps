@@ -3,9 +3,10 @@ import { describe, it, vi, beforeEach, expect } from "vitest";
 vi.mock("../helper.jsx", () => ({
   GET: vi.fn(),
   PAGINATED_GET: vi.fn(),
+  POST: vi.fn(),
 }));
 
-import { GET, PAGINATED_GET } from "../helper.jsx";
+import { GET, PAGINATED_GET, POST } from "../helper.jsx";
 import { create_mock_state, expect_api_call } from "../../test/helpers.js";
 import history from "./history.js";
 
@@ -116,6 +117,20 @@ describe("api/resources/history", () => {
       url: "/history/process-instance?superProcessInstanceId=inst-1",
       state,
       signal: state.api.history.process_instance.called,
+    });
+  });
+
+  it("process_instance.delete_async() POSTs selected historic instances", () => {
+    const body = {
+      historicProcessInstanceIds: ["hist-1", "hist-2"],
+      deleteReason: "retention",
+    };
+    history.process_instance.delete_async(state, body);
+    expect_api_call(POST, {
+      url: "/history/process-instance/delete",
+      body,
+      state,
+      signal: state.api.history.process_instance.delete_async,
     });
   });
 });

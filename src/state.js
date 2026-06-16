@@ -176,6 +176,7 @@ const createAppState = () => {
       },
       process_instance: {
         called: signal(null),
+        delete_async: signal(null),
       },
       user_operation: signal(null),
     },

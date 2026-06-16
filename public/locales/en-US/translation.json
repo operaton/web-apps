@@ -388,7 +388,18 @@
         "startedAfter": "startedAfter",
         "finished": "finished"
       },
-      "manage_title": "Manage process-instance filters"
+      "manage_title": "Manage process-instance filters",
+      "historic-delete": {
+        "open": "Delete history",
+        "title": "Delete historic process instances",
+        "reason": "Delete reason",
+        "confirm": "Delete history",
+        "select-all": "Select all historic instances",
+        "count": "{{count}} selected",
+        "batch-created": "Batch created:",
+        "view-batch": "View batch",
+        "success": "History delete batch started."
+      }
     },
     "history-mode-na": "Live data — history mode does not apply here.",
     "filter": {

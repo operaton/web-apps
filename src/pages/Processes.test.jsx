@@ -304,6 +304,89 @@ describe("ProcessesPage — definition tabs", () => {
     expect(getByText("BK-1")).toBeTruthy();
   });
 
+  it("instances tab hides historic delete in live mode", () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "abcdef1234567890",
+        startTime: "2024-01-01T00:00:00Z",
+        state: "ACTIVE",
+        businessKey: "BK-1",
+      },
+    ]);
+    const { container, queryByText } = renderPage(state);
+    expect(queryByText("processes.instance.historic-delete.open")).toBeNull();
+    expect(container.querySelector('tbody input[type="checkbox"]')).toBeNull();
+  });
+
+  it("instances tab disables historic delete until an instance is selected", () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    mockQuery = { history: "true" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "abcdef1234567890",
+        startTime: "2024-01-01T00:00:00Z",
+        state: "COMPLETED",
+        businessKey: "BK-1",
+      },
+    ]);
+    const { container, getByText } = renderPage(state);
+    const open_delete = getByText("processes.instance.historic-delete.open");
+    expect(open_delete.disabled).toBe(true);
+    fireEvent.click(container.querySelector('tbody input[type="checkbox"]'));
+    expect(open_delete.disabled).toBe(false);
+  });
+
+  it("instances tab sends selected historic instances to the async delete endpoint", async () => {
+    mockParams = { definition_id: "proc:1", panel: "instances" };
+    mockQuery = { history: "true" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "abcdef1234567890",
+        startTime: "2024-01-01T00:00:00Z",
+        state: "COMPLETED",
+        businessKey: "BK-1",
+      },
+      {
+        id: "fedcba0987654321",
+        startTime: "2024-01-02T00:00:00Z",
+        state: "COMPLETED",
+        businessKey: "BK-2",
+      },
+    ]);
+    engine_rest.history.process_instance.delete_async.mockImplementationOnce(
+      async (next_state) => {
+        signal_response(next_state.api.history.process_instance.delete_async, {
+          id: "batch-1",
+        });
+      },
+    );
+
+    const { container, getByText } = renderPage(state);
+    fireEvent.click(container.querySelector('tbody input[type="checkbox"]'));
+    fireEvent.click(getByText("processes.instance.historic-delete.open"));
+    fireEvent.input(container.querySelector('input[name="deleteReason"]'), {
+      target: { value: "retention" },
+    });
+    fireEvent.submit(container.querySelector(".historic-instance-delete"));
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.history.process_instance.delete_async).toHaveBeenCalled();
+    const call = engine_rest.history.process_instance.delete_async.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toEqual({
+      historicProcessInstanceIds: ["abcdef1234567890"],
+      deleteReason: "retention",
+    });
+    expect(
+      getByText("processes.instance.historic-delete.view-batch").getAttribute(
+        "href",
+      ),
+    ).toBe("/batches/batch-1");
+  });
+
   it("incidents tab fetches and renders definition incidents", () => {
     mockParams = { definition_id: "proc:1", panel: "incidents" };
     signal_response(state.api.history.incident.by_process_definition, [
