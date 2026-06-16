@@ -711,7 +711,7 @@ const UserProfile = ({ user_id }) => {
 const UserPassword = ({ user_id }) => {
   const
     state = useContext(AppState),
-    { api: { user: { credentials } } } = state,
+    { api: { user: { credentials, unlock } } } = state,
     [t] = useTranslation(),
     password = useSignal(''),
     password_repeat = useSignal(''),
@@ -730,6 +730,7 @@ const UserPassword = ({ user_id }) => {
   return <>
     <h3>{t("admin.user.password")}</h3>
     <ActionResult signal={credentials} success={t("admin.user.password-success")} />
+    <ActionResult signal={unlock} success={t("admin.user.unlock-success")} />
     {mismatch.value ? <p class="error">{t("admin.user.password-mismatch")}</p> : null}
     <form onSubmit={on_submit}>
       <label for="new-password">{t("admin.user.new-password")}</label>
@@ -742,6 +743,7 @@ const UserPassword = ({ user_id }) => {
 
       <div class="button-group">
         <button type="submit">{t("admin.user.change-password")}</button>
+        <button type="button" class="secondary" onClick={() => engine_rest.user.unlock(state, user_id)}>{t("admin.user.unlock")}</button>
       </div>
     </form>
   </>

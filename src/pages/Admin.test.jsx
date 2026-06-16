@@ -177,6 +177,17 @@ describe("AdminPage", () => {
       expect(engine_rest.user.delete.mock.lastCall[0]).toBe(state);
       expect(engine_rest.user.delete.mock.lastCall[1]).toBe("jdoe");
     });
+
+    it("unlocks the user from the password section", () => {
+      mockParams = { page_id: "users", selection_id: "jdoe" };
+      const { getByText } = renderPage(state);
+
+      fireEvent.click(getByText("admin.user.unlock"));
+
+      expect(engine_rest.user.unlock).toHaveBeenCalled();
+      expect(engine_rest.user.unlock.mock.lastCall[0]).toBe(state);
+      expect(engine_rest.user.unlock.mock.lastCall[1]).toBe("jdoe");
+    });
   });
 
   describe("Groups", () => {
