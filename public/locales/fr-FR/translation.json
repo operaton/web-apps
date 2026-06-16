@@ -265,6 +265,8 @@
     "change-definition": "Changer de définition",
     "definition-id": "ID de définition",
     "tenant-id": "ID du locataire",
+    "history-ttl": "Durée de conservation de l'historique",
+    "history-ttl-updated": "Durée de conservation de l'historique mise à jour.",
     "click-to-copy": "Cliquer pour copier",
     "history-mode-active": "Mode historique actif",
     "enable-history-mode": "Activer le mode historique",

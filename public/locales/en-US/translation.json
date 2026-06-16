@@ -273,6 +273,8 @@
     "definition-id": "Definition ID",
     "definition-details": "Definition details",
     "tenant-id": "Tenant ID",
+    "history-ttl": "History Time To Live",
+    "history-ttl-updated": "History time to live updated.",
     "click-to-copy": "Click to copy",
     "history-mode-active": "History Mode Active",
     "enable-history-mode": "Enable History Mode",

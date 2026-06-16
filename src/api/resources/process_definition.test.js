@@ -175,6 +175,16 @@ describe("api/resources/process_definition", () => {
     });
   });
 
+  it("update_history_ttl() PUTs the history time to live", () => {
+    process_definition.update_history_ttl(state, "def-1", 30);
+    expect_api_call(PUT, {
+      url: "/process-definition/def-1/history-time-to-live",
+      body: { historyTimeToLive: 30 },
+      state,
+      signal: state.api.process.definition.update_history_ttl,
+    });
+  });
+
   it("remove() DELETEs with cascade=true", () => {
     process_definition.remove(state, "def-1");
     expect_api_call(DELETE, {

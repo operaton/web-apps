@@ -245,6 +245,54 @@ describe("ProcessesPage — definition detail fetches", () => {
     // Heading shows the definition name.
     expect(getAllByText("Invoice").length).toBeGreaterThan(0);
   });
+
+  it("updates the process definition history time to live", async () => {
+    mockParams = { definition_id: "proc:1" };
+    signal_response(state.api.process.definition.one, {
+      id: "proc:1",
+      name: "Invoice",
+      key: "invoice",
+      version: 2,
+      historyTimeToLive: 30,
+    });
+    const { container, getByLabelText } = renderPage(state);
+
+    fireEvent.input(getByLabelText("processes.history-ttl"), {
+      target: { value: "45" },
+    });
+    fireEvent.submit(container.querySelector("form.history-ttl-form"));
+    await Promise.resolve();
+
+    expect(engine_rest.process_definition.update_history_ttl).toHaveBeenCalled();
+    const call = engine_rest.process_definition.update_history_ttl.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toBe("proc:1");
+    expect(call[2]).toBe(45);
+  });
+
+  it("clears the process definition history time to live with an empty value", async () => {
+    mockParams = { definition_id: "proc:1" };
+    signal_response(state.api.process.definition.one, {
+      id: "proc:1",
+      name: "Invoice",
+      key: "invoice",
+      version: 2,
+      historyTimeToLive: 30,
+    });
+    const { container, getByLabelText } = renderPage(state);
+
+    fireEvent.input(getByLabelText("processes.history-ttl"), {
+      target: { value: "" },
+    });
+    fireEvent.submit(container.querySelector("form.history-ttl-form"));
+    await Promise.resolve();
+
+    expect(engine_rest.process_definition.update_history_ttl).toHaveBeenCalled();
+    const call = engine_rest.process_definition.update_history_ttl.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toBe("proc:1");
+    expect(call[2]).toBeNull();
+  });
 });
 
 describe("ProcessesPage — definition tabs", () => {

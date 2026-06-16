@@ -1,4 +1,4 @@
-import { useSignal } from "@preact/signals";
+import { useSignal, useSignalEffect } from "@preact/signals";
 import { useContext, useEffect } from "preact/hooks";
 import { useLocation, useRoute } from "preact-iso";
 import { useTranslation } from "react-i18next";
@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -716,14 +716,32 @@ const ProcessDefinitionDetails = () => {
 };
 
 const DefinitionOverview = () => {
-  const {
+  const state = useContext(AppState),
+    {
       api: {
         process: {
-          definition: { one: process_definition, statistics },
+          definition: { one: process_definition, statistics, update_history_ttl },
         },
       },
-    } = useContext(AppState),
-    [t] = useTranslation();
+    } = state,
+    [t] = useTranslation(),
+    history_ttl = useSignal("");
+
+  useSignalEffect(() => {
+    history_ttl.value =
+      process_definition.value?.data?.historyTimeToLive ?? "";
+  });
+
+  const submit_history_ttl = async (e, id) => {
+    e.preventDefault();
+    const raw = history_ttl.peek();
+    await engine_rest.process_definition.update_history_ttl(
+      state,
+      id,
+      raw === "" ? null : Number(raw),
+    );
+    void engine_rest.process_definition.one(state, id);
+  };
 
   /** @namespace process_definition.value.data.tenantId **/
   /** @namespace process_definition.value.data.deploymentId **/
@@ -771,6 +789,29 @@ const DefinitionOverview = () => {
               <dt>{t("processes.tabs.incidents")}</dt>
               <dd>{total_incidents}</dd>
             </dl>
+            <RequestState
+              signal={update_history_ttl}
+              on_nothing={() => <></>}
+              on_success={() => (
+                <p class="success">{t("processes.history-ttl-updated")}</p>
+              )}
+            />
+            <form
+              class="history-ttl-form"
+              onSubmit={(e) => submit_history_ttl(e, def.id)}
+            >
+              <label for="history-ttl">{t("processes.history-ttl")}</label>
+              <input
+                id="history-ttl"
+                name="historyTimeToLive"
+                type="number"
+                min="0"
+                step="1"
+                value={history_ttl.value}
+                onInput={(e) => (history_ttl.value = e.currentTarget.value)}
+              />
+              <button type="submit">{t("common.save")}</button>
+            </form>
           </div>
         );
       }}
@@ -928,8 +969,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1044,9 +1084,8 @@ const InstanceVariables = () => {
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
                 ).map(
-                  // eslint-disable-next-line react/jsx-key
                   ([name, { type, value }]) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1054,9 +1093,8 @@ const InstanceVariables = () => {
                   ),
                 )
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1463,13 +1501,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

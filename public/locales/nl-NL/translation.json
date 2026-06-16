@@ -265,6 +265,8 @@
     "change-definition": "Definitie wijzigen",
     "definition-id": "Definitie-ID",
     "tenant-id": "Tenant-ID",
+    "history-ttl": "Bewaartermijn geschiedenis",
+    "history-ttl-updated": "Bewaartermijn geschiedenis bijgewerkt.",
     "click-to-copy": "Klik om te kopiëren",
     "history-mode-active": "Geschiedenismodus actief",
     "enable-history-mode": "Geschiedenismodus inschakelen",

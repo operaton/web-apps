@@ -110,6 +110,7 @@ const createAppState = () => {
         rendered_form: signal(null),
         activity_instance_statistics: signal(null),
         suspend: signal(null),
+        update_history_ttl: signal(null),
         remove: signal(null),
         saved_filters: signal(null),
       },

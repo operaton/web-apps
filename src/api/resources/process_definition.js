@@ -106,6 +106,14 @@ const activate_process_definition = (state, id) =>
     state.api.process.definition.suspend,
   )
 
+const update_history_ttl = (state, id, historyTimeToLive) =>
+  PUT(
+    `/process-definition/${id}/history-time-to-live`,
+    { historyTimeToLive },
+    state,
+    state.api.process.definition.update_history_ttl,
+  )
+
 const delete_process_definition = (state, id) =>
   DELETE(
     `/process-definition/${id}?cascade=true`,
@@ -129,6 +137,7 @@ const process_definition = {
   activity_instance_statistics: get_activity_instance_statistics,
   suspend: suspend_process_definition,
   activate: activate_process_definition,
+  update_history_ttl,
   remove: delete_process_definition,
 }
 

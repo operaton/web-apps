@@ -265,6 +265,8 @@
     "change-definition": "Cambiar definición",
     "definition-id": "ID de definición",
     "tenant-id": "ID del inquilino",
+    "history-ttl": "Tiempo de vida del historial",
+    "history-ttl-updated": "Tiempo de vida del historial actualizado.",
     "click-to-copy": "Clic para copiar",
     "history-mode-active": "Modo historial activo",
     "enable-history-mode": "Activar modo historial",

@@ -273,6 +273,8 @@
     "definition-id": "Definitions-ID",
     "definition-details": "Definitionsdetails",
     "tenant-id": "Mandanten-ID",
+    "history-ttl": "Verlaufs-Aufbewahrungsdauer",
+    "history-ttl-updated": "Verlaufs-Aufbewahrungsdauer aktualisiert.",
     "click-to-copy": "Klicken zum Kopieren",
     "history-mode-active": "Verlaufsmodus aktiv",
     "enable-history-mode": "Verlaufsmodus aktivieren",
