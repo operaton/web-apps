@@ -34,6 +34,7 @@
   },
   "nav": {
     "tasks": "Aufgaben",
+    "task-dashboard": "Offene Aufgaben",
     "processes": "Prozesse",
     "decisions": "Entscheidungen",
     "deployments": "Deployments",
@@ -73,6 +74,7 @@
     "pages": {
       "dashboard": "Dashboard",
       "tasks": "Aufgaben",
+      "task-dashboard": "Dashboard für offene Aufgaben",
       "processes": "Prozesse",
       "decisions": "Entscheidungen",
       "deployments": "Deployments",
@@ -241,8 +243,10 @@
       "assignee": "assignee",
       "assigneeLike": "assigneeLike",
       "candidateGroup": "candidateGroup",
+      "includeAssignedTasks": "includeAssignedTasks",
       "candidateUser": "candidateUser",
       "involvedUser": "involvedUser",
+      "assigned": "assigned",
       "unassigned": "unassigned",
       "processDefinitionKey": "processDefinitionKey",
       "processDefinitionName": "processDefinitionName",
@@ -264,6 +268,27 @@
       "createdAfter": "createdAfter",
       "active": "active",
       "suspended": "suspended"
+    }
+  },
+  "task_dashboard": {
+    "title": "Dashboard für offene Aufgaben",
+    "open-tasklist": "Tasklist öffnen",
+    "assignment-by-type": "Zuordnung nach Typ",
+    "assignment-by-group": "Zuordnung nach Gruppe",
+    "summary": {
+      "open": "offene Aufgaben",
+      "assigned": "zugewiesene Aufgaben",
+      "unassigned": "nicht zugewiesene Aufgaben"
+    },
+    "groups": {
+      "group": "Gruppe",
+      "open-tasks": "Offene Aufgaben",
+      "empty": "Keine offenen Aufgaben werden Gruppen angeboten."
+    },
+    "search": {
+      "title": "Aufgaben suchen",
+      "refresh": "Aktualisieren",
+      "empty": "Keine Aufgaben passen zu dieser Suche."
     }
   },
   "processes": {

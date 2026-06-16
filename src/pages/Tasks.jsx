@@ -12,7 +12,6 @@ import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
-import * as formatter from "../helper/date_formatter.js";
 import {
   filter_share_link,
   parse_list_query,
@@ -45,29 +44,107 @@ const SORT_OPTIONS = [
 
 const FILTER_KEYS = [
   { key: "assignee", nameKey: "tasks.filter_keys.assignee", type: "string" },
-  { key: "assigneeLike", nameKey: "tasks.filter_keys.assigneeLike", type: "string" },
-  { key: "candidateGroup", nameKey: "tasks.filter_keys.candidateGroup", type: "string" },
-  { key: "candidateUser", nameKey: "tasks.filter_keys.candidateUser", type: "string" },
-  { key: "involvedUser", nameKey: "tasks.filter_keys.involvedUser", type: "string" },
-  { key: "unassigned", nameKey: "tasks.filter_keys.unassigned", type: "boolean" },
-  { key: "processDefinitionKey", nameKey: "tasks.filter_keys.processDefinitionKey", type: "string" },
-  { key: "processDefinitionName", nameKey: "tasks.filter_keys.processDefinitionName", type: "string" },
-  { key: "processDefinitionNameLike", nameKey: "tasks.filter_keys.processDefinitionNameLike", type: "string" },
-  { key: "processInstanceBusinessKey", nameKey: "tasks.filter_keys.processInstanceBusinessKey", type: "string" },
-  { key: "processInstanceBusinessKeyLike", nameKey: "tasks.filter_keys.processInstanceBusinessKeyLike", type: "string" },
-  { key: "taskDefinitionKey", nameKey: "tasks.filter_keys.taskDefinitionKey", type: "string" },
-  { key: "taskDefinitionKeyLike", nameKey: "tasks.filter_keys.taskDefinitionKeyLike", type: "string" },
+  {
+    key: "assigneeLike",
+    nameKey: "tasks.filter_keys.assigneeLike",
+    type: "string",
+  },
+  {
+    key: "candidateGroup",
+    nameKey: "tasks.filter_keys.candidateGroup",
+    type: "string",
+  },
+  {
+    key: "includeAssignedTasks",
+    nameKey: "tasks.filter_keys.includeAssignedTasks",
+    type: "boolean",
+  },
+  {
+    key: "candidateUser",
+    nameKey: "tasks.filter_keys.candidateUser",
+    type: "string",
+  },
+  {
+    key: "involvedUser",
+    nameKey: "tasks.filter_keys.involvedUser",
+    type: "string",
+  },
+  { key: "assigned", nameKey: "tasks.filter_keys.assigned", type: "boolean" },
+  {
+    key: "unassigned",
+    nameKey: "tasks.filter_keys.unassigned",
+    type: "boolean",
+  },
+  {
+    key: "processDefinitionKey",
+    nameKey: "tasks.filter_keys.processDefinitionKey",
+    type: "string",
+  },
+  {
+    key: "processDefinitionName",
+    nameKey: "tasks.filter_keys.processDefinitionName",
+    type: "string",
+  },
+  {
+    key: "processDefinitionNameLike",
+    nameKey: "tasks.filter_keys.processDefinitionNameLike",
+    type: "string",
+  },
+  {
+    key: "processInstanceBusinessKey",
+    nameKey: "tasks.filter_keys.processInstanceBusinessKey",
+    type: "string",
+  },
+  {
+    key: "processInstanceBusinessKeyLike",
+    nameKey: "tasks.filter_keys.processInstanceBusinessKeyLike",
+    type: "string",
+  },
+  {
+    key: "taskDefinitionKey",
+    nameKey: "tasks.filter_keys.taskDefinitionKey",
+    type: "string",
+  },
+  {
+    key: "taskDefinitionKeyLike",
+    nameKey: "tasks.filter_keys.taskDefinitionKeyLike",
+    type: "string",
+  },
   { key: "name", nameKey: "tasks.filter_keys.name", type: "string" },
   { key: "nameLike", nameKey: "tasks.filter_keys.nameLike", type: "string" },
-  { key: "description", nameKey: "tasks.filter_keys.description", type: "string" },
-  { key: "descriptionLike", nameKey: "tasks.filter_keys.descriptionLike", type: "string" },
+  {
+    key: "description",
+    nameKey: "tasks.filter_keys.description",
+    type: "string",
+  },
+  {
+    key: "descriptionLike",
+    nameKey: "tasks.filter_keys.descriptionLike",
+    type: "string",
+  },
   { key: "priority", nameKey: "tasks.filter_keys.priority", type: "number" },
   { key: "dueBefore", nameKey: "tasks.filter_keys.dueBefore", type: "date" },
   { key: "dueAfter", nameKey: "tasks.filter_keys.dueAfter", type: "date" },
-  { key: "followUpBefore", nameKey: "tasks.filter_keys.followUpBefore", type: "date" },
-  { key: "followUpAfter", nameKey: "tasks.filter_keys.followUpAfter", type: "date" },
-  { key: "createdBefore", nameKey: "tasks.filter_keys.createdBefore", type: "date" },
-  { key: "createdAfter", nameKey: "tasks.filter_keys.createdAfter", type: "date" },
+  {
+    key: "followUpBefore",
+    nameKey: "tasks.filter_keys.followUpBefore",
+    type: "date",
+  },
+  {
+    key: "followUpAfter",
+    nameKey: "tasks.filter_keys.followUpAfter",
+    type: "date",
+  },
+  {
+    key: "createdBefore",
+    nameKey: "tasks.filter_keys.createdBefore",
+    type: "date",
+  },
+  {
+    key: "createdAfter",
+    nameKey: "tasks.filter_keys.createdAfter",
+    type: "date",
+  },
   { key: "active", nameKey: "tasks.filter_keys.active", type: "boolean" },
   { key: "suspended", nameKey: "tasks.filter_keys.suspended", type: "boolean" },
 ];
@@ -665,11 +742,6 @@ const GroupsList = () => {
 const SetGroupsButton = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
-    {
-      api: {
-        task: { identity_links },
-      },
-    } = state,
     close = () => document.getElementById("add_groups").close(),
     show = () => document.getElementById("add_groups").showModal(),
     group_state = useSignal(null),
@@ -1205,7 +1277,7 @@ const HistoryTab = () => {
     {
       api: {
         history: { user_operation },
-        task: { one, comment },
+        task: { comment },
       },
     } = state;
 
@@ -1279,4 +1351,10 @@ const task_tabs = [
   },
 ];
 
-export { TasksPage };
+export {
+  FILTER_KEYS as TASK_FILTER_KEYS,
+  SORT_OPTIONS as TASK_SORT_OPTIONS,
+  TASK_PAGE_SIZE,
+  TasksManage,
+  TasksPage,
+};

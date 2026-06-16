@@ -234,5 +234,81 @@ describe("api/resources/task", () => {
       );
       expect(result).toEqual([{ id: "d1" }]);
     });
+
+    it("get_task_dashboard_summary counts all, assigned, unassigned and group tasks", async () => {
+      fetchMock
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ count: 9 }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ count: 4 }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ count: 5 }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ count: 3 }) })
+        .mockResolvedValueOnce({ ok: true, json: async () => ({ count: 0 }) });
+
+      await task.get_task_dashboard_summary(state, [
+        { id: "sales", name: "Sales" },
+        { id: "empty", name: "Empty" },
+      ]);
+
+      const urls = fetchMock.mock.calls.map(([url]) => url);
+      expect(urls[0]).toContain("/task/count");
+      expect(urls[1]).toContain("assigned=true");
+      expect(urls[2]).toContain("unassigned=true");
+      expect(urls[3]).toContain("candidateGroup=sales");
+      expect(urls[3]).toContain("includeAssignedTasks=true");
+      expect(state.api.task.dashboard.summary.value).toEqual({
+        status: RESPONSE_STATE.SUCCESS,
+        data: {
+          total: 9,
+          assigned: 4,
+          unassigned: 5,
+          groups: [{ id: "sales", name: "Sales", count: 3 }],
+        },
+      });
+    });
+
+    it("get_task_dashboard_results queries tasks into the dashboard result signal", async () => {
+      fetchMock
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => [
+            { id: "t1", name: "Review", processDefinitionId: "pd1" },
+          ],
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => [{ id: "pd1", name: "Invoice", version: 2 }],
+        });
+
+      await task.get_task_dashboard_results(
+        state,
+        { candidateGroup: "sales", includeAssignedTasks: true },
+        "created",
+        "desc",
+        0,
+        20,
+      );
+
+      const url = fetchMock.mock.calls[0][0];
+      expect(url).toContain("/task?");
+      expect(url).toContain("sortBy=created");
+      expect(url).toContain("sortOrder=desc");
+      expect(url).toContain("candidateGroup=sales");
+      expect(url).toContain("includeAssignedTasks=true");
+      expect(fetchMock.mock.calls[1][0]).toContain(
+        "/process-definition?processDefinitionIdIn=pd1",
+      );
+      expect(state.api.task.dashboard.results.value).toEqual({
+        status: RESPONSE_STATE.SUCCESS,
+        data: [
+          {
+            id: "t1",
+            name: "Review",
+            processDefinitionId: "pd1",
+            definitionName: "Invoice",
+            definitionVersion: 2,
+          },
+        ],
+        hasMore: false,
+      });
+    });
   });
 });

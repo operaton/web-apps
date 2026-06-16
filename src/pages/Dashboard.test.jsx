@@ -44,6 +44,7 @@ describe("DashboardPage", () => {
   it("fires the on-mount fetches for tasks, processes, deployments and decisions", () => {
     renderPage(state);
     expect(engine_rest.task.get_tasks).toHaveBeenCalled();
+    expect(engine_rest.task.get_task_dashboard_summary).toHaveBeenCalled();
     expect(engine_rest.process_definition.list).toHaveBeenCalled();
     expect(engine_rest.deployment.all).toHaveBeenCalled();
     expect(engine_rest.decision.get_decision_definitions).toHaveBeenCalled();

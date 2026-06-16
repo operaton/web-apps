@@ -34,6 +34,7 @@
   },
   "nav": {
     "tasks": "Tasks",
+    "task-dashboard": "Open Tasks",
     "processes": "Processes",
     "decisions": "Decisions",
     "deployments": "Deployments",
@@ -73,6 +74,7 @@
     "pages": {
       "dashboard": "Dashboard",
       "tasks": "Tasks",
+      "task-dashboard": "Open Tasks Dashboard",
       "processes": "Processes",
       "decisions": "Decisions",
       "deployments": "Deployments",
@@ -241,8 +243,10 @@
       "assignee": "assignee",
       "assigneeLike": "assigneeLike",
       "candidateGroup": "candidateGroup",
+      "includeAssignedTasks": "includeAssignedTasks",
       "candidateUser": "candidateUser",
       "involvedUser": "involvedUser",
+      "assigned": "assigned",
       "unassigned": "unassigned",
       "processDefinitionKey": "processDefinitionKey",
       "processDefinitionName": "processDefinitionName",
@@ -264,6 +268,27 @@
       "createdAfter": "createdAfter",
       "active": "active",
       "suspended": "suspended"
+    }
+  },
+  "task_dashboard": {
+    "title": "Open Tasks Dashboard",
+    "open-tasklist": "Open Tasklist",
+    "assignment-by-type": "Assignments by type",
+    "assignment-by-group": "Assignments by group",
+    "summary": {
+      "open": "open tasks",
+      "assigned": "assigned tasks",
+      "unassigned": "unassigned tasks"
+    },
+    "groups": {
+      "group": "Group",
+      "open-tasks": "Open tasks",
+      "empty": "No open tasks are offered to groups."
+    },
+    "search": {
+      "title": "Search Tasks",
+      "refresh": "Refresh",
+      "empty": "No tasks match this search."
     }
   },
   "processes": {

@@ -9,6 +9,8 @@ export const DashboardPage = () => {
 
   if (state.api.task.list.value === null)
     void engine_rest.task.get_tasks(state);
+  if (state.api.task.dashboard.summary.value === null)
+    void engine_rest.task.get_task_dashboard_summary(state);
   if (state.api.process.definition.list.value === null)
     void engine_rest.process_definition.list(state);
   if (state.api.deployment.all.value === null)
@@ -39,6 +41,17 @@ export const DashboardPage = () => {
               </>
             );
           }}
+        />
+        <DashboardCard
+          title={t("nav.task-dashboard")}
+          href="/tasks-dashboard"
+          signal={state.api.task.dashboard.summary}
+          render={(data) => (
+            <>
+              <strong>{data?.total ?? 0}</strong>
+              <span>{t("task_dashboard.summary.open")}</span>
+            </>
+          )}
         />
         <DashboardCard
           title={t("nav.processes")}

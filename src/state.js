@@ -128,6 +128,10 @@ const createAppState = () => {
     task: {
       list: signal(null),
       one: signal(null),
+      dashboard: {
+        summary: signal(null),
+        results: signal(null),
+      },
       by_process_instance: signal(null),
       form: signal(null),
       rendered_form: signal(null),

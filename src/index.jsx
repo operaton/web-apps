@@ -10,6 +10,7 @@ import { GoTo } from "./components/GoTo.jsx";
 import { Home } from "./pages/Home.jsx";
 import { DashboardPage } from "./pages/Dashboard.jsx";
 import { TasksPage } from "./pages/Tasks.jsx";
+import { TaskDashboardPage } from "./pages/TaskDashboard.jsx";
 import { ProcessesPage } from "./pages/Processes.jsx";
 import { MigrationsPage } from "./pages/Migrations.jsx";
 import { AdminPage } from "./pages/Admin.jsx";
@@ -71,15 +72,10 @@ const Routing = () => {
         <Header />
         <Router>
           <Route path="/" component={DashboardPage} />
-          <Route
-            path="/decisions/:decision_id?"
-            component={DecisionsPage}
-          />
+          <Route path="/decisions/:decision_id?" component={DecisionsPage} />
           {/*<Route path="/tasks/start/:id" component={TasksPage} />*/}
-          <Route
-            path="/tasks/:task_id?/:tab?"
-            component={TasksPage}
-          />
+          <Route path="/tasks/:task_id?/:tab?" component={TasksPage} />
+          <Route path="/tasks-dashboard" component={TaskDashboardPage} />
           <Route
             path="/processes/:definition_id?/:panel?/:selection_id?/:sub_panel?"
             component={ProcessesPage}

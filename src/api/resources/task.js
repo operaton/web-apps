@@ -6,6 +6,7 @@ import {
   GET_TEXT,
   POST,
   PUT,
+  get_auth_header,
   get_credentials,
 } from "../helper.jsx";
 import engine_rest from "../engine_rest.jsx";
@@ -121,7 +122,14 @@ const tasks_with_process_definitions = async (tasks, state) => {
   return tasks;
 };
 
-const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0, maxResults = 3, filter = {}) => {
+const get_tasks = (
+  state,
+  sort_key = "name",
+  sort_order = "asc",
+  firstResult = 0,
+  maxResults = 3,
+  filter = {},
+) => {
   const prev = state.api.task.list.value;
   state.api.task.list.value = {
     status: RESPONSE_STATE.LOADING,
@@ -142,30 +150,133 @@ const get_tasks = (state, sort_key = "name", sort_order = "asc", firstResult = 0
     ...filter,
   });
 
-  fetch(
-    `${_url_engine_rest(state)}/task?${params}`,
-    { headers },
-  )
+  fetch(`${_url_engine_rest(state)}/task?${params}`, { headers })
     .then((response) =>
       response.ok ? response.json() : Promise.reject(response),
     )
     .then((tasks) => tasks_with_process_definitions(tasks, state))
-    .then(
-      (json) => {
-        const existing = firstResult > 0 ? (prev?.data ?? []) : [];
-        const existingIds = new Set(existing.map((t) => t.id));
-        const newTasks = json.filter((t) => !existingIds.has(t.id));
-        state.api.task.list.value = {
-          status: RESPONSE_STATE.SUCCESS,
-          data: [...existing, ...newTasks],
-          hasMore: json.length === maxResults,
-        };
-      },
-    )
+    .then((json) => {
+      const existing = firstResult > 0 ? (prev?.data ?? []) : [];
+      const existingIds = new Set(existing.map((t) => t.id));
+      const newTasks = json.filter((t) => !existingIds.has(t.id));
+      state.api.task.list.value = {
+        status: RESPONSE_STATE.SUCCESS,
+        data: [...existing, ...newTasks],
+        hasMore: json.length === maxResults,
+      };
+    })
     .catch(
       (error) =>
         (state.api.task.list.value = { status: RESPONSE_STATE.ERROR, error }),
     );
+};
+
+const fetch_task_count = async (state, filter = {}) => {
+  const headers = new Headers();
+  headers.set("Authorization", get_auth_header(state));
+
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(filter)) {
+    if (value !== null && value !== undefined && value !== "")
+      params.set(key, String(value));
+  }
+
+  const query = params.toString(),
+    response = await fetch(
+      `${_url_engine_rest(state)}/task/count${query ? `?${query}` : ""}`,
+      { headers },
+    ),
+    json = await (response.ok ? response.json() : Promise.reject(response));
+
+  return json.count ?? 0;
+};
+
+const get_task_dashboard_summary = async (state, groups = []) => {
+  const signal = state.api.task.dashboard.summary;
+  signal.value = {
+    status: RESPONSE_STATE.LOADING,
+    data: signal.peek?.()?.data,
+  };
+
+  try {
+    const [total, assigned, unassigned, group_counts] = await Promise.all([
+      fetch_task_count(state),
+      fetch_task_count(state, { assigned: true }),
+      fetch_task_count(state, { unassigned: true }),
+      Promise.all(
+        groups.map(async (group) => ({
+          id: group.id,
+          name: group.name ?? group.id,
+          count: await fetch_task_count(state, {
+            candidateGroup: group.id,
+            includeAssignedTasks: true,
+          }),
+        })),
+      ),
+    ]);
+
+    signal.value = {
+      status: RESPONSE_STATE.SUCCESS,
+      data: {
+        total,
+        assigned,
+        unassigned,
+        groups: group_counts.filter((group) => group.count > 0),
+      },
+    };
+  } catch (error) {
+    signal.value = { status: RESPONSE_STATE.ERROR, error };
+  }
+};
+
+const get_task_dashboard_results = async (
+  state,
+  filter = {},
+  sort_key = "name",
+  sort_order = "asc",
+  firstResult = 0,
+  maxResults = 20,
+) => {
+  const signal = state.api.task.dashboard.results,
+    prev = signal.peek?.();
+  signal.value = {
+    status: RESPONSE_STATE.LOADING,
+    data: prev?.data,
+    hasMore: prev?.hasMore,
+  };
+
+  const headers = new Headers();
+  headers.set("Authorization", get_auth_header(state));
+
+  const params = new URLSearchParams({
+    sortBy: sort_key,
+    sortOrder: sort_order,
+    firstResult,
+    maxResults,
+  });
+  for (const [key, value] of Object.entries(filter)) {
+    if (value !== null && value !== undefined && value !== "")
+      params.set(key, String(value));
+  }
+
+  try {
+    const response = await fetch(`${_url_engine_rest(state)}/task?${params}`, {
+        headers,
+      }),
+      tasks = await (response.ok ? response.json() : Promise.reject(response)),
+      enriched = await tasks_with_process_definitions(tasks, state),
+      existing = firstResult > 0 ? (prev?.data ?? []) : [],
+      existingIds = new Set(existing.map((t) => t.id)),
+      fresh = enriched.filter((t) => !existingIds.has(t.id));
+
+    signal.value = {
+      status: RESPONSE_STATE.SUCCESS,
+      data: [...existing, ...fresh],
+      hasMore: enriched.length === maxResults,
+    };
+  } catch (error) {
+    signal.value = { status: RESPONSE_STATE.ERROR, error };
+  }
 };
 
 const get_task_process_definitions = (state, ids) =>
@@ -190,10 +301,17 @@ const create_comment = (state, task_id, message) =>
   );
 
 const post_task_form = (state, task_id, data) =>
-  POST(`/task/${task_id}/submit-form`, { variables: data, withVariablesInReturn: true, }, state, state.api.task.submit_form );
+  POST(
+    `/task/${task_id}/submit-form`,
+    { variables: data, withVariablesInReturn: true },
+    state,
+    state.api.task.submit_form,
+  );
 
 const task = {
   get_tasks,
+  get_task_dashboard_summary,
+  get_task_dashboard_results,
   get_task,
   update_task,
   get_task_form,
