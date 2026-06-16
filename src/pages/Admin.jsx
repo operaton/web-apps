@@ -932,10 +932,11 @@ const AuthorizationCreate = ({ resource, resource_type, on_done }) => {
     state = useContext(AppState),
     { api: { authorization: { create } } } = state,
     [t] = useTranslation(),
-    form = useSignal({ type: 1, userId: '', permissions: [], resourceId: '*' })
+    form = useSignal({ type: 1, assigneeType: 'user', userId: '', groupId: '', permissions: [], resourceId: '*' })
 
   const
     set_value = (k, e) => form.value = { ...form.peek(), [k]: e.currentTarget.value },
+    set_assignee_type = (e) => form.value = { ...form.peek(), assigneeType: e.currentTarget.value, userId: '', groupId: '' },
     toggle_permission = (name, checked) => {
       const current = form.peek().permissions
       form.value = {
@@ -945,11 +946,15 @@ const AuthorizationCreate = ({ resource, resource_type, on_done }) => {
     },
     on_submit = e => {
       e.preventDefault()
-      const { type, userId, permissions, resourceId } = form.value
+      const { type, assigneeType, userId, groupId, permissions, resourceId } = form.value,
+        assignee = assigneeType === 'group'
+          ? { groupId: groupId || '*', userId: null }
+          : { userId: userId || '*', groupId: null }
+
       void engine_rest.authorization.create(state, {
         type: Number(type),
         permissions,
-        userId: userId || '*',
+        ...assignee,
         resourceType: Number(resource_type),
         resourceId,
       }).then(() => {
@@ -970,9 +975,23 @@ const AuthorizationCreate = ({ resource, resource_type, on_done }) => {
       <option value="2">{t("admin.authorization.deny")}</option>
     </select>
 
-    <label for="auth-user">{t("admin.authorization.user-group")}</label>
-    <input id="auth-user" type="text" value={form.value.userId}
-           onInput={(e) => set_value('userId', e)} placeholder="*" />
+    <label for="auth-assignee-type">{t("admin.authorization.user-group")}</label>
+    <select id="auth-assignee-type" value={form.value.assigneeType} onInput={set_assignee_type}>
+      <option value="user">{t("admin.authorization.user")}</option>
+      <option value="group">{t("admin.authorization.group")}</option>
+    </select>
+
+    {form.value.assigneeType === 'group'
+      ? <>
+        <label for="auth-group">{t("admin.authorization.group-id")}</label>
+        <input id="auth-group" type="text" value={form.value.groupId}
+               onInput={(e) => set_value('groupId', e)} placeholder="*" />
+      </>
+      : <>
+        <label for="auth-user">{t("admin.authorization.user-id")}</label>
+        <input id="auth-user" type="text" value={form.value.userId}
+               onInput={(e) => set_value('userId', e)} placeholder="*" />
+      </>}
 
     <fieldset>
       <legend>{t("admin.authorization.available-permissions")}</legend>

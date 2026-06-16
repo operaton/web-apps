@@ -399,6 +399,35 @@ describe("AdminPage", () => {
       const call = engine_rest.authorization.create.mock.lastCall;
       expect(call[0]).toBe(state);
       expect(call[1].userId).toBe("carol");
+      expect(call[1].groupId).toBeNull();
+      expect(call[1].type).toBe(1);
+      expect(call[1].resourceType).toBe(1);
+    });
+
+    it("creates a group authorization via engine_rest.authorization.create", () => {
+      mockParams = {
+        page_id: "authorizations",
+        selection_id: "resource-type",
+        sub_selection_id: "1",
+      };
+      signal_response(state.api.authorization.create, { id: "a3" });
+      const { container, getByText } = renderPage(state);
+
+      fireEvent.click(getByText("admin.authorization.create"));
+      fireEvent.input(container.querySelector("#auth-assignee-type"), {
+        target: { value: "group" },
+      });
+      fireEvent.input(container.querySelector("#auth-group"), {
+        target: { value: "ops" },
+      });
+      fireEvent.submit(container.querySelector("form.authorization-create"));
+
+      expect(engine_rest.authorization.create).toHaveBeenCalled();
+      const call = engine_rest.authorization.create.mock.lastCall;
+      expect(call[0]).toBe(state);
+      expect(call[1].userId).toBeNull();
+      expect(call[1].groupId).toBe("ops");
+      expect(call[1].type).toBe(1);
       expect(call[1].resourceType).toBe(1);
     });
 
