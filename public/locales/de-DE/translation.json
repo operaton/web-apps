@@ -345,7 +345,12 @@
     "jobs": {
       "overriding-job-priority": "Überschriebene Job-Priorität",
       "suspend": "Anhalten",
-      "change-priority": "Job-Priorität ändern"
+      "change-priority": "Job-Priorität ändern",
+      "retries": "Retries",
+      "due-date": "Fälligkeitsdatum",
+      "due-time": "Fälligkeitszeit",
+      "set-retries": "Retries setzen",
+      "retries-success": "Job-Retries aktualisiert."
     },
     "sort": {
       "name": "Name",

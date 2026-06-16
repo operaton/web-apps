@@ -344,6 +344,7 @@ describe("ProcessesPage — definition tabs", () => {
       {
         id: "jd1",
         suspended: true,
+        activityId: "timer_start",
         jobType: "timer",
         jobConfiguration: "R/PT5M",
         overridingJobPriority: 10,
@@ -353,8 +354,46 @@ describe("ProcessesPage — definition tabs", () => {
     expect(
       engine_rest.job_definition.all.by_process_definition,
     ).toHaveBeenCalled();
+    expect(getByText("timer_start")).toBeTruthy();
     expect(getByText("timer")).toBeTruthy();
     expect(getByText("R/PT5M")).toBeTruthy();
+  });
+
+  it("sets failed job retries for a job definition with an optional due date", async () => {
+    mockParams = { definition_id: "proc:1", panel: "jobs" };
+    engine_rest.job_definition.set_retries.mockResolvedValue(undefined);
+    signal_response(state.api.job_definition.all.by_process_definition, [
+      {
+        id: "jd1",
+        suspended: false,
+        activityId: "timer_start",
+        jobType: "timer",
+        jobConfiguration: "R/PT5M",
+        overridingJobPriority: null,
+      },
+    ]);
+    const { container, getByLabelText } = renderPage(state);
+
+    fireEvent.input(getByLabelText("processes.jobs.retries"), {
+      target: { value: "3" },
+    });
+    fireEvent.input(getByLabelText("processes.jobs.due-date"), {
+      target: { value: "2017-04-06" },
+    });
+    fireEvent.input(getByLabelText("processes.jobs.due-time"), {
+      target: { value: "13:57" },
+    });
+    fireEvent.submit(container.querySelector("form"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.job_definition.set_retries).toHaveBeenCalled();
+    expect(engine_rest.job_definition.set_retries.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.job_definition.set_retries.mock.lastCall[1]).toBe("jd1");
+    expect(engine_rest.job_definition.set_retries.mock.lastCall[2]).toBe(3);
+    expect(engine_rest.job_definition.set_retries.mock.lastCall[3]).toBe(
+      "2017-04-06T13:57:00.000+0000",
+    );
   });
 });
 

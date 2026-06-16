@@ -345,7 +345,12 @@
     "jobs": {
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
-      "change-priority": "Change Overriding Job Priority"
+      "change-priority": "Change Overriding Job Priority",
+      "retries": "Retries",
+      "due-date": "Due Date",
+      "due-time": "Due Time",
+      "set-retries": "Set Retries",
+      "retries-success": "Job retries updated."
     },
     "sort": {
       "name": "Name",

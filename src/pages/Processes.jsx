@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1044,9 +1043,8 @@ const InstanceVariables = () => {
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
                 ).map(
-                  // eslint-disable-next-line react/jsx-key
                   ([name, { type, value }]) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1054,9 +1052,8 @@ const InstanceVariables = () => {
                   ),
                 )
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1426,6 +1423,14 @@ const JobDefinitions = () => {
       {history_mode && (
         <small class="history-na">{t("processes.history-mode-na")}</small>
       )}
+      {state.api.job_definition.retries.value ? (
+        <RequestState
+          signal={state.api.job_definition.retries}
+          on_success={() => (
+            <p class="success">{t("processes.jobs.retries-success")}</p>
+          )}
+        />
+      ) : null}
       <table>
         <thead>
           <tr>
@@ -1440,22 +1445,7 @@ const JobDefinitions = () => {
         <tbody>
           {state.api.job_definition.all.by_process_definition.value?.data?.map(
             (definition) => (
-              <tr key={definition.id}>
-                <td>
-                  {definition.suspended
-                    ? t("common.suspended")
-                    : t("common.active")}
-                </td>
-                <td>?</td>
-                {/*<td>{definition.calledFromActivityIds.map(a => `${a}, `)}</td>*/}
-                <td>{definition.jobType}</td>
-                <td>{definition.jobConfiguration}</td>
-                <td>{definition.overridingJobPriority ?? "-"}</td>
-                <td>
-                  <button>{t("processes.jobs.suspend")}</button>
-                  <button>{t("processes.jobs.change-priority")}</button>
-                </td>
-              </tr>
+              <JobDefinitionRow key={definition.id} definition={definition} />
             ),
           )}
         </tbody>
@@ -1464,12 +1454,83 @@ const JobDefinitions = () => {
   );
 };
 
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
+const JobDefinitionRow = ({ definition }) => {
+  const state = useContext(AppState),
+    { definition_id } = useRoute(),
+    [t] = useTranslation(),
+    retries = useSignal(""),
+    due_date = useSignal(""),
+    due_time = useSignal(""),
+    input_id = `job-retries-${definition.id}`;
+
+  const refresh = () =>
+      engine_rest.job_definition.all.by_process_definition(
+        state,
+        definition_id,
+      ),
+    format_due_date = () =>
+      due_date.value
+        ? `${due_date.value}T${due_time.value || "00:00"}:00.000+0000`
+        : null,
+    on_submit = (e) => {
+      e.preventDefault();
+      const raw = String(retries.value).trim();
+      if (raw === "") return;
+      const parsed = Number(raw);
+      if (!Number.isInteger(parsed) || parsed < 0) return;
+      void engine_rest.job_definition.set_retries(
+        state,
+        definition.id,
+        parsed,
+        format_due_date(),
+      ).then(refresh);
+    };
+
+  return (
+    <tr>
+      <td>
+        {definition.suspended
+          ? t("common.suspended")
+          : t("common.active")}
+      </td>
+      <td>{definition.activityId ?? "—"}</td>
+      <td>{definition.jobType}</td>
+      <td>{definition.jobConfiguration}</td>
+      <td>{definition.overridingJobPriority ?? "-"}</td>
+      <td>
+        <form onSubmit={on_submit}>
+          <label for={input_id}>{t("processes.jobs.retries")}</label>
+          <input
+            id={input_id}
+            type="number"
+            min="0"
+            step="1"
+            value={retries.value}
+            onInput={(e) => (retries.value = e.currentTarget.value)}
+            required
+          />
+          <label for={`${input_id}-date`}>{t("processes.jobs.due-date")}</label>
+          <input
+            id={`${input_id}-date`}
+            type="date"
+            value={due_date.value}
+            onInput={(e) => (due_date.value = e.currentTarget.value)}
+          />
+          <label for={`${input_id}-time`}>{t("processes.jobs.due-time")}</label>
+          <input
+            id={`${input_id}-time`}
+            type="time"
+            value={due_time.value}
+            onInput={(e) => (due_time.value = e.currentTarget.value)}
+          />
+          <div class="button-group">
+            <button type="submit">{t("processes.jobs.set-retries")}</button>
+          </div>
+        </form>
+      </td>
+    </tr>
+  );
+};
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

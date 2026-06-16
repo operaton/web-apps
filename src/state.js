@@ -183,6 +183,7 @@ const createAppState = () => {
       all: {
         by_process_definition: signal(null),
       },
+      retries: signal(null),
     },
   };
 
