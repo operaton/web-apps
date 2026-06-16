@@ -53,6 +53,7 @@ describe("state", () => {
       const { api } = createAppState();
       expect(api.process.definition.list.value).toBeNull();
       expect(api.process.instance.one.value).toBeNull();
+      expect(api.tenant.by_group_member.value).toBeNull();
       expect(api.task.comment.list.value).toBeNull();
       expect(api.authorization.all.value).toBeNull();
       expect(api.batch.list.value).toBeNull();

@@ -608,6 +608,8 @@
       "members": "Mitglieder",
       "no-members": "Diese Gruppe hat keine Mitglieder.",
       "add-member": "Mitglied hinzufügen",
+      "no-tenants": "Diese Gruppe ist derzeit kein Mitglied eines Mandanten.",
+      "add-to-tenant": "Zu Mandant hinzufügen",
       "success-created": "Neue Gruppe erfolgreich erstellt.",
       "success-updated": "Gruppe aktualisiert.",
       "success-deleted": "Gruppe gelöscht.",

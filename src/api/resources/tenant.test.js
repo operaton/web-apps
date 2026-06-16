@@ -76,6 +76,15 @@ describe("api/resources/tenant", () => {
     });
   });
 
+  it("by_group_member() uses the given group", () => {
+    tenant.by_group_member(state, "admins");
+    expect_api_call(GET, {
+      url: "/tenant?groupMember=admins&maxResults=50&firstResult=0",
+      state,
+      signal: state.api.tenant.by_group_member,
+    });
+  });
+
   it("user_members() GETs /user filtered by memberOfTenant", () => {
     tenant.user_members(state, "acme");
     expect_api_call(GET, {

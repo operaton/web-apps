@@ -608,6 +608,8 @@
       "members": "Members",
       "no-members": "This group has no members.",
       "add-member": "Add member",
+      "no-tenants": "This group is currently not a member of any tenant.",
+      "add-to-tenant": "Add to tenant",
       "success-created": "Successfully created new group.",
       "success-updated": "Group updated.",
       "success-deleted": "Group deleted.",

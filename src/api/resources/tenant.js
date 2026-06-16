@@ -5,6 +5,10 @@ const get_user_tenants = (state, user_name) =>
   // TODO remove `?? 'demo'` when we have working authentication
   GET(`/tenant?userMember=${user_name ?? 'demo'}&maxResults=50&firstResult=0`, state, state.api.tenant.by_member)
 
+// Tenants the given group is a member of (used on the group details page).
+const get_group_tenants = (state, group_id) =>
+  GET(`/tenant?groupMember=${group_id}&maxResults=50&firstResult=0`, state, state.api.tenant.by_group_member)
+
 const get_tenants = (state) =>
   GET(`/tenant?firstResult=0&maxResults=50&sortBy=id&sortOrder=asc`, state, state.api.tenant.list)
 
@@ -55,6 +59,7 @@ const tenant = {
   update: update_tenant,
   delete: delete_tenant,
   by_member: get_user_tenants,
+  by_group_member: get_group_tenants,
   user_members: get_tenant_users,
   group_members: get_tenant_groups,
   add_user: add_user_to_tenant,

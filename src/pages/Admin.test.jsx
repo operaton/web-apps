@@ -241,6 +241,7 @@ describe("AdminPage", () => {
       const { container } = renderPage(state);
       expect(engine_rest.group.all).toHaveBeenCalled();
       expect(engine_rest.group.members).toHaveBeenCalled();
+      expect(engine_rest.tenant.by_group_member).toHaveBeenCalled();
       expect(container.querySelector("#group-name").value).toBe("Admins");
     });
 
@@ -259,6 +260,41 @@ describe("AdminPage", () => {
       const call = engine_rest.group.add_user.mock.lastCall;
       expect(call[1]).toBe("g1");
       expect(call[2]).toBe("alice");
+    });
+
+    it("adds a tenant membership from the group details page", () => {
+      mockParams = { page_id: "groups", selection_id: "g1" };
+      signal_response(state.api.group.list, [{ id: "g1", name: "Admins" }]);
+      const { container, getAllByText } = renderPage(state);
+
+      fireEvent.click(getAllByText("admin.group.add-to-tenant")[0]);
+      const input = container.querySelector("dialog[open] #member-id");
+      fireEvent.input(input, { target: { value: "tenant-a" } });
+      fireEvent.submit(input.closest("form"));
+
+      expect(engine_rest.tenant.add_group).toHaveBeenCalled();
+      const call = engine_rest.tenant.add_group.mock.lastCall;
+      expect(call[0]).toBe(state);
+      expect(call[1]).toBe("tenant-a");
+      expect(call[2]).toBe("g1");
+    });
+
+    it("removes a tenant membership from the group details page", () => {
+      mockParams = { page_id: "groups", selection_id: "g1" };
+      signal_response(state.api.group.list, [{ id: "g1", name: "Admins" }]);
+      signal_response(state.api.tenant.by_group_member, [
+        { id: "tenant-a", name: "Tenant A" },
+      ]);
+      const { container } = renderPage(state);
+
+      fireEvent.click(container.querySelector("table button.danger"));
+      fireEvent.click(container.querySelector("dialog[open] button.danger"));
+
+      expect(engine_rest.tenant.remove_group).toHaveBeenCalled();
+      const call = engine_rest.tenant.remove_group.mock.lastCall;
+      expect(call[0]).toBe(state);
+      expect(call[1]).toBe("tenant-a");
+      expect(call[2]).toBe("g1");
     });
   });
 

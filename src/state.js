@@ -87,6 +87,7 @@ const createAppState = () => {
     tenant: {
       list: signal(null),
       by_member: signal(null),
+      by_group_member: signal(null),
       create: signal(null),
       update: signal(null),
       delete: signal(null),

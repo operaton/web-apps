@@ -349,6 +349,7 @@ const GroupDetails = ({ group_id }) => {
     form.value = null
     void engine_rest.group.all(state)
     void engine_rest.group.members(state, group_id)
+    void engine_rest.tenant.by_group_member(state, group_id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group_id])
 
@@ -404,6 +405,16 @@ const GroupDetails = ({ group_id }) => {
       on_add={(member_id) => engine_rest.group.add_user(state, group_id, member_id)}
       on_remove={(member_id) => engine_rest.group.remove_member(state, group_id, member_id)}
       refetch={() => engine_rest.group.members(state, group_id)} />
+
+    <MemberSection
+      title={t("admin.tenants")}
+      list_signal={state.api.tenant.by_group_member}
+      empty={t("admin.group.no-tenants")}
+      add_label={t("admin.group.add-to-tenant")}
+      id_label={t("admin.tenant.tenant-id")}
+      on_add={(tenant_id) => engine_rest.tenant.add_group(state, tenant_id, group_id)}
+      on_remove={(tenant_id) => engine_rest.tenant.remove_group(state, tenant_id, group_id)}
+      refetch={() => engine_rest.tenant.by_group_member(state, group_id)} />
 
     <h3>{t("admin.danger-zone")}</h3>
     <div class="button-group">
