@@ -489,12 +489,13 @@ const MemberSection = ({ title, list_signal, empty, add_label, id_label, on_add,
 /* ----------------------------------------------------------------- System */
 
 const SystemPage = () => {
-  const { api: { engine: { telemetry } } } = useContext(AppState),
-    state = useContext(AppState),
+  const state = useContext(AppState),
+    { api: { engine: { telemetry } } } = state,
     [t] = useTranslation()
 
   useEffect(() => {
     void engine_rest.engine.telemetry(state)
+    void engine_rest.engine.telemetry_configuration(state)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -503,11 +504,51 @@ const SystemPage = () => {
       { name: t("nav.admin"), route: '/admin' },
       { name: t("admin.system") }]} />
     <h2>{t("admin.system")}</h2>
+    <TelemetryConfiguration />
     <RequestState
       signal={telemetry}
       on_success={() => <pre class="fade-in">{telemetry.value !== undefined ? JSON.stringify(telemetry.value?.data, null, 2) : ''} </pre>}
     />
   </div>
+}
+
+const TelemetryConfiguration = () => {
+  const state = useContext(AppState),
+    { api: { engine: { telemetry_configuration, telemetry_configuration_update } } } = state,
+    [t] = useTranslation(),
+    enabled = useSignal(false)
+
+  useSignalEffect(() => {
+    if (telemetry_configuration.value?.data) {
+      enabled.value = telemetry_configuration.value.data.enableTelemetry === true
+    }
+  })
+
+  const on_submit = (e) => {
+    e.preventDefault()
+    void engine_rest.engine.configure_telemetry(state, enabled.value).then(() =>
+      engine_rest.engine.telemetry_configuration(state)
+    )
+  }
+
+  return <section>
+    <h3>{t("admin.telemetry.configuration")}</h3>
+    <ActionResult signal={telemetry_configuration_update} success={t("admin.telemetry.success-updated")} />
+    <RequestState
+      signal={telemetry_configuration}
+      on_success={() => <form onSubmit={on_submit}>
+        <label>
+          <input
+            type="checkbox"
+            checked={enabled.value}
+            onChange={(e) => (enabled.value = e.currentTarget.checked)} />
+          {t("admin.telemetry.enabled")}
+        </label>
+        <div class="button-group">
+          <button type="submit">{t("common.save")}</button>
+        </div>
+      </form>} />
+  </section>
 }
 
 /* ------------------------------------------------------------------ Users */

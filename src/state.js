@@ -48,6 +48,8 @@ const createAppState = () => {
     },
     engine: {
       telemetry: signal(null),
+      telemetry_configuration: signal(null),
+      telemetry_configuration_update: signal(null),
     },
     user: {
       count: signal(null),

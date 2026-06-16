@@ -428,11 +428,13 @@ describe("AdminPage", () => {
   });
 
   describe("System / telemetry", () => {
-    it("fetches telemetry data on mount", () => {
+    it("fetches telemetry data and configuration on mount", () => {
       mockParams = { page_id: "system" };
       renderPage(state);
       expect(engine_rest.engine.telemetry).toHaveBeenCalled();
       expect(engine_rest.engine.telemetry.mock.lastCall[0]).toBe(state);
+      expect(engine_rest.engine.telemetry_configuration).toHaveBeenCalled();
+      expect(engine_rest.engine.telemetry_configuration.mock.lastCall[0]).toBe(state);
     });
 
     it("renders the telemetry data from the signal", () => {
@@ -446,6 +448,26 @@ describe("AdminPage", () => {
       expect(pre).toBeTruthy();
       expect(pre.textContent).toContain("abc-123");
       expect(pre.textContent).toContain("Operaton");
+    });
+
+    it("updates telemetry configuration", async () => {
+      mockParams = { page_id: "system" };
+      signal_response(state.api.engine.telemetry_configuration, {
+        enableTelemetry: true,
+      });
+      const { container, getByLabelText, getByText } = renderPage(state);
+      const enabled = getByLabelText("admin.telemetry.enabled");
+
+      expect(enabled.checked).toBe(true);
+      fireEvent.click(enabled);
+      fireEvent.submit(container.querySelector("form"));
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(engine_rest.engine.configure_telemetry).toHaveBeenCalled();
+      expect(engine_rest.engine.configure_telemetry.mock.lastCall[0]).toBe(state);
+      expect(engine_rest.engine.configure_telemetry.mock.lastCall[1]).toBe(false);
+      expect(getByText("admin.telemetry.configuration")).toBeTruthy();
     });
   });
 });

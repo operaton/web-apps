@@ -568,6 +568,11 @@
     "details": "Details",
     "danger-zone": "Gefahrenzone",
     "confirm-remove-member": "Möchten Sie dieses Mitglied wirklich entfernen?",
+    "telemetry": {
+      "configuration": "Telemetrie-Konfiguration",
+      "enabled": "Telemetrie aktivieren",
+      "success-updated": "Telemetrie-Konfiguration aktualisiert."
+    },
     "user": {
       "title": "Benutzer",
       "create": "Neuen Benutzer erstellen",
