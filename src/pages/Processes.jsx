@@ -686,7 +686,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +928,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -965,21 +964,67 @@ const InstanceDetails = () => {
 const InstanceDetailsDescription = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
+    { query } = useRoute(),
+    history_mode = query.history === "true",
     data = state.api.process.instance.one.value?.data;
+  const set_suspension_state = (suspended) => {
+    if (!data?.id) return;
+    const action = suspended ? "suspend" : "activate";
+    void Promise.resolve(engine_rest.process_instance[action](state, data.id)).then(
+      () => engine_rest.process_instance.one(state, data.id),
+    );
+  };
 
   return (
-    <dl>
-      <dt>{t("processes.instance-id")}</dt>
-      <dd
-        class="font-mono copy-on-click"
-        onClick={copyToClipboard}
-        title={t("processes.click-to-copy")}
-      >
-        {data?.id ?? "—"}
-      </dd>
-      <dt>{t("processes.business-key")}</dt>
-      <dd>{data?.businessKey ?? "—"}</dd>
-    </dl>
+    <>
+      <RequestState
+        signal={state.api.process.instance.suspension}
+        on_nothing={() => null}
+        on_success={() => (
+          <p class="success">{t("processes.instance.suspension-success")}</p>
+        )}
+      />
+      <dl>
+        <dt>{t("processes.instance-id")}</dt>
+        <dd
+          class="font-mono copy-on-click"
+          onClick={copyToClipboard}
+          title={t("processes.click-to-copy")}
+        >
+          {data?.id ?? "—"}
+        </dd>
+        <dt>{t("processes.business-key")}</dt>
+        <dd>{data?.businessKey ?? "—"}</dd>
+        <dt>{t("common.state")}</dt>
+        <dd>
+          {data?.suspended === true
+            ? t("common.suspended")
+            : data?.suspended === false
+              ? t("common.active")
+              : "—"}
+        </dd>
+      </dl>
+      {!history_mode && data?.id ? (
+        <div class="button-group">
+          {data.suspended ? (
+            <button
+              type="button"
+              onClick={() => set_suspension_state(false)}
+            >
+              {t("processes.instance.activate")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              class="secondary"
+              onClick={() => set_suspension_state(true)}
+            >
+              {t("processes.instance.suspend")}
+            </button>
+          )}
+        </div>
+      ) : null}
+    </>
   );
 };
 
@@ -1043,20 +1088,16 @@ const InstanceVariables = () => {
             ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+                ).map(([name, { type, value }]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{value}</td>
+                  </tr>
+                ))
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1463,13 +1504,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

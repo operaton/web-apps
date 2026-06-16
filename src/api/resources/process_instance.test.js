@@ -3,9 +3,10 @@ import { describe, it, vi, beforeEach } from "vitest";
 vi.mock("../helper.jsx", () => ({
   GET: vi.fn(),
   POST: vi.fn(),
+  PUT: vi.fn(),
 }));
 
-import { GET, POST } from "../helper.jsx";
+import { GET, POST, PUT } from "../helper.jsx";
 import { create_mock_state, expect_api_call } from "../../test/helpers.js";
 import process_instance from "./process_instance.js";
 
@@ -30,6 +31,26 @@ describe("api/resources/process_instance", () => {
       url: "/process-instance/inst-1/variables",
       state,
       signal: state.api.process.instance.variables,
+    });
+  });
+
+  it("suspend() PUTs a suspended process instance state", () => {
+    process_instance.suspend(state, "inst-1");
+    expect_api_call(PUT, {
+      url: "/process-instance/inst-1/suspended",
+      body: { suspended: true },
+      state,
+      signal: state.api.process.instance.suspension,
+    });
+  });
+
+  it("activate() PUTs an active process instance state", () => {
+    process_instance.activate(state, "inst-1");
+    expect_api_call(PUT, {
+      url: "/process-instance/inst-1/suspended",
+      body: { suspended: false },
+      state,
+      signal: state.api.process.instance.suspension,
     });
   });
 

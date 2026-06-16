@@ -370,6 +370,9 @@
       "startableInTasklist": "startableInTasklist"
     },
     "instance": {
+      "activate": "Instanz aktivieren",
+      "suspend": "Instanz anhalten",
+      "suspension-success": "Prozessinstanz-Status aktualisiert.",
       "sort": {
         "startTime": "Startzeit",
         "instanceId": "Instanz-ID",

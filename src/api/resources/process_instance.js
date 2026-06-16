@@ -1,4 +1,4 @@
-import { GET, POST } from "../helper.jsx";
+import { GET, POST, PUT } from "../helper.jsx";
 
 const get_process_instance = (state, instance_id) =>
   GET(
@@ -31,6 +31,14 @@ const get_process_instance_variables = (state, instance_id) =>
     `/process-instance/${instance_id}/variables`,
     state,
     state.api.process.instance.variables,
+  );
+
+const set_process_instance_suspension_state = (state, instance_id, suspended) =>
+  PUT(
+    `/process-instance/${instance_id}/suspended`,
+    { suspended },
+    state,
+    state.api.process.instance.suspension,
   );
 
 const get_called_process_instances = (state, instance_id) =>
@@ -105,6 +113,10 @@ const modify_process_instance_async = (
 const process_instance = {
   one: get_process_instance,
   variables: get_process_instance_variables,
+  activate: (state, instance_id) =>
+    set_process_instance_suspension_state(state, instance_id, false),
+  suspend: (state, instance_id) =>
+    set_process_instance_suspension_state(state, instance_id, true),
   called: get_called_process_instances,
   count: get_process_instance_count,
   all: get_all_process_instances,

@@ -370,6 +370,9 @@
       "startableInTasklist": "startableInTasklist"
     },
     "instance": {
+      "activate": "Activate Instance",
+      "suspend": "Suspend Instance",
+      "suspension-success": "Process instance state updated.",
       "sort": {
         "startTime": "Start time",
         "instanceId": "Instance ID",

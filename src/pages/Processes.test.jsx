@@ -389,6 +389,79 @@ describe("ProcessesPage — instance details", () => {
     expect(getByText("BK-9")).toBeTruthy();
   });
 
+  it("suspends a live process instance", async () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    signal_response(state.api.process.instance.one, {
+      id: "inst-9999",
+      businessKey: "BK-9",
+      suspended: false,
+    });
+    const { getByText } = renderPage(state);
+
+    fireEvent.click(getByText("processes.instance.suspend"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.process_instance.suspend).toHaveBeenCalled();
+    expect(engine_rest.process_instance.suspend.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.process_instance.suspend.mock.lastCall[1]).toBe(
+      "inst-9999",
+    );
+    expect(engine_rest.process_instance.one.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.process_instance.one.mock.lastCall[1]).toBe("inst-9999");
+  });
+
+  it("activates a suspended live process instance", async () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    signal_response(state.api.process.instance.one, {
+      id: "inst-9999",
+      businessKey: "BK-9",
+      suspended: true,
+    });
+    const { getByText } = renderPage(state);
+
+    fireEvent.click(getByText("processes.instance.activate"));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(engine_rest.process_instance.activate).toHaveBeenCalled();
+    expect(engine_rest.process_instance.activate.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.process_instance.activate.mock.lastCall[1]).toBe(
+      "inst-9999",
+    );
+    expect(engine_rest.process_instance.one.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.process_instance.one.mock.lastCall[1]).toBe("inst-9999");
+  });
+
+  it("keeps historic process instance details read-only", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "vars",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.process.instance.one, {
+      id: "inst-9999",
+      businessKey: "BK-9",
+      suspended: false,
+    });
+    const { queryByText } = renderPage(state);
+
+    expect(queryByText("processes.instance.suspend")).toBeNull();
+    expect(queryByText("processes.instance.activate")).toBeNull();
+  });
+
   it("variables sub-panel fetches and renders live variables", () => {
     mockParams = {
       definition_id: "proc:1",

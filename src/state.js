@@ -119,6 +119,7 @@ const createAppState = () => {
         list: signal(null),
         count: signal(null),
         variables: signal(null),
+        suspension: signal(null),
         by_defintion_id: signal(null),
         activity_instances: signal(null),
         modification: signal(null),
