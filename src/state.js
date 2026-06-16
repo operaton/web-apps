@@ -164,6 +164,7 @@ const createAppState = () => {
       definitions: signal(null),
       definition: signal(null),
       dmn: signal(null),
+      drd: signal(null),
       saved_filters: signal(null),
     },
     history: {

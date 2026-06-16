@@ -404,6 +404,7 @@
     "version-tag": "Versions-Tag",
     "deployment-id": "Deployment-ID",
     "decision-requirements-id": "Entscheidungsanforderungs-Definitions-ID",
+    "decision-requirements-diagram": "Entscheidungsanforderungsdiagramm",
     "history-ttl": "Verlaufs-Aufbewahrungsdauer",
     "sort": {
       "name": "Name",

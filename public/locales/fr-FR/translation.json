@@ -371,6 +371,7 @@
     "version-tag": "Tag de version",
     "deployment-id": "ID de déploiement",
     "decision-requirements-id": "ID de définition des exigences de décision",
+    "decision-requirements-diagram": "Diagramme des exigences de décision",
     "history-ttl": "Durée de conservation de l'historique",
     "sort": {
       "name": "Nom",

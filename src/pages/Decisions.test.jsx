@@ -67,6 +67,20 @@ describe("DecisionsPage", () => {
     expect(engine_rest.decision.get_dmn_xml).toHaveBeenCalled();
   });
 
+  it("fetches the decision requirements xml when the selected decision belongs to a DRD", () => {
+    mockParams = { decision_id: "d1" };
+    signal_response(state.api.decision.definition, {
+      id: "d1",
+      key: "risk",
+      name: "Risk",
+      version: 1,
+      decisionRequirementsDefinitionId: "drd-1",
+    });
+    renderPage(state);
+    expect(engine_rest.decision.get_decision_requirements_xml).toHaveBeenCalled();
+    expect(engine_rest.decision.get_decision_requirements_xml.mock.lastCall[1]).toBe("drd-1");
+  });
+
   it("renders the DMN viewer with the fetched xml", () => {
     mockParams = { decision_id: "d1" };
     signal_response(state.api.decision.definition, {
@@ -78,5 +92,20 @@ describe("DecisionsPage", () => {
     signal_response(state.api.decision.dmn, { dmnXml: "<dmn>xml</dmn>" });
     const { getByTestId } = renderPage(state);
     expect(getByTestId("dmn-viewer").textContent).toBe("<dmn>xml</dmn>");
+  });
+
+  it("renders the DRD viewer with the fetched decision requirements xml", () => {
+    mockParams = { decision_id: "d1" };
+    signal_response(state.api.decision.definition, {
+      id: "d1",
+      key: "risk",
+      name: "Risk",
+      version: 1,
+      decisionRequirementsDefinitionId: "drd-1",
+    });
+    signal_response(state.api.decision.drd, { dmnXml: "<drd>xml</drd>" });
+    const { getAllByTestId, getByText } = renderPage(state);
+    expect(getByText("decisions.decision-requirements-diagram")).toBeTruthy();
+    expect(getAllByTestId("dmn-viewer").some((node) => node.textContent === "<drd>xml</drd>")).toBe(true);
   });
 });

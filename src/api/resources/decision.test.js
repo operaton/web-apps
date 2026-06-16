@@ -41,4 +41,13 @@ describe("api/resources/decision", () => {
       signal: state.api.decision.dmn,
     });
   });
+
+  it("get_decision_requirements_xml() GETs /decision-requirements-definition/:id/xml", () => {
+    decision.get_decision_requirements_xml(state, "drd-1");
+    expect_api_call(GET, {
+      url: "/decision-requirements-definition/drd-1/xml",
+      state,
+      signal: state.api.decision.drd,
+    });
+  });
 });

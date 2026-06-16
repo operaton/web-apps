@@ -30,6 +30,11 @@ describe("DmnViewer", () => {
     expect(DmnJS.mock.lastCall[0].container).toBe("#diagram");
   });
 
+  it("passes through the table view option", () => {
+    render(<DmnViewer xml="<dmn/>" container="#diagram" table_view_only={false} />);
+    expect(DmnJS.mock.lastCall[0].tableViewOnly).toBe(false);
+  });
+
   it("imports the supplied xml into the viewer", () => {
     render(<DmnViewer xml="<dmn>content</dmn>" container="#diagram" />);
     expect(importXML).toHaveBeenCalled();

@@ -63,7 +63,7 @@ const load_decisions = (state, query) => {
 
 const DecisionsPage = () => {
   const state = useContext(AppState),
-    { api: { decision: { definition, dmn } } } = state,
+    { api: { decision: { definition, dmn, drd } } } = state,
     { params: { decision_id }, query } = useRoute()
 
   useEffect(() => {
@@ -86,9 +86,18 @@ const DecisionsPage = () => {
     return () => {
       definition.value = null
       dmn.value = null
+      drd.value = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decision_id])
+
+  useEffect(() => {
+    const drd_id = definition.value?.data?.decisionRequirementsDefinitionId
+    if (drd_id) {
+      void engine_rest.decision.get_decision_requirements_xml(state, drd_id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [definition.value?.data?.decisionRequirementsDefinitionId])
 
   return (
     <main id="content" class="decisions fade-in">
@@ -170,8 +179,7 @@ const DecisionsList = () => {
 
 const DecisionDetails = () => {
   const state = useContext(AppState),
-    { api: { decision: { definition, dmn } } } = state,
-    { params: { decision_id } } = useRoute(),
+    { api: { decision: { definition, dmn, drd } } } = state,
     [t] = useTranslation()
 
   return <div id="decision-details">
@@ -182,7 +190,6 @@ const DecisionDetails = () => {
         const {
           id, key, name, version, versionTag, tenantId, deploymentId,
           decisionRequirementsDefinitionId, historyTimeToLive,
-          resource
         } = definition.value.data
 
         return <div>
@@ -203,7 +210,11 @@ const DecisionDetails = () => {
             <dt>{t("decisions.deployment-id")}</dt>
             <dd>{deploymentId}</dd>
             <dt>{t("decisions.decision-requirements-id")}</dt>
-            <dd>{decisionRequirementsDefinitionId}</dd>
+            <dd>
+              {decisionRequirementsDefinitionId
+                ? <a href="#decision-requirements-diagram">{decisionRequirementsDefinitionId}</a>
+                : '-'}
+            </dd>
             <dt>{t("decisions.history-ttl")}</dt>
             <dd>{historyTimeToLive}</dd>
           </dl>
@@ -217,6 +228,16 @@ const DecisionDetails = () => {
       signal={dmn}
       on_nothing={() => <p class="info-box">{t("decisions.select-diagram")}</p>}
       on_success={() => <DmnViewer xml={dmn.value.data.dmnXml} container="#diagram-container" />} />
+
+    {definition.value?.data?.decisionRequirementsDefinitionId
+      ? <>
+        <h3 id="decision-requirements-diagram">{t("decisions.decision-requirements-diagram")}</h3>
+        <div id="drd-container" />
+        <RequestState
+          signal={drd}
+          on_success={() => <DmnViewer xml={drd.value.data.dmnXml} container="#drd-container" table_view_only={false} />} />
+      </>
+      : null}
   </div>
 }
 

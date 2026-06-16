@@ -371,6 +371,7 @@
     "version-tag": "Versietag",
     "deployment-id": "Deployment-ID",
     "decision-requirements-id": "Beslissingsvereisten-definitie-ID",
+    "decision-requirements-diagram": "Beslissingsvereistendiagram",
     "history-ttl": "Bewaartermijn geschiedenis",
     "sort": {
       "name": "Naam",

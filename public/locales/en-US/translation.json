@@ -404,6 +404,7 @@
     "version-tag": "Version Tag",
     "deployment-id": "Deployment ID",
     "decision-requirements-id": "Decision Requirements Definition ID",
+    "decision-requirements-diagram": "Decision Requirements Diagram",
     "history-ttl": "History Time To Live",
     "sort": {
       "name": "Name",

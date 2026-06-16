@@ -371,6 +371,7 @@
     "version-tag": "Etiqueta de versión",
     "deployment-id": "ID de despliegue",
     "decision-requirements-id": "ID de definición de requisitos de decisión",
+    "decision-requirements-diagram": "Diagrama de requisitos de decisión",
     "history-ttl": "Tiempo de vida del historial",
     "sort": {
       "name": "Nombre",

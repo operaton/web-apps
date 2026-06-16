@@ -1,9 +1,8 @@
 import DmnJS from 'dmn-js'
-import { useLayoutEffect } from 'preact/hooks'
 
 
 
-export const DmnViewer = ({ xml, container }) => {
+export const DmnViewer = ({ xml, container, table_view_only = true }) => {
 
   document.querySelector(container).innerText = ''
 
@@ -13,7 +12,7 @@ export const DmnViewer = ({ xml, container }) => {
     viewer = new DmnJS({
       container,
       height: 500,
-      tableViewOnly: true,
+      tableViewOnly: table_view_only,
       hideDetails: true,
       drd: {
         drillDown: {
