@@ -590,6 +590,9 @@
       "remove-from-group": "Aus Gruppe entfernen",
       "confirm-remove-from-group": "Möchten Sie den Benutzer wirklich aus dieser Gruppe entfernen?",
       "add-to-group": "Zur Gruppe hinzufügen",
+      "remove-from-tenant": "Aus Mandant entfernen",
+      "confirm-remove-from-tenant": "Möchten Sie den Benutzer wirklich aus diesem Mandanten entfernen?",
+      "add-to-tenant": "Zu Mandant hinzufügen",
       "no-tenants": "Der Benutzer ist derzeit kein Mitglied eines Mandanten.",
       "delete": "Benutzer löschen",
       "confirm-delete": "Möchten Sie diesen Benutzer wirklich löschen?"

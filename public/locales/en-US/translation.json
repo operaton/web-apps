@@ -590,6 +590,9 @@
       "remove-from-group": "Remove from group",
       "confirm-remove-from-group": "Do you really want to remove the user from this group?",
       "add-to-group": "Add to group",
+      "remove-from-tenant": "Remove from tenant",
+      "confirm-remove-from-tenant": "Do you really want to remove the user from this tenant?",
+      "add-to-tenant": "Add to tenant",
       "no-tenants": "User is currently not a member of any tenant.",
       "delete": "Delete User",
       "confirm-delete": "Do you really want to delete this user?"

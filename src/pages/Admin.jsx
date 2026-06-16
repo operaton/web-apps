@@ -656,7 +656,7 @@ const UserDetails = ({ user_id }) => {
     <UserProfile user_id={user_id} />
     <UserPassword user_id={user_id} />
     <UserGroups user_id={user_id} />
-    <UserTenants />
+    <UserTenants user_id={user_id} />
 
     <h3>{t("admin.danger-zone")}</h3>
     <div class="button-group">
@@ -823,10 +823,32 @@ const UserGroups = ({ user_id }) => {
   </>
 }
 
-const UserTenants = () => {
+const UserTenants = ({ user_id }) => {
   const
-    { api: { tenant: { by_member: tenants } } } = useContext(AppState),
-    [t] = useTranslation()
+    state = useContext(AppState),
+    { api: { tenant: { by_member: tenants } } } = state,
+    [t] = useTranslation(),
+    add_open = useSignal(false),
+    remove_open = useSignal(false),
+    pending_remove = useSignal(null),
+    new_tenant = useSignal('')
+
+  const
+    refetch = () => engine_rest.tenant.by_member(state, user_id),
+    confirm_remove = (tenant_id) => {
+      pending_remove.value = tenant_id
+      remove_open.value = true
+    },
+    do_remove = () =>
+      void engine_rest.tenant.remove_user(state, pending_remove.value, user_id).then(refetch),
+    do_add = e => {
+      e.preventDefault()
+      void engine_rest.tenant.add_user(state, new_tenant.value, user_id).then(() => {
+        new_tenant.value = ''
+        add_open.value = false
+        refetch()
+      })
+    }
 
   return <>
     <h3>{t("admin.tenants")}</h3>
@@ -838,6 +860,7 @@ const UserTenants = () => {
           <tr>
             <th>{t("common.id")}</th>
             <th>{t("common.name")}</th>
+            <th>{t("common.action")}</th>
           </tr>
           </thead>
           <tbody>
@@ -845,11 +868,31 @@ const UserTenants = () => {
             <tr key={tenant.id}>
               <td>{tenant.id}</td>
               <td>{tenant.name}</td>
+              <td><button class="danger" onClick={() => confirm_remove(tenant.id)}>{t("admin.user.remove-from-tenant")}</button></td>
             </tr>
           ))}
           </tbody>
         </table>
         : <p>{t("admin.user.no-tenants")}</p>} />
+
+    <div class="button-group">
+      <button onClick={() => (add_open.value = true)}>{t("admin.user.add-to-tenant")}</button>
+    </div>
+
+    <Dialog open={add_open} title={t("admin.user.add-to-tenant")}>
+      <form onSubmit={do_add}>
+        <label for="add-tenant-id">{t("admin.tenant.tenant-id")}</label>
+        <input id="add-tenant-id" type="text" value={new_tenant.value}
+               onInput={(e) => (new_tenant.value = e.currentTarget.value)} required />
+        <div class="button-group">
+          <button type="submit">{t("common.save")}</button>
+          <button type="button" class="secondary" onClick={() => (add_open.value = false)}>{t("common.cancel")}</button>
+        </div>
+      </form>
+    </Dialog>
+
+    <ConfirmDialog open={remove_open} confirm_label={t("common.remove")}
+                   message={t("admin.user.confirm-remove-from-tenant")} on_confirm={do_remove} />
   </>
 }
 

@@ -177,6 +177,39 @@ describe("AdminPage", () => {
       expect(engine_rest.user.delete.mock.lastCall[0]).toBe(state);
       expect(engine_rest.user.delete.mock.lastCall[1]).toBe("jdoe");
     });
+
+    it("adds a tenant membership from the user details page", () => {
+      mockParams = { page_id: "users", selection_id: "jdoe" };
+      const { container, getAllByText } = renderPage(state);
+
+      fireEvent.click(getAllByText("admin.user.add-to-tenant")[0]);
+      const input = container.querySelector("#add-tenant-id");
+      fireEvent.input(input, { target: { value: "tenant-a" } });
+      fireEvent.submit(input.closest("form"));
+
+      expect(engine_rest.tenant.add_user).toHaveBeenCalled();
+      const call = engine_rest.tenant.add_user.mock.lastCall;
+      expect(call[0]).toBe(state);
+      expect(call[1]).toBe("tenant-a");
+      expect(call[2]).toBe("jdoe");
+    });
+
+    it("removes a tenant membership from the user details page", () => {
+      mockParams = { page_id: "users", selection_id: "jdoe" };
+      signal_response(state.api.tenant.by_member, [
+        { id: "tenant-a", name: "Tenant A" },
+      ]);
+      const { container, getByText } = renderPage(state);
+
+      fireEvent.click(getByText("admin.user.remove-from-tenant"));
+      fireEvent.click(container.querySelector("dialog[open] button.danger"));
+
+      expect(engine_rest.tenant.remove_user).toHaveBeenCalled();
+      const call = engine_rest.tenant.remove_user.mock.lastCall;
+      expect(call[0]).toBe(state);
+      expect(call[1]).toBe("tenant-a");
+      expect(call[2]).toBe("jdoe");
+    });
   });
 
   describe("Groups", () => {
