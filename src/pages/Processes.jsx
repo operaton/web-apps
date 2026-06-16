@@ -167,6 +167,9 @@ const ProcessesPage = () => {
       state.api.process.instance.list.value = null;
       state.api.process.instance.one.value = null;
       state.api.process.instance.activity_instances.value = null;
+      state.api.incident.by_process_definition.value = null;
+      state.api.incident.by_process_instance.value = null;
+      state.api.incident.annotation.value = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.definition_id]);
@@ -686,7 +689,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +931,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1005,6 +1007,83 @@ const ProcessInstance = ({ id, startTime, state, businessKey }) => {
   );
 };
 
+const refetch_definition_incidents = (state, definition_id, history_mode) =>
+  history_mode
+    ? engine_rest.history.incident.by_process_definition(state, definition_id)
+    : engine_rest.incident.by_process_definition(state, definition_id);
+
+const refetch_instance_incidents = (state, instance_id, history_mode) =>
+  history_mode
+    ? engine_rest.history.incident.by_process_instance(state, instance_id)
+    : engine_rest.incident.by_process_instance(state, instance_id);
+
+const IncidentAnnotationActions = ({ incident, readonly, on_refresh }) => {
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    annotation = useSignal(incident.annotation ?? ""),
+    saving = useSignal(false);
+
+  useEffect(() => {
+    annotation.value = incident.annotation ?? "";
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incident.id, incident.annotation]);
+
+  const submit = async (event) => {
+      event.preventDefault();
+      saving.value = true;
+      try {
+        await engine_rest.incident.set_annotation(
+          state,
+          incident.id,
+          annotation.value,
+        );
+        await on_refresh?.();
+      } finally {
+        saving.value = false;
+      }
+    },
+    clear = async () => {
+      saving.value = true;
+      try {
+        await engine_rest.incident.clear_annotation(state, incident.id);
+        annotation.value = "";
+        await on_refresh?.();
+      } finally {
+        saving.value = false;
+      }
+    };
+
+  if (readonly) return annotation.value || "—";
+
+  return (
+    <form class="incident-annotation" onSubmit={submit}>
+      <input
+        type="text"
+        aria-label={`${t("processes.incidents.annotation")} ${incident.id}`}
+        placeholder={t("processes.incidents.annotation-placeholder")}
+        value={annotation.value}
+        disabled={saving.value}
+        onInput={(event) => (annotation.value = event.currentTarget.value)}
+      />
+      <span class="button-group">
+        <button type="submit" disabled={saving.value}>
+          {t("processes.incidents.save-annotation")}
+        </button>
+        {incident.annotation ? (
+          <button
+            type="button"
+            class="secondary"
+            disabled={saving.value}
+            onClick={clear}
+          >
+            {t("processes.incidents.clear-annotation")}
+          </button>
+        ) : null}
+      </span>
+    </form>
+  );
+};
+
 const InstanceVariables = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
@@ -1044,9 +1123,8 @@ const InstanceVariables = () => {
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
                 ).map(
-                  // eslint-disable-next-line react/jsx-key
                   ([name, { type, value }]) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1054,9 +1132,8 @@ const InstanceVariables = () => {
                   ),
                 )
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1074,16 +1151,13 @@ const InstanceIncidents = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
     history_mode = query.history === "true",
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    incidents = history_mode
+      ? state.api.history.incident.by_process_instance
+      : state.api.incident.by_process_instance;
 
-  // The incident endpoint is history-only in Camunda 7, but timestamp filters
-  // applied via history mode (e.g. closed instance window) can change the
-  // returned set — re-fetch on toggle.
   useEffect(() => {
-    void engine_rest.history.incident.by_process_instance(
-      state,
-      params.selection_id,
-    );
+    refetch_instance_incidents(state, params.selection_id, history_mode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selection_id, history_mode]);
 
@@ -1102,16 +1176,16 @@ const InstanceIncidents = () => {
             <th>{t("processes.incidents.root-cause-process-instance-id")}</th>
             <th>{t("common.type")}</th>
             <th>{t("processes.incidents.annotation")}</th>
-            <th>{t("common.action")}</th>
           </tr>
         </thead>
         <tbody>
-          {state.api.history.incident.by_process_instance.value?.data?.map(
+          {incidents.value?.data?.map(
             // eslint-disable-next-line react/jsx-key
             ({
               id,
               incidentMessage,
               processInstanceId,
+              incidentTimestamp,
               createTime,
               activityId,
               failedActivityId,
@@ -1126,8 +1200,10 @@ const InstanceIncidents = () => {
                   <UUIDLink path={"/processes"} uuid={processInstanceId} />
                 </td>
                 <td>
-                  <time datetime={createTime}>
-                    {createTime ? createTime.substring(0, 19) : "-/-"}
+                  <time datetime={incidentTimestamp ?? createTime}>
+                    {(incidentTimestamp ?? createTime)
+                      ? (incidentTimestamp ?? createTime).substring(0, 19)
+                      : "-/-"}
                   </time>
                 </td>
                 <td>{activityId}</td>
@@ -1139,7 +1215,19 @@ const InstanceIncidents = () => {
                   <UUIDLink path={""} uuid={rootCauseIncidentId} />
                 </td>
                 <td>{incidentType}</td>
-                <td>{annotation}</td>
+                <td>
+                  <IncidentAnnotationActions
+                    incident={{ id, annotation }}
+                    readonly={history_mode}
+                    on_refresh={() =>
+                      refetch_instance_incidents(
+                        state,
+                        params.selection_id,
+                        history_mode,
+                      )
+                    }
+                  />
+                </td>
               </tr>
             ),
           )}
@@ -1311,16 +1399,20 @@ const CalledProcessInstances = () => {
 
 const Incidents = () => {
   const state = useContext(AppState),
-    { definition_id } = useRoute(),
-    [t] = useTranslation();
+    {
+      params: { definition_id },
+      query,
+    } = useRoute(),
+    history_mode = query.history === "true",
+    [t] = useTranslation(),
+    incidents = history_mode
+      ? state.api.history.incident.by_process_definition
+      : state.api.incident.by_process_definition;
 
   useEffect(() => {
-    void engine_rest.history.incident.by_process_definition(
-      state,
-      definition_id,
-    );
+    refetch_definition_incidents(state, definition_id, history_mode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition_id]);
+  }, [definition_id, history_mode]);
 
   /** @namespace instance.incidentMessage **/
   /** @namespace instance.incidentType **/
@@ -1332,18 +1424,30 @@ const Incidents = () => {
             <th>{t("processes.incidents.message")}</th>
             <th>{t("common.type")}</th>
             <th>{t("processes.incidents.configuration")}</th>
+            <th>{t("processes.incidents.annotation")}</th>
           </tr>
         </thead>
         <tbody>
-          {state.api.history.incident.by_process_definition.value?.data?.map(
-            (incident) => (
-              <tr key={incident.id}>
-                <td>{incident.incidentMessage}</td>
-                <td>{incident.incidentType}</td>
-                <td>{incident.configuration}</td>
-              </tr>
-            ),
-          )}
+          {incidents.value?.data?.map((incident) => (
+            <tr key={incident.id}>
+              <td>{incident.incidentMessage}</td>
+              <td>{incident.incidentType}</td>
+              <td>{incident.configuration}</td>
+              <td>
+                <IncidentAnnotationActions
+                  incident={incident}
+                  readonly={history_mode}
+                  on_refresh={() =>
+                    refetch_definition_incidents(
+                      state,
+                      definition_id,
+                      history_mode,
+                    )
+                  }
+                />
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -1463,13 +1567,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

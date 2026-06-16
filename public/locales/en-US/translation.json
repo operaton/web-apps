@@ -324,7 +324,10 @@
       "cause-process-instance-id": "Cause Process Instance ID",
       "root-cause-process-instance-id": "Root Cause Process Instance ID",
       "annotation": "Annotation",
-      "configuration": "Configuration"
+      "configuration": "Configuration",
+      "annotation-placeholder": "Add annotation",
+      "save-annotation": "Save",
+      "clear-annotation": "Clear"
     },
     "user-tasks": {
       "owner": "Owner",

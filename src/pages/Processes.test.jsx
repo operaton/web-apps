@@ -282,7 +282,8 @@ describe("ProcessesPage — definition tabs", () => {
     mockQuery = { history: "true", "q.finished": "true" };
     renderPage(state);
     expect(engine_rest.history.process_instance.all).toHaveBeenCalled();
-    const params_arg = engine_rest.history.process_instance.all.mock.lastCall[2];
+    const params_arg =
+      engine_rest.history.process_instance.all.mock.lastCall[2];
     expect(params_arg.finished).toBe("true");
   });
 
@@ -304,22 +305,93 @@ describe("ProcessesPage — definition tabs", () => {
     expect(getByText("BK-1")).toBeTruthy();
   });
 
-  it("incidents tab fetches and renders definition incidents", () => {
+  it("incidents tab fetches and renders live definition incidents", () => {
     mockParams = { definition_id: "proc:1", panel: "incidents" };
-    signal_response(state.api.history.incident.by_process_definition, [
+    signal_response(state.api.incident.by_process_definition, [
       {
         id: "inc1",
         incidentMessage: "boom",
         incidentType: "failedJob",
         configuration: "cfg",
+        annotation: "watching",
       },
     ]);
-    const { getByText } = renderPage(state);
+    const { getByDisplayValue, getByText } = renderPage(state);
+    expect(engine_rest.incident.by_process_definition).toHaveBeenCalled();
+    expect(getByText("boom")).toBeTruthy();
+    expect(getByText("cfg")).toBeTruthy();
+    expect(getByDisplayValue("watching")).toBeTruthy();
+  });
+
+  it("incidents tab uses history incidents read-only in history mode", () => {
+    mockParams = { definition_id: "proc:1", panel: "incidents" };
+    mockQuery = { history: "true" };
+    signal_response(state.api.history.incident.by_process_definition, [
+      {
+        id: "inc1",
+        incidentMessage: "historic boom",
+        incidentType: "failedJob",
+        configuration: "cfg",
+        annotation: "historic note",
+      },
+    ]);
+    const { getByText, queryByText } = renderPage(state);
     expect(
       engine_rest.history.incident.by_process_definition,
     ).toHaveBeenCalled();
-    expect(getByText("boom")).toBeTruthy();
-    expect(getByText("cfg")).toBeTruthy();
+    expect(getByText("historic boom")).toBeTruthy();
+    expect(getByText("historic note")).toBeTruthy();
+    expect(queryByText("processes.incidents.save-annotation")).toBeNull();
+  });
+
+  it("incidents tab saves an annotation for a live incident", async () => {
+    mockParams = { definition_id: "proc:1", panel: "incidents" };
+    engine_rest.incident.set_annotation.mockResolvedValue(undefined);
+    signal_response(state.api.incident.by_process_definition, [
+      {
+        id: "inc1",
+        incidentMessage: "boom",
+        incidentType: "failedJob",
+        configuration: "cfg",
+        annotation: "",
+      },
+    ]);
+    const { getByLabelText, getByText } = renderPage(state);
+    fireEvent.input(getByLabelText("processes.incidents.annotation inc1"), {
+      target: { value: "Checked by ops" },
+    });
+    fireEvent.submit(
+      getByText("processes.incidents.save-annotation").closest("form"),
+    );
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(engine_rest.incident.set_annotation).toHaveBeenCalled();
+    expect(engine_rest.incident.set_annotation.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.incident.set_annotation.mock.lastCall[1]).toBe("inc1");
+    expect(engine_rest.incident.set_annotation.mock.lastCall[2]).toBe(
+      "Checked by ops",
+    );
+  });
+
+  it("incidents tab clears an annotation for a live incident", async () => {
+    mockParams = { definition_id: "proc:1", panel: "incidents" };
+    engine_rest.incident.clear_annotation.mockResolvedValue(undefined);
+    signal_response(state.api.incident.by_process_definition, [
+      {
+        id: "inc1",
+        incidentMessage: "boom",
+        incidentType: "failedJob",
+        configuration: "cfg",
+        annotation: "old note",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    fireEvent.click(getByText("processes.incidents.clear-annotation"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(engine_rest.incident.clear_annotation).toHaveBeenCalled();
+    expect(engine_rest.incident.clear_annotation.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.incident.clear_annotation.mock.lastCall[1]).toBe("inc1");
   });
 
   it("called-definitions tab fetches and renders called definitions", () => {
@@ -423,26 +495,52 @@ describe("ProcessesPage — instance details", () => {
     expect(getByText("amount")).toBeTruthy();
   });
 
-  it("instance-incidents sub-panel fetches and renders incidents", () => {
+  it("instance-incidents sub-panel fetches and renders live incidents", () => {
     mockParams = {
       definition_id: "proc:1",
       panel: "instances",
       selection_id: "inst-9999",
       sub_panel: "instance_incidents",
     };
-    signal_response(state.api.history.incident.by_process_instance, [
+    signal_response(state.api.incident.by_process_instance, [
       {
         id: "ii1",
         incidentMessage: "instance boom",
         processInstanceId: "inst-9999",
-        createTime: "2024-01-01T00:00:00Z",
+        incidentTimestamp: "2024-01-01T00:00:00Z",
         activityId: "act1",
         incidentType: "failedJob",
       },
     ]);
     const { getByText } = renderPage(state);
-    expect(engine_rest.history.incident.by_process_instance).toHaveBeenCalled();
+    expect(engine_rest.incident.by_process_instance).toHaveBeenCalled();
     expect(getByText("instance boom")).toBeTruthy();
+  });
+
+  it("instance-incidents sub-panel uses historic incidents read-only in history mode", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "instance_incidents",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.history.incident.by_process_instance, [
+      {
+        id: "ii1",
+        incidentMessage: "historic instance boom",
+        processInstanceId: "inst-9999",
+        createTime: "2024-01-01T00:00:00Z",
+        activityId: "act1",
+        incidentType: "failedJob",
+        annotation: "historic note",
+      },
+    ]);
+    const { getByText, queryByText } = renderPage(state);
+    expect(engine_rest.history.incident.by_process_instance).toHaveBeenCalled();
+    expect(getByText("historic instance boom")).toBeTruthy();
+    expect(getByText("historic note")).toBeTruthy();
+    expect(queryByText("processes.incidents.save-annotation")).toBeNull();
   });
 
   it("called-instances sub-panel fetches and renders called instances", () => {

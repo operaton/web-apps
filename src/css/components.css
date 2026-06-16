@@ -533,6 +533,23 @@ main#processes {
   max-width: 40%;
 }
 
+#processes form.incident-annotation {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin: 0;
+}
+
+#processes form.incident-annotation input {
+  min-width: 14rem;
+}
+
+#processes form.incident-annotation .button-group {
+  grid-column: auto;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+
 /* Definition / instance metadata renders as a <dl> grid. */
 #processes dl {
   display: grid;

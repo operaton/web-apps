@@ -77,6 +77,11 @@ const createAppState = () => {
       validation: signal(null),
       execution: signal(null),
     },
+    incident: {
+      by_process_definition: signal(null),
+      by_process_instance: signal(null),
+      annotation: signal(null),
+    },
     batch: {
       list: signal(null),
       one: signal(null),

@@ -291,7 +291,10 @@
       "cause-process-instance-id": "Oorzaak procesinstantie-ID",
       "root-cause-process-instance-id": "Hoofdoorzaak procesinstantie-ID",
       "annotation": "Annotatie",
-      "configuration": "Configuratie"
+      "configuration": "Configuratie",
+      "annotation-placeholder": "Annotatie toevoegen",
+      "save-annotation": "Opslaan",
+      "clear-annotation": "Wissen"
     },
     "user-tasks": {
       "owner": "Eigenaar",

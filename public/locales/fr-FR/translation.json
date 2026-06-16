@@ -291,7 +291,10 @@
       "cause-process-instance-id": "ID d'instance de processus cause",
       "root-cause-process-instance-id": "ID d'instance de processus cause racine",
       "annotation": "Annotation",
-      "configuration": "Configuration"
+      "configuration": "Configuration",
+      "annotation-placeholder": "Ajouter une annotation",
+      "save-annotation": "Enregistrer",
+      "clear-annotation": "Effacer"
     },
     "user-tasks": {
       "owner": "Propriétaire",

@@ -324,7 +324,10 @@
       "cause-process-instance-id": "Verursachende Prozessinstanz-ID",
       "root-cause-process-instance-id": "Ursprüngliche Prozessinstanz-ID",
       "annotation": "Anmerkung",
-      "configuration": "Konfiguration"
+      "configuration": "Konfiguration",
+      "annotation-placeholder": "Anmerkung hinzufügen",
+      "save-annotation": "Speichern",
+      "clear-annotation": "Leeren"
     },
     "user-tasks": {
       "owner": "Besitzer",
