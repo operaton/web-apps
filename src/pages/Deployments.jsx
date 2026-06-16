@@ -216,7 +216,8 @@ const DeploymentsList = () => {
 
 const ResourcesList = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
+    { params, query } = useRoute(),
+    { route } = useLocation(),
     [t] = useTranslation();
 
   if (!params.deployment_id) {
@@ -227,6 +228,30 @@ const ResourcesList = () => {
 
   return (
     <div>
+      <section>
+        <h3>{t("deployments.actions")}</h3>
+        <RequestState
+          signal={state.api.deployment.redeploy}
+          on_nothing={() => null}
+          on_success={() => <p class="success">{t("deployments.redeploy-success")}</p>}
+        />
+        <div class="button-group">
+          <button
+            type="button"
+            onClick={() =>
+              void Promise.resolve(
+                engine_rest.deployment.redeploy(state, params.deployment_id),
+              ).then(() => {
+                load_deployments(state, query);
+                const deployment_id = state.api.deployment.redeploy.value?.data?.id;
+                if (deployment_id) route(`/deployments/${deployment_id}`, true);
+              })
+            }
+          >
+            {t("deployments.redeploy")}
+          </button>
+        </div>
+      </section>
       <table>
         <thead>
           <tr>

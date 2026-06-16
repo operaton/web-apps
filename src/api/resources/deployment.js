@@ -1,4 +1,4 @@
-import { GET, DELETE, GET_TEXT } from '../helper.jsx'
+import { GET, DELETE, GET_TEXT, POST } from '../helper.jsx'
 
 /**
  * Fetches deployments sorted by deployment time, sets the first as selected
@@ -33,12 +33,15 @@ const get_deployment_resource = (state, deployment_id, resource_id) =>
 const delete_deployment = (state, deployment_id, params = {}) =>
    DELETE(`/deployment/${deployment_id}?${new URLSearchParams(params).toString()}`, null, state, state.api.deployment.delete)
 
+const redeploy_deployment = (state, deployment_id) =>
+  POST(`/deployment/${deployment_id}/redeploy`, {}, state, state.api.deployment.redeploy)
 
 const deployment = {
   all: get_deployments,
   resources: get_deployment_resources,
   resource: get_deployment_resource,
-  delete: delete_deployment
+  delete: delete_deployment,
+  redeploy: redeploy_deployment,
 }
 
 export default deployment

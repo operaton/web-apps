@@ -440,6 +440,9 @@
     "empty-response": "Empty response",
     "form-preview": "Form preview",
     "raw-data-json": "Raw data (JSON)",
+    "actions": "Deployment Actions",
+    "redeploy": "Redeploy",
+    "redeploy-success": "Deployment redeployed.",
     "sort": {
       "deploymentTime": "Deployment time",
       "name": "Name",

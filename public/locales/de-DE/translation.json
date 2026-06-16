@@ -440,6 +440,9 @@
     "empty-response": "Leere Antwort",
     "form-preview": "Formularvorschau",
     "raw-data-json": "Rohdaten (JSON)",
+    "actions": "Deployment-Aktionen",
+    "redeploy": "Erneut deployen",
+    "redeploy-success": "Deployment erneut bereitgestellt.",
     "sort": {
       "deploymentTime": "Deployment-Zeit",
       "name": "Name",

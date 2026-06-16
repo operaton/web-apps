@@ -158,6 +158,7 @@ const createAppState = () => {
       resources: signal(null),
       resource: signal(null),
       delete: signal(null),
+      redeploy: signal(null),
       saved_filters: signal(null),
     },
     decision: {

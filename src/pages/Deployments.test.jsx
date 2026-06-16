@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { h } from "preact";
-import { render, cleanup } from "@testing-library/preact";
+import { render, cleanup, fireEvent } from "@testing-library/preact";
 
 // Spy all engine_rest API functions but keep RequestState/RESPONSE_STATE real.
 vi.mock("../api/engine_rest.jsx", async (importOriginal) => {
@@ -99,6 +99,24 @@ describe("DeploymentsPage", () => {
     const { getByText } = renderPage(state);
     const link = getByText("process.bpmn");
     expect(link.getAttribute("href")).toBe("/deployments/dep1/process.bpmn");
+  });
+
+  it("redeploys the active deployment", async () => {
+    mockParams = { deployment_id: "dep1" };
+    engine_rest.deployment.redeploy.mockImplementationOnce(() => {
+      signal_response(state.api.deployment.redeploy, { id: "dep2" });
+      return Promise.resolve(state.api.deployment.redeploy.value);
+    });
+    const { getByText } = renderPage(state);
+
+    fireEvent.click(getByText("deployments.redeploy"));
+    await Promise.resolve();
+
+    expect(engine_rest.deployment.redeploy).toHaveBeenCalled();
+    expect(engine_rest.deployment.redeploy.mock.lastCall[0]).toBe(state);
+    expect(engine_rest.deployment.redeploy.mock.lastCall[1]).toBe("dep1");
+    expect(engine_rest.deployment.all).toHaveBeenCalled();
+    expect(routeFn).toHaveBeenCalledWith("/deployments/dep2", true);
   });
 
   it("fetches resource content + definition + instance count when a resource is selected", () => {
