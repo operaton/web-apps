@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { h } from "preact";
-import { render, cleanup } from "@testing-library/preact";
+import { render, cleanup, fireEvent } from "@testing-library/preact";
 
 // Spy all engine_rest API functions but keep RequestState/RESPONSE_STATE real.
 vi.mock("../api/engine_rest.jsx", async (importOriginal) => {
@@ -60,11 +60,14 @@ describe("DecisionsPage", () => {
     expect(link.getAttribute("href")).toBe("/decisions/d1");
   });
 
-  it("fetches the selected decision + DMN xml when a decision_id is in the route", () => {
+  it("fetches the selected decision, DMN xml and decision instances when a decision_id is in the route", () => {
     mockParams = { decision_id: "d1" };
     renderPage(state);
     expect(engine_rest.decision.get_decision_definition).toHaveBeenCalled();
     expect(engine_rest.decision.get_dmn_xml).toHaveBeenCalled();
+    expect(
+      engine_rest.history.decision_instance.by_decision_definition,
+    ).toHaveBeenCalled();
   });
 
   it("renders the DMN viewer with the fetched xml", () => {
@@ -78,5 +81,61 @@ describe("DecisionsPage", () => {
     signal_response(state.api.decision.dmn, { dmnXml: "<dmn>xml</dmn>" });
     const { getByTestId } = renderPage(state);
     expect(getByTestId("dmn-viewer").textContent).toBe("<dmn>xml</dmn>");
+  });
+
+  it("renders decision instances for the selected decision", () => {
+    mockParams = { decision_id: "d1" };
+    signal_response(state.api.decision.definition, {
+      id: "d1",
+      key: "risk",
+      name: "Risk",
+      version: 1,
+    });
+    signal_response(state.api.decision.dmn, { dmnXml: "<dmn>xml</dmn>" });
+    signal_response(state.api.history.decision_instance.list, [
+      {
+        id: "decision-instance-1",
+        evaluationTime: "2024-01-01T10:00:00Z",
+        processDefinitionId: "proc:1",
+        processInstanceId: "abcdef1234567890",
+        activityId: "BusinessRuleTask_1",
+        tenantId: "tenant-a",
+      },
+    ]);
+
+    const { getByText } = renderPage(state);
+    expect(getByText("decision")).toBeTruthy();
+    const process = getByText("abcdef12");
+    expect(process.getAttribute("href")).toBe(
+      "/processes/proc:1/instances/abcdef1234567890/vars?history=true",
+    );
+    expect(getByText("BusinessRuleTask_1")).toBeTruthy();
+    expect(getByText("tenant-a")).toBeTruthy();
+  });
+
+  it("loads more decision instances from the current result length", () => {
+    mockParams = { decision_id: "d1" };
+    signal_response(state.api.decision.definition, {
+      id: "d1",
+      key: "risk",
+      name: "Risk",
+      version: 1,
+    });
+    signal_response(state.api.decision.dmn, { dmnXml: "<dmn>xml</dmn>" });
+    signal_response(state.api.history.decision_instance.list, [
+      { id: "di-1", evaluationTime: "2024-01-01T10:00:00Z" },
+      { id: "di-2", evaluationTime: "2024-01-02T10:00:00Z" },
+    ]);
+    state.api.history.decision_instance.list.value = {
+      ...state.api.history.decision_instance.list.value,
+      hasMore: true,
+    };
+
+    const { getByText } = renderPage(state);
+    fireEvent.click(getByText("tasks.load-more"));
+    expect(
+      engine_rest.history.decision_instance.by_decision_definition.mock
+        .lastCall[2],
+    ).toBe(2);
   });
 });

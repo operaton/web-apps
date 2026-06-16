@@ -177,6 +177,9 @@ const createAppState = () => {
       process_instance: {
         called: signal(null),
       },
+      decision_instance: {
+        list: signal(null),
+      },
       user_operation: signal(null),
     },
     job_definition: {

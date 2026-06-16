@@ -425,6 +425,15 @@
       "latestVersion": "latestVersion",
       "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
     },
+    "instances": {
+      "title": "Decision Instances",
+      "refresh": "Refresh",
+      "empty": "No decision instances found.",
+      "id": "Decision Instance ID",
+      "evaluation-time": "Evaluation Time",
+      "process-instance": "Process Instance",
+      "activity": "Activity"
+    },
     "filter": {
       "manage_title": "Manage decision-definition filters"
     }

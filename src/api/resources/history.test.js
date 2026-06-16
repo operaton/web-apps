@@ -118,4 +118,15 @@ describe("api/resources/history", () => {
       signal: state.api.history.process_instance.called,
     });
   });
+
+  it("decision_instance.by_decision_definition() PAGINATED_GETs historic decision instances", () => {
+    history.decision_instance.by_decision_definition(state, "decision-1", 20);
+    expect_api_call(PAGINATED_GET, {
+      url: "/history/decision-instance?decisionDefinitionId=decision-1&sortBy=evaluationTime&sortOrder=desc",
+      state,
+      signal: state.api.history.decision_instance.list,
+    });
+    expect(PAGINATED_GET.mock.lastCall[3]).toBe(20);
+    expect(PAGINATED_GET.mock.lastCall[4]).toBe(20);
+  });
 });

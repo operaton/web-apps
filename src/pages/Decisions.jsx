@@ -61,9 +61,18 @@ const load_decisions = (state, query) => {
   void engine_rest.decision.get_decision_definitions(state, params)
 }
 
+const load_decision_instances = (state, decision_id, firstResult = 0) => {
+  if (!decision_id) return
+  void engine_rest.history.decision_instance.by_decision_definition(
+    state,
+    decision_id,
+    firstResult,
+  )
+}
+
 const DecisionsPage = () => {
   const state = useContext(AppState),
-    { api: { decision: { definition, dmn } } } = state,
+    { api: { decision: { definition, dmn }, history: { decision_instance } } } = state,
     { params: { decision_id }, query } = useRoute()
 
   useEffect(() => {
@@ -80,12 +89,14 @@ const DecisionsPage = () => {
     if (decision_id) {
       void engine_rest.decision.get_decision_definition(state, decision_id)
       void engine_rest.decision.get_dmn_xml(state, decision_id)
+      load_decision_instances(state, decision_id)
     }
     // Clear stale per-decision data so navigating between decisions doesn't
-    // render the previous decision's metadata or DMN diagram briefly.
+    // render the previous decision's metadata, DMN diagram or instances briefly.
     return () => {
       definition.value = null
       dmn.value = null
+      decision_instance.list.value = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decision_id])
@@ -182,7 +193,6 @@ const DecisionDetails = () => {
         const {
           id, key, name, version, versionTag, tenantId, deploymentId,
           decisionRequirementsDefinitionId, historyTimeToLive,
-          resource
         } = definition.value.data
 
         return <div>
@@ -217,7 +227,98 @@ const DecisionDetails = () => {
       signal={dmn}
       on_nothing={() => <p class="info-box">{t("decisions.select-diagram")}</p>}
       on_success={() => <DmnViewer xml={dmn.value.data.dmnXml} container="#diagram-container" />} />
+
+    {decision_id ? <DecisionInstances decision_id={decision_id} /> : null}
   </div>
+}
+
+const DecisionInstances = ({ decision_id }) => {
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    list = state.api.history.decision_instance.list
+
+  const load_more = () =>
+    load_decision_instances(state, decision_id, list.value?.data?.length ?? 0)
+
+  const process_instance_link = (instance) =>
+    instance.processDefinitionId && instance.processInstanceId
+      ? `/processes/${instance.processDefinitionId}/instances/${instance.processInstanceId}/vars?history=true`
+      : null
+
+  const formatted_time = (value) =>
+    value ? new Date(Date.parse(value)).toLocaleString() : '—'
+
+  return (
+    <section id="decision-instances">
+      <header>
+        <h3>{t("decisions.instances.title")}</h3>
+        <button
+          type="button"
+          class="secondary"
+          onClick={() => load_decision_instances(state, decision_id)}
+        >
+          {t("decisions.instances.refresh")}
+        </button>
+      </header>
+      <RequestState
+        signal={list}
+        on_success={() => {
+          const rows = list.value?.data ?? []
+          if (rows.length === 0) {
+            return <p class="info-box">{t("decisions.instances.empty")}</p>
+          }
+          return (
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    <th>{t("decisions.instances.id")}</th>
+                    <th>{t("decisions.instances.evaluation-time")}</th>
+                    <th>{t("decisions.instances.process-instance")}</th>
+                    <th>{t("decisions.instances.activity")}</th>
+                    <th>{t("processes.tenant-id")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((instance) => {
+                    const process_link = process_instance_link(instance)
+                    return (
+                      <tr key={instance.id}>
+                        <td class="font-mono">{instance.id?.substring(0, 8)}</td>
+                        <td>
+                          <time datetime={instance.evaluationTime}>
+                            {formatted_time(instance.evaluationTime)}
+                          </time>
+                        </td>
+                        <td class="font-mono">
+                          {process_link ? (
+                            <a href={process_link}>
+                              {instance.processInstanceId.substring(0, 8)}
+                            </a>
+                          ) : (
+                            instance.processInstanceId ?? '—'
+                          )}
+                        </td>
+                        <td>{instance.activityId ?? '—'}</td>
+                        <td>{instance.tenantId ?? '—'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              {list.value?.hasMore === true ? (
+                <button class="load-more" onClick={load_more}>
+                  {t("tasks.load-more")}
+                </button>
+              ) : list.value?.hasMore === false ? (
+                <small class="load-more-end">{t("tasks.no-more-items")}</small>
+              ) : null}
+            </>
+          )
+        }}
+      />
+    </section>
+  )
 }
 
 const DecisionsManage = () => {

@@ -1,6 +1,7 @@
 import { GET, PAGINATED_GET } from '../helper.jsx'
 
 const INSTANCE_PAGE_SIZE = 20
+const DECISION_INSTANCE_PAGE_SIZE = 20
 
 const instance_url = (definition_id, params = {}, { unfinished = false } = {}) => {
   const merged = {
@@ -49,6 +50,19 @@ const get_historic_tasks_by_instance = (state, instance_id) =>
 const get_historic_called_instances = (state, instance_id) =>
   GET(`/history/process-instance?superProcessInstanceId=${instance_id}`, state, state.api.history.process_instance.called)
 
+const get_decision_instances_by_definition = (state, definition_id, firstResult = 0) =>
+  PAGINATED_GET(
+    `/history/decision-instance?${new URLSearchParams({
+      decisionDefinitionId: definition_id,
+      sortBy: 'evaluationTime',
+      sortOrder: 'desc',
+    }).toString()}`,
+    state,
+    state.api.history.decision_instance.list,
+    firstResult,
+    DECISION_INSTANCE_PAGE_SIZE,
+  )
+
 /**
  * Task History
  */
@@ -71,6 +85,9 @@ const history = {
   },
   task: {
     by_process_instance: get_historic_tasks_by_instance,
+  },
+  decision_instance: {
+    by_decision_definition: get_decision_instances_by_definition,
   },
   get_user_operation
 }

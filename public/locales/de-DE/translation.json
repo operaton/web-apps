@@ -425,6 +425,15 @@
       "latestVersion": "latestVersion",
       "decisionRequirementsDefinitionKey": "decisionRequirementsDefinitionKey"
     },
+    "instances": {
+      "title": "Decision-Instanzen",
+      "refresh": "Aktualisieren",
+      "empty": "Keine Decision-Instanzen gefunden.",
+      "id": "Decision-Instanz-ID",
+      "evaluation-time": "Auswertungszeit",
+      "process-instance": "Prozessinstanz",
+      "activity": "Aktivität"
+    },
     "filter": {
       "manage_title": "Decision-Filter verwalten"
     }
