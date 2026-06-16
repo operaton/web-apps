@@ -90,6 +90,22 @@ export const start_process_submit_form = (state, id, body = {}) =>
 export const get_activity_instance_statistics = (state, id) =>
   GET(`/process-definition/${id}/statistics`, state, state.api.process.definition.activity_instance_statistics)
 
+const restart_process_instances = (state, id, body) =>
+  POST(
+    `/process-definition/${id}/restart`,
+    body,
+    state,
+    state.api.process.definition.restart,
+  )
+
+const restart_process_instances_async = (state, id, body) =>
+  POST(
+    `/process-definition/${id}/restart-async`,
+    body,
+    state,
+    state.api.process.definition.restart,
+  )
+
 const suspend_process_definition = (state, id) =>
   PUT(
     `/process-definition/${id}/suspended`,
@@ -127,6 +143,8 @@ const process_definition = {
   rendered_start_form: get_rendered_start_form,
   submit_form: start_process_submit_form,
   activity_instance_statistics: get_activity_instance_statistics,
+  restart: restart_process_instances,
+  restart_async: restart_process_instances_async,
   suspend: suspend_process_definition,
   activate: activate_process_definition,
   remove: delete_process_definition,

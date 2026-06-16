@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { h } from "preact";
-import { render, cleanup, fireEvent } from "@testing-library/preact";
+import { render, cleanup, fireEvent, waitFor } from "@testing-library/preact";
 
 // Spy all engine_rest API functions but keep RequestState/RESPONSE_STATE real.
 vi.mock("../api/engine_rest.jsx", async (importOriginal) => {
@@ -336,6 +336,92 @@ describe("ProcessesPage — definition tabs", () => {
     expect(engine_rest.process_definition.called).toHaveBeenCalled();
     const link = getByText("Sub Process");
     expect(link.getAttribute("href")).toBe("/processes/called:1");
+  });
+
+  it("restart tab fetches completed historic instances", () => {
+    mockParams = { definition_id: "proc:1", panel: "restart" };
+    renderPage(state);
+    expect(engine_rest.history.process_instance.all).toHaveBeenCalled();
+    const call = engine_rest.history.process_instance.all.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toBe("proc:1");
+    expect(call[2]).toMatchObject({
+      finished: true,
+      sortBy: "endTime",
+      sortOrder: "desc",
+    });
+  });
+
+  it("restart tab creates an async restart payload from the selected row", async () => {
+    mockParams = { definition_id: "proc:1", panel: "restart" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "hist-1",
+        startTime: "2024-01-01T00:00:00Z",
+        endTime: "2024-01-01T01:00:00Z",
+        state: "COMPLETED",
+        businessKey: "BK-1",
+      },
+    ]);
+    engine_rest.process_definition.restart_async.mockResolvedValue(undefined);
+
+    const { container, getByText } = renderPage(state);
+    const row_box = container.querySelector('tbody input[type="checkbox"]'),
+      option_boxes = container.querySelectorAll(
+        '.restart form input[type="checkbox"]',
+      );
+    fireEvent.click(row_box);
+    fireEvent.change(container.querySelector(".restart select"), {
+      target: { value: "startAfterActivity" },
+    });
+    fireEvent.input(container.querySelector('.restart input[type="text"]'), {
+      target: { value: "UserTask_1" },
+    });
+    fireEvent.click(option_boxes[1]);
+    fireEvent.click(getByText("processes.restart.execute-async"));
+
+    await waitFor(() =>
+      expect(engine_rest.process_definition.restart_async).toHaveBeenCalled(),
+    );
+    const call = engine_rest.process_definition.restart_async.mock.lastCall;
+    expect(call[0]).toBe(state);
+    expect(call[1]).toBe("proc:1");
+    expect(call[2]).toMatchObject({
+      instructions: [
+        { type: "startAfterActivity", activityId: "UserTask_1" },
+      ],
+      processInstanceIds: ["hist-1"],
+      initialVariables: true,
+    });
+  });
+
+  it("restart tab can execute a synchronous default-start restart", async () => {
+    mockParams = { definition_id: "proc:1", panel: "restart" };
+    signal_response(state.api.process.instance.list, [
+      {
+        id: "hist-2",
+        startTime: "2024-01-01T00:00:00Z",
+        endTime: "2024-01-01T01:00:00Z",
+        state: "COMPLETED",
+      },
+    ]);
+    engine_rest.process_definition.restart.mockResolvedValue(undefined);
+
+    const { container, getByText } = renderPage(state);
+    const row_box = container.querySelector('tbody input[type="checkbox"]'),
+      option_boxes = container.querySelectorAll(
+        '.restart form input[type="checkbox"]',
+      );
+    fireEvent.click(row_box);
+    fireEvent.click(option_boxes[0]);
+    fireEvent.click(getByText("processes.restart.execute"));
+
+    await waitFor(() =>
+      expect(engine_rest.process_definition.restart).toHaveBeenCalled(),
+    );
+    const body = engine_rest.process_definition.restart.mock.lastCall[2];
+    expect(body.processInstanceIds).toEqual(["hist-2"]);
+    expect(body.instructions).toBeUndefined();
   });
 
   it("jobs tab fetches and renders job definitions", () => {

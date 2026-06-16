@@ -570,6 +570,43 @@ main#processes {
   color: var(--text);
 }
 
+#processes .restart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+#processes .restart form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--spacing-2);
+}
+
+#processes .restart fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1);
+  margin: 0;
+}
+
+#processes .restart label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+#processes .restart label:has(> select),
+#processes .restart label:has(> input[type="text"]) {
+  flex-direction: column;
+  align-items: start;
+}
+
+#processes .restart button {
+  margin: 0;
+}
+
 /* bpmn-js's brand badge defaults to inline-flow at the canvas root, which
    can push sibling columns sideways. Pin it to the viewport's bottom-right. */
 .bjs-powered-by {

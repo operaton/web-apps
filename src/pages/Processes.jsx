@@ -277,6 +277,7 @@ const ProcessSubNav = () => {
           panel="called_definitions"
           label={t("processes.subnav.called-definitions")}
         />
+        <NavEntry panel="restart" label={t("processes.subnav.restart")} />
         <NavEntry panel="jobs" label={t("processes.subnav.jobs")} />
       </menu>
 
@@ -686,7 +687,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -928,8 +929,7 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
   if (selection_id) {
     if (
@@ -1005,6 +1005,302 @@ const ProcessInstance = ({ id, startTime, state, businessKey }) => {
   );
 };
 
+const restart_instruction = (type, target) => {
+  if (type === "default") return null;
+  const value = target.trim();
+  if (!value) return null;
+  return type === "startTransition"
+    ? { type, transitionId: value }
+    : { type, activityId: value };
+};
+
+const restart_body = (selected, form) => {
+  const instruction = restart_instruction(
+    form.instruction_type.value,
+    form.instruction_target.value,
+  );
+  return {
+    ...(instruction ? { instructions: [instruction] } : {}),
+    processInstanceIds: [...selected],
+    initialVariables: form.initial_variables.value,
+    skipCustomListeners: form.skip_custom_listeners.value,
+    skipIoMappings: form.skip_io_mappings.value,
+    withoutBusinessKey: form.without_business_key.value,
+  };
+};
+
+const RestartProcessInstances = () => {
+  const state = useContext(AppState),
+    { params } = useRoute(),
+    [t] = useTranslation(),
+    selected = useSignal(new Set()),
+    form = {
+      instruction_type: useSignal("default"),
+      instruction_target: useSignal(""),
+      async: useSignal(true),
+      initial_variables: useSignal(false),
+      skip_custom_listeners: useSignal(false),
+      skip_io_mappings: useSignal(false),
+      without_business_key: useSignal(false),
+    },
+    list = state.api.process.instance.list,
+    restart = state.api.process.definition.restart;
+
+  useEffect(() => {
+    restart.value = null;
+    selected.value = new Set();
+    void engine_rest.history.process_instance.all(
+      state,
+      params.definition_id,
+      { finished: true, sortBy: "endTime", sortOrder: "desc" },
+      0,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.definition_id]);
+
+  const rows = list.value?.data ?? [],
+    needs_target = form.instruction_type.value !== "default",
+    has_target = form.instruction_target.value.trim().length > 0,
+    can_restart =
+      selected.value.size > 0 && (!needs_target || has_target);
+
+  const toggle_one = (id) => {
+    const next = new Set(selected.value);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    selected.value = next;
+  };
+
+  const toggle_all = () => {
+    if (selected.value.size === rows.length && rows.length > 0) {
+      selected.value = new Set();
+    } else {
+      selected.value = new Set(rows.map((row) => row.id));
+    }
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!can_restart) return;
+    const body = restart_body(selected.value, form);
+    if (form.async.value) {
+      await engine_rest.process_definition.restart_async(
+        state,
+        params.definition_id,
+        body,
+      );
+    } else {
+      await engine_rest.process_definition.restart(
+        state,
+        params.definition_id,
+        body,
+      );
+    }
+    selected.value = new Set();
+  };
+
+  return (
+    <section class="restart">
+      <form onSubmit={submit}>
+        <fieldset>
+          <legend>{t("processes.restart.start-point")}</legend>
+          <label>
+            {t("processes.restart.instruction")}
+            <select
+              value={form.instruction_type.value}
+              onChange={(event) => {
+                form.instruction_type.value = event.currentTarget.value;
+                form.instruction_target.value = "";
+              }}
+            >
+              <option value="default">
+                {t("processes.restart.default-start")}
+              </option>
+              <option value="startBeforeActivity">
+                {t("processes.restart.start-before")}
+              </option>
+              <option value="startAfterActivity">
+                {t("processes.restart.start-after")}
+              </option>
+              <option value="startTransition">
+                {t("processes.restart.start-transition")}
+              </option>
+            </select>
+          </label>
+          {needs_target ? (
+            <label>
+              {form.instruction_type.value === "startTransition"
+                ? t("processes.restart.transition-id")
+                : t("processes.restart.activity-id")}
+              <input
+                type="text"
+                value={form.instruction_target.value}
+                onInput={(event) =>
+                  (form.instruction_target.value = event.currentTarget.value)
+                }
+                required
+              />
+            </label>
+          ) : null}
+        </fieldset>
+
+        <fieldset>
+          <legend>{t("processes.restart.options")}</legend>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.async.value}
+              onChange={(event) =>
+                (form.async.value = event.currentTarget.checked)
+              }
+            />
+            {t("processes.restart.async")}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.initial_variables.value}
+              onChange={(event) =>
+                (form.initial_variables.value = event.currentTarget.checked)
+              }
+            />
+            {t("processes.restart.initial-variables")}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.without_business_key.value}
+              onChange={(event) =>
+                (form.without_business_key.value =
+                  event.currentTarget.checked)
+              }
+            />
+            {t("processes.restart.without-business-key")}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.skip_custom_listeners.value}
+              onChange={(event) =>
+                (form.skip_custom_listeners.value =
+                  event.currentTarget.checked)
+              }
+            />
+            {t("processes.restart.skip-custom-listeners")}
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={form.skip_io_mappings.value}
+              onChange={(event) =>
+                (form.skip_io_mappings.value = event.currentTarget.checked)
+              }
+            />
+            {t("processes.restart.skip-io-mappings")}
+          </label>
+        </fieldset>
+
+        <button type="submit" disabled={!can_restart}>
+          {form.async.value
+            ? t("processes.restart.execute-async")
+            : t("processes.restart.execute")}
+        </button>
+      </form>
+
+      <RequestState
+        signal={restart}
+        on_nothing={() => null}
+        on_success={() => {
+          const result = restart.value?.data;
+          return result?.id ? (
+            <p class="info-box">
+              {t("processes.restart.batch-created")}{" "}
+              <a href={`/batches/${result.id}`}>{result.id}</a>
+            </p>
+          ) : (
+            <p class="info-box">{t("processes.restart.success")}</p>
+          );
+        }}
+      />
+
+      <RequestState
+        signal={list}
+        on_success={() =>
+          rows.length === 0 ? (
+            <p class="info-box">{t("processes.restart.no-instances")}</p>
+          ) : (
+            <div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      <input
+                        type="checkbox"
+                        aria-label={t("processes.bulk.select-all")}
+                        checked={
+                          rows.length > 0 && selected.value.size === rows.length
+                        }
+                        onChange={toggle_all}
+                      />
+                    </th>
+                    <th>{t("common.id")}</th>
+                    <th>{t("processes.start-time")}</th>
+                    <th>{t("processes.restart.end-time")}</th>
+                    <th>{t("common.state")}</th>
+                    <th>{t("processes.business-key")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((instance) => (
+                    <tr
+                      key={instance.id}
+                      aria-selected={selected.value.has(instance.id)}
+                    >
+                      <td>
+                        <input
+                          type="checkbox"
+                          aria-label={instance.id}
+                          checked={selected.value.has(instance.id)}
+                          onChange={() => toggle_one(instance.id)}
+                        />
+                      </td>
+                      <td class="font-mono">{instance.id.substring(0, 8)}</td>
+                      <td>
+                        {instance.startTime ? (
+                          <time datetime={instance.startTime}>
+                            {new Date(
+                              Date.parse(instance.startTime),
+                            ).toLocaleString()}
+                          </time>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td>
+                        {instance.endTime ? (
+                          <time datetime={instance.endTime}>
+                            {new Date(
+                              Date.parse(instance.endTime),
+                            ).toLocaleString()}
+                          </time>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td>{instance.state}</td>
+                      <td>{instance.businessKey}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        }
+      />
+    </section>
+  );
+};
+
 const InstanceVariables = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
@@ -1046,7 +1342,7 @@ const InstanceVariables = () => {
                 ).map(
                   // eslint-disable-next-line react/jsx-key
                   ([name, { type, value }]) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1056,7 +1352,7 @@ const InstanceVariables = () => {
               : state.api.process.instance.variables.value.data.map(
                   // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
                       <td>{value}</td>
@@ -1464,13 +1760,6 @@ const JobDefinitions = () => {
   );
 };
 
-const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
-
 const DefinitionsManage = () => {
   const state = useContext(AppState),
     { route } = useLocation(),
@@ -1558,9 +1847,15 @@ const process_definition_tabs = [
     Component: CalledProcessDefinitions,
   },
   {
+    nameKey: "processes.tabs.restart",
+    id: "restart",
+    pos: 3,
+    Component: RestartProcessInstances,
+  },
+  {
     nameKey: "processes.tabs.jobs",
     id: "jobs",
-    pos: 3,
+    pos: 4,
     Component: JobDefinitions,
   },
 ];

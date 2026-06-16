@@ -52,6 +52,7 @@ describe("state", () => {
     it("mirrors the REST resource structure under api.*", () => {
       const { api } = createAppState();
       expect(api.process.definition.list.value).toBeNull();
+      expect(api.process.definition.restart.value).toBeNull();
       expect(api.process.instance.one.value).toBeNull();
       expect(api.task.comment.list.value).toBeNull();
       expect(api.authorization.all.value).toBeNull();

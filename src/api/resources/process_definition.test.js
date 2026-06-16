@@ -155,6 +155,34 @@ describe("api/resources/process_definition", () => {
     });
   });
 
+  it("restart() POSTs the restart payload", () => {
+    const body = {
+      instructions: [{ type: "startBeforeActivity", activityId: "task" }],
+      processInstanceIds: ["inst-1"],
+    };
+    process_definition.restart(state, "def-1", body);
+    expect_api_call(POST, {
+      url: "/process-definition/def-1/restart",
+      body,
+      state,
+      signal: state.api.process.definition.restart,
+    });
+  });
+
+  it("restart_async() POSTs the async restart payload", () => {
+    const body = {
+      processInstanceIds: ["inst-1", "inst-2"],
+      initialVariables: true,
+    };
+    process_definition.restart_async(state, "def-1", body);
+    expect_api_call(POST, {
+      url: "/process-definition/def-1/restart-async",
+      body,
+      state,
+      signal: state.api.process.definition.restart,
+    });
+  });
+
   it("suspend() PUTs suspended=true", () => {
     process_definition.suspend(state, "def-1");
     expect_api_call(PUT, {
