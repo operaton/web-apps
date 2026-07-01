@@ -33,11 +33,11 @@ describe("api/resources/history", () => {
   });
 
   it("process_instance.all() forwards extra filter params and lets them override defaults", () => {
-    history.process_instance.all(
-      state,
-      "def-1",
-      { businessKeyLike: "%foo%", sortBy: "businessKey", sortOrder: "desc" },
-    );
+    history.process_instance.all(state, "def-1", {
+      businessKeyLike: "%foo%",
+      sortBy: "businessKey",
+      sortOrder: "desc",
+    });
     expect_api_call(PAGINATED_GET, {
       url: "/history/process-instance?sortBy=businessKey&sortOrder=desc&processDefinitionId=def-1&businessKeyLike=%25foo%25",
       state,
@@ -116,6 +116,25 @@ describe("api/resources/history", () => {
       url: "/history/process-instance?superProcessInstanceId=inst-1",
       state,
       signal: state.api.history.process_instance.called,
+    });
+  });
+
+  it("batch.all() PAGINATED_GETs /history/batch", () => {
+    history.batch.all(state, { sortBy: "batchId", sortOrder: "desc" }, 20);
+    expect_api_call(PAGINATED_GET, {
+      url: "/history/batch?sortBy=batchId&sortOrder=desc",
+      state,
+      signal: state.api.history.batch.list,
+    });
+    expect(PAGINATED_GET.mock.lastCall[3]).toBe(20);
+  });
+
+  it("batch.one() GETs /history/batch/:id", () => {
+    history.batch.one(state, "b1");
+    expect_api_call(GET, {
+      url: "/history/batch/b1",
+      state,
+      signal: state.api.history.batch.one,
     });
   });
 });

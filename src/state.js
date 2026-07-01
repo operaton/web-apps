@@ -184,6 +184,8 @@ const createAppState = () => {
       definitions: signal(null),
       definition: signal(null),
       dmn: signal(null),
+      instances: signal(null),
+      instance: signal(null),
       saved_filters: signal(null),
     },
     history: {
@@ -196,6 +198,10 @@ const createAppState = () => {
       },
       process_instance: {
         called: signal(null),
+      },
+      batch: {
+        list: signal(null),
+        one: signal(null),
       },
       user_operation: signal(null),
     },

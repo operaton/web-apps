@@ -31,7 +31,8 @@
     "active": "Aktiv",
     "running": "Laufend",
     "select-page": "Seite auswählen",
-    "activate": "Aktivieren"
+    "activate": "Aktivieren",
+    "load-more": "Mehr laden"
   },
   "nav": {
     "tasks": "Aufgaben",
@@ -454,6 +455,16 @@
     },
     "filter": {
       "manage_title": "Decision-Filter verwalten"
+    },
+    "tabs": {
+      "details": "Details",
+      "instances": "Instanzen"
+    },
+    "instances": {
+      "empty": "Keine Entscheidungsauswertungen vorhanden.",
+      "evaluation-time": "Auswertungszeit",
+      "inputs": "Eingaben",
+      "outputs": "Ausgaben"
     }
   },
   "deployments": {
@@ -527,7 +538,11 @@
     "filter": {
       "manage_title": "Batch-Filter verwalten"
     },
-    "retry-failed": "Fehlgeschlagene Jobs wiederholen"
+    "retry-failed": "Fehlgeschlagene Jobs wiederholen",
+    "show-history": "Verlauf anzeigen",
+    "show-running": "Laufende anzeigen",
+    "end-time": "Endzeit",
+    "start-time": "Startzeit"
   },
   "migrations": {
     "title": "Migrationen",

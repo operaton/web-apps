@@ -1,59 +1,123 @@
-import { GET, PAGINATED_GET } from '../helper.jsx'
+import { GET, PAGINATED_GET } from "../helper.jsx";
 
-const INSTANCE_PAGE_SIZE = 20
+const INSTANCE_PAGE_SIZE = 20;
 
-const instance_url = (definition_id, params = {}, { unfinished = false } = {}) => {
+const instance_url = (
+  definition_id,
+  params = {},
+  { unfinished = false } = {},
+) => {
   const merged = {
-    sortBy: 'startTime',
-    sortOrder: 'asc',
+    sortBy: "startTime",
+    sortOrder: "asc",
     ...(unfinished ? { unfinished: true } : {}),
     processDefinitionId: definition_id,
     ...params,
-  }
-  return new URLSearchParams(merged).toString()
-}
+  };
+  return new URLSearchParams(merged).toString();
+};
 
-const get_process_instances = (state, definition_id, params = {}, firstResult = 0) =>
+const get_process_instances = (
+  state,
+  definition_id,
+  params = {},
+  firstResult = 0,
+) =>
   PAGINATED_GET(
     `/history/process-instance?${instance_url(definition_id, params)}`,
     state,
     state.api.process.instance.list,
     firstResult,
     INSTANCE_PAGE_SIZE,
-  )
+  );
 
-const get_process_instances_unfinished = (state, definition_id, params = {}, firstResult = 0) =>
+const get_process_instances_unfinished = (
+  state,
+  definition_id,
+  params = {},
+  firstResult = 0,
+) =>
   PAGINATED_GET(
     `/history/process-instance?${instance_url(definition_id, params, { unfinished: true })}`,
     state,
     state.api.process.instance.list,
     firstResult,
     INSTANCE_PAGE_SIZE,
-  )
+  );
 
 const get_process_instance = (state, definition_id) =>
-  GET(`/history/process-instance/${definition_id}`, state, state.api.process.instance.one)
+  GET(
+    `/history/process-instance/${definition_id}`,
+    state,
+    state.api.process.instance.one,
+  );
 
 const get_incidents_by_process_definition = (state, definition_id) =>
-  GET(`/history/incident?processDefinitionId=${definition_id}`, state, state.api.history.incident.by_process_definition)
+  GET(
+    `/history/incident?processDefinitionId=${definition_id}`,
+    state,
+    state.api.history.incident.by_process_definition,
+  );
 
 const get_incidents_by_process_instance = (state, instance_id) =>
-  GET(`/history/incident?processInstanceId=${instance_id}`, state, state.api.history.incident.by_process_instance)
+  GET(
+    `/history/incident?processInstanceId=${instance_id}`,
+    state,
+    state.api.history.incident.by_process_instance,
+  );
 
 const get_process_instance_variable = (state, instance_id) =>
-  GET(`/history/variable-instance?processInstanceId=${instance_id}`, state, state.api.process.instance.variables)
+  GET(
+    `/history/variable-instance?processInstanceId=${instance_id}`,
+    state,
+    state.api.process.instance.variables,
+  );
 
 const get_historic_tasks_by_instance = (state, instance_id) =>
-  GET(`/history/task?processInstanceId=${instance_id}`, state, state.api.history.task.by_process_instance)
+  GET(
+    `/history/task?processInstanceId=${instance_id}`,
+    state,
+    state.api.history.task.by_process_instance,
+  );
 
 const get_historic_called_instances = (state, instance_id) =>
-  GET(`/history/process-instance?superProcessInstanceId=${instance_id}`, state, state.api.history.process_instance.called)
+  GET(
+    `/history/process-instance?superProcessInstanceId=${instance_id}`,
+    state,
+    state.api.history.process_instance.called,
+  );
 
 /**
  * Task History
  */
 const get_user_operation = (state, execution_id) =>
-  GET(`/history/user-operation?processInstanceId=${execution_id}`, state, state.api.history.user_operation)
+  GET(
+    `/history/user-operation?processInstanceId=${execution_id}`,
+    state,
+    state.api.history.user_operation,
+  );
+
+/**
+ * Finished/historic batches (carry `endTime` once complete).
+ * @see https://docs.operaton.org/reference/latest/rest-api/#tag/Historic-Batch
+ */
+const get_historic_batches = (
+  state,
+  params = { sortBy: "batchId", sortOrder: "desc" },
+  firstResult = 0,
+) => {
+  const qs = new URLSearchParams(params).toString();
+  return PAGINATED_GET(
+    `/history/batch${qs ? `?${qs}` : ""}`,
+    state,
+    state.api.history.batch.list,
+    firstResult,
+    20,
+  );
+};
+
+const get_historic_batch = (state, id) =>
+  GET(`/history/batch/${id}`, state, state.api.history.batch.one);
 
 const history = {
   process_instance: {
@@ -64,7 +128,7 @@ const history = {
   },
   incident: {
     by_process_definition: get_incidents_by_process_definition,
-    by_process_instance: get_incidents_by_process_instance
+    by_process_instance: get_incidents_by_process_instance,
   },
   variable_instance: {
     by_process_instance: get_process_instance_variable,
@@ -72,7 +136,11 @@ const history = {
   task: {
     by_process_instance: get_historic_tasks_by_instance,
   },
-  get_user_operation
-}
+  batch: {
+    all: get_historic_batches,
+    one: get_historic_batch,
+  },
+  get_user_operation,
+};
 
-export default history
+export default history;

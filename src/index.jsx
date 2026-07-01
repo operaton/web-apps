@@ -72,7 +72,7 @@ const Routing = () => {
         <Router>
           <Route path="/" component={DashboardPage} />
           <Route
-            path="/decisions/:decision_id?"
+            path="/decisions/:decision_id?/:panel?"
             component={DecisionsPage}
           />
           {/*<Route path="/tasks/start/:id" component={TasksPage} />*/}

@@ -31,7 +31,8 @@
     "active": "Active",
     "running": "Running",
     "select-page": "Select Page",
-    "activate": "Activate"
+    "activate": "Activate",
+    "load-more": "Load more"
   },
   "nav": {
     "tasks": "Tasks",
@@ -454,6 +455,16 @@
     },
     "filter": {
       "manage_title": "Manage decision-definition filters"
+    },
+    "tabs": {
+      "details": "Details",
+      "instances": "Instances"
+    },
+    "instances": {
+      "empty": "No decision evaluations recorded.",
+      "evaluation-time": "Evaluation time",
+      "inputs": "Inputs",
+      "outputs": "Outputs"
     }
   },
   "deployments": {
@@ -527,7 +538,11 @@
     "filter": {
       "manage_title": "Manage batch filters"
     },
-    "retry-failed": "Retry failed jobs"
+    "retry-failed": "Retry failed jobs",
+    "show-history": "Show history",
+    "show-running": "Show running",
+    "end-time": "End time",
+    "start-time": "Start time"
   },
   "migrations": {
     "title": "Migrations",

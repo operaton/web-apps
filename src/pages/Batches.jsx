@@ -55,7 +55,9 @@ const find_saved = (signal, id) => {
   return (signal.value?.data ?? []).find((f) => f.id === id) ?? null;
 };
 
-const load_batches = (state, query, firstResult = 0) => {
+const keep_history_query = (query) => (query?.history ? "?history=true" : "");
+
+const load_batches = (state, query, firstResult = 0, history = false) => {
   const { saved_filter_id, sortBy, sortOrder, criteria } =
     parse_list_query(query);
   const saved = find_saved(state.api.batch.saved_filters, saved_filter_id);
@@ -66,7 +68,8 @@ const load_batches = (state, query, firstResult = 0) => {
     ...(sortBy ? { sortBy } : {}),
     ...(sortOrder ? { sortOrder } : {}),
   };
-  void engine_rest.batch.all(state, params, firstResult);
+  if (history) void engine_rest.history.batch.all(state, params, firstResult);
+  else void engine_rest.batch.all(state, params, firstResult);
 };
 
 const BatchesPage = () => {
@@ -75,6 +78,7 @@ const BatchesPage = () => {
       params: { batch_id },
       query,
     } = useRoute(),
+    history_mode = query.history === "true",
     [t] = useTranslation();
 
   useEffect(() => {
@@ -83,20 +87,23 @@ const BatchesPage = () => {
   }, []);
 
   useEffect(() => {
-    load_batches(state, query);
+    load_batches(state, query, 0, history_mode);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
-  // Load the selected batch's statistics; clear on navigation.
+  // Load the selected batch's statistics; clear on navigation. Finished batches
+  // only exist in the history endpoint.
   useEffect(() => {
     if (batch_id) {
-      void engine_rest.batch.one(state, batch_id);
+      if (history_mode) void engine_rest.history.batch.one(state, batch_id);
+      else void engine_rest.batch.one(state, batch_id);
     }
     return () => {
       state.api.batch.one.value = null;
+      state.api.history.batch.one.value = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [batch_id]);
+  }, [batch_id, history_mode]);
 
   return (
     <main id="content" class="batches fade-in">
@@ -124,6 +131,7 @@ const BatchesList = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
     { route } = useLocation(),
+    history_mode = query.history === "true",
     [t] = useTranslation();
 
   const parsed = parse_list_query(query);
@@ -138,6 +146,12 @@ const BatchesList = () => {
     route(write_list_query(window.location.href, patch), true);
   };
   const open_manage = () => route(with_manage(), false);
+  const toggle_history = () =>
+    route(history_mode ? "/batches" : "/batches?history=true");
+
+  const list_signal = history_mode
+    ? state.api.history.batch.list
+    : state.api.batch.list;
 
   if (query?.filters === "manage") return <BatchesManage />;
 
@@ -145,10 +159,13 @@ const BatchesList = () => {
     <div>
       <header>
         <h1>{t("batches.title")}</h1>
+        <button type="button" class="secondary" onClick={toggle_history}>
+          {history_mode ? t("batches.show-running") : t("batches.show-history")}
+        </button>
         <button
           type="button"
           class="secondary"
-          onClick={() => load_batches(state, query)}
+          onClick={() => load_batches(state, query, 0, history_mode)}
         >
           {t("batches.refresh")}
         </button>
@@ -162,9 +179,9 @@ const BatchesList = () => {
         on_manage={open_manage}
       />
       <RequestState
-        signal={state.api.batch.list}
+        signal={list_signal}
         on_success={() => {
-          const rows = state.api.batch.list.value?.data ?? [];
+          const rows = list_signal.value?.data ?? [];
           if (rows.length === 0)
             return <p class="info-box">{t("batches.empty")}</p>;
           return (
@@ -173,9 +190,15 @@ const BatchesList = () => {
                 <tr>
                   <th>{t("batches.id")}</th>
                   <th>{t("batches.type")}</th>
-                  <th>{t("batches.progress")}</th>
-                  <th class="num">{t("batches.failed-jobs")}</th>
-                  <th>{t("batches.state")}</th>
+                  {history_mode ? (
+                    <th>{t("batches.end-time")}</th>
+                  ) : (
+                    <>
+                      <th>{t("batches.progress")}</th>
+                      <th class="num">{t("batches.failed-jobs")}</th>
+                      <th>{t("batches.state")}</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -185,20 +208,36 @@ const BatchesList = () => {
                     aria-selected={params.batch_id === batch.id}
                   >
                     <th scope="row">
-                      <a href={`/batches/${batch.id}`}>
+                      <a
+                        href={`/batches/${batch.id}${keep_history_query(query)}`}
+                      >
                         {batch.id.substring(0, 8)}
                       </a>
                     </th>
                     <td>{batch.type}</td>
-                    <td>
-                      <Progress batch={batch} />
-                    </td>
-                    <td class="num">{batch.failedJobs ?? 0}</td>
-                    <td>
-                      {batch.suspended
-                        ? t("batches.suspended")
-                        : t("batches.running")}
-                    </td>
+                    {history_mode ? (
+                      <td>
+                        {batch.endTime ? (
+                          <time datetime={batch.endTime}>
+                            {batch.endTime.substring(0, 19)}
+                          </time>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    ) : (
+                      <>
+                        <td>
+                          <Progress batch={batch} />
+                        </td>
+                        <td class="num">{batch.failedJobs ?? 0}</td>
+                        <td>
+                          {batch.suspended
+                            ? t("batches.suspended")
+                            : t("batches.running")}
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -214,9 +253,12 @@ const BatchDetails = () => {
   const state = useContext(AppState),
     {
       params: { batch_id },
+      query,
     } = useRoute(),
     [t] = useTranslation(),
     confirm_delete = useSignal(false);
+
+  if (query.history === "true") return <HistoricBatchDetails />;
 
   const reload = () => {
     void engine_rest.batch.one(state, batch_id);
@@ -305,6 +347,59 @@ const BatchDetails = () => {
                 confirm_label={t("batches.delete")}
                 on_confirm={remove}
               />
+            </div>
+          );
+        }}
+      />
+    </div>
+  );
+};
+
+const HistoricBatchDetails = () => {
+  const state = useContext(AppState),
+    [t] = useTranslation();
+
+  return (
+    <div id="batch-details">
+      <RequestState
+        signal={state.api.history.batch.one}
+        on_nothing={() => <p class="info-box">{t("batches.select-batch")}</p>}
+        on_success={() => {
+          const batch = state.api.history.batch.one.value?.data;
+          if (!batch) return <p class="info-box">{t("batches.empty")}</p>;
+          return (
+            <div>
+              <header>
+                <h1>{batch.id}</h1>
+              </header>
+              <dl>
+                <dt>{t("batches.type")}</dt>
+                <dd>{batch.type}</dd>
+                <dt>{t("batches.total-jobs")}</dt>
+                <dd>{batch.totalJobs ?? 0}</dd>
+                <dt>{t("batches.created-by")}</dt>
+                <dd>{batch.createUserId ?? "—"}</dd>
+                <dt>{t("batches.start-time")}</dt>
+                <dd>
+                  {batch.startTime ? (
+                    <time datetime={batch.startTime}>
+                      {batch.startTime.substring(0, 19)}
+                    </time>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+                <dt>{t("batches.end-time")}</dt>
+                <dd>
+                  {batch.endTime ? (
+                    <time datetime={batch.endTime}>
+                      {batch.endTime.substring(0, 19)}
+                    </time>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+              </dl>
             </div>
           );
         }}
