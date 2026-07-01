@@ -1,10 +1,15 @@
 import { useContext, useEffect } from "preact/hooks";
+import { useSignal } from "@preact/signals";
 import { useTranslation } from "react-i18next";
 import { AppState } from "../state.js";
 import { useLocation, useRoute } from "preact-iso";
-import engine_rest, { RequestState } from "../api/engine_rest.jsx";
+import engine_rest, {
+  RequestState,
+  RESPONSE_STATE,
+} from "../api/engine_rest.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { CamundaForm } from "../components/CamundaForm.jsx";
+import { Dialog } from "../components/Dialog.jsx";
 import { DmnViewer } from "../components/DMNViewer.jsx";
 import { formatRelativeDate } from "../helper/date_formatter.js";
 import { ListFilter } from "../components/ListFilter.jsx";
@@ -34,9 +39,17 @@ const SORT_OPTIONS = [
 
 const FILTER_KEYS = [
   { key: "name", nameKey: "deployments.filter_keys.name", type: "string" },
-  { key: "nameLike", nameKey: "deployments.filter_keys.nameLike", type: "string" },
+  {
+    key: "nameLike",
+    nameKey: "deployments.filter_keys.nameLike",
+    type: "string",
+  },
   { key: "source", nameKey: "deployments.filter_keys.source", type: "string" },
-  { key: "tenantIdIn", nameKey: "deployments.filter_keys.tenantIdIn", type: "string" },
+  {
+    key: "tenantIdIn",
+    nameKey: "deployments.filter_keys.tenantIdIn",
+    type: "string",
+  },
   { key: "after", nameKey: "deployments.filter_keys.after", type: "date" },
   { key: "before", nameKey: "deployments.filter_keys.before", type: "date" },
 ];
@@ -49,7 +62,8 @@ const find_saved = (signal, id) => {
 };
 
 const load_deployments = (state, query) => {
-  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
+  const { saved_filter_id, sortBy, sortOrder, criteria } =
+    parse_list_query(query);
   const saved = find_saved(state.api.deployment.saved_filters, saved_filter_id);
   const params = {
     ...DEPLOYMENT_DEFAULTS,
@@ -170,6 +184,7 @@ const DeploymentsList = () => {
 
   return (
     <div>
+      <DeploymentUpload />
       <ListFilter
         sort_options={SORT_OPTIONS}
         saved_filters_signal={state.api.deployment.saved_filters}
@@ -211,6 +226,108 @@ const DeploymentsList = () => {
         </tbody>
       </table>
     </div>
+  );
+};
+
+const DeploymentUpload = () => {
+  const state = useContext(AppState),
+    { route } = useLocation(),
+    [t] = useTranslation(),
+    open = useSignal(false),
+    name = useSignal(""),
+    dedup = useSignal(false),
+    changed_only = useSignal(false),
+    files = useSignal(null),
+    error = useSignal(null),
+    busy = useSignal(false);
+
+  const submit = async () => {
+    if (!files.value?.length) return;
+    const fd = new FormData();
+    fd.append("deployment-name", name.value || "");
+    fd.append("enable-duplicate-filtering", String(dedup.value));
+    if (dedup.value)
+      fd.append("deploy-changed-only", String(changed_only.value));
+    for (const file of files.value) fd.append(file.name, file);
+
+    busy.value = true;
+    error.value = null;
+    await engine_rest.deployment.create(state, fd);
+    busy.value = false;
+
+    const result = state.api.deployment.create.value;
+    if (result?.status === RESPONSE_STATE.ERROR) {
+      error.value = result.error?.message ?? t("common.error");
+      return;
+    }
+    open.value = false;
+    name.value = "";
+    files.value = null;
+    dedup.value = false;
+    changed_only.value = false;
+    void engine_rest.deployment.all(state);
+    if (result?.data?.id) route(`/deployments/${result.data.id}`);
+  };
+
+  return (
+    <>
+      <div class="button-group">
+        <button type="button" onClick={() => (open.value = true)}>
+          {t("deployments.upload.title")}
+        </button>
+      </div>
+      <Dialog open={open} title={t("deployments.upload.title")}>
+        <div class="dialog-fields">
+          <label>
+            {t("deployments.upload.name")}
+            <input
+              type="text"
+              value={name.value}
+              onInput={(e) => (name.value = e.target.value)}
+            />
+          </label>
+          <label>
+            {t("deployments.upload.files")}
+            <input
+              type="file"
+              multiple
+              onChange={(e) => (files.value = e.target.files)}
+            />
+          </label>
+        </div>
+        <label>
+          <input
+            type="checkbox"
+            checked={dedup.value}
+            onChange={(e) => (dedup.value = e.target.checked)}
+          />
+          {t("deployments.upload.duplicate-filtering")}
+        </label>
+        {dedup.value && (
+          <label>
+            <input
+              type="checkbox"
+              checked={changed_only.value}
+              onChange={(e) => (changed_only.value = e.target.checked)}
+            />
+            {t("deployments.upload.deploy-changed-only")}
+          </label>
+        )}
+        {error.value && <p class="error">{error.value}</p>}
+        <div class="button-group">
+          <button
+            type="button"
+            onClick={submit}
+            disabled={busy.value || !files.value?.length}
+          >
+            {t("deployments.upload.submit")}
+          </button>
+          <button type="button" onClick={() => (open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
+    </>
   );
 };
 

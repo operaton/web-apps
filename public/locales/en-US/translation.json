@@ -483,6 +483,14 @@
     },
     "filter": {
       "manage_title": "Manage deployment filters"
+    },
+    "upload": {
+      "title": "Deploy",
+      "name": "Deployment name",
+      "files": "Files",
+      "duplicate-filtering": "Enable duplicate filtering",
+      "deploy-changed-only": "Deploy changed resources only",
+      "submit": "Deploy"
     }
   },
   "batches": {

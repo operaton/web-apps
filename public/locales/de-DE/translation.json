@@ -483,6 +483,14 @@
     },
     "filter": {
       "manage_title": "Deployment-Filter verwalten"
+    },
+    "upload": {
+      "title": "Bereitstellen",
+      "name": "Name der Bereitstellung",
+      "files": "Dateien",
+      "duplicate-filtering": "Duplikatfilterung aktivieren",
+      "deploy-changed-only": "Nur geänderte Ressourcen bereitstellen",
+      "submit": "Bereitstellen"
     }
   },
   "batches": {

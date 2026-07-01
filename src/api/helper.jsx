@@ -106,7 +106,11 @@ const resolve_signal = (signal, on_load, on_success, on_error, t) => {
   }
 
   if (signal.value.status === RESPONSE_STATE.LOADING) {
-    return on_load ? on_load : <p class="fade-in-delayed">{t("common.loading")}</p>;
+    return on_load ? (
+      on_load
+    ) : (
+      <p class="fade-in-delayed">{t("common.loading")}</p>
+    );
   }
 
   if (signal.value.status === RESPONSE_STATE.SUCCESS) {
@@ -292,7 +296,40 @@ const fetch_with_body = async (method, url, body, state, signl) => {
     return (signl.value = { status: RESPONSE_STATE.SUCCESS, data: json });
   } catch (error) {
     if (error instanceof Response) {
-      const json = await error.json().catch(() => ({ message: error.statusText }));
+      const json = await error
+        .json()
+        .catch(() => ({ message: error.statusText }));
+      return (signl.value = { status: RESPONSE_STATE.ERROR, error: json });
+    }
+    return (signl.value = { status: RESPONSE_STATE.ERROR, error });
+  }
+};
+
+/**
+ * Multipart POST for file uploads (deployments, attachments). `body` is a
+ * FormData; deliberately does NOT set Content-Type so the browser adds the
+ * multipart boundary itself.
+ */
+export const POST_FORM = async (url, body, state, signl) => {
+  signl.value = { status: RESPONSE_STATE.LOADING };
+
+  let headers = new Headers();
+  headers.set("Authorization", get_auth_header(state));
+
+  try {
+    const response = await fetch(`${_url_engine_rest(state)}${url}`, {
+      headers,
+      method: "POST",
+      body,
+      credentials: "include",
+    });
+    const json = await response_data(response);
+    return (signl.value = { status: RESPONSE_STATE.SUCCESS, data: json });
+  } catch (error) {
+    if (error instanceof Response) {
+      const json = await error
+        .json()
+        .catch(() => ({ message: error.statusText }));
       return (signl.value = { status: RESPONSE_STATE.ERROR, error: json });
     }
     return (signl.value = { status: RESPONSE_STATE.ERROR, error });

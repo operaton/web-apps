@@ -176,6 +176,7 @@ const createAppState = () => {
       resources: signal(null),
       resource: signal(null),
       delete: signal(null),
+      create: signal(null),
       saved_filters: signal(null),
     },
     decision: {
