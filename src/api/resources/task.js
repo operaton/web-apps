@@ -5,7 +5,9 @@ import {
   GET_SERVER_URL,
   GET_TEXT,
   POST,
+  POST_FORM,
   PUT,
+  DELETE,
   get_credentials,
 } from "../helper.jsx";
 import engine_rest from "../engine_rest.jsx";
@@ -192,6 +194,40 @@ const create_comment = (state, task_id, message) =>
 const post_task_form = (state, task_id, data) =>
   POST(`/task/${task_id}/submit-form`, { variables: data, withVariablesInReturn: true, }, state, state.api.task.submit_form );
 
+/**
+ * Complete a task directly (without a form), optionally passing variables.
+ * @see https://docs.operaton.org/reference/latest/rest-api/#tag/Task/operation/complete
+ */
+const complete_task = (state, task_id, variables = {}) =>
+  POST(
+    `/task/${task_id}/complete`,
+    { variables },
+    state,
+    state.api.task.complete,
+  );
+
+const get_attachments = (state, task_id) =>
+  GET(`/task/${task_id}/attachment`, state, state.api.task.attachment.list);
+
+const create_attachment = (state, task_id, form_data) =>
+  POST_FORM(
+    `/task/${task_id}/attachment/create`,
+    form_data,
+    state,
+    state.api.task.attachment.create,
+  );
+
+const delete_attachment = (state, task_id, attachment_id) =>
+  DELETE(
+    `/task/${task_id}/attachment/${attachment_id}`,
+    null,
+    state,
+    state.api.task.attachment.delete,
+  );
+
+const attachment_url = (state, task_id, attachment_id) =>
+  `${_url_engine_rest(state)}/task/${task_id}/attachment/${attachment_id}/data`;
+
 const task = {
   get_tasks,
   get_task,
@@ -206,11 +242,16 @@ const task = {
   unclaim_task,
   assign_task,
   post_task_form,
+  complete_task,
   add_group,
   delete_group,
   get_identity_links,
   get_comments,
   create_comment,
+  get_attachments,
+  create_attachment,
+  delete_attachment,
+  attachment_url,
 };
 
 export default task;

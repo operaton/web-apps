@@ -178,6 +178,13 @@ const RenderedFallbackForm = ({ task, taskId }) => {
             >
               {t("tasks.form.save-form")}
             </button>
+            <button
+              type="button"
+              class="secondary"
+              onClick={() => complete_directly(state, setError, taskId)}
+            >
+              {t("tasks.form.complete-directly")}
+            </button>
           </div>
         </form>
       </div>
@@ -199,6 +206,19 @@ const submit_legacy_form = (e, state, setError, taskId) => {
       console.error("Submit failed:", error);
       setError(error?.message || "An unknown error occurred.");
     });
+};
+
+// Complete a task without submitting the generated variable form, via the
+// dedicated /complete endpoint.
+const complete_directly = (state, setError, taskId) => {
+  setError(null);
+  engine_rest.task
+    .complete_task(state, taskId)
+    .then(() => {
+      localStorage.removeItem(`task_form_${taskId}`);
+      window.location.href = "/tasks";
+    })
+    .catch((error) => setError(error?.message || "Complete failed"));
 };
 
 const store_data = (state) => {

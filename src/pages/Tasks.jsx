@@ -1258,6 +1258,132 @@ const HistoryTab = () => {
   );
 };
 
+const AttachmentsTab = () => {
+  const state = useContext(AppState),
+    { params } = useRoute(),
+    [t] = useTranslation(),
+    name = useSignal(""),
+    description = useSignal(""),
+    file = useSignal(null);
+
+  const load = () =>
+    void engine_rest.task.get_attachments(state, params.task_id);
+
+  useEffect(() => {
+    load();
+    return () => {
+      state.api.task.attachment.list.value = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.task_id]);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!file.value) return;
+    const fd = new FormData();
+    fd.append("attachment-name", name.value || file.value.name);
+    fd.append("attachment-description", description.value);
+    fd.append("attachment-type", file.value.type || "application/octet-stream");
+    fd.append("content", file.value);
+    await engine_rest.task.create_attachment(state, params.task_id, fd);
+    name.value = "";
+    description.value = "";
+    file.value = null;
+    load();
+  };
+
+  const remove = async (id) => {
+    await engine_rest.task.delete_attachment(state, params.task_id, id);
+    load();
+  };
+
+  return (
+    <div class="task-attachments">
+      <RequestState
+        signal={state.api.task.attachment.list}
+        on_success={() => {
+          const rows = state.api.task.attachment.list.value?.data ?? [];
+          if (rows.length === 0)
+            return <p class="info-box">{t("tasks.attachments.empty")}</p>;
+          return (
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("common.name")}</th>
+                  <th>{t("tasks.attachments.description")}</th>
+                  <th>{t("common.action")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((a) => (
+                  <tr key={a.id}>
+                    <td>
+                      <a
+                        href={engine_rest.task.attachment_url(
+                          state,
+                          params.task_id,
+                          a.id,
+                        )}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {a.name ?? a.id}
+                      </a>
+                    </td>
+                    <td>{a.description}</td>
+                    <td>
+                      <button
+                        type="button"
+                        class="danger"
+                        onClick={() => remove(a.id)}
+                      >
+                        {t("common.delete")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          );
+        }}
+      />
+      <form onSubmit={submit}>
+        <h3>{t("tasks.attachments.add")}</h3>
+        <div class="dialog-fields">
+          <label>
+            {t("common.name")}
+            <input
+              type="text"
+              value={name.value}
+              onInput={(e) => (name.value = e.currentTarget.value)}
+            />
+          </label>
+          <label>
+            {t("tasks.attachments.description")}
+            <input
+              type="text"
+              value={description.value}
+              onInput={(e) => (description.value = e.currentTarget.value)}
+            />
+          </label>
+          <label>
+            {t("tasks.attachments.file")}
+            <input
+              type="file"
+              onChange={(e) => (file.value = e.currentTarget.files[0])}
+            />
+          </label>
+        </div>
+        <div class="button-group">
+          <button type="submit" disabled={!file.value}>
+            {t("tasks.attachments.upload")}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 const task_tabs = [
   {
     nameKey: "tasks.tabs.form",
@@ -1272,9 +1398,15 @@ const task_tabs = [
     Component: HistoryTab,
   },
   {
+    nameKey: "tasks.tabs.attachments",
+    id: "attachments",
+    pos: 2,
+    Component: AttachmentsTab,
+  },
+  {
     nameKey: "tasks.tabs.diagram",
     id: "diagram",
-    pos: 2,
+    pos: 3,
     Component: Diagram,
   },
 ];

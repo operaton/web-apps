@@ -175,7 +175,8 @@
     "tabs": {
       "form": "Formular",
       "history": "Verlauf",
-      "diagram": "Diagramm"
+      "diagram": "Diagramm",
+      "attachments": "Anhänge"
     },
     "history": {
       "title": "Verlauf",
@@ -192,7 +193,8 @@
       "unknown-error": "Ein unbekannter Fehler ist aufgetreten.",
       "form-title": "Formular",
       "fetch-failed": "Formular konnte nicht geladen werden",
-      "validation-error": "Bitte beheben Sie die obigen Fehler und versuchen Sie es erneut."
+      "validation-error": "Bitte beheben Sie die obigen Fehler und versuchen Sie es erneut.",
+      "complete-directly": "Ohne Formular abschließen"
     },
     "start-process": {
       "title": "Aufgabe starten",
@@ -266,6 +268,13 @@
       "createdAfter": "createdAfter",
       "active": "active",
       "suspended": "suspended"
+    },
+    "attachments": {
+      "empty": "Keine Anhänge.",
+      "add": "Anhang hinzufügen",
+      "description": "Beschreibung",
+      "file": "Datei",
+      "upload": "Hochladen"
     }
   },
   "processes": {

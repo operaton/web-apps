@@ -156,12 +156,18 @@ const createAppState = () => {
       unclaim_result: signal(null),
       assign_result: signal(null),
       submit_form: signal(null),
+      complete: signal(null),
       add_group: signal(null),
       delete_group: signal(null),
       identity_links: signal(null),
       comment: {
         list: signal(null),
         create: signal(null),
+      },
+      attachment: {
+        list: signal(null),
+        create: signal(null),
+        delete: signal(null),
       },
     },
     filter: {

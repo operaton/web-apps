@@ -175,7 +175,8 @@
     "tabs": {
       "form": "Form",
       "history": "History",
-      "diagram": "Diagram"
+      "diagram": "Diagram",
+      "attachments": "Attachments"
     },
     "history": {
       "title": "History",
@@ -192,7 +193,8 @@
       "unknown-error": "An unknown error occurred.",
       "form-title": "Form",
       "fetch-failed": "Could not load form",
-      "validation-error": "Please fix the errors above and try again."
+      "validation-error": "Please fix the errors above and try again.",
+      "complete-directly": "Complete without form"
     },
     "start-process": {
       "title": "Start Task",
@@ -266,6 +268,13 @@
       "createdAfter": "createdAfter",
       "active": "active",
       "suspended": "suspended"
+    },
+    "attachments": {
+      "empty": "No attachments.",
+      "add": "Add attachment",
+      "description": "Description",
+      "file": "File",
+      "upload": "Upload"
     }
   },
   "processes": {
