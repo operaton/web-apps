@@ -30,7 +30,8 @@
     "suspended": "Suspended",
     "active": "Active",
     "running": "Running",
-    "select-page": "Select Page"
+    "select-page": "Select Page",
+    "activate": "Activate"
   },
   "nav": {
     "tasks": "Tasks",
@@ -324,7 +325,10 @@
       "cause-process-instance-id": "Cause Process Instance ID",
       "root-cause-process-instance-id": "Root Cause Process Instance ID",
       "annotation": "Annotation",
-      "configuration": "Configuration"
+      "configuration": "Configuration",
+      "retry": "Retry",
+      "set-annotation": "Edit annotation",
+      "annotation-placeholder": "Enter annotation…"
     },
     "user-tasks": {
       "owner": "Owner",
@@ -345,7 +349,14 @@
     "jobs": {
       "overriding-job-priority": "Overriding Job Priority",
       "suspend": "Suspend",
-      "change-priority": "Change Overriding Job Priority"
+      "change-priority": "Change Overriding Job Priority",
+      "retry": "Retry",
+      "job-id": "Job ID",
+      "due-date": "Due date",
+      "retries": "Retries",
+      "set-due-date": "Set due date",
+      "exception": "Exception",
+      "set-retries": "Set retries"
     },
     "sort": {
       "name": "Name",
@@ -388,11 +399,21 @@
         "startedAfter": "startedAfter",
         "finished": "finished"
       },
-      "manage_title": "Manage process-instance filters"
+      "manage_title": "Manage process-instance filters",
+      "suspend": "Suspend instance",
+      "activate": "Activate instance",
+      "cancel": "Cancel instance",
+      "confirm-cancel": "Really cancel this process instance?",
+      "keep-running": "Keep running"
     },
     "history-mode-na": "Live data — history mode does not apply here.",
     "filter": {
       "manage_title": "Manage process-definition filters"
+    },
+    "variables": {
+      "add": "Add variable",
+      "edit": "Edit variable",
+      "confirm-delete": "Delete variable \"{{name}}\"?"
     }
   },
   "decisions": {

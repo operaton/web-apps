@@ -282,7 +282,8 @@ describe("ProcessesPage — definition tabs", () => {
     mockQuery = { history: "true", "q.finished": "true" };
     renderPage(state);
     expect(engine_rest.history.process_instance.all).toHaveBeenCalled();
-    const params_arg = engine_rest.history.process_instance.all.mock.lastCall[2];
+    const params_arg =
+      engine_rest.history.process_instance.all.mock.lastCall[2];
     expect(params_arg.finished).toBe("true");
   });
 
@@ -423,26 +424,104 @@ describe("ProcessesPage — instance details", () => {
     expect(getByText("amount")).toBeTruthy();
   });
 
-  it("instance-incidents sub-panel fetches and renders incidents", () => {
+  it("instance-incidents sub-panel fetches live incidents and can retry", () => {
     mockParams = {
       definition_id: "proc:1",
       panel: "instances",
       selection_id: "inst-9999",
       sub_panel: "instance_incidents",
     };
-    signal_response(state.api.history.incident.by_process_instance, [
+    signal_response(state.api.incident.by_process_instance, [
       {
         id: "ii1",
         incidentMessage: "instance boom",
+        processInstanceId: "inst-9999",
+        incidentTimestamp: "2024-01-01T00:00:00Z",
+        activityId: "act1",
+        incidentType: "failedJob",
+        configuration: "job-42",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.incident.by_process_instance).toHaveBeenCalled();
+    expect(getByText("instance boom")).toBeTruthy();
+
+    fireEvent.click(getByText("processes.incidents.retry"));
+    // Assert on lastCall (not toHaveBeenCalledWith) to avoid recursing into the
+    // signal tree passed as `state`.
+    expect(engine_rest.job.set_retries).toHaveBeenCalled();
+    const call = engine_rest.job.set_retries.mock.lastCall;
+    expect(call[1]).toBe("job-42");
+    expect(call[2]).toBe(1);
+  });
+
+  it("instance-incidents in history mode uses the read-only history endpoint", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-9999",
+      sub_panel: "instance_incidents",
+    };
+    mockQuery = { history: "true" };
+    signal_response(state.api.history.incident.by_process_instance, [
+      {
+        id: "ii1",
+        incidentMessage: "old boom",
         processInstanceId: "inst-9999",
         createTime: "2024-01-01T00:00:00Z",
         activityId: "act1",
         incidentType: "failedJob",
       },
     ]);
-    const { getByText } = renderPage(state);
+    const { getByText, queryByText } = renderPage(state);
     expect(engine_rest.history.incident.by_process_instance).toHaveBeenCalled();
-    expect(getByText("instance boom")).toBeTruthy();
+    expect(getByText("old boom")).toBeTruthy();
+    // No action buttons in the read-only history view.
+    expect(queryByText("processes.incidents.retry")).toBeNull();
+  });
+
+  it("jobs sub-panel fetches jobs and retries a failed job", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-1",
+      sub_panel: "jobs",
+    };
+    signal_response(state.api.job.by_process_instance, [
+      {
+        id: "job-1",
+        retries: 0,
+        dueDate: null,
+        suspended: false,
+        exceptionMessage: "kaboom",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.job.by_process_instance).toHaveBeenCalled();
+    expect(getByText("kaboom")).toBeTruthy();
+
+    fireEvent.click(getByText("processes.jobs.retry"));
+    expect(engine_rest.job.set_retries).toHaveBeenCalled();
+    expect(engine_rest.job.set_retries.mock.lastCall[1]).toBe("job-1");
+  });
+
+  it("instance detail suspends a running instance", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-1",
+      sub_panel: "vars",
+    };
+    signal_response(state.api.process.instance.one, {
+      id: "inst-1",
+      suspended: false,
+    });
+    const { getByText } = renderPage(state);
+    fireEvent.click(getByText("processes.instance.suspend"));
+    expect(engine_rest.process_instance.set_suspended).toHaveBeenCalled();
+    const call = engine_rest.process_instance.set_suspended.mock.lastCall;
+    expect(call[1]).toBe("inst-1");
+    expect(call[2]).toBe(true);
   });
 
   it("called-instances sub-panel fetches and renders called instances", () => {

@@ -9,6 +9,7 @@ import engine_rest, {
 import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
+import { Dialog, ConfirmDialog } from "../components/Dialog.jsx";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
 import {
@@ -37,22 +38,62 @@ const INSTANCE_SORT_OPTIONS = [
 ];
 
 const INSTANCE_FILTER_KEYS = [
-  { key: "businessKey", nameKey: "processes.instance.filter_keys.businessKey", type: "string" },
-  { key: "businessKeyLike", nameKey: "processes.instance.filter_keys.businessKeyLike", type: "string" },
-  { key: "active", nameKey: "processes.instance.filter_keys.active", type: "boolean" },
-  { key: "suspended", nameKey: "processes.instance.filter_keys.suspended", type: "boolean" },
-  { key: "finished", nameKey: "processes.instance.filter_keys.finished", type: "boolean" },
-  { key: "withIncidents", nameKey: "processes.instance.filter_keys.withIncidents", type: "boolean" },
-  { key: "withoutIncidents", nameKey: "processes.instance.filter_keys.withoutIncidents", type: "boolean" },
-  { key: "startedBefore", nameKey: "processes.instance.filter_keys.startedBefore", type: "date" },
-  { key: "startedAfter", nameKey: "processes.instance.filter_keys.startedAfter", type: "date" },
+  {
+    key: "businessKey",
+    nameKey: "processes.instance.filter_keys.businessKey",
+    type: "string",
+  },
+  {
+    key: "businessKeyLike",
+    nameKey: "processes.instance.filter_keys.businessKeyLike",
+    type: "string",
+  },
+  {
+    key: "active",
+    nameKey: "processes.instance.filter_keys.active",
+    type: "boolean",
+  },
+  {
+    key: "suspended",
+    nameKey: "processes.instance.filter_keys.suspended",
+    type: "boolean",
+  },
+  {
+    key: "finished",
+    nameKey: "processes.instance.filter_keys.finished",
+    type: "boolean",
+  },
+  {
+    key: "withIncidents",
+    nameKey: "processes.instance.filter_keys.withIncidents",
+    type: "boolean",
+  },
+  {
+    key: "withoutIncidents",
+    nameKey: "processes.instance.filter_keys.withoutIncidents",
+    type: "boolean",
+  },
+  {
+    key: "startedBefore",
+    nameKey: "processes.instance.filter_keys.startedBefore",
+    type: "date",
+  },
+  {
+    key: "startedAfter",
+    nameKey: "processes.instance.filter_keys.startedAfter",
+    type: "date",
+  },
 ];
 
 const INSTANCE_DEFAULTS = { sortBy: "startTime", sortOrder: "asc" };
 
 const instance_params_from_query = (state, query) => {
-  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
-  const saved = find_saved(state.api.process.instance.saved_filters, saved_filter_id);
+  const { saved_filter_id, sortBy, sortOrder, criteria } =
+    parse_list_query(query);
+  const saved = find_saved(
+    state.api.process.instance.saved_filters,
+    saved_filter_id,
+  );
   return {
     ...(saved?.query ?? {}),
     ...criteria,
@@ -73,16 +114,44 @@ const SORT_OPTIONS = [
 
 const FILTER_KEYS = [
   { key: "name", nameKey: "processes.filter_keys.name", type: "string" },
-  { key: "nameLike", nameKey: "processes.filter_keys.nameLike", type: "string" },
+  {
+    key: "nameLike",
+    nameKey: "processes.filter_keys.nameLike",
+    type: "string",
+  },
   { key: "key", nameKey: "processes.filter_keys.key", type: "string" },
   { key: "keyLike", nameKey: "processes.filter_keys.keyLike", type: "string" },
-  { key: "category", nameKey: "processes.filter_keys.category", type: "string" },
-  { key: "categoryLike", nameKey: "processes.filter_keys.categoryLike", type: "string" },
-  { key: "versionTag", nameKey: "processes.filter_keys.versionTag", type: "string" },
+  {
+    key: "category",
+    nameKey: "processes.filter_keys.category",
+    type: "string",
+  },
+  {
+    key: "categoryLike",
+    nameKey: "processes.filter_keys.categoryLike",
+    type: "string",
+  },
+  {
+    key: "versionTag",
+    nameKey: "processes.filter_keys.versionTag",
+    type: "string",
+  },
   { key: "active", nameKey: "processes.filter_keys.active", type: "boolean" },
-  { key: "suspended", nameKey: "processes.filter_keys.suspended", type: "boolean" },
-  { key: "latestVersion", nameKey: "processes.filter_keys.latestVersion", type: "boolean" },
-  { key: "startableInTasklist", nameKey: "processes.filter_keys.startableInTasklist", type: "boolean" },
+  {
+    key: "suspended",
+    nameKey: "processes.filter_keys.suspended",
+    type: "boolean",
+  },
+  {
+    key: "latestVersion",
+    nameKey: "processes.filter_keys.latestVersion",
+    type: "boolean",
+  },
+  {
+    key: "startableInTasklist",
+    nameKey: "processes.filter_keys.startableInTasklist",
+    type: "boolean",
+  },
 ];
 
 const find_saved = (signal, id) => {
@@ -91,8 +160,12 @@ const find_saved = (signal, id) => {
 };
 
 const load_definitions = (state, query) => {
-  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
-  const saved = find_saved(state.api.process.definition.saved_filters, saved_filter_id);
+  const { saved_filter_id, sortBy, sortOrder, criteria } =
+    parse_list_query(query);
+  const saved = find_saved(
+    state.api.process.definition.saved_filters,
+    saved_filter_id,
+  );
   const params = {
     ...(saved?.query ?? {}),
     ...criteria,
@@ -851,7 +924,10 @@ const Instances = () => {
   // history toggle, sort changes, saved-filter pick and criteria edits all
   // funnel through the same reload path.
   const criteria_signature = Object.entries(query ?? {})
-    .filter(([k]) => ["filter", "sortBy", "sortOrder"].includes(k) || k.startsWith("q."))
+    .filter(
+      ([k]) =>
+        ["filter", "sortBy", "sortOrder"].includes(k) || k.startsWith("q."),
+    )
     .map(([k, v]) => `${k}=${v}`)
     .sort()
     .join("&");
@@ -859,7 +935,12 @@ const Instances = () => {
   useEffect(() => {
     if (!params.selection_id) fetch_page(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.definition_id, params.selection_id, history_mode, criteria_signature]);
+  }, [
+    params.definition_id,
+    params.selection_id,
+    history_mode,
+    criteria_signature,
+  ]);
 
   const load_more = () => fetch_page(list.value?.data?.length ?? 0);
 
@@ -964,22 +1045,69 @@ const InstanceDetails = () => {
 
 const InstanceDetailsDescription = () => {
   const state = useContext(AppState),
+    { params, query } = useRoute(),
+    { route } = useLocation(),
+    history_mode = query.history === "true",
     [t] = useTranslation(),
+    confirm_cancel = useSignal(false),
     data = state.api.process.instance.one.value?.data;
 
+  const toggle_suspended = async (suspended) => {
+    await engine_rest.process_instance.set_suspended(
+      state,
+      params.selection_id,
+      suspended,
+    );
+    void engine_rest.process_instance.one(state, params.selection_id);
+  };
+
+  const cancel_instance = async () => {
+    await engine_rest.process_instance.delete(state, params.selection_id);
+    route(`/processes/${params.definition_id}/instances`);
+  };
+
   return (
-    <dl>
-      <dt>{t("processes.instance-id")}</dt>
-      <dd
-        class="font-mono copy-on-click"
-        onClick={copyToClipboard}
-        title={t("processes.click-to-copy")}
-      >
-        {data?.id ?? "—"}
-      </dd>
-      <dt>{t("processes.business-key")}</dt>
-      <dd>{data?.businessKey ?? "—"}</dd>
-    </dl>
+    <>
+      <dl>
+        <dt>{t("processes.instance-id")}</dt>
+        <dd
+          class="font-mono copy-on-click"
+          onClick={copyToClipboard}
+          title={t("processes.click-to-copy")}
+        >
+          {data?.id ?? "—"}
+        </dd>
+        <dt>{t("processes.business-key")}</dt>
+        <dd>{data?.businessKey ?? "—"}</dd>
+      </dl>
+      {!history_mode && data && (
+        <div class="button-group">
+          {data.suspended ? (
+            <button type="button" onClick={() => toggle_suspended(false)}>
+              {t("processes.instance.activate")}
+            </button>
+          ) : (
+            <button type="button" onClick={() => toggle_suspended(true)}>
+              {t("processes.instance.suspend")}
+            </button>
+          )}
+          <button
+            type="button"
+            class="danger"
+            onClick={() => (confirm_cancel.value = true)}
+          >
+            {t("processes.instance.cancel")}
+          </button>
+        </div>
+      )}
+      <ConfirmDialog
+        open={confirm_cancel}
+        message={t("processes.instance.confirm-cancel")}
+        confirm_label={t("processes.instance.cancel")}
+        cancel_label={t("processes.instance.keep-running")}
+        on_confirm={cancel_instance}
+      />
+    </>
   );
 };
 
@@ -1005,19 +1133,57 @@ const ProcessInstance = ({ id, startTime, state, businessKey }) => {
   );
 };
 
+// Operaton stores typed variables; coerce the raw text input to the JS type the
+// REST API expects for the chosen variable type.
+const VARIABLE_TYPES = [
+  "String",
+  "Boolean",
+  "Integer",
+  "Long",
+  "Double",
+  "Short",
+  "Json",
+];
+
+const coerce_variable_value = (type, raw) => {
+  switch (type) {
+    case "Boolean":
+      return raw === "true" || raw === true;
+    case "Integer":
+    case "Long":
+    case "Short":
+      return raw === "" ? null : parseInt(raw, 10);
+    case "Double":
+    case "Float":
+      return raw === "" ? null : parseFloat(raw);
+    default:
+      return raw;
+  }
+};
+
 const InstanceVariables = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
     history_mode = query.history === "true",
     [t] = useTranslation(),
+    edit_open = useSignal(false),
+    delete_open = useSignal(false),
+    edit_new = useSignal(false),
+    edit_name = useSignal(""),
+    edit_type = useSignal("String"),
+    edit_value = useSignal(""),
+    delete_name = useSignal(null),
     selection_exists =
       state.api.process.instance.variables.value !== null &&
       state.api.process.instance.variables.value.data !== null &&
       state.api.process.instance.variables.value.data !== undefined;
 
+  const load = () =>
+    void engine_rest.process_instance.variables(state, params.selection_id);
+
   useEffect(() => {
     if (!history_mode) {
-      void engine_rest.process_instance.variables(state, params.selection_id);
+      load();
     } else {
       void engine_rest.history.variable_instance.by_process_instance(
         state,
@@ -1026,6 +1192,45 @@ const InstanceVariables = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selection_id, history_mode]);
+
+  const open_add = () => {
+    edit_new.value = true;
+    edit_name.value = "";
+    edit_type.value = "String";
+    edit_value.value = "";
+    edit_open.value = true;
+  };
+
+  const open_edit = (name, type, value) => {
+    edit_new.value = false;
+    edit_name.value = name;
+    edit_type.value = type ?? "String";
+    edit_value.value = value ?? "";
+    edit_open.value = true;
+  };
+
+  const save_variable = async () => {
+    await engine_rest.process_instance.set_variable(
+      state,
+      params.selection_id,
+      edit_name.value,
+      {
+        value: coerce_variable_value(edit_type.value, edit_value.value),
+        type: edit_type.value,
+      },
+    );
+    edit_open.value = false;
+    load();
+  };
+
+  const remove_variable = async () => {
+    await engine_rest.process_instance.delete_variable(
+      state,
+      params.selection_id,
+      delete_name.value,
+    );
+    load();
+  };
 
   return (
     <div>
@@ -1043,29 +1248,114 @@ const InstanceVariables = () => {
             ? !history_mode
               ? Object.entries(
                   state.api.process.instance.variables.value.data,
-                ).map(
-                  // eslint-disable-next-line react/jsx-key
-                  ([name, { type, value }]) => (
-                    <tr>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{value}</td>
-                    </tr>
-                  ),
-                )
+                ).map(([name, { type, value }]) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{String(value)}</td>
+                    <td>
+                      <div class="button-group">
+                        <button
+                          type="button"
+                          onClick={() => open_edit(name, type, value)}
+                        >
+                          {t("common.edit")}
+                        </button>
+                        <button
+                          type="button"
+                          class="danger"
+                          onClick={() => {
+                            delete_name.value = name;
+                            delete_open.value = true;
+                          }}
+                        >
+                          {t("common.delete")}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               : state.api.process.instance.variables.value.data.map(
-                  // eslint-disable-next-line react/jsx-key
                   ({ name, type, value }) => (
-                    <tr>
+                    <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
-                      <td>{value}</td>
+                      <td>{String(value)}</td>
+                      <td />
                     </tr>
                   ),
                 )
             : t("common.loading")}
         </tbody>
       </table>
+      {!history_mode && (
+        <div class="button-group">
+          <button type="button" onClick={open_add}>
+            {t("processes.variables.add")}
+          </button>
+        </div>
+      )}
+      <Dialog
+        open={edit_open}
+        title={
+          edit_new.value
+            ? t("processes.variables.add")
+            : t("processes.variables.edit")
+        }
+      >
+        <div class="dialog-fields">
+          <label>
+            {t("common.name")}
+            <input
+              type="text"
+              value={edit_name.value}
+              disabled={!edit_new.value}
+              onInput={(e) => (edit_name.value = e.target.value)}
+            />
+          </label>
+          <label>
+            {t("common.type")}
+            <select
+              value={edit_type.value}
+              onChange={(e) => (edit_type.value = e.target.value)}
+            >
+              {VARIABLE_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {t("common.value")}
+            <input
+              type="text"
+              value={edit_value.value}
+              onInput={(e) => (edit_value.value = e.target.value)}
+            />
+          </label>
+        </div>
+        <div class="button-group">
+          <button
+            type="button"
+            onClick={save_variable}
+            disabled={!edit_name.value}
+          >
+            {t("common.save")}
+          </button>
+          <button type="button" onClick={() => (edit_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
+      <ConfirmDialog
+        open={delete_open}
+        message={t("processes.variables.confirm-delete", {
+          name: delete_name.value,
+        })}
+        confirm_label={t("common.delete")}
+        on_confirm={remove_variable}
+      />
     </div>
   );
 };
@@ -1074,20 +1364,58 @@ const InstanceIncidents = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
     history_mode = query.history === "true",
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    annotation_open = useSignal(false),
+    annotation_id = useSignal(null),
+    annotation_text = useSignal("");
 
-  // The incident endpoint is history-only in Camunda 7, but timestamp filters
-  // applied via history mode (e.g. closed instance window) can change the
-  // returned set — re-fetch on toggle.
+  // Live incidents (`/incident`) are actionable; history mode falls back to the
+  // read-only `/history/incident` audit view.
+  const load = () => {
+    if (history_mode) {
+      void engine_rest.history.incident.by_process_instance(
+        state,
+        params.selection_id,
+      );
+    } else {
+      void engine_rest.incident.by_process_instance(state, params.selection_id);
+    }
+  };
+
   useEffect(() => {
-    void engine_rest.history.incident.by_process_instance(
-      state,
-      params.selection_id,
-    );
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selection_id, history_mode]);
 
-  /** @namespace state.api.history.incident.by_process_instance.value.data **/
+  const rows =
+    (history_mode
+      ? state.api.history.incident.by_process_instance.value?.data
+      : state.api.incident.by_process_instance.value?.data) ?? [];
+
+  // For failedJob incidents the `configuration` field carries the jobId; a retry
+  // resets its retries to 1 so the engine picks it up again.
+  const retry = async (configuration) => {
+    await engine_rest.job.set_retries(state, configuration, 1);
+    load();
+  };
+
+  const open_annotation = (id, current) => {
+    annotation_id.value = id;
+    annotation_text.value = current ?? "";
+    annotation_open.value = true;
+  };
+
+  const save_annotation = async () => {
+    await engine_rest.incident.set_annotation(
+      state,
+      annotation_id.value,
+      annotation_text.value,
+    );
+    annotation_open.value = false;
+    load();
+  };
+
+  /** @namespace state.api.incident.by_process_instance.value.data **/
   return (
     <div>
       <table>
@@ -1106,45 +1434,81 @@ const InstanceIncidents = () => {
           </tr>
         </thead>
         <tbody>
-          {state.api.history.incident.by_process_instance.value?.data?.map(
-            // eslint-disable-next-line react/jsx-key
-            ({
-              id,
-              incidentMessage,
-              processInstanceId,
-              createTime,
-              activityId,
-              failedActivityId,
-              causeIncidentId,
-              rootCauseIncidentId,
-              incidentType,
-              annotation,
-            }) => (
-              <tr key={id}>
-                <td>{incidentMessage}</td>
+          {rows.map((incident) => {
+            const timestamp = incident.createTime ?? incident.incidentTimestamp;
+            return (
+              <tr key={incident.id}>
+                <td>{incident.incidentMessage}</td>
                 <td>
-                  <UUIDLink path={"/processes"} uuid={processInstanceId} />
+                  <UUIDLink
+                    path={"/processes"}
+                    uuid={incident.processInstanceId}
+                  />
                 </td>
                 <td>
-                  <time datetime={createTime}>
-                    {createTime ? createTime.substring(0, 19) : "-/-"}
+                  <time datetime={timestamp}>
+                    {timestamp ? timestamp.substring(0, 19) : "-/-"}
                   </time>
                 </td>
-                <td>{activityId}</td>
-                <td>{failedActivityId}</td>
+                <td>{incident.activityId}</td>
+                <td>{incident.failedActivityId}</td>
                 <td>
-                  <UUIDLink path={""} uuid={causeIncidentId} />
+                  <UUIDLink path={""} uuid={incident.causeIncidentId} />
                 </td>
                 <td>
-                  <UUIDLink path={""} uuid={rootCauseIncidentId} />
+                  <UUIDLink path={""} uuid={incident.rootCauseIncidentId} />
                 </td>
-                <td>{incidentType}</td>
-                <td>{annotation}</td>
+                <td>{incident.incidentType}</td>
+                <td>{incident.annotation}</td>
+                <td>
+                  {!history_mode && (
+                    <div class="button-group">
+                      {incident.incidentType === "failedJob" &&
+                        incident.configuration && (
+                          <button
+                            type="button"
+                            onClick={() => retry(incident.configuration)}
+                          >
+                            {t("processes.incidents.retry")}
+                          </button>
+                        )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          open_annotation(incident.id, incident.annotation)
+                        }
+                      >
+                        {t("processes.incidents.set-annotation")}
+                      </button>
+                    </div>
+                  )}
+                </td>
               </tr>
-            ),
-          )}
+            );
+          })}
         </tbody>
       </table>
+      <Dialog
+        open={annotation_open}
+        title={t("processes.incidents.annotation")}
+      >
+        <label>
+          {t("processes.incidents.annotation")}
+          <textarea
+            value={annotation_text.value}
+            onInput={(e) => (annotation_text.value = e.target.value)}
+            placeholder={t("processes.incidents.annotation-placeholder")}
+          />
+        </label>
+        <div class="button-group">
+          <button type="button" onClick={save_annotation}>
+            {t("common.save")}
+          </button>
+          <button type="button" onClick={() => (annotation_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 };
@@ -1174,11 +1538,13 @@ const InstanceUserTasks = () => {
   // `delegationState`; normalise to the live shape so the table render below
   // doesn't need a second code path.
   const rows = history_mode
-    ? (state.api.history.task.by_process_instance.value?.data ?? []).map((t) => ({
-        ...t,
-        created: t.startTime,
-        delegationState: t.delegationState ?? null,
-      }))
+    ? (state.api.history.task.by_process_instance.value?.data ?? []).map(
+        (t) => ({
+          ...t,
+          created: t.startTime,
+          delegationState: t.delegationState ?? null,
+        }),
+      )
     : (state.api.task.by_process_instance.value?.data ?? []);
 
   /** @namespace state.api.task.by_process_instance.value.data **/
@@ -1263,9 +1629,10 @@ const CalledProcessInstances = () => {
   // /history/process-instance uses `state` ("ACTIVE"/"COMPLETED"/...) and
   // `processDefinitionId`; the live endpoint uses `suspended` (bool) and
   // `definitionId`. Normalise to one shape for rendering.
-  const rows = (history_mode
-    ? state.api.history.process_instance.called.value?.data
-    : state.api.process.instance.called.value?.data) ?? [];
+  const rows =
+    (history_mode
+      ? state.api.history.process_instance.called.value?.data
+      : state.api.process.instance.called.value?.data) ?? [];
 
   /** @namespace state.api.process.instance.called.value.data **/
   /** @namespace instance.definitionId **/
@@ -1282,7 +1649,8 @@ const CalledProcessInstances = () => {
         </thead>
         <tbody>
           {rows.map((instance) => {
-            const definition_id = instance.processDefinitionId ?? instance.definitionId;
+            const definition_id =
+              instance.processDefinitionId ?? instance.definitionId;
             const state_label = history_mode
               ? instance.state
               : instance.suspended
@@ -1407,15 +1775,47 @@ const JobDefinitions = () => {
   const state = useContext(AppState),
     { definition_id, query } = useRoute(),
     history_mode = query?.history === "true",
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    priority_open = useSignal(false),
+    retries_open = useSignal(false),
+    target_id = useSignal(null),
+    input_value = useSignal("");
 
-  useEffect(() => {
+  const load = () =>
     void engine_rest.job_definition.all.by_process_definition(
       state,
       definition_id,
     );
+
+  useEffect(() => {
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [definition_id]);
+
+  const toggle_suspended = async (id, suspended) => {
+    await engine_rest.job_definition.set_suspended(state, id, suspended);
+    load();
+  };
+
+  const save_priority = async () => {
+    await engine_rest.job_definition.set_priority(
+      state,
+      target_id.value,
+      parseInt(input_value.value, 10),
+    );
+    priority_open.value = false;
+    load();
+  };
+
+  const save_retries = async () => {
+    await engine_rest.job_definition.set_retries(
+      state,
+      target_id.value,
+      parseInt(input_value.value, 10),
+    );
+    retries_open.value = false;
+    load();
+  };
 
   /** @namespace state.api.job_definition.all.by_process_definition.value.data **/
   /** @namespace definition.jobType **/
@@ -1446,20 +1846,107 @@ const JobDefinitions = () => {
                     ? t("common.suspended")
                     : t("common.active")}
                 </td>
-                <td>?</td>
-                {/*<td>{definition.calledFromActivityIds.map(a => `${a}, `)}</td>*/}
+                <td>{definition.activityId ?? "—"}</td>
                 <td>{definition.jobType}</td>
                 <td>{definition.jobConfiguration}</td>
                 <td>{definition.overridingJobPriority ?? "-"}</td>
                 <td>
-                  <button>{t("processes.jobs.suspend")}</button>
-                  <button>{t("processes.jobs.change-priority")}</button>
+                  {!history_mode && (
+                    <div class="button-group">
+                      {definition.suspended ? (
+                        <button
+                          type="button"
+                          onClick={() => toggle_suspended(definition.id, false)}
+                        >
+                          {t("common.activate")}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => toggle_suspended(definition.id, true)}
+                        >
+                          {t("processes.jobs.suspend")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          target_id.value = definition.id;
+                          input_value.value = String(
+                            definition.overridingJobPriority ?? "",
+                          );
+                          priority_open.value = true;
+                        }}
+                      >
+                        {t("processes.jobs.change-priority")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          target_id.value = definition.id;
+                          input_value.value = "";
+                          retries_open.value = true;
+                        }}
+                      >
+                        {t("processes.jobs.set-retries")}
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ),
           )}
         </tbody>
       </table>
+      <Dialog open={priority_open} title={t("processes.jobs.change-priority")}>
+        <div class="dialog-fields">
+          <label>
+            {t("processes.jobs.overriding-job-priority")}
+            <input
+              type="number"
+              value={input_value.value}
+              onInput={(e) => (input_value.value = e.target.value)}
+            />
+          </label>
+        </div>
+        <div class="button-group">
+          <button
+            type="button"
+            onClick={save_priority}
+            disabled={input_value.value === ""}
+          >
+            {t("common.save")}
+          </button>
+          <button type="button" onClick={() => (priority_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
+      <Dialog open={retries_open} title={t("processes.jobs.set-retries")}>
+        <div class="dialog-fields">
+          <label>
+            {t("processes.jobs.retries")}
+            <input
+              type="number"
+              min="0"
+              value={input_value.value}
+              onInput={(e) => (input_value.value = e.target.value)}
+            />
+          </label>
+        </div>
+        <div class="button-group">
+          <button
+            type="button"
+            onClick={save_retries}
+            disabled={input_value.value === ""}
+          >
+            {t("common.save")}
+          </button>
+          <button type="button" onClick={() => (retries_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 };
@@ -1571,8 +2058,154 @@ const UUIDLink = ({ uuid = "?", path }) => (
   </a>
 );
 
-// TODO: create Jobs example for old Camunda apps
-const InstanceJobsPlaceholder = () => <p>Jobs</p>;
+// Format a <input type="datetime-local"> value into the engine's expected
+// `yyyy-MM-dd'T'HH:mm:ss.SSSZ` shape (UTC / +0000 offset).
+const to_engine_datetime = (local) => {
+  const d = new Date(local),
+    pad = (n, l = 2) => String(n).padStart(l, "0");
+  return (
+    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}` +
+    `T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}` +
+    `.${pad(d.getUTCMilliseconds(), 3)}+0000`
+  );
+};
+
+const InstanceJobs = () => {
+  const state = useContext(AppState),
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
+    [t] = useTranslation(),
+    duedate_open = useSignal(false),
+    duedate_id = useSignal(null),
+    duedate_value = useSignal("");
+
+  const load = () =>
+    void engine_rest.job.by_process_instance(state, params.selection_id);
+
+  useEffect(() => {
+    if (!history_mode) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id, history_mode]);
+
+  const retry = async (id) => {
+    await engine_rest.job.set_retries(state, id, 1);
+    load();
+  };
+
+  const toggle_suspended = async (id, suspended) => {
+    await engine_rest.job.set_suspended(state, id, suspended);
+    load();
+  };
+
+  const save_duedate = async () => {
+    await engine_rest.job.set_duedate(
+      state,
+      duedate_id.value,
+      to_engine_datetime(duedate_value.value),
+    );
+    duedate_open.value = false;
+    load();
+  };
+
+  /** @namespace state.api.job.by_process_instance.value.data **/
+  return (
+    <div>
+      {history_mode && (
+        <small class="history-na">{t("processes.history-mode-na")}</small>
+      )}
+      <table>
+        <thead>
+          <tr>
+            <th>{t("processes.jobs.job-id")}</th>
+            <th>{t("processes.jobs.due-date")}</th>
+            <th>{t("processes.jobs.retries")}</th>
+            <th>{t("common.state")}</th>
+            <th>{t("processes.jobs.exception")}</th>
+            <th>{t("common.action")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {state.api.job.by_process_instance.value?.data?.map((job) => (
+            <tr key={job.id}>
+              <td class="font-mono">{job.id?.substring(0, 8)}</td>
+              <td>
+                {job.dueDate ? (
+                  <time datetime={job.dueDate}>
+                    {job.dueDate.substring(0, 19)}
+                  </time>
+                ) : (
+                  "—"
+                )}
+              </td>
+              <td>{job.retries}</td>
+              <td>
+                {job.suspended ? t("common.suspended") : t("common.active")}
+              </td>
+              <td>{job.exceptionMessage}</td>
+              <td>
+                {!history_mode && (
+                  <div class="button-group">
+                    <button type="button" onClick={() => retry(job.id)}>
+                      {t("processes.jobs.retry")}
+                    </button>
+                    {job.suspended ? (
+                      <button
+                        type="button"
+                        onClick={() => toggle_suspended(job.id, false)}
+                      >
+                        {t("common.activate")}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => toggle_suspended(job.id, true)}
+                      >
+                        {t("processes.jobs.suspend")}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        duedate_id.value = job.id;
+                        duedate_value.value = "";
+                        duedate_open.value = true;
+                      }}
+                    >
+                      {t("processes.jobs.set-due-date")}
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Dialog open={duedate_open} title={t("processes.jobs.set-due-date")}>
+        <label>
+          {t("processes.jobs.due-date")}
+          <input
+            type="datetime-local"
+            value={duedate_value.value}
+            onInput={(e) => (duedate_value.value = e.target.value)}
+          />
+        </label>
+        <div class="button-group">
+          <button
+            type="button"
+            onClick={save_duedate}
+            disabled={!duedate_value.value}
+          >
+            {t("common.save")}
+          </button>
+          <button type="button" onClick={() => (duedate_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
+    </div>
+  );
+};
+
 // TODO: create External Apps example for old Camunda apps
 const InstanceExternalTasksPlaceholder = () => <p>External Tasks</p>;
 
@@ -1605,7 +2238,7 @@ const process_instance_tabs = [
     nameKey: "processes.tabs.jobs",
     id: "jobs",
     pos: 4,
-    Component: InstanceJobsPlaceholder,
+    Component: InstanceJobs,
   },
   {
     nameKey: "processes.tabs.external-tasks",

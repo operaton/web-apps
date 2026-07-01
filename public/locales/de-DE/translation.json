@@ -30,7 +30,8 @@
     "suspended": "Angehalten",
     "active": "Aktiv",
     "running": "Laufend",
-    "select-page": "Seite auswählen"
+    "select-page": "Seite auswählen",
+    "activate": "Aktivieren"
   },
   "nav": {
     "tasks": "Aufgaben",
@@ -324,7 +325,10 @@
       "cause-process-instance-id": "Verursachende Prozessinstanz-ID",
       "root-cause-process-instance-id": "Ursprüngliche Prozessinstanz-ID",
       "annotation": "Anmerkung",
-      "configuration": "Konfiguration"
+      "configuration": "Konfiguration",
+      "retry": "Wiederholen",
+      "set-annotation": "Anmerkung bearbeiten",
+      "annotation-placeholder": "Anmerkung eingeben…"
     },
     "user-tasks": {
       "owner": "Besitzer",
@@ -345,7 +349,14 @@
     "jobs": {
       "overriding-job-priority": "Überschriebene Job-Priorität",
       "suspend": "Anhalten",
-      "change-priority": "Job-Priorität ändern"
+      "change-priority": "Job-Priorität ändern",
+      "retry": "Wiederholen",
+      "job-id": "Job-ID",
+      "due-date": "Fälligkeitsdatum",
+      "retries": "Wiederholungen",
+      "set-due-date": "Fälligkeitsdatum setzen",
+      "exception": "Fehler",
+      "set-retries": "Wiederholungen setzen"
     },
     "sort": {
       "name": "Name",
@@ -388,11 +399,21 @@
         "startedAfter": "startedAfter",
         "finished": "finished"
       },
-      "manage_title": "Prozessinstanz-Filter verwalten"
+      "manage_title": "Prozessinstanz-Filter verwalten",
+      "suspend": "Instanz anhalten",
+      "activate": "Instanz aktivieren",
+      "cancel": "Instanz abbrechen",
+      "confirm-cancel": "Diese Prozessinstanz wirklich abbrechen?",
+      "keep-running": "Weiterlaufen lassen"
     },
     "history-mode-na": "Live-Daten – der Verlaufsmodus gilt hier nicht.",
     "filter": {
       "manage_title": "Prozessdefinitions-Filter verwalten"
+    },
+    "variables": {
+      "add": "Variable hinzufügen",
+      "edit": "Variable bearbeiten",
+      "confirm-delete": "Variable \"{{name}}\" löschen?"
     }
   },
   "decisions": {

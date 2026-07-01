@@ -12,6 +12,8 @@ import process_definition from "./resources/process_definition.js";
 import process_instance from "./resources/process_instance.js";
 import deployment from "./resources/deployment.js";
 import history from "./resources/history.js";
+import incident from "./resources/incident.js";
+import job from "./resources/job.js";
 import job_definition from "./resources/job_definition.js";
 import migration from "./resources/migration.js";
 import task from "./resources/task.js";
@@ -29,6 +31,8 @@ const engine_rest = {
   filter,
   group,
   history,
+  incident,
+  job,
   job_definition,
   migration,
   process_definition,

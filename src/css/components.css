@@ -217,6 +217,28 @@ section.task-tabs {
   margin: 0;
 }
 
+/* Stacked field list for action dialogs (variable edit/add etc.). Without this
+   the bare <label>s flow inline and sit side-by-side; force one field per row
+   with its label above the control. */
+.dialog-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin: var(--spacing-1) 0;
+}
+
+.dialog-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.dialog-fields input,
+.dialog-fields select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* The dialog form used by <ListFilter> for create/edit. The global `form`
    rule sets a 2-column label/input grid, which would put the criteria
    fieldset and the sort-override fieldset side-by-side and overlap them

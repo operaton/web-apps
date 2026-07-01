@@ -119,11 +119,23 @@ const createAppState = () => {
         list: signal(null),
         count: signal(null),
         variables: signal(null),
+        variables_update: signal(null),
         by_defintion_id: signal(null),
         activity_instances: signal(null),
         modification: signal(null),
+        suspend: signal(null),
+        delete: signal(null),
         saved_filters: signal(null),
       },
+    },
+    incident: {
+      by_process_instance: signal(null),
+      annotation: signal(null),
+    },
+    job: {
+      by_process_instance: signal(null),
+      update: signal(null),
+      stacktrace: signal(null),
     },
     task: {
       list: signal(null),
@@ -183,6 +195,7 @@ const createAppState = () => {
       all: {
         by_process_definition: signal(null),
       },
+      update: signal(null),
     },
   };
 
