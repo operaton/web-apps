@@ -1122,7 +1122,7 @@
 
   :where(button, .button, select, input):hover {
     cursor: pointer;
-    outline-style: solid;
+    outline: dashed .15rem;
     z-index: 999;
     transition: 50ms all;
   }
