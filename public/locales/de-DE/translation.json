@@ -414,6 +414,12 @@
       "add": "Variable hinzufügen",
       "edit": "Variable bearbeiten",
       "confirm-delete": "Variable \"{{name}}\" löschen?"
+    },
+    "external-tasks": {
+      "topic": "Thema",
+      "worker": "Worker",
+      "lock-expiration": "Sperre läuft ab",
+      "unlock": "Entsperren"
     }
   },
   "decisions": {

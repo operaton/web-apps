@@ -137,6 +137,11 @@ const createAppState = () => {
       update: signal(null),
       stacktrace: signal(null),
     },
+    external_task: {
+      by_process_instance: signal(null),
+      update: signal(null),
+      error_details: signal(null),
+    },
     task: {
       list: signal(null),
       one: signal(null),

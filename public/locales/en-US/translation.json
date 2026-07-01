@@ -414,6 +414,12 @@
       "add": "Add variable",
       "edit": "Edit variable",
       "confirm-delete": "Delete variable \"{{name}}\"?"
+    },
+    "external-tasks": {
+      "topic": "Topic",
+      "worker": "Worker",
+      "lock-expiration": "Lock expiration",
+      "unlock": "Unlock"
     }
   },
   "decisions": {

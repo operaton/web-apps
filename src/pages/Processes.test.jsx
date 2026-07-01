@@ -505,6 +505,33 @@ describe("ProcessesPage — instance details", () => {
     expect(engine_rest.job.set_retries.mock.lastCall[1]).toBe("job-1");
   });
 
+  it("external-tasks sub-panel fetches tasks and retries", () => {
+    mockParams = {
+      definition_id: "proc:1",
+      panel: "instances",
+      selection_id: "inst-1",
+      sub_panel: "external_tasks",
+    };
+    signal_response(state.api.external_task.by_process_instance, [
+      {
+        id: "et-1",
+        topicName: "charge-card",
+        workerId: "worker-7",
+        activityId: "chargeCard",
+        retries: 0,
+        errorMessage: "gateway down",
+      },
+    ]);
+    const { getByText } = renderPage(state);
+    expect(engine_rest.external_task.by_process_instance).toHaveBeenCalled();
+    expect(getByText("charge-card")).toBeTruthy();
+    expect(getByText("gateway down")).toBeTruthy();
+
+    fireEvent.click(getByText("processes.jobs.retry"));
+    expect(engine_rest.external_task.set_retries).toHaveBeenCalled();
+    expect(engine_rest.external_task.set_retries.mock.lastCall[1]).toBe("et-1");
+  });
+
   it("instance detail suspends a running instance", () => {
     mockParams = {
       definition_id: "proc:1",

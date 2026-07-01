@@ -11,6 +11,7 @@ import tenant from "./resources/tenant.js";
 import process_definition from "./resources/process_definition.js";
 import process_instance from "./resources/process_instance.js";
 import deployment from "./resources/deployment.js";
+import external_task from "./resources/external_task.js";
 import history from "./resources/history.js";
 import incident from "./resources/incident.js";
 import job from "./resources/job.js";
@@ -28,6 +29,7 @@ const engine_rest = {
   decision,
   deployment,
   engine,
+  external_task,
   filter,
   group,
   history,

@@ -2206,8 +2206,91 @@ const InstanceJobs = () => {
   );
 };
 
-// TODO: create External Apps example for old Camunda apps
-const InstanceExternalTasksPlaceholder = () => <p>External Tasks</p>;
+const InstanceExternalTasks = () => {
+  const state = useContext(AppState),
+    { params, query } = useRoute(),
+    history_mode = query.history === "true",
+    [t] = useTranslation();
+
+  const load = () =>
+    void engine_rest.external_task.by_process_instance(
+      state,
+      params.selection_id,
+    );
+
+  useEffect(() => {
+    if (!history_mode) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id, history_mode]);
+
+  const retry = async (id) => {
+    await engine_rest.external_task.set_retries(state, id, 1);
+    load();
+  };
+
+  const unlock = async (id) => {
+    await engine_rest.external_task.unlock(state, id);
+    load();
+  };
+
+  /** @namespace state.api.external_task.by_process_instance.value.data **/
+  return (
+    <div>
+      {history_mode && (
+        <small class="history-na">{t("processes.history-mode-na")}</small>
+      )}
+      <table>
+        <thead>
+          <tr>
+            <th>{t("processes.external-tasks.topic")}</th>
+            <th>{t("processes.external-tasks.worker")}</th>
+            <th>{t("common.activity")}</th>
+            <th>{t("processes.jobs.retries")}</th>
+            <th>{t("processes.external-tasks.lock-expiration")}</th>
+            <th>{t("processes.jobs.exception")}</th>
+            <th>{t("common.action")}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {state.api.external_task.by_process_instance.value?.data?.map(
+            (task) => (
+              <tr key={task.id}>
+                <td>{task.topicName}</td>
+                <td>{task.workerId ?? "—"}</td>
+                <td>{task.activityId}</td>
+                <td>{task.retries ?? "—"}</td>
+                <td>
+                  {task.lockExpirationTime ? (
+                    <time datetime={task.lockExpirationTime}>
+                      {task.lockExpirationTime.substring(0, 19)}
+                    </time>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td>{task.errorMessage}</td>
+                <td>
+                  {!history_mode && (
+                    <div class="button-group">
+                      <button type="button" onClick={() => retry(task.id)}>
+                        {t("processes.jobs.retry")}
+                      </button>
+                      {task.workerId && (
+                        <button type="button" onClick={() => unlock(task.id)}>
+                          {t("processes.external-tasks.unlock")}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ),
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const process_instance_tabs = [
   {
@@ -2244,7 +2327,7 @@ const process_instance_tabs = [
     nameKey: "processes.tabs.external-tasks",
     id: "external_tasks",
     pos: 5,
-    Component: InstanceExternalTasksPlaceholder,
+    Component: InstanceExternalTasks,
   },
 ];
 
