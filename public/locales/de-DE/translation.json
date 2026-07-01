@@ -526,7 +526,8 @@
     },
     "filter": {
       "manage_title": "Batch-Filter verwalten"
-    }
+    },
+    "retry-failed": "Fehlgeschlagene Jobs wiederholen"
   },
   "migrations": {
     "title": "Migrationen",

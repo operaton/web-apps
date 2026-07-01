@@ -105,6 +105,25 @@ describe("BatchesPage", () => {
     expect(engine_rest.batch.set_suspended.mock.lastCall[2]).toBe(false);
   });
 
+  it("retries failed jobs, scoped to the batch job definition", () => {
+    mockParams = { batch_id: "batch-1234abcd" };
+    signal_response(state.api.batch.one, [
+      sample_batch({ failedJobs: 3, batchJobDefinitionId: "jd-batch-1" }),
+    ]);
+    engine_rest.batch.retry.mockResolvedValue(undefined);
+    const { getByText } = renderPage(state);
+    fireEvent.click(getByText("batches.retry-failed"));
+    expect(engine_rest.batch.retry).toHaveBeenCalled();
+    expect(engine_rest.batch.retry.mock.lastCall[1]).toBe("jd-batch-1");
+  });
+
+  it("hides the retry button when there are no failed jobs", () => {
+    mockParams = { batch_id: "batch-1234abcd" };
+    signal_response(state.api.batch.one, [sample_batch({ failedJobs: 0 })]);
+    const { queryByText } = renderPage(state);
+    expect(queryByText("batches.retry-failed")).toBeNull();
+  });
+
   it("deletes a batch after confirming in the dialog", () => {
     mockParams = { batch_id: "batch-1234abcd" };
     signal_response(state.api.batch.one, [sample_batch()]);

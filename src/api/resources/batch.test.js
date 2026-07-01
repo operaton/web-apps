@@ -4,10 +4,11 @@ vi.mock("../helper.jsx", () => ({
   GET: vi.fn(),
   DELETE: vi.fn(),
   PUT: vi.fn(),
+  POST: vi.fn(),
   PAGINATED_GET: vi.fn(),
 }));
 
-import { GET, DELETE, PUT, PAGINATED_GET } from "../helper.jsx";
+import { GET, DELETE, PUT, POST, PAGINATED_GET } from "../helper.jsx";
 import { create_mock_state, expect_api_call } from "../../test/helpers.js";
 import batch from "./batch.js";
 
@@ -74,5 +75,18 @@ describe("api/resources/batch", () => {
   it("set_suspended(false) resumes the batch", () => {
     batch.set_suspended(state, "b1", false);
     expect(PUT.mock.lastCall[1]).toEqual({ suspended: false });
+  });
+
+  it("retry() POSTs a scoped job-retries batch to /job/retries", () => {
+    batch.retry(state, "jd-batch-1");
+    expect_api_call(POST, {
+      url: "/job/retries",
+      body: {
+        retries: 1,
+        jobQuery: { jobDefinitionId: "jd-batch-1", withException: true },
+      },
+      state,
+      signal: state.api.batch.retry,
+    });
   });
 });

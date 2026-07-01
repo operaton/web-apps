@@ -526,7 +526,8 @@
     },
     "filter": {
       "manage_title": "Manage batch filters"
-    }
+    },
+    "retry-failed": "Retry failed jobs"
   },
   "migrations": {
     "title": "Migrations",

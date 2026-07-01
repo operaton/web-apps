@@ -82,6 +82,7 @@ const createAppState = () => {
       one: signal(null),
       delete: signal(null),
       update: signal(null),
+      retry: signal(null),
       saved_filters: signal(null),
     },
     tenant: {

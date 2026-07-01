@@ -31,9 +31,21 @@ const SORT_OPTIONS = [
 const FILTER_KEYS = [
   { key: "batchId", nameKey: "batches.filter_keys.batchId", type: "string" },
   { key: "type", nameKey: "batches.filter_keys.type", type: "string" },
-  { key: "tenantIdIn", nameKey: "batches.filter_keys.tenantIdIn", type: "string" },
-  { key: "suspended", nameKey: "batches.filter_keys.suspended", type: "boolean" },
-  { key: "withoutTenantId", nameKey: "batches.filter_keys.withoutTenantId", type: "boolean" },
+  {
+    key: "tenantIdIn",
+    nameKey: "batches.filter_keys.tenantIdIn",
+    type: "string",
+  },
+  {
+    key: "suspended",
+    nameKey: "batches.filter_keys.suspended",
+    type: "boolean",
+  },
+  {
+    key: "withoutTenantId",
+    nameKey: "batches.filter_keys.withoutTenantId",
+    type: "boolean",
+  },
 ];
 
 const BATCH_DEFAULTS = { sortBy: "batchId", sortOrder: "desc" };
@@ -44,7 +56,8 @@ const find_saved = (signal, id) => {
 };
 
 const load_batches = (state, query, firstResult = 0) => {
-  const { saved_filter_id, sortBy, sortOrder, criteria } = parse_list_query(query);
+  const { saved_filter_id, sortBy, sortOrder, criteria } =
+    parse_list_query(query);
   const saved = find_saved(state.api.batch.saved_filters, saved_filter_id);
   const params = {
     ...BATCH_DEFAULTS,
@@ -220,6 +233,11 @@ const BatchDetails = () => {
     void engine_rest.batch.all(state);
   };
 
+  const retry_failed = async (batch_job_definition_id) => {
+    await engine_rest.batch.retry(state, batch_job_definition_id);
+    reload();
+  };
+
   return (
     <div id="batch-details">
       <RequestState
@@ -263,6 +281,14 @@ const BatchDetails = () => {
                 ) : (
                   <button type="button" onClick={() => toggle_suspended(true)}>
                     {t("batches.suspend")}
+                  </button>
+                )}
+                {batch.failedJobs > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => retry_failed(batch.batchJobDefinitionId)}
+                  >
+                    {t("batches.retry-failed")}
                   </button>
                 )}
                 <button
