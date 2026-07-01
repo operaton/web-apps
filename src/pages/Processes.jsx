@@ -1679,16 +1679,56 @@ const CalledProcessInstances = () => {
 
 const Incidents = () => {
   const state = useContext(AppState),
-    { definition_id } = useRoute(),
-    [t] = useTranslation();
+    { definition_id, query } = useRoute(),
+    history_mode = query?.history === "true",
+    [t] = useTranslation(),
+    annotation_open = useSignal(false),
+    annotation_id = useSignal(null),
+    annotation_text = useSignal("");
+
+  // Live incidents (`/incident`) are actionable; history mode falls back to the
+  // read-only `/history/incident` audit view.
+  const load = () => {
+    if (history_mode) {
+      void engine_rest.history.incident.by_process_definition(
+        state,
+        definition_id,
+      );
+    } else {
+      void engine_rest.incident.by_process_definition(state, definition_id);
+    }
+  };
 
   useEffect(() => {
-    void engine_rest.history.incident.by_process_definition(
-      state,
-      definition_id,
-    );
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition_id]);
+  }, [definition_id, history_mode]);
+
+  const rows =
+    (history_mode
+      ? state.api.history.incident.by_process_definition.value?.data
+      : state.api.incident.by_process_definition.value?.data) ?? [];
+
+  const retry = async (configuration) => {
+    await engine_rest.job.set_retries(state, configuration, 1);
+    load();
+  };
+
+  const open_annotation = (id, current) => {
+    annotation_id.value = id;
+    annotation_text.value = current ?? "";
+    annotation_open.value = true;
+  };
+
+  const save_annotation = async () => {
+    await engine_rest.incident.set_annotation(
+      state,
+      annotation_id.value,
+      annotation_text.value,
+    );
+    annotation_open.value = false;
+    load();
+  };
 
   /** @namespace instance.incidentMessage **/
   /** @namespace instance.incidentType **/
@@ -1700,20 +1740,67 @@ const Incidents = () => {
             <th>{t("processes.incidents.message")}</th>
             <th>{t("common.type")}</th>
             <th>{t("processes.incidents.configuration")}</th>
+            <th>{t("processes.incidents.annotation")}</th>
+            <th>{t("common.action")}</th>
           </tr>
         </thead>
         <tbody>
-          {state.api.history.incident.by_process_definition.value?.data?.map(
-            (incident) => (
-              <tr key={incident.id}>
-                <td>{incident.incidentMessage}</td>
-                <td>{incident.incidentType}</td>
-                <td>{incident.configuration}</td>
-              </tr>
-            ),
-          )}
+          {rows.map((incident) => (
+            <tr key={incident.id}>
+              <td>{incident.incidentMessage}</td>
+              <td>{incident.incidentType}</td>
+              <td>{incident.configuration}</td>
+              <td>{incident.annotation}</td>
+              <td>
+                {!history_mode && (
+                  <div class="button-group">
+                    {incident.incidentType === "failedJob" &&
+                      incident.configuration && (
+                        <button
+                          type="button"
+                          onClick={() => retry(incident.configuration)}
+                        >
+                          {t("processes.incidents.retry")}
+                        </button>
+                      )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        open_annotation(incident.id, incident.annotation)
+                      }
+                    >
+                      {t("processes.incidents.set-annotation")}
+                    </button>
+                  </div>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
+      <Dialog
+        open={annotation_open}
+        title={t("processes.incidents.annotation")}
+      >
+        <div class="dialog-fields">
+          <label>
+            {t("processes.incidents.annotation")}
+            <textarea
+              value={annotation_text.value}
+              onInput={(e) => (annotation_text.value = e.target.value)}
+              placeholder={t("processes.incidents.annotation-placeholder")}
+            />
+          </label>
+        </div>
+        <div class="button-group">
+          <button type="button" onClick={save_annotation}>
+            {t("common.save")}
+          </button>
+          <button type="button" onClick={() => (annotation_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 };

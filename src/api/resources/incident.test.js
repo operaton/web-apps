@@ -25,6 +25,15 @@ describe("api/resources/incident", () => {
     });
   });
 
+  it("by_process_definition() GETs /incident filtered by processDefinitionId", () => {
+    incident.by_process_definition(state, "def-1");
+    expect_api_call(GET, {
+      url: "/incident?processDefinitionId=def-1",
+      state,
+      signal: state.api.incident.by_process_definition,
+    });
+  });
+
   it("set_annotation() PUTs {annotation} to /incident/:id/annotation", () => {
     incident.set_annotation(state, "inc-1", "looked into it");
     expect_api_call(PUT, {

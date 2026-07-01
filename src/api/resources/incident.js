@@ -11,6 +11,13 @@ const get_incidents_by_process_instance = (state, instance_id) =>
     state.api.incident.by_process_instance,
   );
 
+const get_incidents_by_process_definition = (state, definition_id) =>
+  GET(
+    `/incident?processDefinitionId=${definition_id}`,
+    state,
+    state.api.incident.by_process_definition,
+  );
+
 const set_incident_annotation = (state, incident_id, annotation) =>
   PUT(
     `/incident/${incident_id}/annotation`,
@@ -29,6 +36,7 @@ const clear_incident_annotation = (state, incident_id) =>
 
 const incident = {
   by_process_instance: get_incidents_by_process_instance,
+  by_process_definition: get_incidents_by_process_definition,
   set_annotation: set_incident_annotation,
   clear_annotation: clear_incident_annotation,
 };

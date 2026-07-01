@@ -305,22 +305,23 @@ describe("ProcessesPage — definition tabs", () => {
     expect(getByText("BK-1")).toBeTruthy();
   });
 
-  it("incidents tab fetches and renders definition incidents", () => {
+  it("incidents tab fetches live definition incidents and can retry", () => {
     mockParams = { definition_id: "proc:1", panel: "incidents" };
-    signal_response(state.api.history.incident.by_process_definition, [
+    signal_response(state.api.incident.by_process_definition, [
       {
         id: "inc1",
         incidentMessage: "boom",
         incidentType: "failedJob",
-        configuration: "cfg",
+        configuration: "job-cfg",
       },
     ]);
     const { getByText } = renderPage(state);
-    expect(
-      engine_rest.history.incident.by_process_definition,
-    ).toHaveBeenCalled();
+    expect(engine_rest.incident.by_process_definition).toHaveBeenCalled();
     expect(getByText("boom")).toBeTruthy();
-    expect(getByText("cfg")).toBeTruthy();
+
+    fireEvent.click(getByText("processes.incidents.retry"));
+    expect(engine_rest.job.set_retries).toHaveBeenCalled();
+    expect(engine_rest.job.set_retries.mock.lastCall[1]).toBe("job-cfg");
   });
 
   it("called-definitions tab fetches and renders called definitions", () => {
