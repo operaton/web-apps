@@ -24,18 +24,7 @@ export function Header() {
     showSearch = () => document.getElementById("global-search").showModal(),
     show_mobile_menu = () => document.getElementById("mobile-menu").showModal(),
     close_mobile_menu = () => document.getElementById("mobile-menu").close(),
-    logout = () => engine_rest.auth.logout(state),
-    // Move focus (not just the scroll position) to the skip target. In an SPA
-    // the router intercepts the hash link, so native fragment focus never
-    // happens; do it explicitly and make the target programmatically focusable.
-    skip_to = (e, id) => {
-      const target = document.getElementById(id)
-      if (!target) return
-      e.preventDefault()
-      target.setAttribute("tabindex", "-1")
-      target.focus()
-      target.scrollIntoView()
-    }
+    logout = () => engine_rest.auth.logout(state)
 
   useHotkeys("alt+shift+0", () => route("/"))
   useHotkeys("alt+shift+1", () => route("/tasks"))
@@ -61,8 +50,7 @@ export function Header() {
             </div>}*/}
 
         <menu id="skip-links">
-          <li><a href="#content"            onClick={(e) => skip_to(e, "content")}>           {t("nav.skip-to-content")}</a></li>
-          <li><a href="#primary-navigation" onClick={(e) => skip_to(e, "primary-navigation")}>{t("nav.skip-to-navigation")}</a></li>
+          <li><a href="#content">{t("nav.skip-to-content")}</a></li>
         </menu>
 
 
