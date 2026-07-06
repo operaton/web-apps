@@ -534,7 +534,17 @@ main#processes {
 #processes td {
   padding: 0.4rem 0.6rem;
   text-align: left;
-  border-bottom: var(--border);
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+/* Head row: darker separator, same thickness. */
+#processes thead th {
+  border-bottom-color: var(--border-color-2);
+}
+
+/* Body rows: keep their color, but a slightly thinner separator. */
+#processes tbody :where(th, td) {
+  border-bottom-width: 0.07rem;
 }
 
 #processes .num {
