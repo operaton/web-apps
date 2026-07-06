@@ -291,6 +291,12 @@
     "business-key": "Business Key",
     "instance-id": "Instance ID",
     "change-instance": "Change Instance",
+    "col-abbr": {
+      "incidents": "Incid.",
+      "instances": "Inst.",
+      "version": "Ver.",
+      "tenant-id": "Tenant"
+    },
     "tabs": {
       "instances": "Instances",
       "incidents": "Incidents",

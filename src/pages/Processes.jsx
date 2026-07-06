@@ -725,12 +725,20 @@ const ProcessDefinitionSelection = () => {
                   />
                 </th>
                 <th>{t("common.name")}</th>
-                <th class="num">{t("processes.tabs.incidents")}</th>
-                <th class="num">{t("dashboard.instances")}</th>
+                <th class="num" title={t("processes.tabs.incidents")}>
+                  {t("processes.col-abbr.incidents")}
+                </th>
+                <th class="num" title={t("dashboard.instances")}>
+                  {t("processes.col-abbr.instances")}
+                </th>
                 <th>{t("common.key")}</th>
-                <th class="num">{t("processes.version")}</th>
+                <th class="num" title={t("processes.version")}>
+                  {t("processes.col-abbr.version")}
+                </th>
                 <th>{t("common.id")}</th>
-                <th>{t("processes.tenant-id")}</th>
+                <th title={t("processes.tenant-id")}>
+                  {t("processes.col-abbr.tenant-id")}
+                </th>
               </tr>
             </thead>
             <tbody>

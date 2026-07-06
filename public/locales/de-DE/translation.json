@@ -291,6 +291,12 @@
     "business-key": "Geschäftsschlüssel",
     "instance-id": "Instanz-ID",
     "change-instance": "Instanz wechseln",
+    "col-abbr": {
+      "incidents": "Inzid.",
+      "instances": "Inst.",
+      "version": "Ver.",
+      "tenant-id": "Mandant"
+    },
     "tabs": {
       "instances": "Instanzen",
       "incidents": "Inzidente",
