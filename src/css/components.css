@@ -33,21 +33,21 @@
   line-height: 1;
 }
 
-.list li.selected {
+.list li:has(> a[aria-current="page"]) {
   border-radius: var(--border-radius);
   border-top-color: transparent;
 }
 
-.list li.selected a {
+.list li a[aria-current="page"] {
   background-color: var(--background-3);
 }
 
-.list li.selected a:focus {
+.list li a[aria-current="page"]:focus {
   background-color: var(--color-primary-transparent);
 }
 
-.list li:first-child:not(.selected),
-.list li.selected + li {
+.list li:first-child:not(:has(> a[aria-current="page"])),
+.list li:has(> a[aria-current="page"]) + li {
   border-color: transparent;
 }
 
@@ -421,7 +421,7 @@ main#processes {
   min-height: 2rem;
   padding: 0 var(--spacing-2);
   border-bottom: var(--border);
-  background: var(--background-1);
+  background: var(--background-2);
   font-size: var(--small-font-size);
   flex-wrap: wrap;
 }
@@ -462,7 +462,11 @@ main#processes {
 
 #processes nav a[aria-current] {
   color: var(--color-primary);
+  /* Overlap the nav's bottom border so the indicator sits on top of it,
+     growing its height by the border width to fully cover it. */
   border-bottom-color: var(--color-primary);
+  border-bottom-width: calc(0.15em + var(--border-width));
+  margin-bottom: calc(-1 * var(--border-width));
   font-weight: 600;
 }
 
@@ -650,6 +654,20 @@ form.camunda-form {
 
 .camunda-form .form-input-cell input[type="checkbox"] {
   align-self: start;
+}
+
+/* Grouped fields (radio-group, checklist) use a <fieldset>/<legend> for the
+   group name; reset the native chrome so it matches the surrounding grid form. */
+.camunda-form .form-field-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.camunda-form .form-field-group > legend {
+  padding: 0;
+  margin-bottom: var(--spacing-1);
 }
 
 .camunda-form .form-radio-group,
@@ -1134,6 +1152,15 @@ div.accordion {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
+  /* Rendered as a <button> for keyboard access — strip the native button chrome
+     so it reads as the inline value it wraps. */
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  text-align: inherit;
 
   &:hover {
     cursor: copy;
@@ -1225,7 +1252,27 @@ dialog#global-search {
   border: 2px solid var(--color-primary);
 }
 
+/* Page heading row: title and primary action share a line, with
+   space-between, wrapping the action onto the next line when too narrow. */
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  margin: var(--spacing-2) 0;
+}
+
+.page-heading > * {
+  margin: 0;
+}
+
 /* breadcrumbs */
+
+/* The breadcrumb nav shouldn't inherit the generic side padding on <nav>. */
+nav:has(> .breadcrumbs) {
+  padding: 0;
+}
 
 .breadcrumbs {
   display: inline-flex;
@@ -1275,11 +1322,11 @@ dialog#global-search {
 }
 
 /* account */
-#account-page {
+.account-page {
   display: flex;
 }
 
-#account-page > section {
+.account-page > section {
   margin: 0;
   padding: var(--spacing-2);
   overflow-y: auto;
@@ -1288,7 +1335,7 @@ dialog#global-search {
   background-clip: padding-box;
 }
 
-#account-page dialog table td.fill {
+.account-page dialog table td.fill {
   width: 100%;
 }
 

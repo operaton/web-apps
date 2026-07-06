@@ -68,9 +68,9 @@ export const FilterEditForm = ({
           <table>
             <thead>
               <tr>
-                <th>{t("common.key")}</th>
-                <th>{t("common.value")}</th>
-                <th>{t("common.action")}</th>
+                <th scope="col">{t("common.key")}</th>
+                <th scope="col">{t("common.value")}</th>
+                <th scope="col">{t("common.action")}</th>
               </tr>
             </thead>
             <tbody>
@@ -80,6 +80,7 @@ export const FilterEditForm = ({
                   <tr key={i}>
                     <td>
                       <select
+                        aria-label={t("common.key")}
                         value={criterion.key}
                         onChange={(e) =>
                           update_criterion(i, "key", e.currentTarget.value)
@@ -97,6 +98,7 @@ export const FilterEditForm = ({
                         meta={meta}
                         value={criterion.value}
                         on_change={(v) => update_criterion(i, "value", v)}
+                        label={t("common.value")}
                       />
                     </td>
                     <td>
@@ -155,14 +157,22 @@ export const FilterEditForm = ({
   );
 };
 
-const CriterionValueInput = ({ meta, value, on_change }) => {
+const CriterionValueInput = ({ meta, value, on_change, label }) => {
   if (!meta)
     return (
-      <input value={value} onInput={(e) => on_change(e.currentTarget.value)} />
+      <input
+        aria-label={label}
+        value={value}
+        onInput={(e) => on_change(e.currentTarget.value)}
+      />
     );
   if (meta.type === "boolean")
     return (
-      <select value={value} onChange={(e) => on_change(e.currentTarget.value)}>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(e) => on_change(e.currentTarget.value)}
+      >
         <option value="">—</option>
         <option value="true">true</option>
         <option value="false">false</option>
@@ -170,7 +180,11 @@ const CriterionValueInput = ({ meta, value, on_change }) => {
     );
   if (meta.type === "enum" && Array.isArray(meta.options))
     return (
-      <select value={value} onChange={(e) => on_change(e.currentTarget.value)}>
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(e) => on_change(e.currentTarget.value)}
+      >
         <option value="">—</option>
         {meta.options.map((o) => (
           <option key={o.value ?? o} value={o.value ?? o}>
@@ -183,12 +197,17 @@ const CriterionValueInput = ({ meta, value, on_change }) => {
     return (
       <input
         type="datetime-local"
+        aria-label={label}
         value={value}
         onInput={(e) => on_change(e.currentTarget.value)}
       />
     );
   return (
-    <input value={value} onInput={(e) => on_change(e.currentTarget.value)} />
+    <input
+      aria-label={label}
+      value={value}
+      onInput={(e) => on_change(e.currentTarget.value)}
+    />
   );
 };
 

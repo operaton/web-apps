@@ -74,16 +74,16 @@ describe("Header", () => {
     ]);
   });
 
-  it("marks the link for the current route as active", () => {
+  it("marks the link for the current route as the current page", () => {
     mockUrl = "/processes/p1";
     const { container } = renderHeader(state);
     const nav = container.querySelector("#primary-navigation");
     const processes = nav.querySelector('a[href="/processes"]');
     const tasks = nav.querySelector('a[href="/tasks"]');
-    // The source toggles an `active` class (not aria-current) for the matching
-    // route prefix; assert on that observable behavior.
-    expect(processes.getAttribute("class")).toBe("active");
-    expect(tasks.getAttribute("class")).not.toBe("active");
+    // The active link exposes its state via aria-current="page" (semantic,
+    // announced by screen readers) rather than a CSS class.
+    expect(processes.getAttribute("aria-current")).toBe("page");
+    expect(tasks.getAttribute("aria-current")).not.toBe("page");
   });
 
   it("renders an option per VITE_BACKEND server in the selector", () => {

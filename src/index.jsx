@@ -143,11 +143,12 @@ const Routing = () => {
             Login with SSO
           </button>
         ) : (
-          <form onSubmit={login} class=".form-horizontal">
+          <form onSubmit={login} class="form-horizontal">
             <label for="username">User name*</label>
             <input
               name="username"
               id="username"
+              autocomplete="username"
               onInput={(e) =>
                 (credentials.value = {
                   ...credentials.peek(),
@@ -162,6 +163,7 @@ const Routing = () => {
               name="password"
               type="password"
               id="password"
+              autocomplete="current-password"
               onInput={(e) =>
                 (credentials.value = {
                   ...credentials.peek(),

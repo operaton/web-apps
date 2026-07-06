@@ -32,7 +32,9 @@
     "running": "Running",
     "select-page": "Select Page",
     "activate": "Activate",
-    "load-more": "Load more"
+    "load-more": "Load more",
+    "breadcrumb": "Breadcrumb",
+    "confirmation": "Confirmation"
   },
   "nav": {
     "tasks": "Tasks",
@@ -48,6 +50,7 @@
     "menu": "Menu",
     "close-menu": "Close menu",
     "mobile-navigation": "Mobile navigation",
+    "main-navigation": "Main navigation",
     "skip-to-content": "Skip to content",
     "skip-to-navigation": "Skip to Primary Navigation",
     "go-to": "Go To",
@@ -137,6 +140,7 @@
     "unclaim": "Unclaim",
     "you": "You",
     "reset-assignee": "Reset Assignee",
+    "assignee-menu": "Assignee actions",
     "comment": "Comment",
     "comment-add": "Add Comment",
     "comment-none": "No comments yet.",
@@ -173,6 +177,7 @@
       "remove-groups": "Remove Groups"
     },
     "tabs": {
+      "label": "Task details",
       "form": "Form",
       "history": "History",
       "diagram": "Diagram",
@@ -279,6 +284,7 @@
   },
   "processes": {
     "title": "Process Definitions",
+    "subnav-label": "Sub-section navigation",
     "version": "Version",
     "change-definition": "Change Definition",
     "definition-id": "Definition ID",

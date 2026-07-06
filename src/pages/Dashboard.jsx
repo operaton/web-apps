@@ -21,6 +21,7 @@ export const DashboardPage = () => {
 
   return (
     <main id="content" class="dashboard fade-in">
+      <h1 class="screen-hidden">{t("dashboard.greeting")}</h1>
       <h2>
         {t("dashboard.greeting")}
         {username ? `, ${username}` : ""}

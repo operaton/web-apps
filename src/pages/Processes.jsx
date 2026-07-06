@@ -323,7 +323,7 @@ const ProcessSubNav = () => {
       );
 
   return (
-    <nav aria-label="Processes navigation">
+    <nav aria-label={t("nav.processes")}>
       <menu>
         <li>
           <a
@@ -415,7 +415,7 @@ const ProcessTertiaryNav = ({ tabs, base_path, param = "sub_panel" }) => {
   }, [base_path, active]);
 
   return (
-    <nav class="tertiary" aria-label="Sub-section navigation">
+    <nav class="tertiary" aria-label={t("processes.subnav-label")}>
       <menu>
         {tabs.map((tab) => (
           <li key={tab.id}>
@@ -468,12 +468,16 @@ const DefinitionMetaPanel = () => {
       <summary>{t("processes.definition-details")}</summary>
       <dl>
         <dt>{t("processes.definition-id")}</dt>
-        <dd
-          class="font-mono copy-on-click"
-          onClick={copyToClipboard}
-          title={t("processes.click-to-copy")}
-        >
-          {def.id ?? "—"}
+        <dd>
+          <button
+            type="button"
+            class="font-mono copy-on-click"
+            onClick={copyToClipboard}
+            aria-label={t("processes.click-to-copy")}
+            title={t("processes.click-to-copy")}
+          >
+            {def.id ?? "—"}
+          </button>
         </dd>
         <dt>{t("common.key")}</dt>
         <dd>{def.key ?? "—"}</dd>
@@ -830,12 +834,16 @@ const DefinitionOverview = () => {
             </header>
             <dl>
               <dt>{t("processes.definition-id")}</dt>
-              <dd
-                class="font-mono copy-on-click"
-                onClick={copyToClipboard}
-                title={t("processes.click-to-copy")}
-              >
-                {def?.id ?? "—"}
+              <dd>
+                <button
+                  type="button"
+                  class="font-mono copy-on-click"
+                  onClick={copyToClipboard}
+                  aria-label={t("processes.click-to-copy")}
+                  title={t("processes.click-to-copy")}
+                >
+                  {def?.id ?? "—"}
+                </button>
               </dd>
               <dt>{t("common.key")}</dt>
               <dd>{def?.key ?? "—"}</dd>
@@ -994,7 +1002,7 @@ const Instances = () => {
         </table>
       </div>
       {list.value?.hasMore === true ? (
-        <button class="load-more" onClick={load_more}>
+        <button type="button" class="load-more" onClick={load_more}>
           {t("tasks.load-more")}
         </button>
       ) : list.value?.hasMore === false ? (
@@ -1078,12 +1086,16 @@ const InstanceDetailsDescription = () => {
     <>
       <dl>
         <dt>{t("processes.instance-id")}</dt>
-        <dd
-          class="font-mono copy-on-click"
-          onClick={copyToClipboard}
-          title={t("processes.click-to-copy")}
-        >
-          {data?.id ?? "—"}
+        <dd>
+          <button
+            type="button"
+            class="font-mono copy-on-click"
+            onClick={copyToClipboard}
+            aria-label={t("processes.click-to-copy")}
+            title={t("processes.click-to-copy")}
+          >
+            {data?.id ?? "—"}
+          </button>
         </dd>
         <dt>{t("processes.business-key")}</dt>
         <dd>{data?.businessKey ?? "—"}</dd>
@@ -1607,8 +1619,12 @@ const InstanceUserTasks = () => {
                   <UUIDLink path="/" uuid={id} />
                 </td>
                 <td>
-                  <button>{t("processes.user-tasks.groups")}</button>
-                  <button>{t("processes.user-tasks.users")}</button>
+                  <button type="button">
+                    {t("processes.user-tasks.groups")}
+                  </button>
+                  <button type="button">
+                    {t("processes.user-tasks.users")}
+                  </button>
                 </td>
               </tr>
             ),
@@ -2047,7 +2063,12 @@ const JobDefinitions = () => {
 };
 
 const BackToListBtn = ({ url, title, className }) => (
-  <a className={`tabs-back ${className || ""}`} href={url} title={title}>
+  <a
+    class={`tabs-back ${className || ""}`}
+    href={url}
+    title={title}
+    aria-label={title}
+  >
     <Icons.arrow_left />
     <Icons.list />
   </a>

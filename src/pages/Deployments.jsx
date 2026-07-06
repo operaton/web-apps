@@ -148,6 +148,7 @@ const DeploymentsPage = () => {
 
   return (
     <main id="content" class="deployments fade-in">
+      <h1 class="screen-hidden">{t("nav.deployments")}</h1>
       <DeploymentsList />
       <ResourcesList />
       {resource_name ? (

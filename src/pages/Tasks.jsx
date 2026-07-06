@@ -318,9 +318,7 @@ const TaskRowEntry = ({ task, selected }) => {
   return (
     <tr id={id} key={id} aria-selected={selected}>
       <th scope="row">
-        <a href={`/tasks/${id}/${task_tabs[0].id}`} aria-labelledby={id}>
-          {name}
-        </a>
+        <a href={`/tasks/${id}/${task_tabs[0].id}`}>{name}</a>
       </th>
       <td>{assignee ? assignee : "—"}</td>
       <td>
@@ -457,6 +455,7 @@ const TaskTabs = () => {
           tabs={task_tabs}
           base_url={`/tasks/${state.api.task.one.value.data.id}`}
           className="fade-in"
+          label={t("tasks.tabs.label")}
         />
       ) : (
         t("common.loading")
@@ -506,15 +505,15 @@ const SetDueDateButton = () => {
 
   return (
     <>
-      <button onClick={show} class="task-card">
+      <button type="button" onClick={show} class="task-card">
         <small>{t("tasks.due-date.label")}</small>
         <span>{due_date !== null ? due_date.toLocaleString() : "—"}</span>
         <Icons.pencil />
       </button>
 
-      <dialog id="set_due_date">
+      <dialog id="set_due_date" aria-labelledby="set-due-date-title">
         <button onClick={close}>{t("common.close")}</button>
-        <h2>{t("tasks.due-date.title")}</h2>
+        <h2 id="set-due-date-title">{t("tasks.due-date.title")}</h2>
 
         <form onSubmit={submit}>
           <label for="date">{t("tasks.due-date.date")}</label>
@@ -598,7 +597,7 @@ const SetFollowUpDateButton = () => {
 
   return (
     <>
-      <button onClick={show} class="task-card">
+      <button type="button" onClick={show} class="task-card">
         <small>{t("tasks.follow-up.label")}</small>
         <span>
           {followUpDate !== null ? followUpDate.toLocaleString() : "—"}
@@ -606,9 +605,9 @@ const SetFollowUpDateButton = () => {
         <Icons.pencil />
       </button>
 
-      <dialog id="set_follow_up_date">
+      <dialog id="set_follow_up_date" aria-labelledby="set-follow-up-date-title">
         <button onClick={close}>{t("common.close")}</button>
-        <h2>{t("tasks.follow-up.title")}</h2>
+        <h2 id="set-follow-up-date-title">{t("tasks.follow-up.title")}</h2>
 
         <form onSubmit={submit}>
           <label for="date">{t("tasks.due-date.date")}</label>
@@ -694,7 +693,7 @@ const SetGroupsButton = () => {
 
   return (
     <>
-      <button onClick={show} class="task-card">
+      <button type="button" onClick={show} class="task-card">
         <small>{t("tasks.groups.set")}</small>
         <span>
           <GroupsList />
@@ -702,10 +701,15 @@ const SetGroupsButton = () => {
         <Icons.pencil />
       </button>
 
-      <dialog id="add_groups">
+      <dialog id="add_groups" aria-labelledby="add-groups-title">
         <header>
-          <h2>{t("tasks.groups.manage")}</h2>
-          <button onClick={close} class="neutral">
+          <h2 id="add-groups-title">{t("tasks.groups.manage")}</h2>
+          <button
+            type="button"
+            onClick={close}
+            class="neutral"
+            aria-label={t("common.close")}
+          >
             <Icons.close />
           </button>
         </header>
@@ -779,11 +783,13 @@ const CommentButton = () => {
 
   return (
     <>
-      <button onClick={show}>{t("tasks.comment-add")}</button>
+      <button type="button" onClick={show}>
+        {t("tasks.comment-add")}
+      </button>
 
-      <dialog id="add_comment">
+      <dialog id="add_comment" aria-labelledby="add-comment-title">
         <button onClick={close}>{t("common.close")}</button>
-        <h2>{t("tasks.comment")}</h2>
+        <h2 id="add-comment-title">{t("tasks.comment")}</h2>
 
         <form onSubmit={submit}>
           <label for="comment_message">{t("tasks.comment-message")}</label>
@@ -823,34 +829,37 @@ const ClaimButton = () => {
       signal={state.api.task.one}
       on_success={() => (
         <>
-          <button onClick={show} class="task-card">
+          <button type="button" onClick={show} class="task-card">
             <small>{t("tasks.task-list.table-headings.assignee")}</small>
             <span>{task?.assignee ?? "—"}</span>
             <Icons.pencil />
           </button>
 
-          <dialog id="set_assignee">
-            <button onClick={close}>{t("common.close")}</button>
+          <dialog id="set_assignee" aria-label={t("tasks.assignee-menu")}>
+            <button type="button" onClick={close}>{t("common.close")}</button>
             {assignee_is_different && !assigned ? (
               <button
+                type="button"
                 onClick={() =>
                   engine_rest.task.assign_task(state, null, task.id)
                 }
-                className="secondary"
+                class="secondary"
               >
                 <Icons.user_minus /> {t("tasks.reset-assignee")}
               </button>
             ) : (user_is_assignee || claimed) && !unclaimed ? (
               <button
+                type="button"
                 onClick={() => engine_rest.task.unclaim_task(state, task.id)}
-                className="secondary"
+                class="secondary"
               >
                 <Icons.user_minus /> {t("tasks.unclaim")}
               </button>
             ) : (
               <button
+                type="button"
                 onClick={() => engine_rest.task.claim_task(state, task.id)}
-                className="secondary"
+                class="secondary"
               >
                 <Icons.user_plus /> {t("tasks.claim")}
               </button>

@@ -215,6 +215,9 @@ const SearchComponent = () => {
 
   let item_index = 0
 
+  const item_count = flat_items().length
+  const results_shown = item_count > 0
+
   return (
     <search class="goto-search">
       <header>
@@ -225,6 +228,13 @@ const SearchComponent = () => {
       <input
         autofocus
         type="search"
+        role="combobox"
+        aria-label={t("goto.placeholder")}
+        aria-controls="goto-listbox"
+        aria-expanded={results_shown}
+        aria-activedescendant={
+          results_shown ? `goto-option-${selected.value}` : undefined
+        }
         placeholder={t("goto.placeholder")}
         class="goto-input"
         value={query.value}
@@ -232,19 +242,25 @@ const SearchComponent = () => {
         onKeyDown={on_keydown}
       />
 
-      <div class="goto-results" role="listbox">
+      <div id="goto-listbox" class="goto-results" role="listbox">
         {!query.value && <p class="goto-hint">{t("goto.hint")}</p>}
 
         {results.value.map((group) => {
           const cat = CATEGORIES.find((c) => c.key === group.category)
+          const heading_id = `goto-group-${group.category}`
           return (
-            <section key={group.category}>
-              <h4>{cat ? t(cat.labelKey) : group.category}</h4>
+            <section
+              key={group.category}
+              role="group"
+              aria-labelledby={heading_id}
+            >
+              <h3 id={heading_id}>{cat ? t(cat.labelKey) : group.category}</h3>
               {group.items.map((item) => {
                 const idx = item_index++
                 return (
                   <a
                     key={item.href}
+                    id={`goto-option-${idx}`}
                     href={item.href}
                     class={`goto-item ${idx === selected.value ? "goto-selected" : ""}`}
                     role="option"
@@ -261,13 +277,14 @@ const SearchComponent = () => {
         })}
 
         {query.value && lookup_signal.value?.status === "success" && (
-          <section>
-            <h4>{t("goto.id-lookup")}</h4>
+          <section role="group" aria-labelledby="goto-group-lookup">
+            <h3 id="goto-group-lookup">{t("goto.id-lookup")}</h3>
             {lookup_signal.value.data.map((item) => {
               const idx = item_index++
               return (
                 <a
                   key={item.href}
+                  id={`goto-option-${idx}`}
                   href={item.href}
                   class={`goto-item ${idx === selected.value ? "goto-selected" : ""}`}
                   role="option"

@@ -41,13 +41,14 @@ const StartableProcessesList = () => {
 
   return <div>
 
-    <div className="row space-between p-1">
+    <div class="row space-between p-1">
       <h2>{t("tasks.start-process.title")}</h2>
 
       <input
         type="text"
-        className="search-input"
+        class="search-input"
         id="process-popup-search-input"
+        aria-label={t("tasks.start-process.search-placeholder")}
         placeholder={t("tasks.start-process.search-placeholder")}
         value={search_term.value}
         onChange={(e) => (search_term.value = e.target.value)} />
@@ -78,7 +79,7 @@ const StartableProcessesList = () => {
               })
               .map((process) => (
                 <tr key={process.id}
-                    class={(process.id === params.tab) ? 'selected' : ''}>
+                    aria-selected={process.id === params.tab}>
                   <td><a href={`/tasks/start/${process.id}`}>{process.name}</a></td>
                   <td>{process.version}</td>
                   <td>{process.description}</td>

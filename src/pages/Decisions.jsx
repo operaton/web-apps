@@ -184,7 +184,7 @@ const DecisionsList = () => {
               {definitions.value?.data?.map((decision) => (
                 <tr
                   key={decision.id}
-                  class={params.decision_id === decision.id ? "selected" : null}
+                  aria-selected={params.decision_id === decision.id}
                 >
                   <td>
                     <a href={`/decisions/${decision.id}`}>

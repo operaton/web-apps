@@ -254,11 +254,11 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
         let actions_html = `<button class="bpmn-badge bpmn-badge-running bpmn-action-btn" data-action="instances" data-activity-id="${id}" title="${t('bpmn.show-instances')}">${instances}</button>`
 
         if (incidents?.length > 0) {
-          actions_html += `<button class="bpmn-action-btn" data-action="incidents" data-activity-id="${id}" title="${t('bpmn.show-incidents')}">${icon_incident}</button>`
+          actions_html += `<button class="bpmn-action-btn" data-action="incidents" data-activity-id="${id}" aria-label="${t('bpmn.show-incidents')}" title="${t('bpmn.show-incidents')}">${icon_incident}</button>`
         }
 
         if (is_call_activity) {
-          actions_html += `<button class="bpmn-action-btn" data-action="called" data-activity-id="${id}" title="${t('bpmn.show-called-activity')}">${icon_link}</button>`
+          actions_html += `<button class="bpmn-action-btn" data-action="called" data-activity-id="${id}" aria-label="${t('bpmn.show-called-activity')}" title="${t('bpmn.show-called-activity')}">${icon_link}</button>`
         }
 
         overlays.add(id, {
@@ -344,7 +344,14 @@ const ModifyInstanceDialog = ({ request, mode, instance_id, definition_id }) => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request.value])
 
-  if (!request.value) return <dialog ref={dialogRef} class="modify-instance-dialog" />
+  if (!request.value)
+    return (
+      <dialog
+        ref={dialogRef}
+        class="modify-instance-dialog"
+        onClose={() => (request.value = null)}
+      />
+    )
 
   const {
     source_activity_id,
@@ -441,7 +448,11 @@ const ModifyInstanceDialog = ({ request, mode, instance_id, definition_id }) => 
   const batch_done = is_batch && created_batch.value
 
   return (
-    <dialog ref={dialogRef} class="modify-instance-dialog">
+    <dialog
+      ref={dialogRef}
+      class="modify-instance-dialog"
+      onClose={() => (request.value = null)}
+    >
       <h2>{t('bpmn.modify.title')}</h2>
       <dl>
         <dt>{t('bpmn.modify.source')}</dt>

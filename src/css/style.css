@@ -38,7 +38,9 @@
 
   --text: #000;
   --text-2: #555;
-  --text-disabled: #888;
+  /* #6b6b6b meets WCAG AA (4.5:1) even on the --background-2 (#f2f2f4) surfaces
+     where disabled text appears (e.g. the processes sub-nav) */
+  --text-disabled: #6b6b6b;
   --text-inverted: #fff;
 
   /* font */
@@ -166,7 +168,7 @@
   #mobile-menu nav menu li a:visited {
     color: var(--text);
   }
-  #mobile-menu nav menu li a.active {
+  #mobile-menu nav menu li a[aria-current="page"] {
     color: var(--color-primary);
     background: var(--background-3);
   }
@@ -390,7 +392,7 @@
   nav menu li a:visited {
     color: var(--text);
   }
-  nav menu li a.active {
+  nav menu li a[aria-current="page"] {
     color: var(--color-primary);
   }
 
@@ -435,21 +437,36 @@
     padding: var(--spacing-1);
     box-sizing: border-box;
   }
-  #app > header nav menu > li > a.active {
+  #app > header nav menu > li > a[aria-current="page"] {
     color: var(--text);
-    border-bottom: 0.2em solid var(--color-primary);
+    /* Overlap the header's bottom border so the indicator sits on top of it,
+       growing its height by the border width to fully cover it. */
+    border-bottom: calc(0.2em + var(--border-width)) solid var(--color-primary);
     padding-bottom: calc(var(--spacing-1) - 0.2em);
+    margin-bottom: calc(-1 * var(--border-width));
   }
   #app > header nav menu a {
     color: var(--text);
     text-decoration: none;
   }
 
+  /* Canonical visually-hidden: stays in the accessibility tree (readable by
+     screen readers) but is clipped to a 1-unit box so it never renders visibly
+     or creates a non-focusable scroll region (axe scrollable-region-focusable).
+     0.0625rem == 1px at the default root size; kept relative per project rules.
+     !important guards the hiding against unlayered layout rules (e.g. the
+     `overflow-y: auto` in components.css) — the standard for sr-only utilities. */
   .screen-hidden {
-    position: absolute;
-    left: -999vw;
-    height: 0;
-    width: 0;
+    position: absolute !important;
+    width: 0.0625rem !important;
+    height: 0.0625rem !important;
+    padding: 0 !important;
+    margin: -0.0625rem !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
   }
 
   #migration {
@@ -749,7 +766,7 @@
     table {
       width: calc(100% - var(--spacing-1));
 
-      tr.selected {
+      tr[aria-selected="true"] {
         a {
           color: var(--text);
         }
@@ -828,12 +845,12 @@
     text-align: center;
   }
 
-  #admin-page {
+  .admin-page {
     display: flex;
     flex: 1;
     min-height: 0;
   }
-  #admin-page > div {
+  .admin-page > div {
     padding: var(--spacing-2);
     overflow-y: auto;
     width: calc(100% - var(--spacing-3));
@@ -841,9 +858,20 @@
     background-clip: padding-box;
   }
 
+  /* Override the global row-wrapping `nav menu` into a vertical sidebar.
+     Scoped to the direct-child sidebar nav so the breadcrumb nav inside the
+     content area keeps the default background. */
+  .admin-page > nav {
+    background: var(--background-2);
+  }
+  .admin-page > nav menu {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
   /* keep the hover/selected background, but drop the negative margin shift */
-  #admin-page tbody tr:hover :where(td, th),
-  #admin-page tbody tr[aria-selected="true"] :where(td, th) {
+  .admin-page tbody tr:hover :where(td, th),
+  .admin-page tbody tr[aria-selected="true"] :where(td, th) {
     margin: 0;
   }
 

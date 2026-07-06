@@ -24,7 +24,18 @@ export function Header() {
     showSearch = () => document.getElementById("global-search").showModal(),
     show_mobile_menu = () => document.getElementById("mobile-menu").showModal(),
     close_mobile_menu = () => document.getElementById("mobile-menu").close(),
-    logout = () => engine_rest.auth.logout(state)
+    logout = () => engine_rest.auth.logout(state),
+    // Move focus (not just the scroll position) to the skip target. In an SPA
+    // the router intercepts the hash link, so native fragment focus never
+    // happens; do it explicitly and make the target programmatically focusable.
+    skip_to = (e, id) => {
+      const target = document.getElementById(id)
+      if (!target) return
+      e.preventDefault()
+      target.setAttribute("tabindex", "-1")
+      target.focus()
+      target.scrollIntoView()
+    }
 
   useHotkeys("alt+shift+0", () => route("/"))
   useHotkeys("alt+shift+1", () => route("/tasks"))
@@ -50,24 +61,24 @@ export function Header() {
             </div>}*/}
 
         <menu id="skip-links">
-          <li><a href="#content">           {t("nav.skip-to-content")}</a></li>
-          <li><a href="#primary-navigation">{t("nav.skip-to-navigation")}</a></li>
+          <li><a href="#content"            onClick={(e) => skip_to(e, "content")}>           {t("nav.skip-to-content")}</a></li>
+          <li><a href="#primary-navigation" onClick={(e) => skip_to(e, "primary-navigation")}>{t("nav.skip-to-navigation")}</a></li>
         </menu>
 
 
         <a href="/" id="mobile-logo">OPERATON</a>
-        <button id="mobile-menu-toggle" onClick={show_mobile_menu} aria-label={t("nav.menu")} />
+        <button type="button" id="mobile-menu-toggle" onClick={show_mobile_menu} aria-label={t("nav.menu")} />
         <div id="nav-wrapper">
-          <nav id="primary-navigation" aria-label="Main">
+          <nav id="primary-navigation" aria-label={t("nav.main-navigation")}>
             <menu>
-              <li><a href="/"            class={url === "/" && "active"}          id="logo">OPERATON</a></li>
-              <li><a href="/tasks"       class={url.startsWith("/tasks")       && "active"}>{t("nav.tasks")}</a></li>
-              <li><a href="/processes"   class={url.startsWith("/processes")   && "active"}>{t("nav.processes")}</a></li>
-              <li><a href="/decisions"   class={url.startsWith("/decisions")   && "active"}>{t("nav.decisions")}</a></li>
-              <li><a href="/deployments" class={url.startsWith("/deployments") && "active"}>{t("nav.deployments")}</a></li>
-              <li><a href="/batches"     class={url.startsWith("/batches")     && "active"}>{t("nav.batches")}</a></li>
-              <li><a href="/migrations"  class={url.startsWith("/migrations")  && "active"}>{t("nav.migrations")}</a></li>
-              <li><a href="/admin"       class={url.startsWith("/admin")       && "active"}>{t("nav.admin")}</a></li>
+              <li><a href="/"            aria-current={url === "/" ? "page" : undefined}                    id="logo">OPERATON</a></li>
+              <li><a href="/tasks"       aria-current={url.startsWith("/tasks")       ? "page" : undefined}>{t("nav.tasks")}</a></li>
+              <li><a href="/processes"   aria-current={url.startsWith("/processes")   ? "page" : undefined}>{t("nav.processes")}</a></li>
+              <li><a href="/decisions"   aria-current={url.startsWith("/decisions")   ? "page" : undefined}>{t("nav.decisions")}</a></li>
+              <li><a href="/deployments" aria-current={url.startsWith("/deployments") ? "page" : undefined}>{t("nav.deployments")}</a></li>
+              <li><a href="/batches"     aria-current={url.startsWith("/batches")     ? "page" : undefined}>{t("nav.batches")}</a></li>
+              <li><a href="/migrations"  aria-current={url.startsWith("/migrations")  ? "page" : undefined}>{t("nav.migrations")}</a></li>
+              <li><a href="/admin"       aria-current={url.startsWith("/admin")       ? "page" : undefined}>{t("nav.admin")}</a></li>
             </menu>
           </nav>
           <div>
@@ -77,12 +88,12 @@ export function Header() {
                 <li><a href="/account">{t("nav.account")}</a></li>
               </menu>
             </nav>
-            <button id="go-to" onClick={showSearch}>
+            <button type="button" id="go-to" onClick={showSearch}>
               {t("nav.go-to")} <kbd>Alt+K</kbd>
             </button>
-            <label id="server-selector" title="Server selection">
+            <label id="server-selector">
               {/* <Icons.server />*/}
-              <select onChange={(e) => swap_server(e, state)}>
+              <select aria-label={t("nav.choose-server")} onChange={(e) => swap_server(e, state)}>
                 <option disabled>{t("nav.choose-server")}</option>
                 {servers.map((server) =>
                   <option key={server.url} value={server.url} selected={state.server.value?.url === server.url}>
@@ -90,7 +101,7 @@ export function Header() {
                   </option>)}
               </select>
             </label>
-            <button id="logout" onClick={logout}>{t("nav.logout")}</button>
+            <button type="button" id="logout" onClick={logout}>{t("nav.logout")}</button>
           </div>
         </div>
       </header>
@@ -98,21 +109,21 @@ export function Header() {
       <dialog id="mobile-menu">
         <header>
           <h2>{t("nav.menu")}</h2>
-          <button onClick={close_mobile_menu} aria-label={t("nav.close-menu")}>
+          <button type="button" onClick={close_mobile_menu} aria-label={t("nav.close-menu")}>
             <Icons.close />
           </button>
         </header>
         <nav aria-label={t("nav.mobile-navigation")}>
           <menu>
             <li>
-              <a href="/tasks" class={url.startsWith("/tasks") && "active"}>
+              <a href="/tasks" aria-current={url.startsWith("/tasks") ? "page" : undefined}>
                 {t("nav.tasks")}
               </a>
             </li>
             <li>
               <a
                 href="/processes"
-                class={url.startsWith("/processes") && "active"}
+                aria-current={url.startsWith("/processes") ? "page" : undefined}
               >
                 {t("nav.processes")}
               </a>
@@ -120,7 +131,7 @@ export function Header() {
             <li>
               <a
                 href="/decisions"
-                class={url.startsWith("/decisions") && "active"}
+                aria-current={url.startsWith("/decisions") ? "page" : undefined}
               >
                 {t("nav.decisions")}
               </a>
@@ -128,26 +139,26 @@ export function Header() {
             <li>
               <a
                 href="/deployments"
-                class={url.startsWith("/deployments") && "active"}
+                aria-current={url.startsWith("/deployments") ? "page" : undefined}
               >
                 {t("nav.deployments")}
               </a>
             </li>
             <li>
-              <a href="/batches" class={url.startsWith("/batches") && "active"}>
+              <a href="/batches" aria-current={url.startsWith("/batches") ? "page" : undefined}>
                 {t("nav.batches")}
               </a>
             </li>
             <li>
               <a
                 href="/migrations"
-                class={url.startsWith("/migrations") && "active"}
+                aria-current={url.startsWith("/migrations") ? "page" : undefined}
               >
                 {t("nav.migrations")}
               </a>
             </li>
             <li>
-              <a href="/admin" class={url.startsWith("/admin") && "active"}>
+              <a href="/admin" aria-current={url.startsWith("/admin") ? "page" : undefined}>
                 {t("nav.admin")}
               </a>
             </li>
@@ -161,6 +172,7 @@ export function Header() {
             </li>
             <li>
               <button
+                type="button"
                 id="mobile-logout"
                 onClick={() => {
                   close_mobile_menu()
@@ -175,6 +187,7 @@ export function Header() {
         <menu>
           <li>
             <button
+              type="button"
               onClick={() => {
                 close_mobile_menu()
                 showSearch()
@@ -185,9 +198,9 @@ export function Header() {
             </button>
           </li>
           <li>
-            <label id="mobile-server-selector" title="Server selection">
+            <label id="mobile-server-selector">
               <Icons.server />
-              <select onChange={(e) => swap_server(e, state)}>
+              <select aria-label={t("nav.choose-server")} onChange={(e) => swap_server(e, state)}>
                 <option disabled>{t("nav.choose-server")}</option>
                 {servers.map((server) => (
                   <option

@@ -32,7 +32,9 @@
     "running": "Laufend",
     "select-page": "Seite auswählen",
     "activate": "Aktivieren",
-    "load-more": "Mehr laden"
+    "load-more": "Mehr laden",
+    "breadcrumb": "Brotkrümelnavigation",
+    "confirmation": "Bestätigung"
   },
   "nav": {
     "tasks": "Aufgaben",
@@ -48,6 +50,7 @@
     "menu": "Menü",
     "close-menu": "Menü schließen",
     "mobile-navigation": "Mobile Navigation",
+    "main-navigation": "Hauptnavigation",
     "skip-to-content": "Zum Inhalt springen",
     "skip-to-navigation": "Zur Hauptnavigation springen",
     "go-to": "Gehe zu",
@@ -137,6 +140,7 @@
     "unclaim": "Freigeben",
     "you": "Sie",
     "reset-assignee": "Verantwortlichen zurücksetzen",
+    "assignee-menu": "Zuständigkeits-Aktionen",
     "comment": "Kommentar",
     "comment-add": "Kommentar hinzufügen",
     "comment-none": "Noch keine Kommentare.",
@@ -173,6 +177,7 @@
       "remove-groups": "Gruppen entfernen"
     },
     "tabs": {
+      "label": "Aufgabendetails",
       "form": "Formular",
       "history": "Verlauf",
       "diagram": "Diagramm",
@@ -279,6 +284,7 @@
   },
   "processes": {
     "title": "Prozessdefinitionen",
+    "subnav-label": "Unternavigation",
     "version": "Version",
     "change-definition": "Definition wechseln",
     "definition-id": "Definitions-ID",

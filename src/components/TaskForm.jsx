@@ -69,7 +69,7 @@ const CamundaTaskForm = ({ task, taskId }) => {
   ) {
     if (deployed?.status === "ERROR") {
       return (
-        <p class="error">
+        <p class="error" role="alert">
           {t("tasks.form.fetch-failed")}: {deployed.error?.message}
         </p>
       );
@@ -106,7 +106,7 @@ const CamundaTaskForm = ({ task, taskId }) => {
           submit_ref.current = c.submit;
         }}
       />
-      {error && <p class="error">{error}</p>}
+      {error && <p class="error" role="alert">{error}</p>}
       <div class="form-buttons">
         <button type="button" onClick={() => submit_ref.current?.()}>
           {t("tasks.form.complete-task")}
@@ -163,7 +163,7 @@ const RenderedFallbackForm = ({ task, taskId }) => {
             class="form-fields"
             dangerouslySetInnerHTML={{ __html: generated }}
           />
-          <div class={`error ${error ? "show" : "hidden"}`}>
+          <div class={`error ${error ? "show" : "hidden"}`} role="alert">
             <span class="icon">
               <Icons.exclamation_triangle />
             </span>

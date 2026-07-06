@@ -116,12 +116,13 @@ export const ManageFilters = ({
         <p class="info-box">{t("list_filter.empty")}</p>
       ) : (
         <table>
+          <caption class="screen-hidden">{title}</caption>
           <thead>
             <tr>
-              <th>{t("common.name")}</th>
-              <th>{t("list_filter.criteria")}</th>
-              <th>{t("list_filter.sort_override")}</th>
-              <th>{t("common.action")}</th>
+              <th scope="col">{t("common.name")}</th>
+              <th scope="col">{t("list_filter.criteria")}</th>
+              <th scope="col">{t("list_filter.sort_override")}</th>
+              <th scope="col">{t("common.action")}</th>
             </tr>
           </thead>
           <tbody>
@@ -144,9 +145,11 @@ export const ManageFilters = ({
                     {t("list_filter.duplicate")}
                   </button>
                   <button type="button" onClick={() => share(filter)}>
-                    {copied.value === filter.id
-                      ? t("list_filter.share_link_copied")
-                      : t("list_filter.share_link")}
+                    <span aria-live="polite">
+                      {copied.value === filter.id
+                        ? t("list_filter.share_link_copied")
+                        : t("list_filter.share_link")}
+                    </span>
                   </button>
                   <button
                     type="button"

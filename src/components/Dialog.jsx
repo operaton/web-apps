@@ -1,4 +1,4 @@
-import { useRef } from "preact/hooks";
+import { useRef, useId } from "preact/hooks";
 import { useSignalEffect } from "@preact/signals";
 import { useTranslation } from "react-i18next";
 import * as Icons from "../assets/icons.jsx";
@@ -8,11 +8,15 @@ import * as Icons from "../assets/icons.jsx";
  * native <dialog> stays in sync with the signal, and closing it (Esc, backdrop,
  * close button) resets the signal to false.
  *
+ * Provide an accessible name via `title` (shown in the header) or, for
+ * header-less dialogs, via `aria_label`.
+ *
  * @param open {import("@preact/signals").Signal<boolean>}
  */
-const Dialog = ({ open, title, hide_header = false, children }) => {
+const Dialog = ({ open, title, hide_header = false, aria_label, children }) => {
   const [t] = useTranslation(),
-    ref = useRef(null);
+    ref = useRef(null),
+    heading_id = useId();
 
   useSignalEffect(() => {
     const dialog = ref.current;
@@ -22,10 +26,15 @@ const Dialog = ({ open, title, hide_header = false, children }) => {
   });
 
   return (
-    <dialog ref={ref} onClose={() => (open.value = false)}>
+    <dialog
+      ref={ref}
+      onClose={() => (open.value = false)}
+      aria-label={aria_label}
+      aria-labelledby={title && !hide_header ? heading_id : undefined}
+    >
       {!hide_header && (
         <header>
-          {title ? <h2>{title}</h2> : <span />}
+          {title ? <h2 id={heading_id}>{title}</h2> : <span />}
           <button
             type="button"
             onClick={() => (open.value = false)}
@@ -59,10 +68,11 @@ const ConfirmDialog = ({
   // The dismiss button and Esc already close the dialog, so the header's close
   // button would be a redundant third dismiss control — hide it here.
   return (
-    <Dialog open={open} hide_header>
+    <Dialog open={open} hide_header aria_label={t("common.confirmation")}>
       <p>{message}</p>
       <div class="button-group">
         <button
+          type="button"
           class="danger"
           onClick={() => {
             on_confirm();
@@ -71,7 +81,7 @@ const ConfirmDialog = ({
         >
           {confirm_label ?? t("common.delete")}
         </button>
-        <button onClick={() => (open.value = false)}>
+        <button type="button" onClick={() => (open.value = false)}>
           {cancel_label ?? t("common.cancel")}
         </button>
       </div>
