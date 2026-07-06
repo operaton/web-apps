@@ -331,10 +331,10 @@ section.task-tabs {
 }
 
 /* Processes page — column layout: top nav · content · diagram pane.
-   Page-specific styling cascades from `#processes`; only genuinely
+   Page-specific styling cascades from `.processes`; only genuinely
    idiosyncratic things (diagram pane, history-mode pill, maximize button)
    keep their own class. */
-main#processes {
+main.processes {
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -342,14 +342,14 @@ main#processes {
 }
 
 /* Wrapper that holds the .content + .diagram split panes. */
-#processes > div {
+.processes > div {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-#processes .content {
+.processes .content {
   flex: 1 1 70%;
   min-height: 0;
   overflow-x: hidden;
@@ -358,15 +358,15 @@ main#processes {
 }
 
 /* Scroll the table horizontally on its own; header and toolbar stay put. */
-#processes .content div:has(> table) {
+.processes .content div:has(> table) {
   overflow-x: auto;
 }
 
-#processes .content h1 {
+.processes .content h1 {
   font-size: 2em;
 }
 
-#processes .diagram {
+.processes .diagram {
   flex: 0 0 30%;
   min-height: 0;
   position: relative;
@@ -376,11 +376,11 @@ main#processes {
   flex-direction: column;
 }
 
-#processes .diagram.maximized {
+.processes .diagram.maximized {
   flex: 1 1 100%;
 }
 
-#processes .diagram #canvas {
+.processes .diagram #canvas {
   flex: 1;
   min-height: 0;
   position: relative;
@@ -414,7 +414,7 @@ main#processes {
 }
 
 /* Sub-nav and tertiary nav share an underline-tab pattern. */
-#processes nav {
+.processes nav {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
@@ -427,17 +427,17 @@ main#processes {
 }
 
 /* The top sub-nav puts the history toggle on the right edge. */
-#processes > nav:first-of-type {
+.processes > nav:first-of-type {
   justify-content: space-between;
 }
 
 /* The tertiary nav lives inside .content (which has its own padding); the
    negative side-margins let its bottom border span edge-to-edge. */
-#processes nav.tertiary {
+.processes nav.tertiary {
   margin: 0 calc(-1 * var(--spacing-2)) var(--spacing-1);
 }
 
-#processes nav menu {
+.processes nav menu {
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
@@ -447,8 +447,8 @@ main#processes {
   padding: 0;
 }
 
-#processes nav a,
-#processes nav .disabled {
+.processes nav a,
+.processes nav .disabled {
   color: var(--text);
   text-decoration: none;
   padding: 0;
@@ -456,11 +456,11 @@ main#processes {
   border-bottom: 0.15em solid transparent;
 }
 
-#processes nav a:hover {
+.processes nav a:hover {
   color: var(--color-primary);
 }
 
-#processes nav a[aria-current] {
+.processes nav a[aria-current] {
   color: var(--color-primary);
   /* Overlap the nav's bottom border so the indicator sits on top of it,
      growing its height by the border width to fully cover it. */
@@ -470,18 +470,18 @@ main#processes {
   font-weight: 600;
 }
 
-#processes nav .disabled {
+.processes nav .disabled {
   color: var(--text-disabled);
   cursor: not-allowed;
 }
 
-#processes nav .chevron {
+.processes nav .chevron {
   color: var(--text-2, var(--muted));
   font-size: 1.1em;
   user-select: none;
 }
 
-#processes .history-toggle {
+.processes .history-toggle {
   background: transparent;
   color: var(--text);
   border: var(--border);
@@ -492,7 +492,7 @@ main#processes {
   margin: 0;
 }
 
-#processes .history-toggle.active {
+.processes .history-toggle.active {
   background: var(--color-primary);
   color: #fff;
   border-color: var(--color-primary);
@@ -500,7 +500,7 @@ main#processes {
 
 /* Caption rendered on tabs that have no historic equivalent (job
    definitions, called definitions) when the history toggle is on. */
-#processes .history-na {
+.processes .history-na {
   display: block;
   margin: 0 0 var(--spacing-1);
   color: var(--text-2, var(--muted));
@@ -509,7 +509,7 @@ main#processes {
 
 /* Page header: title (+ optional muted breadcrumb in <small>) on the left,
    action button on the right. */
-#processes header {
+.processes header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -517,60 +517,60 @@ main#processes {
   margin-bottom: var(--spacing-1);
 }
 
-#processes header h1 {
+.processes header h1 {
   margin: 0;
 }
 
-#processes header h1 small {
+.processes header h1 small {
   color: var(--text-2, var(--muted));
   font-weight: 400;
   font-size: inherit;
 }
 
 /* Tables: only the overrides the global stylesheet doesn't already cover. */
-#processes table {
+.processes table {
   width: 100%;
   border-collapse: collapse;
   white-space: normal;
 }
 
-#processes th,
-#processes td {
+.processes th,
+.processes td {
   padding: 0.4rem 0.6rem;
   text-align: left;
   border-bottom: var(--border-width) solid var(--border-color);
 }
 
 /* Head row: darker separator, same thickness. */
-#processes thead th {
+.processes thead th {
   border-bottom-color: var(--border-color-2);
 }
 
 /* Body rows: keep their color, but a slightly thinner separator. */
-#processes tbody :where(th, td) {
+.processes tbody :where(th, td) {
   border-bottom-width: 0.07rem;
 }
 
-#processes .num {
+.processes .num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#processes tbody tr:hover {
+.processes tbody tr:hover {
   background: var(--background-2);
 }
 
-#processes tbody tr[aria-selected="true"] {
+.processes tbody tr[aria-selected="true"] {
   background: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
-#processes input[type="search"] {
+.processes input[type="search"] {
   flex: 0 1 24rem;
   max-width: 40%;
 }
 
 /* Definition / instance metadata renders as a <dl> grid. */
-#processes dl {
+.processes dl {
   display: grid;
   grid-template-columns: max-content 1fr;
   gap: 0.25rem 1rem;
@@ -578,31 +578,31 @@ main#processes {
   margin-bottom: var(--spacing-1);
 }
 
-#processes dl dt {
+.processes dl dt {
   color: var(--text-2, var(--muted));
   font-size: var(--small-font-size);
   font-weight: normal;
   margin: 0;
 }
 
-#processes dl dd {
+.processes dl dd {
   margin: 0;
 }
 
 /* Collapsible meta panel above each tab's table. */
-#processes details {
+.processes details {
   margin: 0 0 var(--spacing-2);
   font-size: var(--small-font-size);
 }
 
-#processes details > summary {
+.processes details > summary {
   cursor: pointer;
   color: var(--text-2, var(--muted));
   user-select: none;
   padding: 0.15rem 0;
 }
 
-#processes details > summary:hover {
+.processes details > summary:hover {
   color: var(--text);
 }
 

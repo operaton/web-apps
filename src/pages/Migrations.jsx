@@ -63,7 +63,7 @@ const MigrationsPage = () => {
 
   return (
     <MigrationState.Provider value={migration_state}>
-      <main>
+      <main id="content" class="migrations">
         <ProcessSelection />
       </main>
     </MigrationState.Provider>

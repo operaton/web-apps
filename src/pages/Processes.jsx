@@ -248,7 +248,7 @@ const ProcessesPage = () => {
   const diagram_maximized = useSignal(false);
 
   return (
-    <main id="processes">
+    <main id="content" class="processes">
       <ProcessSubNav />
       <div>
         {(!def_selected || !diagram_maximized.value) && (
