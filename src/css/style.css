@@ -626,7 +626,12 @@
     position: relative;
     max-height: 100%;
     box-sizing: border-box;
-    max-width: 40vw;
+    /* Readable at any zoom (WCAG reflow): clamp a 30em floor, a 40vw goal and
+       a 100% cap. When the 30em floor exceeds the viewport the details pane
+       wraps to a new row (.tasks is flex-wrap: wrap). flex-shrink: 0 stops
+       flexbox from shrinking the list back below the clamped width. */
+    flex-shrink: 0;
+    width: clamp(30em, 40vw, 100%);
     background: var(--background-2);
 
     >div {
