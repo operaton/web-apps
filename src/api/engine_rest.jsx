@@ -2,6 +2,7 @@ import {
   RequestState as request_state,
   RESPONSE_STATE as response_state,
 } from "./helper.jsx";
+import { plugin_apis } from "./plugins.js";
 import auth from "./resources/auth.js";
 import batch from "./resources/batch.js";
 import engine from "./resources/engine.js";
@@ -42,6 +43,11 @@ const engine_rest = {
   task,
   tenant,
   user,
+  // Plugin-contributed API namespaces are mounted here at boot by the plugin
+  // registry, as engine_rest.plugins.<plugin-id>.<fn> (see api/plugins.js).
+  // `mock_engine_rest()` deep-clones whatever is mounted, so plugin APIs are
+  // covered in tests too.
+  plugins: plugin_apis,
 };
 
 export default engine_rest;

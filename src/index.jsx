@@ -26,6 +26,10 @@ import { useContext } from "preact/hooks";
 import engine_rest from "./api/engine_rest.jsx";
 import { useSignal } from "@preact/signals";
 import { is_oauth } from "./api/oauth.js";
+import { load_plugins } from "./plugins/loader.js";
+import { install_plugin_host } from "./plugins/host.js";
+import { plugins_for } from "./plugins/registry.js";
+import { PLUGIN_POINTS } from "./plugins/points.js";
 
 ("use strict");
 
@@ -76,10 +80,7 @@ const Routing = () => {
             component={DecisionsPage}
           />
           {/*<Route path="/tasks/start/:id" component={TasksPage} />*/}
-          <Route
-            path="/tasks/:task_id?/:tab?"
-            component={TasksPage}
-          />
+          <Route path="/tasks/:task_id?/:tab?" component={TasksPage} />
           <Route
             path="/processes/:definition_id?/:panel?/:selection_id?/:sub_panel?"
             component={ProcessesPage}
@@ -99,6 +100,13 @@ const Routing = () => {
             component={AccountPage}
           />
           <Route path="/help" component={Home} />
+          {plugins_for(PLUGIN_POINTS.PAGE).map((plugin) => (
+            <Route
+              key={plugin.id}
+              path={plugin.properties.path}
+              component={plugin.Component}
+            />
+          ))}
           <Route default component={NotFound} />
         </Router>
         <GoTo />
@@ -181,4 +189,9 @@ const Routing = () => {
   }
 };
 
-render(<App />, document.getElementById("app"));
+// Expose host primitives for remote no-build plugins, then load every plugin
+// (bundled + remote) before the first render so the registry is frozen and
+// every seam — routes, nav, tabs, state — sees a stable plugin list. A broken
+// plugin server can never block boot; the loader guards itself with a timeout.
+install_plugin_host();
+load_plugins().finally(() => render(<App />, document.getElementById("app")));

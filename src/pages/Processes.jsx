@@ -10,6 +10,8 @@ import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Dialog, ConfirmDialog } from "../components/Dialog.jsx";
+import { plugin_tabs } from "../plugins/registry.js";
+import { PLUGIN_POINTS } from "../plugins/points.js";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
 import {
@@ -781,7 +783,7 @@ const DefinitionsEmpty = () => {
 
 const ProcessDefinitionDetails = () => {
   const { params } = useRoute();
-  const active_tab = process_definition_tabs.find(
+  const active_tab = process_definition_tabs().find(
     (tab) => tab.id === params.panel,
   );
 
@@ -2141,7 +2143,7 @@ const InstancesManage = () => {
   );
 };
 
-const process_definition_tabs = [
+const base_process_definition_tabs = [
   {
     nameKey: "processes.tabs.instances",
     id: "instances",
@@ -2167,6 +2169,15 @@ const process_definition_tabs = [
     Component: JobDefinitions,
   },
 ];
+
+// Memoized: merges PROCESS_DEFINITION_TAB plugin tabs on first call (after the
+// plugin registry is frozen at boot — must not run at module-import time).
+let _process_definition_tabs;
+const process_definition_tabs = () =>
+  (_process_definition_tabs ??= plugin_tabs(
+    PLUGIN_POINTS.PROCESS_DEFINITION_TAB,
+    base_process_definition_tabs,
+  ));
 
 const UUIDLink = ({ uuid = "?", path }) => (
   <a href={`${path}${keep_history_query(useRoute().query)}`}>

@@ -6,6 +6,7 @@
 
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
+import { plugin_state_branches } from "./plugins/registry.js";
 
 /**
  * Create the global app state by invoking the function in the root [Tasks.jsx`]
@@ -217,6 +218,9 @@ const createAppState = () => {
       },
       update: signal(null),
     },
+    // Plugin-contributed signal branches, as state.api.plugins.<plugin-id>.
+    // Populated from the registry, which is frozen before the first render.
+    plugins: plugin_state_branches(),
   };
 
   return {

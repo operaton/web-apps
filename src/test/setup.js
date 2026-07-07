@@ -16,6 +16,12 @@ import.meta.env.VITE_BACKEND = JSON.stringify([
   { name: "Other", url: "http://localhost:9090", c7_mode: true },
 ]);
 
+// The i18n singleton is imported by the plugin registry (via state.js). Stub it
+// so tests don't spin up i18next-http-backend and attempt real network fetches.
+vi.mock("../helper/i18n.js", () => ({
+  default: { addResourceBundle: vi.fn() },
+}));
+
 vi.mock("react-i18next", () => ({
   // The real useTranslation returns an array [t, i18n, ready] that ALSO carries
   // .t / .i18n properties, so both `const [t] =` and `const { t } =` work.

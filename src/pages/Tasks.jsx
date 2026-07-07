@@ -10,6 +10,8 @@ import engine_rest, {
 import * as Icons from "../assets/icons.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
+import { plugin_tabs } from "../plugins/registry.js";
+import { PLUGIN_POINTS } from "../plugins/points.js";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
 import * as formatter from "../helper/date_formatter.js";
@@ -45,29 +47,101 @@ const SORT_OPTIONS = [
 
 const FILTER_KEYS = [
   { key: "assignee", nameKey: "tasks.filter_keys.assignee", type: "string" },
-  { key: "assigneeLike", nameKey: "tasks.filter_keys.assigneeLike", type: "string" },
-  { key: "candidateGroup", nameKey: "tasks.filter_keys.candidateGroup", type: "string" },
-  { key: "candidateUser", nameKey: "tasks.filter_keys.candidateUser", type: "string" },
-  { key: "involvedUser", nameKey: "tasks.filter_keys.involvedUser", type: "string" },
-  { key: "unassigned", nameKey: "tasks.filter_keys.unassigned", type: "boolean" },
-  { key: "processDefinitionKey", nameKey: "tasks.filter_keys.processDefinitionKey", type: "string" },
-  { key: "processDefinitionName", nameKey: "tasks.filter_keys.processDefinitionName", type: "string" },
-  { key: "processDefinitionNameLike", nameKey: "tasks.filter_keys.processDefinitionNameLike", type: "string" },
-  { key: "processInstanceBusinessKey", nameKey: "tasks.filter_keys.processInstanceBusinessKey", type: "string" },
-  { key: "processInstanceBusinessKeyLike", nameKey: "tasks.filter_keys.processInstanceBusinessKeyLike", type: "string" },
-  { key: "taskDefinitionKey", nameKey: "tasks.filter_keys.taskDefinitionKey", type: "string" },
-  { key: "taskDefinitionKeyLike", nameKey: "tasks.filter_keys.taskDefinitionKeyLike", type: "string" },
+  {
+    key: "assigneeLike",
+    nameKey: "tasks.filter_keys.assigneeLike",
+    type: "string",
+  },
+  {
+    key: "candidateGroup",
+    nameKey: "tasks.filter_keys.candidateGroup",
+    type: "string",
+  },
+  {
+    key: "candidateUser",
+    nameKey: "tasks.filter_keys.candidateUser",
+    type: "string",
+  },
+  {
+    key: "involvedUser",
+    nameKey: "tasks.filter_keys.involvedUser",
+    type: "string",
+  },
+  {
+    key: "unassigned",
+    nameKey: "tasks.filter_keys.unassigned",
+    type: "boolean",
+  },
+  {
+    key: "processDefinitionKey",
+    nameKey: "tasks.filter_keys.processDefinitionKey",
+    type: "string",
+  },
+  {
+    key: "processDefinitionName",
+    nameKey: "tasks.filter_keys.processDefinitionName",
+    type: "string",
+  },
+  {
+    key: "processDefinitionNameLike",
+    nameKey: "tasks.filter_keys.processDefinitionNameLike",
+    type: "string",
+  },
+  {
+    key: "processInstanceBusinessKey",
+    nameKey: "tasks.filter_keys.processInstanceBusinessKey",
+    type: "string",
+  },
+  {
+    key: "processInstanceBusinessKeyLike",
+    nameKey: "tasks.filter_keys.processInstanceBusinessKeyLike",
+    type: "string",
+  },
+  {
+    key: "taskDefinitionKey",
+    nameKey: "tasks.filter_keys.taskDefinitionKey",
+    type: "string",
+  },
+  {
+    key: "taskDefinitionKeyLike",
+    nameKey: "tasks.filter_keys.taskDefinitionKeyLike",
+    type: "string",
+  },
   { key: "name", nameKey: "tasks.filter_keys.name", type: "string" },
   { key: "nameLike", nameKey: "tasks.filter_keys.nameLike", type: "string" },
-  { key: "description", nameKey: "tasks.filter_keys.description", type: "string" },
-  { key: "descriptionLike", nameKey: "tasks.filter_keys.descriptionLike", type: "string" },
+  {
+    key: "description",
+    nameKey: "tasks.filter_keys.description",
+    type: "string",
+  },
+  {
+    key: "descriptionLike",
+    nameKey: "tasks.filter_keys.descriptionLike",
+    type: "string",
+  },
   { key: "priority", nameKey: "tasks.filter_keys.priority", type: "number" },
   { key: "dueBefore", nameKey: "tasks.filter_keys.dueBefore", type: "date" },
   { key: "dueAfter", nameKey: "tasks.filter_keys.dueAfter", type: "date" },
-  { key: "followUpBefore", nameKey: "tasks.filter_keys.followUpBefore", type: "date" },
-  { key: "followUpAfter", nameKey: "tasks.filter_keys.followUpAfter", type: "date" },
-  { key: "createdBefore", nameKey: "tasks.filter_keys.createdBefore", type: "date" },
-  { key: "createdAfter", nameKey: "tasks.filter_keys.createdAfter", type: "date" },
+  {
+    key: "followUpBefore",
+    nameKey: "tasks.filter_keys.followUpBefore",
+    type: "date",
+  },
+  {
+    key: "followUpAfter",
+    nameKey: "tasks.filter_keys.followUpAfter",
+    type: "date",
+  },
+  {
+    key: "createdBefore",
+    nameKey: "tasks.filter_keys.createdBefore",
+    type: "date",
+  },
+  {
+    key: "createdAfter",
+    nameKey: "tasks.filter_keys.createdAfter",
+    type: "date",
+  },
   { key: "active", nameKey: "tasks.filter_keys.active", type: "boolean" },
   { key: "suspended", nameKey: "tasks.filter_keys.suspended", type: "boolean" },
 ];
@@ -318,7 +392,7 @@ const TaskRowEntry = ({ task, selected }) => {
   return (
     <tr id={id} key={id} aria-selected={selected}>
       <th scope="row">
-        <a href={`/tasks/${id}/${task_tabs[0].id}`}>{name}</a>
+        <a href={`/tasks/${id}/${task_tabs()[0].id}`}>{name}</a>
       </th>
       <td>{assignee ? assignee : "—"}</td>
       <td>
@@ -452,7 +526,7 @@ const TaskTabs = () => {
     <section className="task-tabs">
       {state.api.task.one.value?.data != null ? (
         <Tabs
-          tabs={task_tabs}
+          tabs={task_tabs()}
           base_url={`/tasks/${state.api.task.one.value.data.id}`}
           className="fade-in"
           label={t("tasks.tabs.label")}
@@ -605,7 +679,10 @@ const SetFollowUpDateButton = () => {
         <Icons.pencil />
       </button>
 
-      <dialog id="set_follow_up_date" aria-labelledby="set-follow-up-date-title">
+      <dialog
+        id="set_follow_up_date"
+        aria-labelledby="set-follow-up-date-title"
+      >
         <button onClick={close}>{t("common.close")}</button>
         <h2 id="set-follow-up-date-title">{t("tasks.follow-up.title")}</h2>
 
@@ -836,7 +913,9 @@ const ClaimButton = () => {
           </button>
 
           <dialog id="set_assignee" aria-label={t("tasks.assignee-menu")}>
-            <button type="button" onClick={close}>{t("common.close")}</button>
+            <button type="button" onClick={close}>
+              {t("common.close")}
+            </button>
             {assignee_is_different && !assigned ? (
               <button
                 type="button"
@@ -1393,7 +1472,7 @@ const AttachmentsTab = () => {
   );
 };
 
-const task_tabs = [
+const base_task_tabs = [
   {
     nameKey: "tasks.tabs.form",
     id: "form",
@@ -1419,5 +1498,11 @@ const task_tabs = [
     Component: Diagram,
   },
 ];
+
+// Memoized: merges TASK_TAB plugin tabs the first time it's called (after the
+// plugin registry is frozen at boot — must not run at module-import time).
+let _task_tabs;
+const task_tabs = () =>
+  (_task_tabs ??= plugin_tabs(PLUGIN_POINTS.TASK_TAB, base_task_tabs));
 
 export { TasksPage };

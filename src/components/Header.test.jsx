@@ -40,6 +40,8 @@ import { AppState } from "../state.js";
 import engine_rest from "../api/engine_rest.jsx";
 import { Header } from "./Header.jsx";
 import { create_mock_state } from "../test/helpers.js";
+import { register, _reset_registry } from "../plugins/registry.js";
+import { PLUGIN_POINTS } from "../plugins/points.js";
 
 const renderHeader = (state) =>
   render(h(AppState.Provider, { value: state }, h(Header, {})));
@@ -119,5 +121,45 @@ describe("Header", () => {
     expect(engine_rest.auth.logout).toHaveBeenCalled();
     // state is passed by reference; never compare structurally.
     expect(engine_rest.auth.logout.mock.lastCall[0]).toBe(state);
+  });
+});
+
+describe("Header — plugin nav", () => {
+  let state;
+  beforeEach(() => {
+    _reset_registry();
+    register({
+      id: "test-nav",
+      point: PLUGIN_POINTS.PAGE,
+      properties: { href: "/plugin/test-nav", nameKey: "plugins.test.nav" },
+      Component: () => null,
+    });
+    state = create_mock_state();
+    mockUrl = "/";
+  });
+  afterEach(() => {
+    cleanup();
+    _reset_registry();
+  });
+
+  it("renders a PAGE plugin entry in both the desktop and mobile menus", () => {
+    const { container } = renderHeader(state);
+    const desktop = container.querySelectorAll(
+      '#primary-navigation a[href="/plugin/test-nav"]',
+    );
+    const mobile = container.querySelectorAll(
+      '#mobile-menu a[href="/plugin/test-nav"]',
+    );
+    expect(desktop).toHaveLength(1);
+    expect(mobile).toHaveLength(1);
+  });
+
+  it("marks the plugin entry aria-current when its route is active", () => {
+    mockUrl = "/plugin/test-nav";
+    const { container } = renderHeader(state);
+    const link = container.querySelector(
+      '#primary-navigation a[href="/plugin/test-nav"]',
+    );
+    expect(link.getAttribute("aria-current")).toBe("page");
   });
 });

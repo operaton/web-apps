@@ -2,6 +2,8 @@ import { useContext } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { AppState } from "../state.js";
+import { plugins_for } from "../plugins/registry.js";
+import { PLUGIN_POINTS } from "../plugins/points.js";
 
 export const DashboardPage = () => {
   const state = useContext(AppState),
@@ -228,6 +230,9 @@ export const DashboardPage = () => {
           }}
         />
       </section>
+      {plugins_for(PLUGIN_POINTS.DASHBOARD_WIDGET).map((plugin) => (
+        <plugin.Component key={plugin.id} />
+      ))}
     </main>
   );
 };
