@@ -789,35 +789,33 @@
     padding: var(--spacing-2);
   }
 
-  /* Two-row, two-column layout:
-       row 1: deployments table, spans both columns
-       row 2: resources list (left) + details pane (right) */
+  /* Single vertical column that fills the viewport; the page itself does not
+     scroll — only the details pane does.
+       row 1: deployment list (content height, capped at 30rem, scrolls internally)
+       row 2: resource list (content height)
+       row 3: resource details (fills the rest, scrolls internally) */
   .deployments {
-    display: grid;
-    grid-template-rows: minmax(5em, 30vh) 1fr;
-    grid-template-columns: minmax(15em, 25em) 1fr;
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
-  .deployments > :first-child {
-    grid-column: 1 / -1;
+
+  .deployments .deployment-list {
+    flex: none;
+    max-height: 30rem;
     overflow-y: auto;
     border-bottom: var(--border-width-2) solid var(--border-color);
   }
-  .deployments > :nth-child(2) {
-    overflow-y: auto;
-    border-right: var(--border);
+
+  .deployments .resource-list {
+    flex: none;
+    border-bottom: var(--border);
   }
-  .deployments > :nth-child(3) {
-    overflow: auto;
-  }
+
   .deployment-empty {
-    display: flex;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
+    padding: var(--spacing-2);
     color: var(--text-2);
     font-size: var(--small-font-size);
-    text-align: center;
   }
 
   /* Batches: list (left) + details pane (right). */

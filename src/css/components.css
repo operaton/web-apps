@@ -1308,13 +1308,38 @@ nav:has(> .breadcrumbs) {
 
 /* deployments page */
 
+/* Toolbar row: filter + sort clustered on the left, Deploy button on the
+   right. Overrides the shared #list-filter space-between just for this page. */
+.deployment-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-wrap: wrap;
+}
+.deployment-toolbar #list-filter {
+  flex: 1;
+  justify-content: flex-start;
+  gap: var(--spacing-3);
+}
+.deployment-toolbar .button-group {
+  margin-right: var(--spacing-1);
+}
+.deployment-toolbar .button-group button {
+  margin: 0;
+}
+
 .process-details {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
-  overflow-y: auto;
   padding: var(--spacing-2);
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.deployments #diagram-container {
+  height: 40vh;
 }
 
 .bpmn-viewer .djs-parent {

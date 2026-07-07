@@ -195,16 +195,18 @@ const DeploymentsList = () => {
   if (query?.filters === "manage") return <DeploymentsManage />;
 
   return (
-    <div>
-      <DeploymentUpload />
-      <ListFilter
-        sort_options={SORT_OPTIONS}
-        saved_filters_signal={state.api.deployment.saved_filters}
-        current={list_current}
-        defaults={DEPLOYMENT_DEFAULTS}
-        on_change={apply_patch}
-        on_manage={open_manage}
-      />
+    <div class="deployment-list">
+      <div class="deployment-toolbar">
+        <ListFilter
+          sort_options={SORT_OPTIONS}
+          saved_filters_signal={state.api.deployment.saved_filters}
+          current={list_current}
+          defaults={DEPLOYMENT_DEFAULTS}
+          on_change={apply_patch}
+          on_manage={open_manage}
+        />
+        <DeploymentUpload />
+      </div>
       <table>
         <thead>
           <tr>
@@ -284,7 +286,7 @@ const DeploymentUpload = () => {
   return (
     <>
       <div class="button-group">
-        <button type="button" onClick={() => (open.value = true)}>
+        <button type="button" class="primary" onClick={() => (open.value = true)}>
           {t("deployments.upload.title")}
         </button>
       </div>
@@ -355,7 +357,7 @@ const ResourcesList = () => {
   }
 
   return (
-    <div>
+    <div class="resource-list">
       <table>
         <thead>
           <tr>
