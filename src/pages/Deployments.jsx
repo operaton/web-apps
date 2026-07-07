@@ -143,6 +143,17 @@ const DeploymentsPage = () => {
         void engine_rest.process_instance.count(state, deployment_id);
       }
     }
+    // Clear the resource-scoped signals whenever the selected resource changes
+    // (or is cleared). Navigating between resources of the same deployment does
+    // not re-run the deployment-scoped cleanup above, so without this a
+    // re-selected resource would still hold stale SUCCESS data — mounting the
+    // diagram viewer synchronously before its container element exists (crash).
+    return () => {
+      selected_resource.value = null;
+      state.api.deployment.resource.value = null;
+      state.api.process.definition.one.value = null;
+      state.api.process.instance.count.value = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deployment_id, resource_name, state.api.deployment.resources.value]);
 
