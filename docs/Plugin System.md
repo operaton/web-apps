@@ -3,10 +3,14 @@
 The web app ships a runtime **plugin system** so third parties (and our own
 optional features) can extend the UI without forking the app. It is modeled on
 the Camunda 7 / Operaton webapp plugin mechanism, adapted to this standalone
-Preact SPA. A plugin can add a whole page, inject a tab into the Processes or
-Tasks panels, drop a widget on the dashboard, and bring its own API calls,
-state, translations, and styles — all described by a single **descriptor**
-object.
+Preact SPA. A plugin can add a whole page, drop a widget on the dashboard, and
+bring its own API calls, state, translations, and styles — all described by a
+single **descriptor** object.
+
+> **Note**: Plugins extend the app at the **root** — a top-level page, a
+> dashboard card, or a headless API/state namespace. The core application's own
+> sub-navigations (the Processes definition tabs, the Task detail tabs) are
+> intentionally **closed**; there is no plugin point for injecting into them.
 
 ## Concept
 
@@ -30,16 +34,14 @@ and a slow or missing remote manifest is guarded by a timeout.
 
 ## Plugin Points
 
-The five extension points live in [`points.js`](../src/plugins/points.js). A
+The three extension points live in [`points.js`](../src/plugins/points.js). A
 descriptor's `point` must be one of these:
 
-| Constant                               | Value                      | What it does                                                         |
-| -------------------------------------- | -------------------------- | -------------------------------------------------------------------- |
-| `PLUGIN_POINTS.PAGE`                   | `app.page`                 | A whole app section: route + primary-nav entry + hotkey + GoTo entry |
-| `PLUGIN_POINTS.PROCESS_DEFINITION_TAB` | `processes.definition.tab` | A tab injected into the process-definition panel (Processes page)    |
-| `PLUGIN_POINTS.TASK_TAB`               | `tasks.task.tab`           | A tab injected into the task-detail panel (Tasks page)               |
-| `PLUGIN_POINTS.DASHBOARD_WIDGET`       | `dashboard.widget`         | A card rendered on the dashboard                                     |
-| `PLUGIN_POINTS.API`                    | `app.api`                  | A pure API/state namespace, no UI                                    |
+| Constant                         | Value              | What it does                                                         |
+| -------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| `PLUGIN_POINTS.PAGE`             | `app.page`         | A whole app section: route + primary-nav entry + hotkey + GoTo entry |
+| `PLUGIN_POINTS.DASHBOARD_WIDGET` | `dashboard.widget` | A card rendered on the dashboard                                     |
+| `PLUGIN_POINTS.API`              | `app.api`          | A pure API/state namespace, no UI                                    |
 
 ## The Descriptor Contract
 
@@ -53,7 +55,7 @@ header):
   point: string,             // one of PLUGIN_POINTS
   priority?: number,         // sort order within a point (higher = earlier), default 0
   properties?: object,       // point-specific config (see below)
-  Component?: ComponentType, // Preact component for PAGE / *_TAB / DASHBOARD_WIDGET
+  Component?: ComponentType, // Preact component for PAGE / DASHBOARD_WIDGET
   api?: object,              // fn leaves (state, ...args) => Promise → engine_rest.plugins[id]
   signals?: () => object,    // factory → state.api.plugins[id]
   translations?: object,     // { "en-US": {…}, "de-DE": {…} } deep-merged into the i18n namespace
@@ -64,7 +66,6 @@ header):
 
 - **PAGE** — `path` and `href` (the route), `nameKey` (i18n key for the nav
   label), optional `hotkey` (e.g. `"alt+shift+8"`).
-- **`*_TAB`** — `id` (tab id used in the URL) and `nameKey` (tab label).
 - Any point may set `apiBase` to route the plugin's `get`/`post` calls to its
   own backend instead of the engine REST API (see
   [`use_plugin_api`](#the-use_plugin_api-hook)).
@@ -105,8 +106,7 @@ const { params, query, state, engine, signals, api, resolve_url, get, post } =
   use_plugin_api("metrics");
 ```
 
-- `params` / `query` — from the current route (so a tab can read
-  `params.definition_id`).
+- `params` / `query` — the current route's params and query string.
 - `signals` — the plugin's own state branch (`state.api.plugins.metrics`).
 - `api` — the plugin's mounted API namespace (`engine_rest.plugins.metrics`).
 - `get(path, signal)` / `post(path, body, signal)` — scoped verbs. When the
@@ -118,9 +118,9 @@ const { params, query, state, engine, signals, api, resolve_url, get, post } =
 ### Worked example — Engine Metrics
 
 [`src/plugins/bundled/metrics/plugin.jsx`](../src/plugins/bundled/metrics/plugin.jsx)
-is the reference bundled plugin. It exercises both major seams and owns its API,
-state, translations, and CSS — sharing no host signals, which proves namespace
-isolation. Its default export is an array of two descriptors:
+is the reference bundled plugin — a PAGE that owns its API, state, translations,
+and CSS, sharing no host signals, which proves namespace isolation. Its default
+export is an array of one descriptor (an array so a plugin can ship several):
 
 ```jsx
 export default [
@@ -137,13 +137,6 @@ export default [
     api, // → engine_rest.plugins.metrics.*
     signals: make_signals, // → state.api.plugins.metrics.*
     translations, // en-US + de-DE under plugins.metrics.*
-  },
-  {
-    id: "metrics.definition-heat",
-    point: PLUGIN_POINTS.PROCESS_DEFINITION_TAB,
-    priority: -10, // sorts after the built-in tabs
-    properties: { id: "heat", nameKey: "plugins.metrics.tab-heat" },
-    Component: DefinitionHeatTab,
   },
 ];
 ```
@@ -175,15 +168,15 @@ and authors markup with `html` (htm bound to the host's `h`).
 
 ### Modules (`src/plugins/`)
 
-| File                | Responsibility                                                                                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `points.js`         | The `PLUGIN_POINTS` enum.                                                                                                                                        |
-| `registry.js`       | The in-memory registry. `register()` validates + mounts i18n/API; read seams `plugins_for()`, `plugin_descriptor()`, `plugin_state_branches()`, `plugin_tabs()`. |
-| `loader.js`         | `load_plugins()` — registers bundled plugins, then discovers and imports remote ones under a timeout.                                                            |
-| `plugin_api.jsx`    | `use_plugin_api(id)` — the render-time context hook.                                                                                                             |
-| `host.js`           | `install_plugin_host()` — exposes `window.__OPERATON_PLUGIN_HOST__` for remote plugins.                                                                          |
-| `index.js`          | The public import surface for bundled plugin authors.                                                                                                            |
-| `../api/plugins.js` | Dependency-free container for mounted API namespaces (also exposed as `engine_rest.plugins`).                                                                    |
+| File                | Responsibility                                                                                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `points.js`         | The `PLUGIN_POINTS` enum.                                                                                                                       |
+| `registry.js`       | The in-memory registry. `register()` validates + mounts i18n/API; read seams `plugins_for()`, `plugin_descriptor()`, `plugin_state_branches()`. |
+| `loader.js`         | `load_plugins()` — registers bundled plugins, then discovers and imports remote ones under a timeout.                                           |
+| `plugin_api.jsx`    | `use_plugin_api(id)` — the render-time context hook.                                                                                            |
+| `host.js`           | `install_plugin_host()` — exposes `window.__OPERATON_PLUGIN_HOST__` for remote plugins.                                                         |
+| `index.js`          | The public import surface for bundled plugin authors.                                                                                           |
+| `../api/plugins.js` | Dependency-free container for mounted API namespaces (also exposed as `engine_rest.plugins`).                                                   |
 
 `api/plugins.js` is deliberately dependency-free so importing it from the
 registry — which `state.js` pulls in — never drags in the HTTP helpers that
@@ -214,18 +207,8 @@ Each seam simply reads the frozen registry:
   to the command palette.
 - **Dashboard** — [`Dashboard.jsx`](../src/pages/Dashboard.jsx) renders
   `plugins_for(PLUGIN_POINTS.DASHBOARD_WIDGET)`.
-- **Tabs** — [`Tasks.jsx`](../src/pages/Tasks.jsx) and
-  [`Processes.jsx`](../src/pages/Processes.jsx) merge plugin tabs into their
-  built-in tab arrays via `plugin_tabs()`. Positive-priority plugin tabs sort
-  before the built-ins, the rest after, and `pos` is recomputed contiguous
-  because `Tabs.jsx` arrow-key navigation indexes by it.
 - **State / API** — `state.js` mounts `state.api.plugins.<id>` and
   `engine_rest.jsx` mounts `engine_rest.plugins.<id>`.
-
-> **Important**: The tab arrays in `Tasks.jsx` / `Processes.jsx` are exposed as
-> **lazy memoized functions** (`task_tabs()`, `process_definition_tabs()`), not
-> plain arrays. They must not run at module-import time, because the registry is
-> not frozen yet — merging early would miss every plugin tab.
 
 ## Configuration
 
@@ -269,8 +252,7 @@ list.
 
 Plugin modules are unit-tested in `src/plugins/*.test.js(x)` and
 `src/api/plugins.test.js`; the host seams have integration coverage in
-`src/components/Header.test.jsx`, `src/components/GoTo.test.jsx`,
-`src/pages/Dashboard.test.jsx`, and `src/pages/plugin_tabs.test.js`. Reset the
-shared registry between tests with `_reset_registry()` (and clear `plugin_apis`)
-so registrations don't leak across cases — see the existing tests for the
-pattern.
+`src/components/Header.test.jsx`, `src/components/GoTo.test.jsx`, and
+`src/pages/Dashboard.test.jsx`. Reset the shared registry between tests with
+`_reset_registry()` (and clear `plugin_apis`) so registrations don't leak across
+cases — see the existing tests for the pattern.

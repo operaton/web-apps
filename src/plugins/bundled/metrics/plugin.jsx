@@ -1,9 +1,7 @@
 /**
  * Engine Metrics — the reference bundled plugin.
  *
- * Demonstrates the two major seams end-to-end:
- *   - a top-level PAGE (route + nav + hotkey + GoTo) at /plugin/metrics
- *   - a PROCESS_DEFINITION_TAB ("heat") injected into the Processes panel
+ * A top-level PAGE (route + nav + hotkey + GoTo) at /plugin/metrics.
  *
  * It owns its API namespace (engine_rest.plugins.metrics.*), its state branch
  * (state.api.plugins.metrics.*), its translations and its styles — sharing no
@@ -56,7 +54,6 @@ const make_signals = () => ({
   version: signal(null),
   process_starts: signal(null),
   flow_nodes: signal(null),
-  definition_stats: signal(null),
 });
 
 const MetricValue = ({ signal: signl, format = (v) => v }) => (
@@ -101,51 +98,6 @@ const MetricsPage = () => {
   );
 };
 
-const count_incidents = (row) =>
-  (row.incidents ?? []).reduce((sum, i) => sum + (i.incidentCount ?? 0), 0);
-
-const DefinitionHeatTab = () => {
-  const { params, get, signals } = use_plugin_api(PLUGIN_ID);
-  const [t] = useTranslation();
-
-  useEffect(() => {
-    if (params.definition_id)
-      get(
-        `/process-definition/${params.definition_id}/statistics?incidents=true`,
-        signals.definition_stats,
-      );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.definition_id]);
-
-  return (
-    <div class="metrics-heat fade-in">
-      <RequestState
-        signal={signals.definition_stats}
-        on_success={() => (
-          <table>
-            <thead>
-              <tr>
-                <th>{t("plugins.metrics.activity")}</th>
-                <th>{t("plugins.metrics.instances")}</th>
-                <th>{t("plugins.metrics.incidents")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {signals.definition_stats.value.data.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.id}</td>
-                  <td>{row.instances}</td>
-                  <td>{count_incidents(row)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      />
-    </div>
-  );
-};
-
 const translations = {
   "en-US": {
     plugins: {
@@ -155,10 +107,6 @@ const translations = {
         version: "Engine version",
         "process-starts": "Process starts (12 mo)",
         "flow-nodes": "Flow nodes executed (12 mo)",
-        "tab-heat": "Heat",
-        activity: "Activity",
-        instances: "Instances",
-        incidents: "Incidents",
       },
     },
   },
@@ -170,10 +118,6 @@ const translations = {
         version: "Engine-Version",
         "process-starts": "Prozessstarts (12 Mon.)",
         "flow-nodes": "Ausgeführte Flow-Knoten (12 Mon.)",
-        "tab-heat": "Auslastung",
-        activity: "Aktivität",
-        instances: "Instanzen",
-        incidents: "Inzidente",
       },
     },
   },
@@ -194,12 +138,5 @@ export default [
     api,
     signals: make_signals,
     translations,
-  },
-  {
-    id: "metrics.definition-heat",
-    point: PLUGIN_POINTS.PROCESS_DEFINITION_TAB,
-    priority: -10,
-    properties: { id: "heat", nameKey: "plugins.metrics.tab-heat" },
-    Component: DefinitionHeatTab,
   },
 ];

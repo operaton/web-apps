@@ -10,8 +10,6 @@ import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Dialog, ConfirmDialog } from "../components/Dialog.jsx";
-import { plugin_tabs, plugins_for } from "../plugins/registry.js";
-import { PLUGIN_POINTS } from "../plugins/points.js";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
 import {
@@ -353,15 +351,6 @@ const ProcessSubNav = () => {
           label={t("processes.subnav.called-definitions")}
         />
         <NavEntry panel="jobs" label={t("processes.subnav.jobs")} />
-        {/* Plugin-contributed definition tabs get a nav entry too, so they are
-            reachable — not just renderable by URL (see ProcessDefinitionDetails). */}
-        {plugins_for(PLUGIN_POINTS.PROCESS_DEFINITION_TAB).map((plugin) => (
-          <NavEntry
-            key={plugin.id}
-            panel={plugin.properties.id}
-            label={t(plugin.properties.nameKey)}
-          />
-        ))}
       </menu>
 
       <button
@@ -792,7 +781,7 @@ const DefinitionsEmpty = () => {
 
 const ProcessDefinitionDetails = () => {
   const { params } = useRoute();
-  const active_tab = process_definition_tabs().find(
+  const active_tab = process_definition_tabs.find(
     (tab) => tab.id === params.panel,
   );
 
@@ -2152,7 +2141,7 @@ const InstancesManage = () => {
   );
 };
 
-const base_process_definition_tabs = [
+const process_definition_tabs = [
   {
     nameKey: "processes.tabs.instances",
     id: "instances",
@@ -2178,15 +2167,6 @@ const base_process_definition_tabs = [
     Component: JobDefinitions,
   },
 ];
-
-// Memoized: merges PROCESS_DEFINITION_TAB plugin tabs on first call (after the
-// plugin registry is frozen at boot — must not run at module-import time).
-let _process_definition_tabs;
-const process_definition_tabs = () =>
-  (_process_definition_tabs ??= plugin_tabs(
-    PLUGIN_POINTS.PROCESS_DEFINITION_TAB,
-    base_process_definition_tabs,
-  ));
 
 const UUIDLink = ({ uuid = "?", path }) => (
   <a href={`${path}${keep_history_query(useRoute().query)}`}>
@@ -2471,6 +2451,4 @@ const process_instance_tabs = [
 const copyToClipboard = (event) =>
   navigator.clipboard.writeText(event.target.innerText);
 
-// `process_definition_tabs` and `ProcessSubNav` are exported for the plugin
-// tab-merge / sub-nav integration tests.
-export { ProcessesPage, process_definition_tabs, ProcessSubNav };
+export { ProcessesPage };

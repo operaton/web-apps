@@ -106,30 +106,6 @@ export const plugin_state_branches = () =>
       .map((descriptor) => [descriptor.id, descriptor.signals()]),
   );
 
-/**
- * Merge plugin-contributed tabs into a page's built-in tab array. Plugin tabs
- * with a positive priority sort before the built-ins, the rest after. `pos` is
- * recomputed to be contiguous because `Tabs.jsx` arrow-key navigation indexes
- * into the array by `pos`.
- */
-export const plugin_tabs = (point, base_tabs) => {
-  const extra = plugins_for(point).map((descriptor) => ({
-    id: descriptor.properties.id,
-    nameKey: descriptor.properties.nameKey,
-    name: descriptor.properties.name,
-    Component: descriptor.Component,
-    priority: descriptor.priority ?? 0,
-  }));
-
-  const before = extra.filter((tab) => tab.priority > 0);
-  const after = extra.filter((tab) => tab.priority <= 0);
-
-  return [...before, ...base_tabs, ...after].map((tab, index) => ({
-    ...tab,
-    pos: index,
-  }));
-};
-
 /** Test-only: clear all registrations. */
 export const _reset_registry = () => {
   registry.length = 0;

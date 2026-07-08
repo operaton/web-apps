@@ -10,8 +10,6 @@ import engine_rest, {
 import * as Icons from "../assets/icons.jsx";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
-import { plugin_tabs } from "../plugins/registry.js";
-import { PLUGIN_POINTS } from "../plugins/points.js";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
 import * as formatter from "../helper/date_formatter.js";
@@ -392,7 +390,7 @@ const TaskRowEntry = ({ task, selected }) => {
   return (
     <tr id={id} key={id} aria-selected={selected}>
       <th scope="row">
-        <a href={`/tasks/${id}/${task_tabs()[0].id}`}>{name}</a>
+        <a href={`/tasks/${id}/${task_tabs[0].id}`}>{name}</a>
       </th>
       <td>{assignee ? assignee : "—"}</td>
       <td>
@@ -526,7 +524,7 @@ const TaskTabs = () => {
     <section className="task-tabs">
       {state.api.task.one.value?.data != null ? (
         <Tabs
-          tabs={task_tabs()}
+          tabs={task_tabs}
           base_url={`/tasks/${state.api.task.one.value.data.id}`}
           className="fade-in"
           label={t("tasks.tabs.label")}
@@ -1472,7 +1470,7 @@ const AttachmentsTab = () => {
   );
 };
 
-const base_task_tabs = [
+const task_tabs = [
   {
     nameKey: "tasks.tabs.form",
     id: "form",
@@ -1499,11 +1497,4 @@ const base_task_tabs = [
   },
 ];
 
-// Memoized: merges TASK_TAB plugin tabs the first time it's called (after the
-// plugin registry is frozen at boot — must not run at module-import time).
-let _task_tabs;
-const task_tabs = () =>
-  (_task_tabs ??= plugin_tabs(PLUGIN_POINTS.TASK_TAB, base_task_tabs));
-
-// `task_tabs` is exported for the plugin tab-merge integration test.
-export { TasksPage, task_tabs };
+export { TasksPage };

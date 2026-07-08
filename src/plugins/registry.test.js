@@ -5,7 +5,6 @@ import {
   plugins_for,
   plugin_descriptor,
   plugin_state_branches,
-  plugin_tabs,
   _reset_registry,
 } from "./registry.js";
 import { PLUGIN_POINTS } from "./points.js";
@@ -19,14 +18,6 @@ const page = (over = {}) => ({
   id: "p1",
   point: PLUGIN_POINTS.PAGE,
   properties: { href: "/plugin/p1", nameKey: "x" },
-  Component: () => null,
-  ...over,
-});
-
-const tab = (over = {}) => ({
-  id: "tab1",
-  point: PLUGIN_POINTS.TASK_TAB,
-  properties: { id: "extra", nameKey: "e" },
   Component: () => null,
   ...over,
 });
@@ -134,28 +125,5 @@ describe("plugins/registry — ordering and state", () => {
     register(page({ id: "s1", signals: () => ({ a: signal(42) }) }));
     const branches = plugin_state_branches();
     expect(branches.s1.a.value).toBe(42);
-  });
-});
-
-describe("plugins/registry — plugin_tabs", () => {
-  const base = [
-    { id: "a", nameKey: "a", pos: 0, Component: () => null },
-    { id: "b", nameKey: "b", pos: 1, Component: () => null },
-  ];
-
-  it("appends low-priority plugin tabs after built-ins with contiguous pos", () => {
-    register(tab({ id: "t1", priority: -10 }));
-    const tabs = plugin_tabs(PLUGIN_POINTS.TASK_TAB, base);
-    expect(tabs.map((t) => t.id)).toEqual(["a", "b", "extra"]);
-    expect(tabs.map((t) => t.pos)).toEqual([0, 1, 2]);
-  });
-
-  it("prepends positive-priority plugin tabs before built-ins", () => {
-    register(
-      tab({ id: "t2", priority: 5, properties: { id: "first", nameKey: "f" } }),
-    );
-    const tabs = plugin_tabs(PLUGIN_POINTS.TASK_TAB, base);
-    expect(tabs.map((t) => t.id)).toEqual(["first", "a", "b"]);
-    expect(tabs.map((t) => t.pos)).toEqual([0, 1, 2]);
   });
 });
