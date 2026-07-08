@@ -21,11 +21,14 @@ import "./metrics.css";
 
 const PLUGIN_ID = "metrics";
 
-// ISO 8601 timestamp n months before now — the engine's metrics `startDate`.
-const months_ago_iso = (n) => {
+// URL-ready `startDate` param n months before now. The engine rejects the
+// trailing "Z" from toISOString() (it wants a numeric offset, yyyy-MM-dd'T'HH:
+// mm:ss.SSSZ), and the value must be encoded so the "+" survives the query
+// string rather than decoding to a space.
+const months_ago_param = (n) => {
   const date = new Date();
   date.setMonth(date.getMonth() - n);
-  return date.toISOString();
+  return encodeURIComponent(date.toISOString().replace("Z", "+0000"));
 };
 
 // API namespace — mounted at engine_rest.plugins.metrics. Each function follows
@@ -36,13 +39,13 @@ const api = {
     GET("/version", state, state.api.plugins[PLUGIN_ID].version),
   process_starts: (state) =>
     GET(
-      `/metrics/root-process-instance-start/sum?startDate=${months_ago_iso(12)}`,
+      `/metrics/root-process-instance-start/sum?startDate=${months_ago_param(12)}`,
       state,
       state.api.plugins[PLUGIN_ID].process_starts,
     ),
   flow_nodes: (state) =>
     GET(
-      `/metrics/activity-instance-start/sum?startDate=${months_ago_iso(12)}`,
+      `/metrics/activity-instance-start/sum?startDate=${months_ago_param(12)}`,
       state,
       state.api.plugins[PLUGIN_ID].flow_nodes,
     ),
