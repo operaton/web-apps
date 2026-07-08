@@ -1505,4 +1505,5 @@ let _task_tabs;
 const task_tabs = () =>
   (_task_tabs ??= plugin_tabs(PLUGIN_POINTS.TASK_TAB, base_task_tabs));
 
-export { TasksPage };
+// `task_tabs` is exported for the plugin tab-merge integration test.
+export { TasksPage, task_tabs };

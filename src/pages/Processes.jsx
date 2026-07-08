@@ -2462,4 +2462,5 @@ const process_instance_tabs = [
 const copyToClipboard = (event) =>
   navigator.clipboard.writeText(event.target.innerText);
 
-export { ProcessesPage };
+// `process_definition_tabs` is exported for the plugin tab-merge integration test.
+export { ProcessesPage, process_definition_tabs };
