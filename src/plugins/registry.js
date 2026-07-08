@@ -31,6 +31,43 @@ const is_valid = (descriptor) => {
 };
 
 /**
+ * Deep-merge a plugin's translation bundles into the shared i18n instance,
+ * *after* the http backend has loaded the base translation.json.
+ *
+ * Adding a partial bundle for a language before its backend load makes i18next
+ * treat that language as already present and skip the fetch entirely — so a
+ * plugin's `en-US` keys would suppress the app's own `en-US` base keys and every
+ * built-in string would report `missingKey`. We therefore wait until the base
+ * bundle exists (or add immediately if a plugin is registered after load, e.g.
+ * a late remote plugin).
+ */
+const add_translations = (translations) => {
+  // True only once i18next is initialized, has an active language, and that
+  // language's base bundle has loaded. Guarded so it never runs at boot with an
+  // undefined language (which makes i18next throw) or against the test stub.
+  const base_ready = () =>
+    typeof i18n.hasResourceBundle === "function" &&
+    !!i18n.language &&
+    i18n.hasResourceBundle(i18n.language, "translation");
+
+  const apply = () => {
+    for (const [lng, resources] of Object.entries(translations))
+      // deep merge (true), never overwrite host keys (false)
+      i18n.addResourceBundle(lng, "translation", resources, true, false);
+  };
+
+  if (base_ready()) return apply();
+  // `loaded` can fire per-language; keep listening until the base is actually
+  // ready, then apply once and detach.
+  const on_loaded = () => {
+    if (!base_ready()) return;
+    apply();
+    i18n.off?.("loaded", on_loaded);
+  };
+  i18n.on?.("loaded", on_loaded);
+};
+
+/**
  * Validate and register one descriptor. Mounts its i18n bundle and API
  * namespace as a side effect. Returns whether it was accepted.
  */
@@ -43,10 +80,7 @@ export const register = (descriptor) => {
     return false;
   }
 
-  if (descriptor.translations)
-    for (const [lng, resources] of Object.entries(descriptor.translations))
-      // deep merge (true), never overwrite host keys (false)
-      i18n.addResourceBundle(lng, "translation", resources, true, false);
+  if (descriptor.translations) add_translations(descriptor.translations);
 
   if (descriptor.api) mount_plugin_api(descriptor.id, descriptor.api);
 

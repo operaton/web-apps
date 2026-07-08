@@ -10,6 +10,10 @@ import {
 } from "./registry.js";
 import { PLUGIN_POINTS } from "./points.js";
 import { plugin_apis } from "../api/plugins.js";
+import i18n from "../helper/i18n.js";
+
+const en = { plugins: { p1: { nav: "Metrics" } } };
+const translations = { "en-US": en };
 
 const page = (over = {}) => ({
   id: "p1",
@@ -65,6 +69,54 @@ describe("plugins/registry — register", () => {
   it("looks up a descriptor by id", () => {
     register(page({ id: "look" }));
     expect(plugin_descriptor("look").id).toBe("look");
+  });
+});
+
+describe("plugins/registry — translations", () => {
+  beforeEach(() => {
+    i18n.language = "en-US";
+    i18n.hasResourceBundle.mockReturnValue(true);
+  });
+
+  it("deep-merges a plugin bundle once the base is loaded", () => {
+    register(page({ translations }));
+    expect(i18n.addResourceBundle).toHaveBeenCalledWith(
+      "en-US",
+      "translation",
+      en,
+      true, // deep merge
+      false, // never overwrite host keys
+    );
+  });
+
+  it("does not throw or drop the plugin when i18n has no language yet", () => {
+    // Reproduces the boot-time regression: at load, i18n.language is undefined
+    // and hasResourceBundle(undefined) would throw — registration must survive.
+    i18n.language = undefined;
+    expect(() => register(page({ id: "boot", translations }))).not.toThrow();
+    expect(plugin_descriptor("boot")).toBeTruthy();
+    expect(i18n.addResourceBundle).not.toHaveBeenCalled();
+  });
+
+  it("defers the merge until the base bundle finishes loading", () => {
+    // Base not ready yet: nothing merged, but a `loaded` listener is attached.
+    i18n.hasResourceBundle.mockReturnValue(false);
+    register(page({ id: "late", translations }));
+    expect(i18n.addResourceBundle).not.toHaveBeenCalled();
+    expect(i18n.on).toHaveBeenCalledWith("loaded", expect.any(Function));
+
+    // Simulate i18next finishing its backend load, then firing `loaded`.
+    const on_loaded = i18n.on.mock.calls.at(-1)[1];
+    i18n.hasResourceBundle.mockReturnValue(true);
+    on_loaded();
+    expect(i18n.addResourceBundle).toHaveBeenCalledWith(
+      "en-US",
+      "translation",
+      en,
+      true,
+      false,
+    );
+    expect(i18n.off).toHaveBeenCalledWith("loaded", on_loaded);
   });
 });
 

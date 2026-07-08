@@ -18,8 +18,17 @@ import.meta.env.VITE_BACKEND = JSON.stringify([
 
 // The i18n singleton is imported by the plugin registry (via state.js). Stub it
 // so tests don't spin up i18next-http-backend and attempt real network fetches.
+// Models enough of the instance (language + resource/event API) for the
+// registry's deferred translation merge; `hasResourceBundle` defaults to true
+// so plugin bundles apply synchronously unless a test overrides it.
 vi.mock("../helper/i18n.js", () => ({
-  default: { addResourceBundle: vi.fn() },
+  default: {
+    language: "en-US",
+    addResourceBundle: vi.fn(),
+    hasResourceBundle: vi.fn(() => true),
+    on: vi.fn(),
+    off: vi.fn(),
+  },
 }));
 
 vi.mock("react-i18next", () => ({

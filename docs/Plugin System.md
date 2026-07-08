@@ -83,6 +83,14 @@ header):
 - `translations` is deep-merged into the `translation` namespace and **never
   overwrites host keys**, so namespace them under `plugins.<id>.*`.
 
+> **Important**: The registry defers each plugin's `addResourceBundle` until
+> i18next has loaded the app's own `translation.json` for the active language.
+> This is deliberate — adding a partial bundle for a language _before_ its http
+> backend load makes i18next treat that language as already present and skip the
+> fetch, which would wipe out every base key (`missingKey` for all built-in
+> strings). Plugin authors don't need to do anything; just be aware plugin
+> strings appear a tick after the base UI on first load.
+
 ## Authoring a Plugin
 
 ### The `use_plugin_api` hook
