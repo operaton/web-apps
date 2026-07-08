@@ -170,7 +170,7 @@ const translations = {
         "tab-heat": "Auslastung",
         activity: "Aktivität",
         instances: "Instanzen",
-        incidents: "Vorfälle",
+        incidents: "Inzidente",
       },
     },
   },
