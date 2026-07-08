@@ -10,7 +10,7 @@ import * as Icons from "../assets/icons.jsx";
 import { AppState } from "../state.js";
 import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Dialog, ConfirmDialog } from "../components/Dialog.jsx";
-import { plugin_tabs } from "../plugins/registry.js";
+import { plugin_tabs, plugins_for } from "../plugins/registry.js";
 import { PLUGIN_POINTS } from "../plugins/points.js";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
@@ -353,6 +353,15 @@ const ProcessSubNav = () => {
           label={t("processes.subnav.called-definitions")}
         />
         <NavEntry panel="jobs" label={t("processes.subnav.jobs")} />
+        {/* Plugin-contributed definition tabs get a nav entry too, so they are
+            reachable — not just renderable by URL (see ProcessDefinitionDetails). */}
+        {plugins_for(PLUGIN_POINTS.PROCESS_DEFINITION_TAB).map((plugin) => (
+          <NavEntry
+            key={plugin.id}
+            panel={plugin.properties.id}
+            label={t(plugin.properties.nameKey)}
+          />
+        ))}
       </menu>
 
       <button
@@ -2462,5 +2471,6 @@ const process_instance_tabs = [
 const copyToClipboard = (event) =>
   navigator.clipboard.writeText(event.target.innerText);
 
-// `process_definition_tabs` is exported for the plugin tab-merge integration test.
-export { ProcessesPage, process_definition_tabs };
+// `process_definition_tabs` and `ProcessSubNav` are exported for the plugin
+// tab-merge / sub-nav integration tests.
+export { ProcessesPage, process_definition_tabs, ProcessSubNav };
