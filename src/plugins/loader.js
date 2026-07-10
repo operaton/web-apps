@@ -20,10 +20,26 @@ const register_descriptors = (module) => {
     register(descriptor);
 };
 
-/** Register plugins that ship inside the app bundle. */
+/**
+ * Register plugins that ship inside the app bundle. Bundled plugins are
+ * reference implementations and stay OFF by default — a stock deployment
+ * activates none of them. Opt in per plugin via VITE_BUNDLED_PLUGINS, a
+ * comma-separated list of bundled folder names (e.g. "metrics").
+ */
 const register_bundled = () => {
+  const enabled = new Set(
+    (import.meta.env.VITE_BUNDLED_PLUGINS ?? "")
+      .split(",")
+      .map((name) => name.trim())
+      // Ignore blanks and an unreplaced Docker runtime placeholder.
+      .filter((name) => name && !name.includes("PLACEHOLDER")),
+  );
+  if (enabled.size === 0) return;
+
   const modules = import.meta.glob("./bundled/*/plugin.jsx", { eager: true });
   for (const path in modules) {
+    const name = path.match(/\/bundled\/([^/]+)\//)?.[1];
+    if (!enabled.has(name)) continue;
     try {
       register_descriptors(modules[path]);
     } catch (error) {

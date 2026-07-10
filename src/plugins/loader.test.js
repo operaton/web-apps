@@ -25,6 +25,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("plugins/loader", () => {
@@ -72,7 +73,19 @@ describe("plugins/loader", () => {
     expect(importer).not.toHaveBeenCalled();
   });
 
-  it("always registers bundled plugins (the metrics example)", async () => {
+  it("does not register bundled example plugins by default", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: false })),
+    );
+    await load_plugins({ importer: vi.fn() });
+    expect(plugins_for(PLUGIN_POINTS.PAGE).map((p) => p.id)).not.toContain(
+      "metrics",
+    );
+  });
+
+  it("registers a bundled plugin when opted in via VITE_BUNDLED_PLUGINS", async () => {
+    vi.stubEnv("VITE_BUNDLED_PLUGINS", "metrics");
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({ ok: false })),
