@@ -1,4 +1,11 @@
 {
+  "login": {
+    "errors": {
+      "wrong-credentials": "Falscher Benutzername oder falsches Passwort.",
+      "server-error": "Der Server hat einen Fehler gemeldet. Bitte versuchen Sie es später erneut.",
+      "network-error": "Server nicht erreichbar. Prüfen Sie den ausgewählten Server und Ihre Verbindung."
+    }
+  },
   "common": {
     "loading": "Laden...",
     "fetching": "Abrufen...",

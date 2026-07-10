@@ -1,4 +1,11 @@
 {
+  "login": {
+    "errors": {
+      "wrong-credentials": "Nom d'utilisateur ou mot de passe incorrect.",
+      "server-error": "Le serveur a renvoyé une erreur. Veuillez réessayer plus tard.",
+      "network-error": "Impossible de joindre le serveur. Vérifiez le serveur sélectionné et votre connexion."
+    }
+  },
   "common": {
     "loading": "Chargement...",
     "fetching": "Récupération...",

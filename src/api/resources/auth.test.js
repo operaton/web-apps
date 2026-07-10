@@ -54,13 +54,32 @@ describe("api/resources/auth (basic mode)", () => {
       );
     });
 
-    it("marks wrong_login on a failed response", async () => {
+    it("stays unauthenticated and reports wrong credentials on a 401", async () => {
       fetchMock.mockResolvedValue({ ok: false, status: 401 });
       auth.login(state, "bob", "wrong");
       await vi.waitFor(() =>
-        expect(state.auth.logged_in.value.data).toBe("wrong_login"),
+        expect(state.auth.login_response.value).toEqual({
+          status: RESPONSE_STATE.ERROR,
+          key: "login.errors.wrong-credentials",
+        }),
       );
-      expect(state.auth.logged_in.value.status).toBe(RESPONSE_STATE.ERROR);
+      // Routing has no "wrong_login" branch; the login page (unauthenticated)
+      // must render so the error banner is shown rather than a blank screen.
+      expect(state.auth.logged_in.value).toEqual({
+        status: RESPONSE_STATE.ERROR,
+        data: "unauthenticated",
+      });
+    });
+
+    it("reports a network error when the request rejects without a status", async () => {
+      fetchMock.mockRejectedValue(new TypeError("Failed to fetch"));
+      auth.login(state, "bob", "secret");
+      await vi.waitFor(() =>
+        expect(state.auth.login_response.value?.key).toBe(
+          "login.errors.network-error",
+        ),
+      );
+      expect(state.auth.logged_in.value.data).toBe("unauthenticated");
     });
   });
 

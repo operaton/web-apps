@@ -1,8 +1,8 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 
-import Backend from 'i18next-http-backend';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import Backend from "i18next-http-backend";
+import LanguageDetector from "i18next-browser-languagedetector";
 
 // don't want to use this?
 // have a look at the Quick start guide
@@ -21,13 +21,17 @@ i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({
-    fallbackLng: 'en-US',
+    fallbackLng: "en-US",
+    // Only these locales ship under public/locales; anything the detector picks
+    // from navigator.language (e.g. en-GB, de) resolves to a supported locale or
+    // the fallback instead of requesting a non-existent file.
+    supportedLngs: ["en-US", "de-DE", "es-ES", "fr-FR", "nl-NL"],
+    load: "currentOnly", // don't also request the base `/locales/en/…` (404 → HTML)
     debug: true,
 
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
-    }
+    },
   });
-
 
 export default i18n;

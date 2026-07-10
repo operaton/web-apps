@@ -1,4 +1,11 @@
 {
+  "login": {
+    "errors": {
+      "wrong-credentials": "Usuario o contraseña incorrectos.",
+      "server-error": "El servidor respondió con un error. Inténtelo de nuevo más tarde.",
+      "network-error": "No se puede conectar con el servidor. Compruebe el servidor seleccionado y su conexión."
+    }
+  },
   "common": {
     "loading": "Cargando...",
     "fetching": "Obteniendo...",

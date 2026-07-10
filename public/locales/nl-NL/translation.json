@@ -1,4 +1,11 @@
 {
+  "login": {
+    "errors": {
+      "wrong-credentials": "Onjuiste gebruikersnaam of wachtwoord.",
+      "server-error": "De server gaf een foutmelding. Probeer het later opnieuw.",
+      "network-error": "Kan de server niet bereiken. Controleer de geselecteerde server en uw verbinding."
+    }
+  },
   "common": {
     "loading": "Laden...",
     "fetching": "Ophalen...",

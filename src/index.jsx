@@ -23,8 +23,9 @@ import "./css/components.css";
 
 import { DecisionsPage } from "./pages/Decisions.jsx";
 import { useContext } from "preact/hooks";
+import { useTranslation } from "react-i18next";
 import engine_rest from "./api/engine_rest.jsx";
-import { useSignal } from "@preact/signals";
+import { RESPONSE_STATE } from "./api/helper.jsx";
 import { is_oauth } from "./api/oauth.js";
 import { load_plugins } from "./plugins/loader.js";
 import { install_plugin_host } from "./plugins/host.js";
@@ -52,20 +53,22 @@ const swap_server = (e, state) => {
 };
 
 const Routing = () => {
+  const [t] = useTranslation();
   const state = useContext(AppState),
     {
-      auth: { logged_in },
+      auth: { logged_in, login_response },
     } = state,
-    credentials = useSignal({
-      username: null,
-      password: null,
-    }),
+    // Read the submitted form's values directly rather than a signal fed by
+    // `onInput`: browser autofill / password managers set the field `.value`
+    // without firing `input`, which would otherwise leave us sending empty
+    // credentials.
     login = (event) => {
       event.preventDefault();
+      const form = event.currentTarget;
       void engine_rest.auth.login(
         state,
-        credentials.value.username,
-        credentials.value.password,
+        form.elements.username.value,
+        form.elements.password.value,
       );
     };
 
@@ -114,55 +117,61 @@ const Routing = () => {
     );
   } else if (logged_in.value.data === "unknown") {
     void engine_rest.auth.is_authenticated(state);
-  } else if (logged_in.value.data === "unauthenticated") {
-    return (
-      <section class="login-page">
-        <h1>Operaton Web Apps Login</h1>
-        <span>
-          <a href="https://docs.operaton.org/docs/documentation/webapps/">
-            Documentation
-          </a>
-          &nbsp;-&nbsp;
-          <a href="https://github.com/operaton/web-apps">Source</a>
-        </span>
-        <br />
-        <label>
-          Server Selection <br />
-          <select onChange={(e) => swap_server(e, state)}>
-            <option disabled>
-              ℹ️ Choose a server to retrieve your processes
+    return <p class="fade-in-delayed">{t("common.loading")}</p>;
+  } else if (logged_in.value.status === RESPONSE_STATE.LOADING) {
+    return <p class="fade-in-delayed">{t("common.loading")}</p>;
+  }
+
+  // Default: `unauthenticated`, a failed login, or any unforeseen state all
+  // render the login page — never a blank screen.
+  return (
+    <section class="login-page">
+      <h1>Operaton Web Apps Login</h1>
+      <span>
+        <a href="https://docs.operaton.org/docs/documentation/webapps/">
+          Documentation
+        </a>
+        &nbsp;-&nbsp;
+        <a href="https://github.com/operaton/web-apps">Source</a>
+      </span>
+      <br />
+      <label>
+        Server Selection <br />
+        <select onChange={(e) => swap_server(e, state)}>
+          <option disabled>
+            ℹ️ Choose a server to retrieve your processes
+          </option>
+          {servers.map((server) => (
+            <option
+              key={server.url}
+              value={server.url}
+              selected={state.server.value?.url === server.url}
+            >
+              {server.name} {server.c7_mode ? "(C7)" : ""}
             </option>
-            {servers.map((server) => (
-              <option
-                key={server.url}
-                value={server.url}
-                selected={state.server.value?.url === server.url}
-              >
-                {server.name} {server.c7_mode ? "(C7)" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        {is_oauth ? (
-          <button
-            type="button"
-            onClick={() => engine_rest.auth.start_oauth_login()}
-          >
-            Login with SSO
-          </button>
-        ) : (
+          ))}
+        </select>
+      </label>
+      {is_oauth ? (
+        <button
+          type="button"
+          onClick={() => engine_rest.auth.start_oauth_login()}
+        >
+          Login with SSO
+        </button>
+      ) : (
+        <>
+          {login_response.value?.status === RESPONSE_STATE.ERROR && (
+            <p class="error" role="alert">
+              {t(login_response.value.key)}
+            </p>
+          )}
           <form onSubmit={login} class="form-horizontal">
             <label for="username">User name*</label>
             <input
               name="username"
               id="username"
               autocomplete="username"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  username: e.currentTarget.value,
-                })
-              }
               required
             />
 
@@ -172,21 +181,15 @@ const Routing = () => {
               type="password"
               id="password"
               autocomplete="current-password"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  password: e.currentTarget.value,
-                })
-              }
               required
             />
 
             <button type="submit">Login</button>
           </form>
-        )}
-      </section>
-    );
-  }
+        </>
+      )}
+    </section>
+  );
 };
 
 // Expose host primitives for remote no-build plugins, then load every plugin

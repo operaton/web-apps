@@ -1,4 +1,11 @@
 {
+  "login": {
+    "errors": {
+      "wrong-credentials": "Wrong username or password.",
+      "server-error": "The server responded with an error. Please try again later.",
+      "network-error": "Cannot reach the server. Check the selected server and your connection."
+    }
+  },
   "common": {
     "loading": "Loading...",
     "fetching": "Fetching...",

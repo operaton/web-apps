@@ -60,6 +60,7 @@ const login = (
     )
     .then((data) => {
       state.auth.credentials.value = { username, password };
+      state.auth.login_response.value = { status: RESPONSE_STATE.SUCCESS };
       state.auth.logged_in.value = {
         status: RESPONSE_STATE.SUCCESS,
         data: "authenticated",
@@ -69,13 +70,22 @@ const login = (
         JSON.stringify({ username, password }),
       );
     })
-    .catch(
-      (error) =>
-        (state.auth.logged_in.value = {
-          status: RESPONSE_STATE.ERROR,
-          data: "wrong_login",
-        }),
-    );
+    .catch((error) => {
+      // Classify the failure so the login page can say what went wrong instead
+      // of going blank. A rejected response carries an HTTP status; a network or
+      // CORS failure rejects with a TypeError (no status).
+      const key =
+        typeof error?.status === "number"
+          ? error.status === 401 || error.status === 403
+            ? "login.errors.wrong-credentials"
+            : "login.errors.server-error"
+          : "login.errors.network-error";
+      state.auth.login_response.value = { status: RESPONSE_STATE.ERROR, key };
+      state.auth.logged_in.value = {
+        status: RESPONSE_STATE.ERROR,
+        data: "unauthenticated",
+      };
+    });
 };
 /**
  * Logout current user
