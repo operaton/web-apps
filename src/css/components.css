@@ -151,14 +151,65 @@ section.task-tabs {
   position: relative;
 }
 
+/* Reflow (WCAG 1.4.10): under 50em the 30em list and the 20em details pane no
+   longer fit side by side, so #task-details wraps below #task-list and the two
+   share <main>'s height. .task-tabs — flex: 1, min-height: 0, its own scroll
+   container — then collapses to nothing and takes the absolutely-positioned
+   .tabs with it, hiding every tab. Stacked, let the panes grow to their content
+   and hand vertical scrolling back to <main>. */
+@media (width < 50em) {
+  #task-details {
+    overflow: visible;
+  }
+
+  #task-details section.task-tabs {
+    flex: none;
+    min-height: auto;
+    max-height: none;
+    overflow: visible;
+    position: static;
+  }
+
+  #task-details .tabs {
+    position: static;
+  }
+}
+
 /* TaskList chain: #task-list is flex column; the table wrapper takes
    remaining space and scrolls; .start-process stays pinned at the bottom. */
 #task-list {
   min-height: 0;
 }
 
+/* Separate the filter/sort toolbar from the results below it. The gap below the
+   rule is a margin, not wrapper padding: #task-table-wrapper is the scroll
+   container, so padding there would scroll away with the rows. The header cells
+   already contribute --spacing-1 of their own. */
 #task-list #list-filter {
   flex: none;
+  border-bottom: var(--border);
+  padding-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-1);
+}
+
+/* The task list is a narrow pane beside the details, so the toolbar reads as
+   clutter when its controls run along both axes. Stack each group into a
+   column, and sit the two groups side by side. */
+#task-list #list-filter {
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: start;
+  column-gap: var(--spacing-2);
+}
+
+/* Each group is one column. The 14em basis matches the controls' own width cap,
+   so the groups drop to a single column exactly when two no longer fit — no
+   breakpoint to keep in sync with the pane width. */
+#task-list #list-filter .list-filter-group {
+  flex: 1 1 14em;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
 }
 
 /* Shared toolbar used by every list page. Two flex groups: saved-filter +
@@ -173,14 +224,45 @@ section.task-tabs {
   flex-wrap: wrap;
 }
 
+/* min-width: 0 overrides the flex-item min-content floor, so the group can be
+   squeezed narrow enough for its own flex-wrap to break the controls onto a
+   new line instead of overflowing (WCAG reflow at 400% zoom). */
 #list-filter .list-filter-group {
   display: flex;
   gap: var(--spacing-1);
   align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  /* Grow to the row. The controls size themselves with min(100%, …), whose
+     percentage resolves against this group — shrink-wrapped, each control would
+     fill it and no two could share a line. */
+  flex: 1 1 auto;
+}
+
+/* The sort group is a fieldset so one legend can name both selects. Strip the
+   box chrome: it is a toolbar row, not a boxed form section. */
+#list-filter fieldset.list-filter-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* A legend sits in the fieldset's border box, outside the anonymous flex
+   content box, so the group's row-gap never applies to it. Match that gap by
+   hand or the heading crowds the first select. */
+#list-filter fieldset.list-filter-group legend {
+  padding: 0;
+  margin-bottom: var(--spacing-1);
 }
 
 #list-filter .list-filter-group > * {
   margin: 0;
+}
+
+/* A toolbar label captions the control beside it, not above it, so the wide
+   field measure would just open a gap between the two. Size it to its text. */
+#list-filter label {
+  width: auto;
 }
 
 /* The manage-filters page that opens when ?filters=manage is present. */
@@ -239,11 +321,9 @@ section.task-tabs {
   box-sizing: border-box;
 }
 
-/* The dialog form used by <ListFilter> for create/edit. The global `form`
-   rule sets a 2-column label/input grid, which would put the criteria
-   fieldset and the sort-override fieldset side-by-side and overlap them
-   inside the dialog. Force a single-column stack and align controls to
-   the start so labels sit above their inputs. */
+/* The dialog form used by <ListFilter> for create/edit. Its fieldsets should
+   stretch to the dialog rather than stop at the 30em measure the global `form`
+   grid caps columns at. */
 .filter-edit-form {
   display: flex;
   flex-direction: column;
@@ -1249,7 +1329,7 @@ dialog#global-search {
 /* info box */
 .info-box {
   padding: var(--spacing-2);
-  border: 2px solid var(--color-primary);
+  border: var(--border-width-2) solid var(--color-primary);
 }
 
 /* Page heading row: title and primary action share a line, with
@@ -1349,6 +1429,42 @@ nav:has(> .breadcrumbs) {
 /* account */
 .account-page {
   display: flex;
+}
+
+/* Reflow (WCAG 1.4.10): the sidebar .list has a 20ch floor, which on a narrow
+   viewport leaves the content beside it too thin to read. Below 40em stack the
+   nav above the content, flow its links as a wrapping row, and hand vertical
+   scrolling back to <main> instead of the inner pane. The admin and account
+   shells are the same nav + content layout. */
+@media (width < 40em) {
+  .admin-page,
+  .account-page {
+    flex-direction: column;
+  }
+
+  .admin-page > nav menu.list,
+  .account-page > nav menu.list {
+    width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-y: visible;
+  }
+
+  /* The separators divide a vertical stack; laid out in a row they read as
+     stray marks above each link. */
+  .admin-page > nav menu.list li,
+  .account-page > nav menu.list li {
+    border-top: none;
+  }
+
+  /* flex: none sizes the pane to its content so <main> does the page scrolling.
+     Keep the inherited overflow-y: auto: it never triggers at this height, but
+     it keeps the computed overflow-x at auto, so a wide table scrolls inside
+     the pane rather than dragging the whole page sideways. */
+  .admin-page > div,
+  .account-page > section {
+    flex: none;
+  }
 }
 
 .account-page > section {

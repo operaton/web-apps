@@ -170,35 +170,37 @@ const DecisionsList = () => {
       <RequestState
         signal={definitions}
         on_success={() => (
-          <table>
-            <thead>
-              <tr>
-                <th>{t("common.name")}</th>
-                <th>{t("common.key")}</th>
-                <th>{t("processes.version")}</th>
-                <th>{t("decisions.version-tag")}</th>
-                <th>{t("decisions.history-ttl")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {definitions.value?.data?.map((decision) => (
-                <tr
-                  key={decision.id}
-                  aria-selected={params.decision_id === decision.id}
-                >
-                  <td>
-                    <a href={`/decisions/${decision.id}`}>
-                      {decision?.name || decision?.id}
-                    </a>
-                  </td>
-                  <td>{decision.key}</td>
-                  <td>{decision.version}</td>
-                  <td>{decision.versionTag}</td>
-                  <td>{decision.historyTimeToLive}</td>
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("common.name")}</th>
+                  <th>{t("common.key")}</th>
+                  <th>{t("processes.version")}</th>
+                  <th>{t("decisions.version-tag")}</th>
+                  <th>{t("decisions.history-ttl")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {definitions.value?.data?.map((decision) => (
+                  <tr
+                    key={decision.id}
+                    aria-selected={params.decision_id === decision.id}
+                  >
+                    <td>
+                      <a href={`/decisions/${decision.id}`}>
+                        {decision?.name || decision?.id}
+                      </a>
+                    </td>
+                    <td>{decision.key}</td>
+                    <td>{decision.version}</td>
+                    <td>{decision.versionTag}</td>
+                    <td>{decision.historyTimeToLive}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       />
     </div>

@@ -115,28 +115,30 @@ export const DashboardPage = () => {
             if (incidents.length === 0)
               return <p>{t("dashboard.no-incidents")}</p>;
             return (
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t("common.type")}</th>
-                    <th>{t("dashboard.process")}</th>
-                    <th>{t("dashboard.count")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {incidents.map((i, idx) => (
-                    <tr key={idx}>
-                      <td>{i.incidentType ?? "–"}</td>
-                      <td>
-                        <a href={`/processes/${i.processDefinitionId ?? ""}`}>
-                          {i.processName ?? "–"}
-                        </a>
-                      </td>
-                      <td>{i.incidentCount ?? 0}</td>
+              <div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("common.type")}</th>
+                      <th>{t("dashboard.process")}</th>
+                      <th>{t("dashboard.count")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {incidents.map((i, idx) => (
+                      <tr key={idx}>
+                        <td>{i.incidentType ?? "–"}</td>
+                        <td>
+                          <a href={`/processes/${i.processDefinitionId ?? ""}`}>
+                            {i.processName ?? "–"}
+                          </a>
+                        </td>
+                        <td>{i.incidentCount ?? 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             );
           }}
         />
@@ -154,36 +156,38 @@ export const DashboardPage = () => {
             if (tasks.length === 0)
               return <p>{t("dashboard.no-open-tasks")}</p>;
             return (
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t("common.name")}</th>
-                    <th>{t("dashboard.assignee")}</th>
-                    <th>{t("dashboard.created")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.slice(0, 10).map((task) => (
-                    <tr key={task.id}>
-                      <td>
-                        <a href={`/tasks/${task.id}`}>
-                          {task.name ?? t("dashboard.unnamed")}
-                        </a>
-                      </td>
-                      <td>{task.assignee ?? "–"}</td>
-                      <td>
-                        {task.created ? (
-                          <time datetime={task.created}>
-                            {new Date(task.created).toLocaleDateString()}
-                          </time>
-                        ) : (
-                          "–"
-                        )}
-                      </td>
+              <div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("common.name")}</th>
+                      <th>{t("dashboard.assignee")}</th>
+                      <th>{t("dashboard.created")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {tasks.slice(0, 10).map((task) => (
+                      <tr key={task.id}>
+                        <td>
+                          <a href={`/tasks/${task.id}`}>
+                            {task.name ?? t("dashboard.unnamed")}
+                          </a>
+                        </td>
+                        <td>{task.assignee ?? "–"}</td>
+                        <td>
+                          {task.created ? (
+                            <time datetime={task.created}>
+                              {new Date(task.created).toLocaleDateString()}
+                            </time>
+                          ) : (
+                            "–"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             );
           }}
         />
@@ -202,30 +206,32 @@ export const DashboardPage = () => {
             if (definitions.length === 0)
               return <p>{t("dashboard.no-process-definitions")}</p>;
             return (
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t("common.name")}</th>
-                    <th>{t("common.key")}</th>
-                    <th>{t("dashboard.instances")}</th>
-                    <th>{t("dashboard.open-incidents")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {definitions.slice(0, 10).map((d) => (
-                    <tr key={d.id}>
-                      <td>
-                        <a href={`/processes/${d.id}`}>
-                          {d.definition?.name ?? d.definition?.key ?? "–"}
-                        </a>
-                      </td>
-                      <td>{d.definition?.key ?? "–"}</td>
-                      <td>{d.instances ?? 0}</td>
-                      <td>{d.incidents?.length ?? 0}</td>
+              <div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{t("common.name")}</th>
+                      <th>{t("common.key")}</th>
+                      <th>{t("dashboard.instances")}</th>
+                      <th>{t("dashboard.open-incidents")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {definitions.slice(0, 10).map((d) => (
+                      <tr key={d.id}>
+                        <td>
+                          <a href={`/processes/${d.id}`}>
+                            {d.definition?.name ?? d.definition?.key ?? "–"}
+                          </a>
+                        </td>
+                        <td>{d.definition?.key ?? "–"}</td>
+                        <td>{d.instances ?? 0}</td>
+                        <td>{d.incidents?.length ?? 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             );
           }}
         />

@@ -2,8 +2,8 @@ import { useTranslation } from "react-i18next";
 
 /**
  * Slim list-page toolbar: a saved-filter dropdown + an Edit button that
- * opens the manage page, then a sort selector aligned to the right. CRUD
- * for saved filters lives in <ManageFilters>, not here.
+ * opens the manage page, then a sort fieldset (key + order) aligned to the
+ * right. CRUD for saved filters lives in <ManageFilters>, not here.
  *
  * @param sort_options       {Array<{ key, nameKey }>}
  * @param saved_filters_signal {Signal<{ status, data: SavedFilter[] } | null>}
@@ -56,10 +56,11 @@ export const ListFilter = ({
           {t("list_filter.edit")}
         </button>
       </div>
-      <div class="list-filter-group">
-        <label for="list-filter-sort-by">{t("list_filter.sort_by")}</label>
+      <fieldset class="list-filter-group">
+        <legend>{t("list_filter.sort_by")}</legend>
         <select
           id="list-filter-sort-by"
+          aria-label={t("list_filter.sort_by")}
           value={current.sortBy ?? defaults.sortBy}
           onChange={(e) => on_change?.({ sortBy: e.currentTarget.value })}
         >
@@ -77,7 +78,7 @@ export const ListFilter = ({
           <option value="asc">{t("list_filter.asc")}</option>
           <option value="desc">{t("list_filter.desc")}</option>
         </select>
-      </div>
+      </fieldset>
     </div>
   );
 };
