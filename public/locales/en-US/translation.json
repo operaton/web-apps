@@ -198,7 +198,9 @@
       "form-title": "Form",
       "fetch-failed": "Could not load form",
       "validation-error": "Please fix the errors above and try again.",
-      "complete-directly": "Complete without form"
+      "complete-directly": "Complete without form",
+      "legacy-html-unsupported": "Legacy AngularJS task forms are not supported by the new web applications. Please switch to form-js.",
+      "legacy-html-migrate-link": "How to migrate"
     },
     "start-process": {
       "title": "Start Task",

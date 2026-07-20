@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect, useRef } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { AppState } from "../state.js";
-import engine_rest, { RequestState } from "../api/engine_rest.jsx";
+import engine_rest from "../api/engine_rest.jsx";
 import * as Icons from "../assets/icons.jsx";
 import { useRoute, useLocation } from "preact-iso";
 import { CamundaForm } from "./CamundaForm.jsx";
@@ -118,26 +118,39 @@ const CamundaTaskForm = ({ task, taskId }) => {
 
 // ---- Legacy embedded HTML form ----------------------------------------------
 
-const EmbeddedHtmlTaskForm = ({ formKey }) => {
-  const state = useContext(AppState);
+const EMBEDDED_APP = "embedded:app:";
+const EMBEDDED_DEPLOYMENT = "embedded:deployment:";
 
-  // Fetch in an effect keyed on the form key so switching tasks refetches
-  // instead of showing the previous task's embedded form (see #102).
+const FORM_JS_MIGRATION_DOCS =
+  "https://docs.operaton.org/documentation/user-guide/task-forms/";
+
+const EmbeddedHtmlTaskForm = ({ task, formKey }) => {
+  const state = useContext(AppState),
+    [t] = useTranslation();
+
+  // Legacy AngularJS embedded HTML forms are not supported by the new web
+  // apps and won't be. We still issue the correct fetch by prefix (see #96) —
+  // embedded:app: forms are app-served, embedded:deployment: forms live in the
+  // deployment — but render a migration notice instead of the HTML.
   useEffect(() => {
-    void engine_rest.task.get_task_form(state, formKey.substring(13));
+    if (formKey.startsWith(EMBEDDED_DEPLOYMENT)) {
+      void engine_rest.task.get_task_deployed_form_html(state, task.id);
+    } else {
+      const path = formKey.startsWith(EMBEDDED_APP)
+        ? formKey.substring(EMBEDDED_APP.length)
+        : formKey.replace(/^embedded:/, "");
+      void engine_rest.task.get_task_form(state, path);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formKey]);
+  }, [formKey, task.id]);
 
   return (
-    <RequestState
-      signal={state.api.task.form}
-      on_success={() => (
-        // eslint-disable-next-line react/no-danger
-        <div
-          dangerouslySetInnerHTML={{ __html: state.api.task.form.value.data }}
-        />
-      )}
-    />
+    <p class="info-box">
+      {t("tasks.form.legacy-html-unsupported")}{" "}
+      <a href={FORM_JS_MIGRATION_DOCS} target="_blank" rel="noreferrer">
+        {t("tasks.form.legacy-html-migrate-link")}
+      </a>
+    </p>
   );
 };
 

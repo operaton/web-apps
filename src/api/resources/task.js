@@ -57,6 +57,11 @@ const get_task_rendered_form = (state, task_id) =>
 const get_task_deployed_form = (state, task_id) =>
   GET(`/task/${task_id}/deployed-form`, state, state.api.task.deployed_form);
 
+// embedded:deployment: forms are plain HTML stored in the deployment; fetch the
+// deployed-form endpoint as text (GET would try to JSON-parse the HTML).
+const get_task_deployed_form_html = (state, task_id) =>
+  GET_TEXT(`/task/${task_id}/deployed-form`, state, state.api.task.form);
+
 const get_task_form_variables = (state, task_id) =>
   GET(`/task/${task_id}/form-variables`, state, state.api.task.form_variables);
 
@@ -237,6 +242,7 @@ const task = {
   get_task_process_definitions,
   get_task_rendered_form,
   get_task_deployed_form,
+  get_task_deployed_form_html,
   get_task_form_variables,
   claim_task,
   unclaim_task,

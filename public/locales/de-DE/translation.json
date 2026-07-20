@@ -198,7 +198,9 @@
       "form-title": "Formular",
       "fetch-failed": "Formular konnte nicht geladen werden",
       "validation-error": "Bitte beheben Sie die obigen Fehler und versuchen Sie es erneut.",
-      "complete-directly": "Ohne Formular abschließen"
+      "complete-directly": "Ohne Formular abschließen",
+      "legacy-html-unsupported": "Ältere AngularJS-Aufgabenformulare werden von den neuen Web-Anwendungen nicht unterstützt. Bitte wechseln Sie zu form-js.",
+      "legacy-html-migrate-link": "Anleitung zur Migration"
     },
     "start-process": {
       "title": "Aufgabe starten",
