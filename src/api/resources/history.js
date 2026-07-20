@@ -68,7 +68,7 @@ const get_incidents_by_process_instance = (state, instance_id) =>
 
 const get_process_instance_variable = (state, instance_id) =>
   GET(
-    `/history/variable-instance?processInstanceId=${instance_id}`,
+    `/history/variable-instance?processInstanceId=${instance_id}&deserializeValues=false`,
     state,
     state.api.process.instance.variables,
   );

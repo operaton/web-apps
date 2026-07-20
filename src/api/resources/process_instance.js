@@ -26,9 +26,11 @@ const get_process_instances_by_activity_ids = (
     state.api.process.instance.list,
   );
 
+// deserializeValues=false so Object/Json/Xml come back as their serialized
+// string form (displayable, and avoids server-side deserialization) (#91).
 const get_process_instance_variables = (state, instance_id) =>
   GET(
-    `/process-instance/${instance_id}/variables`,
+    `/process-instance/${instance_id}/variables?deserializeValues=false`,
     state,
     state.api.process.instance.variables,
   );

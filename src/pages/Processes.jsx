@@ -1284,6 +1284,14 @@ const coerce_variable_value = (type, raw) => {
   }
 };
 
+// Render any variable value as text: JSX skips boolean children, and Object/Json
+// values arrive deserialized (real objects), so format them explicitly (#91).
+const format_variable_value = (value) => {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+};
+
 const InstanceVariables = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
@@ -1375,7 +1383,7 @@ const InstanceVariables = () => {
                   <tr key={name}>
                     <td>{name}</td>
                     <td>{type}</td>
-                    <td>{String(value)}</td>
+                    <td>{format_variable_value(value)}</td>
                     <td>
                       <div class="button-group">
                         <button
@@ -1403,7 +1411,7 @@ const InstanceVariables = () => {
                     <tr key={name}>
                       <td>{name}</td>
                       <td>{type}</td>
-                      <td>{String(value)}</td>
+                      <td>{format_variable_value(value)}</td>
                       <td />
                     </tr>
                   ),

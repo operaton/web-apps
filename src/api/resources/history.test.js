@@ -87,7 +87,7 @@ describe("api/resources/history", () => {
   it("variable_instance.by_process_instance() GETs variables filtered by instance", () => {
     history.variable_instance.by_process_instance(state, "inst-1");
     expect_api_call(GET, {
-      url: "/history/variable-instance?processInstanceId=inst-1",
+      url: "/history/variable-instance?processInstanceId=inst-1&deserializeValues=false",
       state,
       signal: state.api.process.instance.variables,
     });

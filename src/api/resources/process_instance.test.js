@@ -29,7 +29,7 @@ describe("api/resources/process_instance", () => {
   it("variables() GETs /process-instance/:id/variables", () => {
     process_instance.variables(state, "inst-1");
     expect_api_call(GET, {
-      url: "/process-instance/inst-1/variables",
+      url: "/process-instance/inst-1/variables?deserializeValues=false",
       state,
       signal: state.api.process.instance.variables,
     });
