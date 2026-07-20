@@ -1076,21 +1076,19 @@ const InstanceDetails = () => {
       params: { selection_id, definition_id, panel },
       query,
     } = useRoute(),
-    history_mode = query.history === "true",
-    [t] = useTranslation();
+    history_mode = query.history === "true";
 
-  if (selection_id) {
-    if (
-      state.api.process.instance.one === undefined ||
-      state.api.process.instance.one.value === null
-    ) {
-      if (!history_mode) {
-        void engine_rest.process_instance.one(state, selection_id);
-      } else {
-        void engine_rest.history.process_instance.one(state, selection_id);
-      }
+  // Refetch on selection or history-mode change so toggling switches the data
+  // source (live vs historic) instead of keeping whatever loaded first (#94).
+  useEffect(() => {
+    if (!selection_id) return;
+    if (!history_mode) {
+      void engine_rest.process_instance.one(state, selection_id);
+    } else {
+      void engine_rest.history.process_instance.one(state, selection_id);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selection_id, history_mode]);
 
   const { params: route_params } = useRoute();
   const sub_panel = route_params.sub_panel;
