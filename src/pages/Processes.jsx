@@ -2584,63 +2584,142 @@ const InstanceAuditLog = () => {
   const state = useContext(AppState),
     { params } = useRoute(),
     [t] = useTranslation(),
-    signal = state.api.history.user_operation;
+    signal = state.api.history.user_operation,
+    annotation_open = useSignal(false),
+    confirm_clear = useSignal(false),
+    annotation_op_id = useSignal(null),
+    annotation_text = useSignal("");
+
+  const reload = () =>
+    void engine_rest.history.get_user_operation(state, params.selection_id);
 
   useEffect(() => {
-    void engine_rest.history.get_user_operation(state, params.selection_id);
+    reload();
     return () => {
       signal.value = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selection_id]);
 
+  // The annotation applies to the whole operation, so edits are keyed on
+  // operationId, not the individual (per-property) log row (see #97).
+  const open_annotation = (operation_id, current) => {
+    annotation_op_id.value = operation_id;
+    annotation_text.value = current ?? "";
+    annotation_open.value = true;
+  };
+
+  const save_annotation = async () => {
+    await engine_rest.history.set_user_operation_annotation(
+      state,
+      annotation_op_id.value,
+      annotation_text.value,
+    );
+    annotation_open.value = false;
+    reload();
+  };
+
+  const clear_annotation = async () => {
+    await engine_rest.history.clear_user_operation_annotation(
+      state,
+      annotation_op_id.value,
+    );
+    confirm_clear.value = false;
+    annotation_open.value = false;
+    reload();
+  };
+
   return (
-    <RequestState
-      signal={signal}
-      on_success={() => {
-        const rows = signal.value?.data ?? [];
-        if (rows.length === 0)
-          return <p class="info-box">{t("processes.audit.empty")}</p>;
-        return (
-          <table>
-            <thead>
-              <tr>
-                <th>{t("processes.audit.time")}</th>
-                <th>{t("processes.audit.user")}</th>
-                <th>{t("processes.audit.operation")}</th>
-                <th>{t("processes.audit.entity")}</th>
-                <th>{t("processes.audit.property")}</th>
-                <th>{t("processes.audit.original-value")}</th>
-                <th>{t("processes.audit.new-value")}</th>
-                <th>{t("processes.audit.annotation")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((op) => (
-                <tr key={op.id}>
-                  <td>
-                    {op.timestamp ? (
-                      <time datetime={op.timestamp}>
-                        {new Date(Date.parse(op.timestamp)).toLocaleString()}
-                      </time>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td>{op.userId ?? "—"}</td>
-                  <td>{op.operationType ?? "—"}</td>
-                  <td>{op.entityType ?? "—"}</td>
-                  <td>{op.property ?? "—"}</td>
-                  <td>{op.orgValue ?? "—"}</td>
-                  <td>{op.newValue ?? "—"}</td>
-                  <td>{op.annotation ?? "—"}</td>
+    <div>
+      <RequestState
+        signal={signal}
+        on_success={() => {
+          const rows = signal.value?.data ?? [];
+          if (rows.length === 0)
+            return <p class="info-box">{t("processes.audit.empty")}</p>;
+          return (
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("processes.audit.time")}</th>
+                  <th>{t("processes.audit.user")}</th>
+                  <th>{t("processes.audit.operation")}</th>
+                  <th>{t("processes.audit.entity")}</th>
+                  <th>{t("processes.audit.property")}</th>
+                  <th>{t("processes.audit.original-value")}</th>
+                  <th>{t("processes.audit.new-value")}</th>
+                  <th>{t("processes.audit.annotation")}</th>
+                  <th>{t("common.action")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        );
-      }}
-    />
+              </thead>
+              <tbody>
+                {rows.map((op) => (
+                  <tr key={op.id}>
+                    <td>
+                      {op.timestamp ? (
+                        <time datetime={op.timestamp}>
+                          {new Date(Date.parse(op.timestamp)).toLocaleString()}
+                        </time>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td>{op.userId ?? "—"}</td>
+                    <td>{op.operationType ?? "—"}</td>
+                    <td>{op.entityType ?? "—"}</td>
+                    <td>{op.property ?? "—"}</td>
+                    <td>{op.orgValue ?? "—"}</td>
+                    <td>{op.newValue ?? "—"}</td>
+                    <td>{op.annotation ?? "—"}</td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          open_annotation(op.operationId, op.annotation)
+                        }
+                      >
+                        {t("processes.audit.edit-annotation")}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          );
+        }}
+      />
+      <Dialog open={annotation_open} title={t("processes.audit.annotation")}>
+        <label>
+          {t("processes.audit.annotation")}
+          <textarea
+            value={annotation_text.value}
+            onInput={(e) => (annotation_text.value = e.target.value)}
+            placeholder={t("processes.audit.annotation-placeholder")}
+          />
+        </label>
+        <div class="button-group">
+          <button type="button" onClick={save_annotation}>
+            {t("common.save")}
+          </button>
+          <button
+            type="button"
+            class="danger"
+            onClick={() => (confirm_clear.value = true)}
+          >
+            {t("processes.audit.clear-annotation")}
+          </button>
+          <button type="button" onClick={() => (annotation_open.value = false)}>
+            {t("common.cancel")}
+          </button>
+        </div>
+      </Dialog>
+      <ConfirmDialog
+        open={confirm_clear}
+        message={t("processes.audit.confirm-clear")}
+        confirm_label={t("processes.audit.clear-annotation")}
+        on_confirm={clear_annotation}
+      />
+    </div>
   );
 };
 

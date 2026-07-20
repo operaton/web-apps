@@ -1,4 +1,4 @@
-import { GET, PAGINATED_GET } from "../helper.jsx";
+import { GET, PAGINATED_GET, PUT } from "../helper.jsx";
 
 const INSTANCE_PAGE_SIZE = 20;
 
@@ -104,6 +104,24 @@ const get_user_operation = (state, execution_id) =>
     state.api.history.user_operation,
   );
 
+// An operation id groups all log entries of one user action; the annotation
+// applies to the whole operation, so these are keyed by operationId.
+const set_user_operation_annotation = (state, operation_id, annotation) =>
+  PUT(
+    `/history/user-operation/${operation_id}/set-annotation`,
+    { annotation },
+    state,
+    state.api.history.user_operation_annotation,
+  );
+
+const clear_user_operation_annotation = (state, operation_id) =>
+  PUT(
+    `/history/user-operation/${operation_id}/clear-annotation`,
+    {},
+    state,
+    state.api.history.user_operation_annotation,
+  );
+
 /**
  * Finished/historic batches (carry `endTime` once complete).
  * @see https://docs.operaton.org/reference/latest/rest-api/#tag/Historic-Batch
@@ -151,6 +169,8 @@ const history = {
     one: get_historic_batch,
   },
   get_user_operation,
+  set_user_operation_annotation,
+  clear_user_operation_annotation,
 };
 
 export default history;

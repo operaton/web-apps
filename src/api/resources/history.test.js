@@ -3,9 +3,10 @@ import { describe, it, vi, beforeEach, expect } from "vitest";
 vi.mock("../helper.jsx", () => ({
   GET: vi.fn(),
   PAGINATED_GET: vi.fn(),
+  PUT: vi.fn(),
 }));
 
-import { GET, PAGINATED_GET } from "../helper.jsx";
+import { GET, PAGINATED_GET, PUT } from "../helper.jsx";
 import { create_mock_state, expect_api_call } from "../../test/helpers.js";
 import history from "./history.js";
 
@@ -98,6 +99,26 @@ describe("api/resources/history", () => {
       url: "/history/user-operation?processInstanceId=inst-1&sortBy=timestamp&sortOrder=desc",
       state,
       signal: state.api.history.user_operation,
+    });
+  });
+
+  it("set_user_operation_annotation() PUTs the annotation by operationId", () => {
+    history.set_user_operation_annotation(state, "op-1", "note");
+    expect_api_call(PUT, {
+      url: "/history/user-operation/op-1/set-annotation",
+      body: { annotation: "note" },
+      state,
+      signal: state.api.history.user_operation_annotation,
+    });
+  });
+
+  it("clear_user_operation_annotation() PUTs clear by operationId", () => {
+    history.clear_user_operation_annotation(state, "op-1");
+    expect_api_call(PUT, {
+      url: "/history/user-operation/op-1/clear-annotation",
+      body: {},
+      state,
+      signal: state.api.history.user_operation_annotation,
     });
   });
 

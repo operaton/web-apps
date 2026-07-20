@@ -214,6 +214,7 @@ const createAppState = () => {
         one: signal(null),
       },
       user_operation: signal(null),
+      user_operation_annotation: signal(null),
     },
     job_definition: {
       all: {

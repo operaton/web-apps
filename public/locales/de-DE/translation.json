@@ -465,7 +465,11 @@
       "property": "Eigenschaft",
       "original-value": "Ursprünglicher Wert",
       "new-value": "Neuer Wert",
-      "annotation": "Anmerkung"
+      "annotation": "Anmerkung",
+      "edit-annotation": "Anmerkung bearbeiten",
+      "clear-annotation": "Löschen",
+      "annotation-placeholder": "Notiz zu dieser Operation hinzufügen…",
+      "confirm-clear": "Anmerkung für diese Operation löschen?"
     }
   },
   "decisions": {

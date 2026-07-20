@@ -465,7 +465,11 @@
       "property": "Property",
       "original-value": "Original Value",
       "new-value": "New Value",
-      "annotation": "Annotation"
+      "annotation": "Annotation",
+      "edit-annotation": "Edit Annotation",
+      "clear-annotation": "Clear",
+      "annotation-placeholder": "Add a note for this operation…",
+      "confirm-clear": "Clear the annotation for this operation?"
     }
   },
   "decisions": {
