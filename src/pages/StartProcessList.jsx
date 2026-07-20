@@ -5,7 +5,7 @@ import { useSignal } from '@preact/signals'
 import engine_rest, { RequestState, RESPONSE_STATE } from '../api/engine_rest.jsx'
 import { useRoute, useLocation } from 'preact-iso'
 import { CamundaForm } from '../components/CamundaForm.jsx'
-import { form_data_to_vars } from '../components/TaskForm_helpers.js'
+import { form_data_to_vars, schema_variable_keys } from '../components/TaskForm_helpers.js'
 
 const EMBEDDED_APP_PREFIX = 'embedded:app:'
 const FORM_JS_PREFIXES = ['camunda-forms:', 'operaton-forms:']
@@ -324,7 +324,7 @@ const StartCamundaForm = ({ definition_id }) => {
       return
     }
     setError(null)
-    const variables = form_data_to_vars(data, {})
+    const variables = form_data_to_vars(data, {}, schema_variable_keys(schema))
     engine_rest.process_definition
       .submit_form(state, definition_id, { variables })
       .then((result) => {

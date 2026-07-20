@@ -8,6 +8,7 @@ import { CamundaForm } from "./CamundaForm.jsx";
 import {
   vars_to_form_data,
   form_data_to_vars,
+  schema_variable_keys,
   build_legacy_form_data,
   parse_html,
 } from "./TaskForm_helpers.js";
@@ -78,7 +79,10 @@ const CamundaTaskForm = ({ task, taskId }) => {
   }
   if (!vars) return <p class="fade-in-delayed">{t("common.loading")}</p>;
 
-  const initial_data = vars_to_form_data(vars);
+  // Only round-trip the variables the form actually binds, so untouched
+  // Json/Object variables aren't echoed back and rejected on submit (see #92).
+  const allowed = schema_variable_keys(schema);
+  const initial_data = vars_to_form_data(vars, allowed);
 
   const on_submit = ({ data, errors }) => {
     if (errors && Object.keys(errors).length > 0) {
@@ -86,7 +90,7 @@ const CamundaTaskForm = ({ task, taskId }) => {
       return;
     }
     setError(null);
-    const payload = form_data_to_vars(data, vars);
+    const payload = form_data_to_vars(data, vars, allowed);
     engine_rest.task
       .post_task_form(state, taskId, payload)
       .then(() => {

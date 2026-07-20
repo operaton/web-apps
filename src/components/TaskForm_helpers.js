@@ -9,10 +9,32 @@ import DOMPurify from "dompurify";
 
 // ---- Camunda Forms (form-js) variable mapping ------------------------------
 
-/** Map engine form-variables ({ name: { value, type } }) to flat form data. */
-export const vars_to_form_data = (vars) => {
+/**
+ * Collect the engine variable names a form-js schema binds, walking nested
+ * component groups. Path keys (`a.b`) map to the first segment, which is the
+ * engine variable (see #92).
+ */
+export const schema_variable_keys = (schema) => {
+  const keys = new Set();
+  const walk = (components) => {
+    for (const c of components ?? []) {
+      if (c.key) keys.add(c.key.split(".")[0]);
+      if (c.components) walk(c.components);
+    }
+  };
+  walk(schema?.components);
+  return keys;
+};
+
+/**
+ * Map engine form-variables ({ name: { value, type } }) to flat form data.
+ * When `allowed` (a Set of variable names) is given, only those are kept so
+ * untouched Json/Object variables never enter the form round-trip (see #92).
+ */
+export const vars_to_form_data = (vars, allowed) => {
   const out = {};
   for (const [k, entry] of Object.entries(vars ?? {})) {
+    if (allowed && !allowed.has(k)) continue;
     out[k] = entry?.value;
   }
   return out;
@@ -30,9 +52,10 @@ export const infer_type = (v) => {
  * Map flat form data back to engine variables, preserving the original type
  * where known and inferring it otherwise.
  */
-export const form_data_to_vars = (data, originalVars) => {
+export const form_data_to_vars = (data, originalVars, allowed) => {
   const out = {};
   for (const [k, value] of Object.entries(data ?? {})) {
+    if (allowed && !allowed.has(k)) continue;
     const original = originalVars?.[k];
     out[k] = { value, type: original?.type ?? infer_type(value) };
   }
