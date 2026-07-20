@@ -218,9 +218,18 @@ const ProcessesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Activity instances are only available for live (non-history) instances.
+  // Activity instances power the diagram tokens and the activity history tab.
+  // Live instances use the runtime endpoint; historic (finished) instances use
+  // /history/activity-instance. Owned here so both the diagram and the tab read
+  // one signal without racing each other's lifecycles (see #99, #100).
   useEffect(() => {
-    if (params.selection_id && !history_mode) {
+    if (!params.selection_id) return;
+    if (history_mode) {
+      void engine_rest.history.activity_instance.by_process_instance(
+        state,
+        params.selection_id,
+      );
+    } else {
       void engine_rest.process_instance.activity_instances(
         state,
         params.selection_id,
@@ -241,6 +250,7 @@ const ProcessesPage = () => {
       state.api.process.instance.list.value = null;
       state.api.process.instance.one.value = null;
       state.api.process.instance.activity_instances.value = null;
+      state.api.history.activity_instance.by_process_instance.value = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.definition_id]);
@@ -534,6 +544,30 @@ const activity_instances_to_tokens = (root) => {
   return Array.from(grouped.values());
 };
 
+// Historic activity instances arrive as a flat list; group by activityId into
+// the token shape the viewer expects, carrying a `canceled` marker (see #99).
+const historic_activity_instances_to_tokens = (list) => {
+  const grouped = new Map();
+  (list ?? []).forEach((a) => {
+    if (!a.activityId) return;
+    const existing = grouped.get(a.activityId);
+    if (existing) {
+      existing.instances += 1;
+      existing.activity_instance_ids.push(a.id);
+      if (a.canceled) existing.canceled = true;
+    } else {
+      grouped.set(a.activityId, {
+        id: a.activityId,
+        instances: 1,
+        incidents: [],
+        activity_instance_ids: [a.id],
+        canceled: !!a.canceled,
+      });
+    }
+  });
+  return Array.from(grouped.values());
+};
+
 const ProcessDiagram = () => {
   const state = useContext(AppState),
     {
@@ -542,11 +576,16 @@ const ProcessDiagram = () => {
           definition: { diagram, statistics },
           instance: { activity_instances },
         },
+        history: {
+          activity_instance: { by_process_instance: historic_activities },
+        },
       },
     } = state,
     { params, query } = useRoute(),
     history_mode = query.history === "true",
     is_instance_view = params.selection_id !== undefined && !history_mode,
+    is_history_instance_view =
+      params.selection_id !== undefined && history_mode,
     has_xml =
       diagram.value?.data?.bpmn20Xml !== null &&
       diagram.value?.data?.bpmn20Xml !== undefined,
@@ -556,11 +595,22 @@ const ProcessDiagram = () => {
     has_activity_instances =
       activity_instances.value?.data !== undefined &&
       activity_instances.value?.data !== null,
-    is_ready = is_instance_view ? has_activity_instances : has_statistics,
+    has_historic_activities = historic_activities.value?.data != null,
+    is_ready = is_instance_view
+      ? has_activity_instances
+      : is_history_instance_view
+        ? has_historic_activities
+        : has_statistics,
     tokens = is_instance_view
       ? activity_instances_to_tokens(activity_instances.value?.data)
-      : statistics.value?.data,
-    mode = is_instance_view ? "instance" : "definition",
+      : is_history_instance_view
+        ? historic_activity_instances_to_tokens(historic_activities.value?.data)
+        : statistics.value?.data,
+    mode = is_instance_view
+      ? "instance"
+      : is_history_instance_view
+        ? "history"
+        : "definition",
     instance_id = is_instance_view ? params.selection_id : undefined;
 
   /** @namespace diagram.value.data.bpmn20Xml **/
@@ -2467,20 +2517,10 @@ const InstanceExternalTasks = () => {
 // instance (start/service/user tasks, gateways, events …) with timestamps.
 const InstanceActivityHistory = () => {
   const state = useContext(AppState),
-    { params } = useRoute(),
     [t] = useTranslation(),
+    // Fetched by ProcessesPage (shared with the history diagram), so this tab
+    // only reads the signal.
     signal = state.api.history.activity_instance.by_process_instance;
-
-  useEffect(() => {
-    void engine_rest.history.activity_instance.by_process_instance(
-      state,
-      params.selection_id,
-    );
-    return () => {
-      signal.value = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.selection_id]);
 
   return (
     <RequestState

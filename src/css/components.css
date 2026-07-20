@@ -1062,6 +1062,19 @@ div.accordion {
   box-shadow: 0 0 0 2px #fff;
 }
 
+/* History mode: canceled activity badge + element outline (see #99). */
+.bpmn-token-count.bpmn-token-canceled {
+  background: var(--color-danger, #bb2511);
+}
+
+.bpmn-canceled .djs-visual rect,
+.bpmn-canceled .djs-visual circle,
+.bpmn-canceled .djs-visual polygon {
+  stroke: var(--color-danger, #bb2511) !important;
+  stroke-dasharray: 5 3 !important;
+  filter: drop-shadow(0 0 6px var(--color-danger, #bb2511));
+}
+
 .bpmn-drop-target .djs-visual rect,
 .bpmn-drop-target .djs-visual circle,
 .bpmn-drop-target .djs-visual polygon {
