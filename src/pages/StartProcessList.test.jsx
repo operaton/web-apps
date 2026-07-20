@@ -42,6 +42,8 @@ describe("StartProcessList", () => {
   beforeEach(() => {
     state = create_mock_state();
     mockParams = { tab: null };
+    // The form dispatch chains start_form().then(...), so it must resolve.
+    engine_rest.process_definition.start_form.mockResolvedValue(undefined);
   });
   afterEach(cleanup);
 
@@ -105,16 +107,15 @@ describe("StartProcessList", () => {
   it("loads the start form once the selected definition resolves", () => {
     mockParams = { tab: "p1" };
     signal_response(state.api.process.definition.one, { id: "p1", key: "inv" });
-    // The page chains start_form().then(() => get_task_form(... start_form.value.data.key ...)),
-    // so populate the start_form signal and resolve the promise.
+    // The form dispatch fetches the start form metadata by definition id, then
+    // resolves the source from its form key.
     signal_response(state.api.process.definition.start_form, {
       key: "embedded:app:inv",
     });
-    engine_rest.process_definition.start_form.mockResolvedValue(undefined);
     renderPage(state);
     expect(engine_rest.process_definition.start_form).toHaveBeenCalled();
     expect(engine_rest.process_definition.start_form.mock.lastCall[1]).toBe(
-      "inv",
+      "p1",
     );
   });
 

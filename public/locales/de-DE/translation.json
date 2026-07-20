@@ -199,8 +199,9 @@
       "fetch-failed": "Formular konnte nicht geladen werden",
       "validation-error": "Bitte beheben Sie die obigen Fehler und versuchen Sie es erneut.",
       "complete-directly": "Ohne Formular abschließen",
-      "legacy-html-unsupported": "Ältere AngularJS-Aufgabenformulare werden von den neuen Web-Anwendungen nicht unterstützt. Bitte wechseln Sie zu form-js.",
-      "legacy-html-migrate-link": "Anleitung zur Migration"
+      "legacy-html-unsupported": "Ältere AngularJS-Formulare werden von den neuen Web-Anwendungen nicht unterstützt. Bitte wechseln Sie zu form-js.",
+      "legacy-html-migrate-link": "Anleitung zur Migration",
+      "unsupported": "Dieser Startformular-Typ wird noch nicht unterstützt."
     },
     "start-process": {
       "title": "Aufgabe starten",
@@ -209,7 +210,9 @@
       "version": "Version",
       "description": "Beschreibung",
       "select-definition": "Wählen Sie eine Prozessdefinition aus",
-      "start": "Prozess starten"
+      "start": "Prozess starten",
+      "no-form": "Dieser Prozess hat kein Startformular. Sie können ihn direkt starten.",
+      "business-key": "Geschäftsschlüssel (optional)"
     },
     "filter": {
       "title": "Filter-Editor",

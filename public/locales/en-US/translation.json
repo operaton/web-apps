@@ -199,8 +199,9 @@
       "fetch-failed": "Could not load form",
       "validation-error": "Please fix the errors above and try again.",
       "complete-directly": "Complete without form",
-      "legacy-html-unsupported": "Legacy AngularJS task forms are not supported by the new web applications. Please switch to form-js.",
-      "legacy-html-migrate-link": "How to migrate"
+      "legacy-html-unsupported": "Legacy AngularJS forms are not supported by the new web applications. Please switch to form-js.",
+      "legacy-html-migrate-link": "How to migrate",
+      "unsupported": "This start form type is not supported yet."
     },
     "start-process": {
       "title": "Start Task",
@@ -209,7 +210,9 @@
       "version": "Version",
       "description": "Description",
       "select-definition": "Select a process definition",
-      "start": "Start Process"
+      "start": "Start Process",
+      "no-form": "This process has no start form. You can start it directly.",
+      "business-key": "Business Key (optional)"
     },
     "filter": {
       "title": "Filter Editor",

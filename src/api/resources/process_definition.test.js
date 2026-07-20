@@ -108,10 +108,10 @@ describe("api/resources/process_definition", () => {
     });
   });
 
-  it("start_form() GETs the start form by key", () => {
-    process_definition.start_form(state, "myKey");
+  it("start_form() GETs the start form metadata by definition id", () => {
+    process_definition.start_form(state, "def-1");
     expect_api_call(GET, {
-      url: "/process-definition/key/myKey/startForm",
+      url: "/process-definition/def-1/startForm",
       state,
       signal: state.api.process.definition.start_form,
     });

@@ -75,13 +75,12 @@ const get_startable_process_definitions = (state) =>
 const get_deployed_start_form = (state, processId) =>
   GET(`/process-definition/${processId}/deployed-start-form`, state, state.api.process.definition.deployed_start_form)
 
+// Start form metadata ({ key, contextPath }) by definition id.
 const get_start_form = (state, processId) =>
-  // GET(`/process-definition/${processId}/deployed-start-form`, state, state.api.process.definition.start_form)
-  GET(`/process-definition/key/${processId}/startForm`, state, state.api.process.definition.start_form)
-  // GET(`/process-definition/${processId}/rendered-form`, state, state.api.process.definition.start_form)
+  GET(`/process-definition/${processId}/startForm`, state, state.api.process.definition.start_form)
 
-export const get_rendered_start_form = async (state, id) =>
-  GET_TEXT(`/process-definition/${id}/rendered-form`, state, state.api.process.definition.rendered_form)
+export const get_rendered_start_form = async (state, id, signal = state.api.process.definition.rendered_form) =>
+  GET_TEXT(`/process-definition/${id}/rendered-form`, state, signal)
 
 export const start_process_submit_form = (state, id, body = {}) =>
   POST(`/process-definition/${id}/submit-form`, body, state, state.api.process.definition.submit_form)
