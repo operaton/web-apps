@@ -1075,6 +1075,18 @@ div.accordion {
   filter: drop-shadow(0 0 6px var(--color-danger, #bb2511));
 }
 
+/* Job stacktrace / external-task error-details drill-down (see #98). */
+.failure-log {
+  max-height: 60vh;
+  max-width: 80vw;
+  overflow: auto;
+  padding: var(--spacing-1, 0.5em);
+  background: var(--color-background-alt, #f5f5f5);
+  border-radius: var(--border-radius-1, 4px);
+  font-size: 0.8em;
+  white-space: pre;
+}
+
 .bpmn-drop-target .djs-visual rect,
 .bpmn-drop-target .djs-visual circle,
 .bpmn-drop-target .djs-visual polygon {

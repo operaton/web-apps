@@ -383,7 +383,8 @@
       "retries": "Wiederholungen",
       "set-due-date": "Fälligkeitsdatum setzen",
       "exception": "Fehler",
-      "set-retries": "Wiederholungen setzen"
+      "set-retries": "Wiederholungen setzen",
+      "stacktrace": "Stacktrace"
     },
     "sort": {
       "name": "Name",
@@ -446,7 +447,9 @@
       "topic": "Thema",
       "worker": "Worker",
       "lock-expiration": "Sperre läuft ab",
-      "unlock": "Entsperren"
+      "unlock": "Entsperren",
+      "priority": "Priorität",
+      "error-details": "Fehlerdetails"
     },
     "activity-history": {
       "empty": "Keine Aktivitätshistorie für diese Instanz.",

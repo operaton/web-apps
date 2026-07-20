@@ -383,7 +383,8 @@
       "retries": "Retries",
       "set-due-date": "Set due date",
       "exception": "Exception",
-      "set-retries": "Set retries"
+      "set-retries": "Set retries",
+      "stacktrace": "Stacktrace"
     },
     "sort": {
       "name": "Name",
@@ -446,7 +447,9 @@
       "topic": "Topic",
       "worker": "Worker",
       "lock-expiration": "Lock expiration",
-      "unlock": "Unlock"
+      "unlock": "Unlock",
+      "priority": "Priority",
+      "error-details": "Error Details"
     },
     "activity-history": {
       "empty": "No activity history for this instance.",

@@ -2298,7 +2298,8 @@ const InstanceJobs = () => {
     [t] = useTranslation(),
     duedate_open = useSignal(false),
     duedate_id = useSignal(null),
-    duedate_value = useSignal("");
+    duedate_value = useSignal(""),
+    stacktrace_open = useSignal(false);
 
   const load = () =>
     void engine_rest.job.by_process_instance(state, params.selection_id);
@@ -2307,6 +2308,12 @@ const InstanceJobs = () => {
     if (!history_mode) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.selection_id, history_mode]);
+
+  const show_stacktrace = (id) => {
+    state.api.job.stacktrace.value = null;
+    void engine_rest.job.stacktrace(state, id);
+    stacktrace_open.value = true;
+  };
 
   const retry = async (id) => {
     await engine_rest.job.set_retries(state, id, 1);
@@ -2394,6 +2401,14 @@ const InstanceJobs = () => {
                     >
                       {t("processes.jobs.set-due-date")}
                     </button>
+                    {job.exceptionMessage && (
+                      <button
+                        type="button"
+                        onClick={() => show_stacktrace(job.id)}
+                      >
+                        {t("processes.jobs.stacktrace")}
+                      </button>
+                    )}
                   </div>
                 )}
               </td>
@@ -2423,6 +2438,21 @@ const InstanceJobs = () => {
           </button>
         </div>
       </Dialog>
+      <Dialog open={stacktrace_open} title={t("processes.jobs.stacktrace")}>
+        <RequestState
+          signal={state.api.job.stacktrace}
+          on_success={() => (
+            <pre class="failure-log">
+              {state.api.job.stacktrace.value?.data}
+            </pre>
+          )}
+        />
+        <div class="button-group">
+          <button type="button" onClick={() => (stacktrace_open.value = false)}>
+            {t("common.close")}
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 };
@@ -2431,7 +2461,8 @@ const InstanceExternalTasks = () => {
   const state = useContext(AppState),
     { params, query } = useRoute(),
     history_mode = query.history === "true",
-    [t] = useTranslation();
+    [t] = useTranslation(),
+    error_open = useSignal(false);
 
   const load = () =>
     void engine_rest.external_task.by_process_instance(
@@ -2454,6 +2485,12 @@ const InstanceExternalTasks = () => {
     load();
   };
 
+  const show_error = (id) => {
+    state.api.external_task.error_details.value = null;
+    void engine_rest.external_task.error_details(state, id);
+    error_open.value = true;
+  };
+
   /** @namespace state.api.external_task.by_process_instance.value.data **/
   return (
     <div>
@@ -2467,6 +2504,7 @@ const InstanceExternalTasks = () => {
             <th>{t("processes.external-tasks.worker")}</th>
             <th>{t("common.activity")}</th>
             <th>{t("processes.jobs.retries")}</th>
+            <th>{t("processes.external-tasks.priority")}</th>
             <th>{t("processes.external-tasks.lock-expiration")}</th>
             <th>{t("processes.jobs.exception")}</th>
             <th>{t("common.action")}</th>
@@ -2480,6 +2518,7 @@ const InstanceExternalTasks = () => {
                 <td>{task.workerId ?? "—"}</td>
                 <td>{task.activityId}</td>
                 <td>{task.retries ?? "—"}</td>
+                <td>{task.priority ?? "—"}</td>
                 <td>
                   {task.lockExpirationTime ? (
                     <time datetime={task.lockExpirationTime}>
@@ -2501,6 +2540,14 @@ const InstanceExternalTasks = () => {
                           {t("processes.external-tasks.unlock")}
                         </button>
                       )}
+                      {task.errorMessage && (
+                        <button
+                          type="button"
+                          onClick={() => show_error(task.id)}
+                        >
+                          {t("processes.external-tasks.error-details")}
+                        </button>
+                      )}
                     </div>
                   )}
                 </td>
@@ -2509,6 +2556,24 @@ const InstanceExternalTasks = () => {
           )}
         </tbody>
       </table>
+      <Dialog
+        open={error_open}
+        title={t("processes.external-tasks.error-details")}
+      >
+        <RequestState
+          signal={state.api.external_task.error_details}
+          on_success={() => (
+            <pre class="failure-log">
+              {state.api.external_task.error_details.value?.data}
+            </pre>
+          )}
+        />
+        <div class="button-group">
+          <button type="button" onClick={() => (error_open.value = false)}>
+            {t("common.close")}
+          </button>
+        </div>
+      </Dialog>
     </div>
   );
 };
