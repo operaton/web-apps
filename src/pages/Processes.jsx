@@ -2578,6 +2578,72 @@ const InstanceExternalTasks = () => {
   );
 };
 
+// History-only: the user operation log (audit trail) for the instance —
+// time, user, operation, entity, property, original/new value, annotation.
+const InstanceAuditLog = () => {
+  const state = useContext(AppState),
+    { params } = useRoute(),
+    [t] = useTranslation(),
+    signal = state.api.history.user_operation;
+
+  useEffect(() => {
+    void engine_rest.history.get_user_operation(state, params.selection_id);
+    return () => {
+      signal.value = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id]);
+
+  return (
+    <RequestState
+      signal={signal}
+      on_success={() => {
+        const rows = signal.value?.data ?? [];
+        if (rows.length === 0)
+          return <p class="info-box">{t("processes.audit.empty")}</p>;
+        return (
+          <table>
+            <thead>
+              <tr>
+                <th>{t("processes.audit.time")}</th>
+                <th>{t("processes.audit.user")}</th>
+                <th>{t("processes.audit.operation")}</th>
+                <th>{t("processes.audit.entity")}</th>
+                <th>{t("processes.audit.property")}</th>
+                <th>{t("processes.audit.original-value")}</th>
+                <th>{t("processes.audit.new-value")}</th>
+                <th>{t("processes.audit.annotation")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((op) => (
+                <tr key={op.id}>
+                  <td>
+                    {op.timestamp ? (
+                      <time datetime={op.timestamp}>
+                        {new Date(Date.parse(op.timestamp)).toLocaleString()}
+                      </time>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>{op.userId ?? "—"}</td>
+                  <td>{op.operationType ?? "—"}</td>
+                  <td>{op.entityType ?? "—"}</td>
+                  <td>{op.property ?? "—"}</td>
+                  <td>{op.orgValue ?? "—"}</td>
+                  <td>{op.newValue ?? "—"}</td>
+                  <td>{op.annotation ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      }}
+    />
+  );
+};
+
 // History-only: chronological list of every executed activity for the
 // instance (start/service/user tasks, gateways, events …) with timestamps.
 const InstanceActivityHistory = () => {
@@ -2690,6 +2756,13 @@ const process_instance_tabs = [
     pos: 6,
     history_only: true,
     Component: InstanceActivityHistory,
+  },
+  {
+    nameKey: "processes.tabs.audit-log",
+    id: "audit_log",
+    pos: 7,
+    history_only: true,
+    Component: InstanceAuditLog,
   },
 ];
 

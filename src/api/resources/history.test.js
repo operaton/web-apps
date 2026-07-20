@@ -95,7 +95,7 @@ describe("api/resources/history", () => {
   it("get_user_operation() GETs user operations filtered by instance", () => {
     history.get_user_operation(state, "inst-1");
     expect_api_call(GET, {
-      url: "/history/user-operation?processInstanceId=inst-1",
+      url: "/history/user-operation?processInstanceId=inst-1&sortBy=timestamp&sortOrder=desc",
       state,
       signal: state.api.history.user_operation,
     });

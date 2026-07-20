@@ -317,7 +317,8 @@
       "called-instances": "Called Instances",
       "user-tasks": "User Tasks",
       "external-tasks": "External Tasks",
-      "activity": "Activity"
+      "activity": "Activity",
+      "audit-log": "Audit Log"
     },
     "subnav": {
       "definitions": "Definitions",
@@ -454,6 +455,17 @@
     "activity-history": {
       "empty": "No activity history for this instance.",
       "canceled": "Canceled"
+    },
+    "audit": {
+      "empty": "No audit log entries for this instance.",
+      "time": "Time",
+      "user": "User",
+      "operation": "Operation",
+      "entity": "Entity",
+      "property": "Property",
+      "original-value": "Original Value",
+      "new-value": "New Value",
+      "annotation": "Annotation"
     }
   },
   "decisions": {

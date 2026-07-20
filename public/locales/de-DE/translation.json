@@ -317,7 +317,8 @@
       "called-instances": "Aufgerufene Instanzen",
       "user-tasks": "Benutzeraufgaben",
       "external-tasks": "Externe Aufgaben",
-      "activity": "Aktivitäten"
+      "activity": "Aktivitäten",
+      "audit-log": "Audit-Log"
     },
     "subnav": {
       "definitions": "Definitionen",
@@ -454,6 +455,17 @@
     "activity-history": {
       "empty": "Keine Aktivitätshistorie für diese Instanz.",
       "canceled": "Abgebrochen"
+    },
+    "audit": {
+      "empty": "Keine Audit-Log-Einträge für diese Instanz.",
+      "time": "Zeit",
+      "user": "Benutzer",
+      "operation": "Operation",
+      "entity": "Entität",
+      "property": "Eigenschaft",
+      "original-value": "Ursprünglicher Wert",
+      "new-value": "Neuer Wert",
+      "annotation": "Anmerkung"
     }
   },
   "decisions": {

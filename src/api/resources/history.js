@@ -99,7 +99,7 @@ const get_historic_called_instances = (state, instance_id) =>
  */
 const get_user_operation = (state, execution_id) =>
   GET(
-    `/history/user-operation?processInstanceId=${execution_id}`,
+    `/history/user-operation?processInstanceId=${execution_id}&sortBy=timestamp&sortOrder=desc`,
     state,
     state.api.history.user_operation,
   );
