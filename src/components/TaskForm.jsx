@@ -121,9 +121,12 @@ const CamundaTaskForm = ({ task, taskId }) => {
 const EmbeddedHtmlTaskForm = ({ formKey }) => {
   const state = useContext(AppState);
 
-  if (!state.api.task.form.value) {
+  // Fetch in an effect keyed on the form key so switching tasks refetches
+  // instead of showing the previous task's embedded form (see #102).
+  useEffect(() => {
     void engine_rest.task.get_task_form(state, formKey.substring(13));
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formKey]);
 
   return (
     <RequestState
@@ -146,13 +149,18 @@ const RenderedFallbackForm = ({ task, taskId }) => {
     [generated, setGenerated] = useState(""),
     [error, setError] = useState(null);
 
-  if (!state.api.task.rendered_form.value) {
-    void engine_rest.task.get_task_rendered_form(state, task.id);
-  }
-  const rendered_form = state.api.task.rendered_form.value;
-  if (rendered_form?.data && generated === "") {
-    setGenerated(parse_html(state, rendered_form.data));
-  }
+  // Fetch in an effect keyed on the task id and reset the generated markup so
+  // switching tasks refetches instead of keeping the previous form (see #102).
+  useEffect(() => {
+    setGenerated("");
+    void engine_rest.task.get_task_rendered_form(state, task.id).then(() => {
+      const rendered_form = state.api.task.rendered_form.value;
+      if (rendered_form?.data) {
+        setGenerated(parse_html(state, rendered_form.data));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task.id]);
 
   return (
     <>

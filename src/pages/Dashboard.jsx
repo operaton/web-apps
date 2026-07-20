@@ -1,4 +1,4 @@
-import { useContext } from "preact/hooks";
+import { useContext, useEffect } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { AppState } from "../state.js";
@@ -9,14 +9,19 @@ export const DashboardPage = () => {
   const state = useContext(AppState),
     [t] = useTranslation();
 
-  if (state.api.task.list.value === null)
-    void engine_rest.task.get_tasks(state);
-  if (state.api.process.definition.list.value === null)
-    void engine_rest.process_definition.list(state);
-  if (state.api.deployment.all.value === null)
-    void engine_rest.deployment.all(state);
-  if (state.api.decision.definitions.value === null)
-    void engine_rest.decision.get_decision_definitions(state);
+  // Load the dashboard cards once on mount. Fetching lives in an effect, not
+  // the component body, so signal writes don't re-trigger fetches (see #102).
+  useEffect(() => {
+    if (state.api.task.list.value === null)
+      void engine_rest.task.get_tasks(state);
+    if (state.api.process.definition.list.value === null)
+      void engine_rest.process_definition.list(state);
+    if (state.api.deployment.all.value === null)
+      void engine_rest.deployment.all(state);
+    if (state.api.decision.definitions.value === null)
+      void engine_rest.decision.get_decision_definitions(state);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const username =
     state.auth.user.id.value ?? state.auth.credentials.value?.username;
