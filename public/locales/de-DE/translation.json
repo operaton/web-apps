@@ -294,6 +294,11 @@
     "enable-history-mode": "Verlaufsmodus aktivieren",
     "start-time": "Startzeit",
     "business-key": "Geschäftsschlüssel",
+    "state": "Status",
+    "end-time": "Endzeit",
+    "duration": "Dauer",
+    "started-by": "Gestartet von",
+    "delete-reason": "Löschgrund",
     "instance-id": "Instanz-ID",
     "change-instance": "Instanz wechseln",
     "col-abbr": {

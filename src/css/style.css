@@ -1485,3 +1485,30 @@
     backdrop-filter: blur(6px);
   }
 }
+
+/* Historic process-instance state badge (see #101). */
+.instance-state {
+  display: inline-block;
+  padding: 0.1em 0.6em;
+  border-radius: 1em;
+  font-size: 0.85em;
+  font-weight: 600;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.instance-state.state-active {
+  color: var(--color-success);
+}
+
+.instance-state.state-completed {
+  color: var(--color-muted, #666);
+}
+
+.instance-state.state-externally_terminated,
+.instance-state.state-internally_terminated {
+  color: var(--color-danger);
+}
+
+.instance-state.state-suspended {
+  color: var(--color-warning);
+}

@@ -294,6 +294,11 @@
     "enable-history-mode": "Enable History Mode",
     "start-time": "Start Time",
     "business-key": "Business Key",
+    "state": "State",
+    "end-time": "End Time",
+    "duration": "Duration",
+    "started-by": "Started By",
+    "delete-reason": "Delete Reason",
     "instance-id": "Instance ID",
     "change-instance": "Change Instance",
     "col-abbr": {

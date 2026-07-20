@@ -25,6 +25,7 @@ import {
   hydrate_signal,
   update_saved_filter,
 } from "../helper/saved_filters.js";
+import { formatDuration } from "../helper/date_formatter.js";
 
 const RESOURCE_TYPE = "process_definition";
 const INSTANCE_RESOURCE_TYPE = "process_instance";
@@ -1099,6 +1100,56 @@ const InstanceDetailsDescription = () => {
         </dd>
         <dt>{t("processes.business-key")}</dt>
         <dd>{data?.businessKey ?? "—"}</dd>
+        {/* History-only fields: absent from the runtime payload, so these rows
+            only appear in history mode (see #101). */}
+        {data?.state && (
+          <>
+            <dt>{t("processes.state")}</dt>
+            <dd>
+              <span class={`instance-state state-${data.state.toLowerCase()}`}>
+                {data.state}
+              </span>
+            </dd>
+          </>
+        )}
+        {data?.startTime && (
+          <>
+            <dt>{t("processes.start-time")}</dt>
+            <dd>
+              <time datetime={data.startTime}>
+                {new Date(Date.parse(data.startTime)).toLocaleString()}
+              </time>
+            </dd>
+          </>
+        )}
+        {data?.endTime && (
+          <>
+            <dt>{t("processes.end-time")}</dt>
+            <dd>
+              <time datetime={data.endTime}>
+                {new Date(Date.parse(data.endTime)).toLocaleString()}
+              </time>
+            </dd>
+          </>
+        )}
+        {data?.durationInMillis != null && (
+          <>
+            <dt>{t("processes.duration")}</dt>
+            <dd>{formatDuration(data.durationInMillis)}</dd>
+          </>
+        )}
+        {data?.startUserId && (
+          <>
+            <dt>{t("processes.started-by")}</dt>
+            <dd>{data.startUserId}</dd>
+          </>
+        )}
+        {data?.deleteReason && (
+          <>
+            <dt>{t("processes.delete-reason")}</dt>
+            <dd>{data.deleteReason}</dd>
+          </>
+        )}
       </dl>
       {!history_mode && data && (
         <div class="button-group">
