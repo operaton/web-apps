@@ -1,9 +1,11 @@
-import { useContext, useEffect } from 'preact/hooks'
+import { useContext, useEffect, useRef, useState } from 'preact/hooks'
 import { useTranslation } from 'react-i18next'
 import { AppState } from '../state.js'
 import { useSignal } from '@preact/signals'
 import engine_rest, { RequestState, RESPONSE_STATE } from '../api/engine_rest.jsx'
 import { useRoute, useLocation } from 'preact-iso'
+import { CamundaForm } from '../components/CamundaForm.jsx'
+import { form_data_to_vars } from '../components/TaskForm_helpers.js'
 
 const EMBEDDED_APP_PREFIX = 'embedded:app:'
 const FORM_JS_PREFIXES = ['camunda-forms:', 'operaton-forms:']
@@ -155,6 +157,7 @@ const StartProcessForm = () => {
   //   - otherwise → the engine's server-rendered (generated) start form
   useEffect(() => {
     state.api.task.form.value = null
+    state.api.process.definition.deployed_start_form.value = null
     parsed_html.value = null
     form_fields.value = []
     form_mode.value = 'loading'
@@ -176,7 +179,11 @@ const StartProcessForm = () => {
           )
         }
       } else if (FORM_JS_PREFIXES.some((p) => form_key?.startsWith(p))) {
-        form_mode.value = 'unsupported'
+        form_mode.value = 'form-js'
+        void engine_rest.process_definition.get_deployed_start_form(
+          state,
+          params.tab
+        )
       } else {
         form_mode.value = 'rendered'
         void engine_rest.process_definition.rendered_start_form(
@@ -262,6 +269,8 @@ const StartProcessForm = () => {
             {t("tasks.form.legacy-html-migrate-link")}
           </a>
         </p>
+      : form_mode.value === 'form-js'
+        ? <StartCamundaForm definition_id={params.tab} />
       : form_mode.value === 'unsupported'
         ? <p class="info-box">{t("tasks.form.unsupported")}</p>
         : form_mode.value === 'no-form'
@@ -284,6 +293,60 @@ const StartProcessForm = () => {
                 </div>
               </form>
             : <p class="fade-in-delayed">{t("common.loading")}</p>}
+  </div>
+}
+
+// form-js (deployed) start form — mirrors the task-side CamundaTaskForm, fed by
+// /process-definition/{id}/deployed-start-form and submitted via submit-form
+// (see #95). Start forms have no pre-existing scope, so initial data is empty
+// and only schema-bound fields are submitted.
+const StartCamundaForm = ({ definition_id }) => {
+  const
+    state = useContext(AppState),
+    { route } = useLocation(),
+    [t] = useTranslation(),
+    [error, setError] = useState(null),
+    submit_ref = useRef(null)
+
+  const deployed = state.api.process.definition.deployed_start_form.value,
+    schema = deployed?.data
+
+  if (!schema || typeof schema !== 'object' || !Array.isArray(schema.components)) {
+    if (deployed?.status === RESPONSE_STATE.ERROR) {
+      return <p class="error" role="alert">{t("tasks.form.fetch-failed")}</p>
+    }
+    return <p class="fade-in-delayed">{t("common.loading")}</p>
+  }
+
+  const on_submit = ({ data, errors }) => {
+    if (errors && Object.keys(errors).length > 0) {
+      setError(t("tasks.form.validation-error"))
+      return
+    }
+    setError(null)
+    const variables = form_data_to_vars(data, {})
+    engine_rest.process_definition
+      .submit_form(state, definition_id, { variables })
+      .then((result) => {
+        if (result?.status === RESPONSE_STATE.SUCCESS) route('/tasks')
+        else setError(result?.error?.message ?? t("tasks.form.unknown-error"))
+      })
+      .catch((e) => setError(e?.message ?? t("tasks.form.unknown-error")))
+  }
+
+  return <div class="task-form camunda-task-form">
+    <CamundaForm
+      schema={schema}
+      data={{}}
+      on_submit={on_submit}
+      on_ready={(c) => (submit_ref.current = c.submit)}
+    />
+    {error && <p class="error" role="alert">{error}</p>}
+    <div class="form-buttons">
+      <button type="button" onClick={() => submit_ref.current?.()}>
+        {t("tasks.start-process.start")}
+      </button>
+    </div>
   </div>
 }
 
