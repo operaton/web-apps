@@ -170,7 +170,11 @@ const RenderedFallbackForm = ({ task, taskId }) => {
   // switching tasks refetches instead of keeping the previous form (see #102).
   useEffect(() => {
     setGenerated("");
-    void engine_rest.task.get_task_rendered_form(state, task.id).then(() => {
+    // Wrap in Promise.resolve so this is robust whether the fetch returns a
+    // promise (production) or not (mocked in tests).
+    Promise.resolve(
+      engine_rest.task.get_task_rendered_form(state, task.id),
+    ).then(() => {
       const rendered_form = state.api.task.rendered_form.value;
       if (rendered_form?.data) {
         setGenerated(parse_html(state, rendered_form.data));
