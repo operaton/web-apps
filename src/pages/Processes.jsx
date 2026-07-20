@@ -1044,15 +1044,19 @@ const InstanceDetails = () => {
 
   const { params: route_params } = useRoute();
   const sub_panel = route_params.sub_panel;
+  // History-only tabs (e.g. the activity history, #100) are hidden in the
+  // live view.
+  const visible_tabs = process_instance_tabs.filter(
+    (tab) => history_mode || !tab.history_only,
+  );
   const active_tab =
-    process_instance_tabs.find((tab) => tab.id === sub_panel) ??
-    process_instance_tabs[0];
+    visible_tabs.find((tab) => tab.id === sub_panel) ?? visible_tabs[0];
 
   return (
     <>
       <InstanceDetailsDescription />
       <ProcessTertiaryNav
-        tabs={process_instance_tabs}
+        tabs={visible_tabs}
         base_path={`/processes/${definition_id}/${panel}/${selection_id}`}
       />
       <div>{active_tab ? <active_tab.Component /> : null}</div>
@@ -2459,6 +2463,85 @@ const InstanceExternalTasks = () => {
   );
 };
 
+// History-only: chronological list of every executed activity for the
+// instance (start/service/user tasks, gateways, events …) with timestamps.
+const InstanceActivityHistory = () => {
+  const state = useContext(AppState),
+    { params } = useRoute(),
+    [t] = useTranslation(),
+    signal = state.api.history.activity_instance.by_process_instance;
+
+  useEffect(() => {
+    void engine_rest.history.activity_instance.by_process_instance(
+      state,
+      params.selection_id,
+    );
+    return () => {
+      signal.value = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.selection_id]);
+
+  return (
+    <RequestState
+      signal={signal}
+      on_success={() => {
+        const rows = signal.value?.data ?? [];
+        if (rows.length === 0)
+          return (
+            <p class="info-box">{t("processes.activity-history.empty")}</p>
+          );
+        return (
+          <table>
+            <thead>
+              <tr>
+                <th>{t("common.activity")}</th>
+                <th>{t("common.type")}</th>
+                <th>{t("processes.start-time")}</th>
+                <th>{t("processes.end-time")}</th>
+                <th>{t("processes.duration")}</th>
+                <th>{t("processes.activity-history.canceled")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((a) => (
+                <tr key={a.id}>
+                  <td>{a.activityName ?? a.activityId}</td>
+                  <td>{a.activityType}</td>
+                  <td>
+                    {a.startTime ? (
+                      <time datetime={a.startTime}>
+                        {new Date(Date.parse(a.startTime)).toLocaleString()}
+                      </time>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>
+                    {a.endTime ? (
+                      <time datetime={a.endTime}>
+                        {new Date(Date.parse(a.endTime)).toLocaleString()}
+                      </time>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  <td>
+                    {a.durationInMillis != null
+                      ? formatDuration(a.durationInMillis)
+                      : "—"}
+                  </td>
+                  <td>{a.canceled ? t("common.yes") : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      }}
+    />
+  );
+};
+
 const process_instance_tabs = [
   {
     nameKey: "processes.tabs.variables",
@@ -2495,6 +2578,13 @@ const process_instance_tabs = [
     id: "external_tasks",
     pos: 5,
     Component: InstanceExternalTasks,
+  },
+  {
+    nameKey: "processes.tabs.activity",
+    id: "activity",
+    pos: 6,
+    history_only: true,
+    Component: InstanceActivityHistory,
   },
 ];
 

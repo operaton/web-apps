@@ -316,7 +316,8 @@
       "instance-incidents": "Instance Incidents",
       "called-instances": "Called Instances",
       "user-tasks": "User Tasks",
-      "external-tasks": "External Tasks"
+      "external-tasks": "External Tasks",
+      "activity": "Activity"
     },
     "subnav": {
       "definitions": "Definitions",
@@ -446,6 +447,10 @@
       "worker": "Worker",
       "lock-expiration": "Lock expiration",
       "unlock": "Unlock"
+    },
+    "activity-history": {
+      "empty": "No activity history for this instance.",
+      "canceled": "Canceled"
     }
   },
   "decisions": {

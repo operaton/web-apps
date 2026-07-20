@@ -316,7 +316,8 @@
       "instance-incidents": "Instanz-Inzidente",
       "called-instances": "Aufgerufene Instanzen",
       "user-tasks": "Benutzeraufgaben",
-      "external-tasks": "Externe Aufgaben"
+      "external-tasks": "Externe Aufgaben",
+      "activity": "Aktivitäten"
     },
     "subnav": {
       "definitions": "Definitionen",
@@ -446,6 +447,10 @@
       "worker": "Worker",
       "lock-expiration": "Sperre läuft ab",
       "unlock": "Entsperren"
+    },
+    "activity-history": {
+      "empty": "Keine Aktivitätshistorie für diese Instanz.",
+      "canceled": "Abgebrochen"
     }
   },
   "decisions": {

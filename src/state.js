@@ -203,6 +203,9 @@ const createAppState = () => {
       task: {
         by_process_instance: signal(null),
       },
+      activity_instance: {
+        by_process_instance: signal(null),
+      },
       process_instance: {
         called: signal(null),
       },

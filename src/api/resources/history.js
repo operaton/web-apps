@@ -80,6 +80,13 @@ const get_historic_tasks_by_instance = (state, instance_id) =>
     state.api.history.task.by_process_instance,
   );
 
+const get_activity_instances_by_process_instance = (state, instance_id) =>
+  GET(
+    `/history/activity-instance?processInstanceId=${instance_id}&sortBy=startTime&sortOrder=asc`,
+    state,
+    state.api.history.activity_instance.by_process_instance,
+  );
+
 const get_historic_called_instances = (state, instance_id) =>
   GET(
     `/history/process-instance?superProcessInstanceId=${instance_id}`,
@@ -135,6 +142,9 @@ const history = {
   },
   task: {
     by_process_instance: get_historic_tasks_by_instance,
+  },
+  activity_instance: {
+    by_process_instance: get_activity_instances_by_process_instance,
   },
   batch: {
     all: get_historic_batches,
