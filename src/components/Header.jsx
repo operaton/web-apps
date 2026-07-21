@@ -126,6 +126,14 @@ export function Header() {
         <a href="/" id="mobile-logo">
           OPERATON
         </a>
+        <a
+          href="/"
+          id="logo"
+          aria-label="Operaton"
+          aria-current={url === "/" ? "page" : undefined}
+        >
+          <img src="/operaton-logo.svg" alt="Operaton" />
+        </a>
         <button
           type="button"
           id="mobile-menu-toggle"
@@ -135,15 +143,6 @@ export function Header() {
         <div id="nav-wrapper">
           <nav id="primary-navigation" aria-label={t("nav.main-navigation")}>
             <menu>
-              <li>
-                <a
-                  href="/"
-                  aria-current={url === "/" ? "page" : undefined}
-                  id="logo"
-                >
-                  OPERATON
-                </a>
-              </li>
               <MainNavEntries url={url} />
             </menu>
           </nav>
