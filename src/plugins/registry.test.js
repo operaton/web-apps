@@ -84,9 +84,43 @@ describe("plugins/registry — translations", () => {
     // Reproduces the boot-time regression: at load, i18n.language is undefined
     // and hasResourceBundle(undefined) would throw — registration must survive.
     i18n.language = undefined;
+    i18n.hasResourceBundle.mockReturnValue(false);
     expect(() => register(page({ id: "boot", translations }))).not.toThrow();
     expect(plugin_descriptor("boot")).toBeTruthy();
     expect(i18n.addResourceBundle).not.toHaveBeenCalled();
+  });
+
+  it("holds back a language whose own base bundle is not loaded yet", () => {
+    // Merging de-DE while only en-US is loaded would make i18next skip the
+    // de-DE fetch, so switching language would keep rendering English.
+    const de = { plugins: { p1: { nav: "Metriken" } } };
+    i18n.hasResourceBundle.mockImplementation((lng) => lng === "en-US");
+    register(
+      page({ id: "two-langs", translations: { "en-US": en, "de-DE": de } }),
+    );
+
+    expect(i18n.addResourceBundle).toHaveBeenCalledTimes(1);
+    expect(i18n.addResourceBundle).toHaveBeenCalledWith(
+      "en-US",
+      "translation",
+      en,
+      true,
+      false,
+    );
+
+    // The user switches language: i18next fetches the de-DE base, then fires
+    // `loaded` — only now may the plugin's German keys be merged on top.
+    const on_loaded = i18n.on.mock.calls.at(-1)[1];
+    i18n.hasResourceBundle.mockReturnValue(true);
+    on_loaded();
+    expect(i18n.addResourceBundle).toHaveBeenCalledWith(
+      "de-DE",
+      "translation",
+      de,
+      true,
+      false,
+    );
+    expect(i18n.off).toHaveBeenCalledWith("loaded", on_loaded);
   });
 
   it("defers the merge until the base bundle finishes loading", () => {

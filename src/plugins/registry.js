@@ -32,37 +32,44 @@ const is_valid = (descriptor) => {
 
 /**
  * Deep-merge a plugin's translation bundles into the shared i18n instance,
- * *after* the http backend has loaded the base translation.json.
+ * *after* the http backend has loaded that language's base translation.json.
  *
  * Adding a partial bundle for a language before its backend load makes i18next
  * treat that language as already present and skip the fetch entirely — so a
  * plugin's `en-US` keys would suppress the app's own `en-US` base keys and every
- * built-in string would report `missingKey`. We therefore wait until the base
- * bundle exists (or add immediately if a plugin is registered after load, e.g.
- * a late remote plugin).
+ * built-in string would report `missingKey`. The check is per language, not for
+ * the active one only: a plugin's `de-DE` stub merged while `en-US` is active
+ * would suppress the de-DE fetch, and switching to German would silently keep
+ * rendering the fallback language until a full page reload.
  */
 const add_translations = (translations) => {
-  // True only once i18next is initialized, has an active language, and that
-  // language's base bundle has loaded. Guarded so it never runs at boot with an
-  // undefined language (which makes i18next throw) or against the test stub.
-  const base_ready = () =>
+  // Guarded so it never runs against the test stub or an undefined language
+  // (which makes i18next throw).
+  const base_loaded = (lng) =>
     typeof i18n.hasResourceBundle === "function" &&
-    !!i18n.language &&
-    i18n.hasResourceBundle(i18n.language, "translation");
+    !!lng &&
+    i18n.hasResourceBundle(lng, "translation");
 
-  const apply = () => {
-    for (const [lng, resources] of Object.entries(translations))
+  // Languages still waiting for their base bundle; each is merged as it loads.
+  const pending = new Map(Object.entries(translations));
+
+  const apply_loaded = () => {
+    for (const [lng, resources] of [...pending]) {
+      if (!base_loaded(lng)) continue;
       // deep merge (true), never overwrite host keys (false)
       i18n.addResourceBundle(lng, "translation", resources, true, false);
+      pending.delete(lng);
+    }
   };
 
-  if (base_ready()) return apply();
-  // `loaded` can fire per-language; keep listening until the base is actually
-  // ready, then apply once and detach.
+  apply_loaded();
+  if (pending.size === 0) return;
+
+  // `loaded` fires per backend load: at boot for the initial language, and
+  // again the first time the user switches to another one.
   const on_loaded = () => {
-    if (!base_ready()) return;
-    apply();
-    i18n.off?.("loaded", on_loaded);
+    apply_loaded();
+    if (pending.size === 0) i18n.off?.("loaded", on_loaded);
   };
   i18n.on?.("loaded", on_loaded);
 };
