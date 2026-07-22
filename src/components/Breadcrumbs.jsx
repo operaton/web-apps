@@ -5,8 +5,8 @@ const Breadcrumbs = ({ paths }) => {
   return (
     <nav aria-label={t("common.breadcrumb")}>
       <ol class="breadcrumbs">
-        {paths.slice(0, -1).map(({ name, route }) => (
-          <li key={route}><a href={route}>{name}</a></li>))}
+        {paths.slice(0, -1).map(({ name, route }, i) => (
+          <li key={i}><a href={route}>{name}</a></li>))}
         <li><span aria-current="page">{paths.at(-1).name}</span></li>
       </ol>
     </nav>

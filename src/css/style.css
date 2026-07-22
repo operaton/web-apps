@@ -358,8 +358,9 @@
   #app {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    /* overflow: hidden; */
+    height: 100vh;
+    /* Bounded to the viewport so `main` scrolls internally (overflow-y: auto)
+       and flex children like the processes split get a definite height. */
   }
 
   main {

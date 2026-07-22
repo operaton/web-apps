@@ -352,16 +352,137 @@ main.processes {
   overflow: hidden;
 }
 
-/* Wrapper that holds the .content + .diagram split panes. */
-.processes > div {
+/* Row: sidebar (when a definition is selected) + the content/diagram split. */
+.processes-body {
   display: flex;
-  flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
+/* Left sidebar of definition sub-pages, same pattern as the Admin page. Fixed
+   width so a long definition id wraps inside it rather than stretching it. Flex
+   column with spacing between the details / nav / toggle blocks. */
+.processes-body > nav {
+  flex: none;
+  width: clamp(20ch, 20vw, 30ch);
+  display: flex;
+  flex-direction: column;
+  border-right: var(--border);
+}
+
+/* Everything above the history toggle scrolls as one block; the toggle stays
+   pinned at the bottom of the sidebar. */
+.processes-body > nav .sidebar-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+/* The nav list no longer scrolls on its own — the sidebar-scroll wrapper does. */
+.processes-body > nav .sidebar-scroll .list {
+  overflow: visible;
+}
+
+/* Back-link to the definitions list, at the very top of the sidebar. */
+.processes-body > nav .back-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-2) 0;
+  font-size: var(--small-font-size);
+  color: var(--text-2);
+}
+
+.processes-body > nav .back-link svg {
+  width: 1em;
+  height: 1em;
+}
+
+/* Definition ID + version at the top of the sidebar (replaces the old
+   Definition-details page). Block (not the global .processes dl grid) so each
+   label sits atop its value, and the long mono id wraps within the column. */
+.processes-body > nav .definition-summary {
+  display: block;
+  margin: 0;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--small-font-size);
+}
+
+.processes-body > nav .definition-summary dt {
+  color: var(--text-2);
+}
+
+.processes-body > nav .definition-summary dd {
+  margin: 0 0 var(--spacing-1);
+}
+
+.processes-body > nav .definition-summary .font-mono {
+  /* The <button> carries the global button margin-top; drop it so the id sits
+     directly under its label. */
+  margin-top: 0;
+  /* Prefer breaking at the id's dashes (natural break opportunities); only
+     break mid-segment if a segment still doesn't fit. */
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-align: left;
+  line-height: 1.3;
+}
+
+/* The history toggle is pinned to the bottom of the sidebar. */
+.processes-body > nav .history-toggle {
+  flex: none;
+  margin: var(--spacing-2);
+}
+
+/* When an instance is drilled into, its details nest under the Instances entry,
+   with a darker background marking the active selection. */
+.processes-body > nav .selected-instance {
+  background: var(--background-3);
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--small-font-size);
+}
+
+.processes-body > nav .selected-instance dl {
+  display: block;
+  margin: 0;
+}
+
+.processes-body > nav .selected-instance dt {
+  color: var(--text-2);
+}
+
+.processes-body > nav .selected-instance dd {
+  margin: 0 0 var(--spacing-1);
+}
+
+.processes-body > nav .selected-instance .font-mono {
+  word-break: normal;
+  overflow-wrap: break-word;
+  text-align: left;
+  line-height: 1.3;
+}
+
+.processes-body > nav .selected-instance .button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin-top: var(--spacing-1);
+}
+
+/* Wrapper that holds the .content + .diagram split panes (stacked vertically). */
+.processes .split {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
 .processes .content {
-  flex: 1 1 70%;
+  flex: 1 1 50%;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -377,11 +498,12 @@ main.processes {
   font-size: 2em;
 }
 
+/* The diagram sits above the sub-page content, each taking ~half the column. */
 .processes .diagram {
-  flex: 0 0 30%;
+  flex: 1 1 50%;
   min-height: 0;
   position: relative;
-  border-top: var(--border);
+  border-bottom: var(--border);
   background: var(--background-1);
   display: flex;
   flex-direction: column;
@@ -395,6 +517,15 @@ main.processes {
   flex: 1;
   min-height: 0;
   position: relative;
+}
+
+/* Keep the bpmn.io watermark anchored to the diagram box. The global
+   `.bjs-powered-by` rule pins it fixed to the page corner (!important), so
+   override it here to sit in the bottom-right of this diagram's container. */
+.processes .diagram .bjs-powered-by {
+  position: absolute !important;
+  bottom: var(--spacing-1) !important;
+  right: var(--spacing-1) !important;
 }
 
 .diagram-maximize-btn {
@@ -424,31 +555,34 @@ main.processes {
   height: 1rem;
 }
 
-/* Sub-nav and tertiary nav share an underline-tab pattern. */
-.processes nav {
+/* Breadcrumb row at the top of the right column — plain, no bar/border. On the
+   definitions list it also holds the history toggle (pushed right). */
+.processes .process-breadcrumbs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+/* Tertiary nav (instance sub-pages): a horizontal underline-tab row inside
+   .content (which has its own padding); the negative side-margins let its
+   bottom border span edge-to-edge. */
+.processes nav.tertiary {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
   min-height: 2rem;
   padding: 0 var(--spacing-2);
-  border-bottom: var(--border);
+  margin: calc(-1 * var(--spacing-2)) calc(-1 * var(--spacing-2))
+    var(--spacing-1);
   background: var(--background-2);
+  border-bottom: var(--border);
   font-size: var(--small-font-size);
   flex-wrap: wrap;
 }
 
-/* The top sub-nav puts the history toggle on the right edge. */
-.processes > nav:first-of-type {
-  justify-content: space-between;
-}
-
-/* The tertiary nav lives inside .content (which has its own padding); the
-   negative side-margins let its bottom border span edge-to-edge. */
-.processes nav.tertiary {
-  margin: 0 calc(-1 * var(--spacing-2)) var(--spacing-1);
-}
-
-.processes nav menu {
+.processes nav.tertiary menu {
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
@@ -458,8 +592,7 @@ main.processes {
   padding: 0;
 }
 
-.processes nav a,
-.processes nav .disabled {
+.processes nav.tertiary a {
   color: var(--text);
   text-decoration: none;
   padding: 0;
@@ -467,11 +600,11 @@ main.processes {
   border-bottom: 0.15em solid transparent;
 }
 
-.processes nav a:hover {
+.processes nav.tertiary a:hover {
   color: var(--color-primary);
 }
 
-.processes nav a[aria-current] {
+.processes nav.tertiary a[aria-current] {
   color: var(--color-primary);
   /* Overlap the nav's bottom border so the indicator sits on top of it,
      growing its height by the border width to fully cover it. */
@@ -479,17 +612,6 @@ main.processes {
   border-bottom-width: calc(0.15em + var(--border-width));
   margin-bottom: calc(-1 * var(--border-width));
   font-weight: 600;
-}
-
-.processes nav .disabled {
-  color: var(--text-disabled);
-  cursor: not-allowed;
-}
-
-.processes nav .chevron {
-  color: var(--text-2, var(--muted));
-  font-size: 1.1em;
-  user-select: none;
 }
 
 .processes .history-toggle {

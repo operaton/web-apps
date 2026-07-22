@@ -12,6 +12,7 @@ import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Dialog, ConfirmDialog } from "../components/Dialog.jsx";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
+import { Breadcrumbs } from "../components/Breadcrumbs.jsx";
 import {
   filter_share_link,
   parse_list_query,
@@ -260,147 +261,215 @@ const ProcessesPage = () => {
 
   return (
     <main id="content" class="processes">
-      <ProcessSubNav />
-      <div>
-        {(!def_selected || !diagram_maximized.value) && (
-          <div class="content">
-            {!def_selected ? (
-              <ProcessDefinitionSelection />
-            ) : (
-              <ProcessDefinitionDetails />
-            )}
-          </div>
-        )}
-        {def_selected && (
-          <div class={`diagram ${diagram_maximized.value ? "maximized" : ""}`}>
-            <button
-              type="button"
-              class="diagram-maximize-btn"
-              onClick={() =>
-                (diagram_maximized.value = !diagram_maximized.value)
-              }
-              title={
-                diagram_maximized.value
-                  ? t("processes.diagram-restore")
-                  : t("processes.diagram-maximize")
-              }
-              aria-label={
-                diagram_maximized.value
-                  ? t("processes.diagram-restore")
-                  : t("processes.diagram-maximize")
-              }
+      <div class="processes-body">
+        {def_selected && <ProcessSidebar />}
+        <div class="split">
+          <ProcessBreadcrumbs />
+          {def_selected && (
+            <div
+              class={`diagram ${diagram_maximized.value ? "maximized" : ""}`}
             >
-              {diagram_maximized.value ? (
-                <Icons.arrows_pointing_in />
+              <button
+                type="button"
+                class="diagram-maximize-btn"
+                onClick={() =>
+                  (diagram_maximized.value = !diagram_maximized.value)
+                }
+                title={
+                  diagram_maximized.value
+                    ? t("processes.diagram-restore")
+                    : t("processes.diagram-maximize")
+                }
+                aria-label={
+                  diagram_maximized.value
+                    ? t("processes.diagram-restore")
+                    : t("processes.diagram-maximize")
+                }
+              >
+                {diagram_maximized.value ? (
+                  <Icons.arrows_pointing_in />
+                ) : (
+                  <Icons.arrows_pointing_out />
+                )}
+              </button>
+              <div id="canvas" />
+              <ProcessDiagram />
+            </div>
+          )}
+          {(!def_selected || !diagram_maximized.value) && (
+            <div class="content">
+              {!def_selected ? (
+                <ProcessDefinitionSelection />
               ) : (
-                <Icons.arrows_pointing_out />
+                <ProcessDefinitionDetails />
               )}
-            </button>
-            <div id="canvas" />
-            <ProcessDiagram />
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
 };
 
-/**
- * The Processes page sub-navigation.
- *
- *   Definitions  ›  Instances (N)   Incidents (M)   Called Definitions   Jobs                [history toggle]
- *
- * The chevron after `Definitions` indicates that the rest are *children of
- * the selected definition*. They are dimmed (and unclickable) until a
- * definition is selected. The history-mode toggle is pinned to the right.
- */
-const ProcessSubNav = () => {
-  const state = useContext(AppState),
-    [t] = useTranslation(),
-    { params, query, path } = useRoute(),
+// Definition-scoped sub-pages, shared by the sidebar and the breadcrumb trail.
+// `panel: null` is the definition overview (rendered at /processes/<id>). The
+// `count` key names the statistics total shown next to the label, if any.
+const DEFINITION_NAV = [
+  {
+    panel: "instances",
+    nameKey: "processes.subnav.instances",
+    count: "instances",
+  },
+  {
+    panel: "incidents",
+    nameKey: "processes.subnav.incidents",
+    count: "incidents",
+  },
+  {
+    panel: "called_definitions",
+    nameKey: "processes.subnav.called-definitions",
+  },
+  { panel: "jobs", nameKey: "processes.subnav.jobs" },
+];
+
+const definition_stat_counts = (state) => {
+  const stats = state.api.process.definition.statistics.value?.data;
+  return {
+    instances: stats?.reduce((n, a) => n + (a.instances ?? 0), 0),
+    incidents: stats?.reduce((n, a) => n + (a.incidents?.length ?? 0), 0),
+  };
+};
+
+// History-mode toggle. Lives in the sidebar when a definition is selected and in
+// the breadcrumb row on the definitions list.
+const HistoryToggle = () => {
+  const [t] = useTranslation(),
+    { query, path } = useRoute(),
     { route } = useLocation(),
-    history_active = query.history === "true",
-    history_query = history_active ? "?history=true" : "",
-    on_definitions = !params.definition_id,
-    instance_count =
-      state.api.process.definition.statistics.value?.data?.reduce(
-        (n, a) => n + (a.instances ?? 0),
-        0,
-      ),
-    incident_count =
-      state.api.process.definition.statistics.value?.data?.reduce(
-        (n, a) => n + (a.incidents?.length ?? 0),
-        0,
-      );
-
+    history_active = query.history === "true";
   return (
-    <nav aria-label={t("nav.processes")}>
-      <menu>
-        <li>
-          <a
-            href={`/processes${history_query}`}
-            aria-current={on_definitions ? "page" : undefined}
-          >
-            {t("processes.subnav.definitions")}
-          </a>
-        </li>
-        <li class="chevron" aria-hidden="true">
-          ›
-        </li>
-        <NavEntry
-          panel="instances"
-          label={t("processes.subnav.instances")}
-          count={instance_count}
-        />
-        <NavEntry
-          panel="incidents"
-          label={t("processes.subnav.incidents")}
-          count={incident_count}
-        />
-        <NavEntry
-          panel="called_definitions"
-          label={t("processes.subnav.called-definitions")}
-        />
-        <NavEntry panel="jobs" label={t("processes.subnav.jobs")} />
-      </menu>
-
-      <button
-        type="button"
-        class={`history-toggle ${history_active ? "active" : ""}`}
-        onClick={() => route(history_active ? path : `${path}?history=true`)}
-      >
-        {history_active
-          ? t("processes.history-mode-active")
-          : t("processes.enable-history-mode")}
-      </button>
-    </nav>
+    <button
+      type="button"
+      class={`history-toggle ${history_active ? "active" : ""}`}
+      onClick={() => route(history_active ? path : `${path}?history=true`)}
+    >
+      {history_active
+        ? t("processes.history-mode-active")
+        : t("processes.enable-history-mode")}
+    </button>
   );
 };
 
-const NavEntry = ({ panel, label, count }) => {
-  const { params, query } = useRoute(),
-    def_id = params.definition_id,
-    has_def = !!def_id,
-    active_panel = params.panel ?? (has_def ? "overview" : "definitions"),
-    history_query = query.history === "true" ? "?history=true" : "";
+// Breadcrumb trail at the top of the right column. On the definitions list (no
+// definition selected) it also carries the history toggle, since there's no
+// sidebar to host it there.
+const ProcessBreadcrumbs = () => {
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    { params, query } = useRoute(),
+    hq = keep_history_query(query),
+    def = state.api.process.definition.one.value?.data;
 
-  if (!has_def) {
-    return (
-      <li>
-        <span class="disabled">{label}</span>
-      </li>
-    );
+  const paths = [{ name: t("nav.processes"), route: `/processes${hq}` }];
+  if (params.definition_id) {
+    const base = `/processes/${params.definition_id}`;
+    // The definition crumb points at the default (Instances) sub-page.
+    paths.push({
+      name: def?.name ?? def?.key ?? params.definition_id,
+      route: `${base}/instances${hq}`,
+    });
+    if (params.panel) {
+      const entry = DEFINITION_NAV.find((e) => e.panel === params.panel);
+      paths.push({
+        name: entry ? t(entry.nameKey) : params.panel,
+        route: `${base}/${params.panel}${hq}`,
+      });
+    }
+    if (params.selection_id) {
+      paths.push({
+        name: params.selection_id.substring(0, 8),
+        route: `${base}/${params.panel}/${params.selection_id}${hq}`,
+      });
+      if (params.sub_panel) {
+        const tab = process_instance_tabs.find(
+          (x) => x.id === params.sub_panel,
+        );
+        paths.push({ name: tab ? t(tab.nameKey) : params.sub_panel });
+      }
+    }
   }
+
   return (
-    <li>
-      <a
-        href={`/processes/${def_id}/${panel}${history_query}`}
-        aria-current={active_panel === panel ? "page" : undefined}
-      >
-        {label}
-        {count !== undefined && ` (${count})`}
-      </a>
-    </li>
+    <div class="process-breadcrumbs">
+      <Breadcrumbs paths={paths} />
+      {!params.definition_id && <HistoryToggle />}
+    </div>
+  );
+};
+
+/**
+ * Left sidebar for a selected definition: its ID + version, the history toggle,
+ * then the sub-page nav (same .list pattern as the Admin page).
+ */
+const ProcessSidebar = () => {
+  const state = useContext(AppState),
+    [t] = useTranslation(),
+    { params, query } = useRoute(),
+    hq = keep_history_query(query),
+    def_id = params.definition_id,
+    def = state.api.process.definition.one.value?.data,
+    counts = definition_stat_counts(state);
+
+  return (
+    <nav aria-label={t("nav.processes")}>
+      <div class="sidebar-scroll">
+        <a class="back-link" href={`/processes${hq}`}>
+          <Icons.arrow_left />
+          {t("processes.all-definitions")}
+        </a>
+        <dl class="definition-summary">
+          <dt>{t("processes.definition-id")}</dt>
+          <dd>
+            <button
+              type="button"
+              class="font-mono copy-on-click"
+              onClick={copyToClipboard}
+              aria-label={t("processes.click-to-copy")}
+              title={t("processes.click-to-copy")}
+            >
+              {def?.id ?? "—"}
+            </button>
+          </dd>
+          <dt>{t("processes.version")}</dt>
+          <dd>{def?.version ?? "—"}</dd>
+        </dl>
+        <menu class="list">
+          {DEFINITION_NAV.map((entry) => {
+            const active = params.panel === entry.panel;
+            const count = entry.count ? counts[entry.count] : undefined;
+            const show_instance =
+              entry.panel === "instances" && params.selection_id;
+            return (
+              <li key={entry.nameKey}>
+                <a
+                  href={`/processes/${def_id}/${entry.panel}${hq}`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {t(entry.nameKey)}
+                  {count !== undefined && ` (${count})`}
+                </a>
+                {show_instance && (
+                  <div class="selected-instance">
+                    <InstanceDetailsDescription />
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </menu>
+      </div>
+      <HistoryToggle />
+    </nav>
   );
 };
 
@@ -444,72 +513,13 @@ const ProcessTertiaryNav = ({ tabs, base_path, param = "sub_panel" }) => {
 };
 
 const DefinitionTabHeading = ({ titleKey }) => {
-  const state = useContext(AppState);
   const [t] = useTranslation();
-  const def = state.api.process.definition.one.value?.data;
-  const def_label = def?.name ?? def?.key;
+  // The definition context now lives in the breadcrumb, so the heading is just
+  // the panel title.
   return (
     <header>
-      <h1>
-        {def_label && (
-          <>
-            <small>{def_label}</small>
-            {" / "}
-          </>
-        )}
-        {t(titleKey)}
-      </h1>
+      <h1>{t(titleKey)}</h1>
     </header>
-  );
-};
-
-const DefinitionMetaPanel = () => {
-  const state = useContext(AppState);
-  const [t] = useTranslation();
-  const def = state.api.process.definition.one.value?.data;
-  const stats = state.api.process.definition.statistics.value?.data;
-  if (!def) return null;
-  const total_instances = stats?.reduce((n, a) => n + (a.instances ?? 0), 0);
-  const total_incidents = stats?.reduce(
-    (n, a) => n + (a.incidents?.length ?? 0),
-    0,
-  );
-  return (
-    <details open>
-      <summary>{t("processes.definition-details")}</summary>
-      <dl>
-        <dt>{t("processes.definition-id")}</dt>
-        <dd>
-          <button
-            type="button"
-            class="font-mono copy-on-click"
-            onClick={copyToClipboard}
-            aria-label={t("processes.click-to-copy")}
-            title={t("processes.click-to-copy")}
-          >
-            {def.id ?? "—"}
-          </button>
-        </dd>
-        <dt>{t("common.key")}</dt>
-        <dd>{def.key ?? "—"}</dd>
-        <dt>{t("processes.version")}</dt>
-        <dd>{def.version ?? "—"}</dd>
-        {def.tenantId ? (
-          <>
-            <dt>{t("processes.tenant-id")}</dt>
-            <dd>{def.tenantId}</dd>
-          </>
-        ) : null}
-        {stats ? (
-          <>
-            <dt>{t("dashboard.instances")}</dt>
-            <dd>{total_instances}</dd>
-            <dt>{t("processes.tabs.incidents")}</dt>
-            <dd>{total_incidents}</dd>
-          </>
-        ) : null}
-      </dl>
-    </details>
   );
 };
 
@@ -831,90 +841,37 @@ const DefinitionsEmpty = () => {
 };
 
 const ProcessDefinitionDetails = () => {
-  const { params } = useRoute();
+  const { params, query } = useRoute();
+  const { route } = useLocation();
   const active_tab = process_definition_tabs.find(
     (tab) => tab.id === params.panel,
   );
 
-  if (!active_tab) return <DefinitionOverview />;
+  // The definition-details page was removed; a bare /processes/<id> defaults to
+  // the Instances sub-page.
+  useEffect(() => {
+    if (!params.panel) {
+      route(
+        `/processes/${params.definition_id}/instances${keep_history_query(query)}`,
+        true,
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.definition_id, params.panel]);
 
-  // Heading + meta panel stay mounted across tab switches; only the panel
-  // content (keyed by tab id) re-mounts so its fade-in plays.
+  if (!active_tab) return null;
+
+  // Definition metadata lives in the sidebar. When drilled into a specific
+  // selection (e.g. an instance) the child renders its own header, so the
+  // definition-level tab heading is skipped.
+  const drilled_in = !!params.selection_id;
   return (
     <>
-      <DefinitionTabHeading titleKey={active_tab.nameKey} />
-      <DefinitionMetaPanel />
+      {!drilled_in && <DefinitionTabHeading titleKey={active_tab.nameKey} />}
       <div class="fade-in" key={active_tab.id}>
         <active_tab.Component />
       </div>
     </>
-  );
-};
-
-const DefinitionOverview = () => {
-  const {
-      api: {
-        process: {
-          definition: { one: process_definition, statistics },
-        },
-      },
-    } = useContext(AppState),
-    [t] = useTranslation();
-
-  /** @namespace process_definition.value.data.tenantId **/
-  /** @namespace process_definition.value.data.deploymentId **/
-  /** @namespace process_definition.value.data.resource **/
-  return (
-    <RequestState
-      signal={process_definition}
-      on_success={() => {
-        const def = process_definition.value?.data;
-        const stats = statistics.value?.data ?? [];
-        const total_instances = stats.reduce(
-          (n, a) => n + (a.instances ?? 0),
-          0,
-        );
-        const total_incidents = stats.reduce(
-          (n, a) => n + (a.incidents?.length ?? 0),
-          0,
-        );
-        return (
-          <div>
-            <header>
-              <h1>{def?.name ?? def?.key}</h1>
-            </header>
-            <dl>
-              <dt>{t("processes.definition-id")}</dt>
-              <dd>
-                <button
-                  type="button"
-                  class="font-mono copy-on-click"
-                  onClick={copyToClipboard}
-                  aria-label={t("processes.click-to-copy")}
-                  title={t("processes.click-to-copy")}
-                >
-                  {def?.id ?? "—"}
-                </button>
-              </dd>
-              <dt>{t("common.key")}</dt>
-              <dd>{def?.key ?? "—"}</dd>
-              <dt>{t("processes.version")}</dt>
-              <dd>{def?.version ?? "—"}</dd>
-              {def?.tenantId ? (
-                <>
-                  <dt>{t("processes.tenant-id")}</dt>
-                  <dd>{def.tenantId}</dd>
-                </>
-              ) : null}
-              <dt>{t("dashboard.instances")}</dt>
-              <dd>{total_instances}</dd>
-              <dt>{t("processes.tabs.incidents")}</dt>
-              <dd>{total_incidents}</dd>
-            </dl>
-          </div>
-        );
-      }}
-    />
   );
 };
 
@@ -1102,7 +1059,6 @@ const InstanceDetails = () => {
 
   return (
     <>
-      <InstanceDetailsDescription />
       <ProcessTertiaryNav
         tabs={visible_tabs}
         base_path={`/processes/${definition_id}/${panel}/${selection_id}`}

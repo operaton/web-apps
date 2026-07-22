@@ -292,6 +292,7 @@
     "version": "Version",
     "change-definition": "Definition wechseln",
     "definition-id": "Definitions-ID",
+    "all-definitions": "Alle Prozessdefinitionen",
     "definition-details": "Definitionsdetails",
     "tenant-id": "Mandanten-ID",
     "click-to-copy": "Klicken zum Kopieren",
@@ -326,6 +327,7 @@
       "audit-log": "Audit-Log"
     },
     "subnav": {
+      "details": "Definitionsdetails",
       "definitions": "Definitionen",
       "instances": "Instanzen",
       "incidents": "Inzidente",

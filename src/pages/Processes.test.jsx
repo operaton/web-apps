@@ -717,15 +717,13 @@ describe("ProcessesPage — sub navigation", () => {
   });
   afterEach(cleanup);
 
-  it("disables the child nav entries on the definitions list", () => {
-    const { getByText } = renderPage(state);
-    // On the bare list, instances/incidents are rendered as disabled spans.
-    const instances = getByText("processes.subnav.instances");
-    expect(instances.tagName.toLowerCase()).toBe("span");
-    expect(instances.getAttribute("class")).toContain("disabled");
+  it("does not show the sub-page sidebar on the definitions list", () => {
+    const { queryByText } = renderPage(state);
+    // No definition selected → no sidebar, so no child sub-page entries.
+    expect(queryByText("processes.subnav.instances")).toBeNull();
   });
 
-  it("links the child nav entries once a definition is selected", () => {
+  it("links the sidebar sub-page entries once a definition is selected", () => {
     mockParams = { definition_id: "proc:1" };
     signal_response(state.api.process.definition.one, {
       id: "proc:1",
