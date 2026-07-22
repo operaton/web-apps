@@ -21,12 +21,26 @@
       var(--color-success) 50%,
       transparent);
 
-  --background-1: #fff;
-  --background-2: #f2f2f4;
-  --background-3: #dadadc;
+  /* One blue hue for the whole neutral scale. Lightness roughly tracks Apple's
+     systemGray6→4; chroma rises as the surface darkens (and drops toward
+     white), so darker surfaces read a touch more blue. */
+  --hue: 255;
+  --background-1: oklch(1 0 var(--hue)); /* pure-white primary surface */
+  --background-2: oklch(0.968 0.004 var(--hue));
+  --background-3: oklch(0.928 0.008 var(--hue));
+  --background-4: oklch(0.868 0.012 var(--hue));
 
-  --border-color: #ccc;
-  --border-color-2: #aaa;
+  /* Borders are a translucent overlay, not fixed colors: a low-alpha near-black
+     darkens whatever surface sits under it (a low-alpha near-white lightens it
+     in dark mode), so one value composites correctly over every background. A
+     little blue in the tint keeps it consistent with the surfaces. */
+  --border-color: oklch(0.2 0.03 var(--hue) / 0.14);
+  --border-color-2: oklch(0.2 0.03 var(--hue) / 0.3);
+  /* Stronger still — for buttons, which need a clearly defined edge. */
+  --border-color-3: oklch(0.2 0.03 var(--hue) / 0.5);
+  /* Button fill: a translucent tint that composites over whatever surface the
+     button sits on, so it stays a distinct control on any background. */
+  --button-background: oklch(0.2 0.03 var(--hue) / 0.08);
 
   --text: #000;
   --text-2: #555;
@@ -68,11 +82,17 @@
   :root {
     color-scheme: dark;
     --color-primary: #5ca2e4;
-    --background-1: #111113;
-    --background-2: #222224;
-    --background-3: #333335;
-    --border-color: #555;
-    --border-color-2: #777;
+    /* Same hue; here the darkest surface (background-1) carries the most chroma
+       and it drops as surfaces lighten. Borders flip to a translucent near-white
+       so they lighten whatever they sit on. */
+    --background-1: oklch(0.22 0.013 var(--hue));
+    --background-2: oklch(0.275 0.01 var(--hue));
+    --background-3: oklch(0.33 0.008 var(--hue));
+    --background-4: oklch(0.39 0.006 var(--hue));
+    --border-color: oklch(0.95 0.02 var(--hue) / 0.16);
+    --border-color-2: oklch(0.95 0.02 var(--hue) / 0.32);
+    --border-color-3: oklch(0.95 0.02 var(--hue) / 0.44);
+    --button-background: oklch(0.95 0.02 var(--hue) / 0.1);
     --text: #fff;
     --text-2: #ccc;
     --text-disabled: #aaa;
@@ -356,9 +376,8 @@
     gap: var(--spacing-1);
     min-height: 2rem;
     padding: 0 var(--spacing-1);
-    background: var(--background-2);
+    background: var(--background-3);
     z-index: 10;
-    border-bottom: var(--border);
   }
 
   /* Logo on the left, spanning both header rows. */
@@ -490,15 +509,16 @@
   #app>header nav menu>li>a {
     padding: var(--spacing-1);
     box-sizing: border-box;
+    /* Fill the (stretched) li so the active indicator can sit on its edge. */
+    height: 100%;
   }
 
   #app>header nav menu>li>a[aria-current="page"] {
     color: var(--text);
-    /* Overlap the header's bottom border so the indicator sits on top of it,
-       growing its height by the border width to fully cover it. */
-    border-bottom: calc(0.2em + var(--border-width)) solid var(--color-primary);
+    /* The indicator ends flush with the header's bottom edge; the padding is
+       reduced by the border width so the link keeps its height. */
+    border-bottom: 0.2em solid var(--color-primary);
     padding-bottom: calc(var(--spacing-1) - 0.2em);
-    margin-bottom: calc(-1 * var(--border-width));
   }
 
   #app>header nav menu a {
@@ -1157,12 +1177,10 @@
     margin-top: 1em;
     box-sizing: content-box;
 
-    /* background: var(--color-primary); */
-    /* color: white; */
-
+    background: var(--button-background);
     background-clip: padding-box;
     border-radius: .3em;
-    border: .13em outset var(--border-color-2);
+    border: .13em outset var(--border-color-3);
     padding: 0.3em 0.7em;
     font-weight: 600;
     line-height: 1;
@@ -1185,7 +1203,7 @@
     }
 
     &.secondary {
-      border: var(--border-width) solid var(--border-color-2);
+      border: var(--border-width) solid var(--border-color-3);
       background: transparent;
       color: var(--text);
     }
@@ -1239,6 +1257,11 @@
     outline: dashed 0.15rem;
     z-index: 999;
     transition: 50ms all;
+  }
+
+  /* On hover a button's fill deepens to its border colour. */
+  :where(button, .button):hover {
+    background: var(--border-color-3);
   }
 
   :where(a, button, input, select):focus {
