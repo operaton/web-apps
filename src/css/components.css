@@ -15,6 +15,16 @@
   overflow-y: auto;
   position: relative;
   width: clamp(20ch, 20vw, 30ch);
+  /* Always a column, overriding the global row-wrapping `nav menu`. */
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+/* A nav holding a .list is a page sidebar (admin, account, processes): a
+   full-height column of links on a recessed surface. */
+nav:has(> menu.list) {
+  background: var(--background-2);
 }
 
 .list li {
@@ -1372,9 +1382,11 @@ nav:has(> .breadcrumbs) {
   min-height: 40vh;
 }
 
-/* account */
+/* account — sidebar + content row, same layout as the Admin page. */
 .account-page {
   display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .account-page > section {

@@ -945,18 +945,6 @@
     background-clip: padding-box;
   }
 
-  /* Override the global row-wrapping `nav menu` into a vertical sidebar.
-     Scoped to the direct-child sidebar nav so the breadcrumb nav inside the
-     content area keeps the default background. */
-  .admin-page>nav {
-    background: var(--background-2);
-  }
-
-  .admin-page>nav menu {
-    flex-direction: column;
-    flex-wrap: nowrap;
-  }
-
   /* keep the hover/selected background, but drop the negative margin shift */
   .admin-page tbody tr:hover :where(td, th),
   .admin-page tbody tr[aria-selected="true"] :where(td, th) {
