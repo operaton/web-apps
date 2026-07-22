@@ -1018,6 +1018,10 @@
     padding: var(--spacing-2);
   }
 
+  .start-process-page {
+    padding: var(--spacing-2);
+  }
+
   .dashboard>div {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(12em, 1fr));

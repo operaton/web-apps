@@ -208,7 +208,7 @@ const TasksPage = () => {
 
   if (params?.task_id === "start") {
     return (
-      <main id="content" class="fade-in">
+      <main id="content" class="start-process-page fade-in">
         <StartProcessList />
       </main>
     );
