@@ -193,6 +193,26 @@ const StartProcessForm = () => {
   </div>
 }
 
+// The business key is a property of the process instance, not a form variable,
+// so no start form (generated or form-js) carries it. Every start mode renders
+// it above the form and folds it into the submit-form payload when set.
+const BusinessKeyField = ({ value, on_change }) => {
+  const [t] = useTranslation()
+  return <label class="business-key">
+    {t("tasks.start-process.business-key")}
+    <input
+      type="text"
+      name="business_key"
+      value={value}
+      onInput={(e) => on_change(e.target.value)} />
+  </label>
+}
+
+// Add `businessKey` to a submit-form payload only when the user typed one —
+// the engine rejects an empty string as a business key.
+const with_business_key = (payload, business_key) =>
+  business_key === '' ? payload : { ...payload, businessKey: business_key }
+
 // Generated (engine-rendered) start form — the start-side twin of the task
 // GeneratedTaskForm. The engine renders it from the start event's
 // camunda:formData; we turn that HTML into a form-js schema (+ its default
@@ -203,6 +223,7 @@ const StartGeneratedForm = ({ definition_id }) => {
     { route } = useLocation(),
     [t] = useTranslation(),
     [error, setError] = useState(null),
+    [business_key, setBusinessKey] = useState(''),
     submit_ref = useRef(null)
 
   const rendered = state.api.process.definition.rendered_form.value
@@ -227,7 +248,7 @@ const StartGeneratedForm = ({ definition_id }) => {
     setError(null)
     const variables = form_data_to_vars(data, vars, allowed)
     engine_rest.process_definition
-      .submit_form(state, definition_id, { variables })
+      .submit_form(state, definition_id, with_business_key({ variables }, business_key))
       .then((result) => {
         if (result?.status === RESPONSE_STATE.SUCCESS) route('/tasks')
         else setError(result?.error?.message ?? t("tasks.form.unknown-error"))
@@ -238,6 +259,7 @@ const StartGeneratedForm = ({ definition_id }) => {
   return <div class="task-form camunda-task-form">
     {schema.components.length === 0 &&
       <p class="info-box">{t("tasks.start-process.no-form")}</p>}
+    <BusinessKeyField value={business_key} on_change={setBusinessKey} />
     <CamundaForm
       schema={schema}
       data={initial_data}
@@ -263,6 +285,7 @@ const StartCamundaForm = ({ definition_id }) => {
     { route } = useLocation(),
     [t] = useTranslation(),
     [error, setError] = useState(null),
+    [business_key, setBusinessKey] = useState(''),
     submit_ref = useRef(null)
 
   const deployed = state.api.process.definition.deployed_start_form.value,
@@ -283,7 +306,7 @@ const StartCamundaForm = ({ definition_id }) => {
     setError(null)
     const variables = form_data_to_vars(data, {}, schema_variable_keys(schema))
     engine_rest.process_definition
-      .submit_form(state, definition_id, { variables })
+      .submit_form(state, definition_id, with_business_key({ variables }, business_key))
       .then((result) => {
         if (result?.status === RESPONSE_STATE.SUCCESS) route('/tasks')
         else setError(result?.error?.message ?? t("tasks.form.unknown-error"))
@@ -292,6 +315,7 @@ const StartCamundaForm = ({ definition_id }) => {
   }
 
   return <div class="task-form camunda-task-form">
+    <BusinessKeyField value={business_key} on_change={setBusinessKey} />
     <CamundaForm
       schema={schema}
       data={{}}
