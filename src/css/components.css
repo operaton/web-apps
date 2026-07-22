@@ -10,11 +10,11 @@
 
 .list {
   list-style: none;
-  padding: var(--spacing-1);
+  padding: 0;
   margin: var(--spacing-1) 0;
   overflow-y: auto;
   position: relative;
-  width: calc(clamp(20ch, 20vw, 30ch) - var(--spacing-1) * 2);
+  width: clamp(20ch, 20vw, 30ch);
 }
 
 .list li {
@@ -40,6 +40,7 @@
 
 .list li a[aria-current="page"] {
   background-color: var(--background-3);
+  font-weight: 600;
 }
 
 .list li a[aria-current="page"]:focus {
@@ -1393,7 +1394,6 @@ nav:has(> .breadcrumbs) {
   font-size: 0.8em;
   font-weight: normal;
   margin: 0;
-  background: var(--background-3);
   color: var(--text);
   padding: 0.2em 0.5em;
 }
