@@ -39,11 +39,10 @@ test.describe("keyboard navigation", () => {
     page,
   }) => {
     await page.goto("/tasks");
-    // The desktop selector — scoped so it doesn't clash with the mobile one,
-    // which carries the same aria-label. Its accessible name comes from the
-    // aria-label we added.
+    // The desktop selector — scoped so it doesn't clash with the mobile one.
+    // Its accessible name comes from the visible "Server" label wrapping it.
     const select = page.locator("#server-selector select");
-    await expect(select).toHaveAttribute("aria-label", /choose a server/i);
+    await expect(select).toHaveAccessibleName(/server/i);
     await select.focus();
     await expect(select).toBeFocused();
   });

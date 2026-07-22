@@ -1,3 +1,7 @@
+// @vitest-environment jsdom
+// DOMPurify (>= 3.4.8) strips every element under happy-dom, so the parse_html
+// cases below would sanitise down to nothing. It behaves correctly under jsdom
+// and in real browsers, so this file opts into jsdom.
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
   vars_to_form_data,
