@@ -423,26 +423,17 @@ const ProcessSidebar = () => {
   return (
     <nav aria-label={t("nav.processes")}>
       <div class="sidebar-scroll">
-        <a class="back-link" href={`/processes${hq}`}>
-          <Icons.arrow_left />
-          {t("processes.all-definitions")}
-        </a>
-        <dl class="definition-summary">
-          <dt>{t("processes.definition-id")}</dt>
-          <dd>
-            <button
-              type="button"
-              class="font-mono copy-on-click"
-              onClick={copyToClipboard}
-              aria-label={t("processes.click-to-copy")}
-              title={t("processes.click-to-copy")}
-            >
-              {def?.id ?? "—"}
-            </button>
-          </dd>
-          <dt>{t("processes.version")}</dt>
-          <dd>{def?.version ?? "—"}</dd>
-        </dl>
+        <div class="definition-block">
+          <h2 class="definition-heading">
+            {def?.name ?? def?.key ?? def_id}
+          </h2>
+          <dl class="definition-summary">
+            <dt>{t("processes.definition-id")}</dt>
+            <dd class="entity-id">{def?.id ?? "—"}</dd>
+            <dt>{t("processes.version")}</dt>
+            <dd>{def?.version ?? "—"}</dd>
+          </dl>
+        </div>
         <menu class="list">
           {DEFINITION_NAV.map((entry) => {
             const active = params.panel === entry.panel;
@@ -525,12 +516,15 @@ const DefinitionTabHeading = ({ titleKey }) => {
 
 const flatten_activity_instances = (node, out = []) => {
   if (!node) return out;
-  const children = node.childActivityInstances ?? [];
-  if (children.length === 0) {
-    if (node.activityId && node.parentActivityInstanceId) out.push(node);
-    return out;
-  }
-  children.forEach((c) => flatten_activity_instances(c, out));
+  // Collect every real activity instance (anything below the process-instance
+  // root, which has no parent), not just the tree's leaves. A leaf can live
+  // inside a collapsed subprocess that isn't rendered (e.g. a user task inside
+  // "Reviewers (parallel)"); its visible ancestor — the subprocess — must still
+  // get a token. The viewer skips activityIds it can't find on the diagram.
+  if (node.activityId && node.parentActivityInstanceId) out.push(node);
+  (node.childActivityInstances ?? []).forEach((c) =>
+    flatten_activity_instances(c, out),
+  );
   return out;
 };
 
@@ -1095,17 +1089,7 @@ const InstanceDetailsDescription = () => {
     <>
       <dl>
         <dt>{t("processes.instance-id")}</dt>
-        <dd>
-          <button
-            type="button"
-            class="font-mono copy-on-click"
-            onClick={copyToClipboard}
-            aria-label={t("processes.click-to-copy")}
-            title={t("processes.click-to-copy")}
-          >
-            {data?.id ?? "—"}
-          </button>
-        </dd>
+        <dd class="entity-id">{data?.id ?? "—"}</dd>
         <dt>{t("processes.business-key")}</dt>
         <dd>{data?.businessKey ?? "—"}</dd>
         {/* History-only fields: absent from the runtime payload, so these rows
@@ -1260,10 +1244,14 @@ const InstanceVariables = () => {
     edit_type = useSignal("String"),
     edit_value = useSignal(""),
     delete_name = useSignal(null),
-    selection_exists =
-      state.api.process.instance.variables.value !== null &&
-      state.api.process.instance.variables.value.data !== null &&
-      state.api.process.instance.variables.value.data !== undefined;
+    vars_data = state.api.process.instance.variables.value?.data,
+    vars_is_array = Array.isArray(vars_data),
+    // The live endpoint returns an object map; the history one an array — both
+    // land in the same signal. During a mode switch the signal still holds the
+    // previous shape, so gate on the shape matching the current mode. Rendering
+    // the wrong branch (e.g. `.map` on the live object) throws mid-render and
+    // corrupts the tree, so wait for the matching data instead.
+    vars_ready = history_mode ? vars_is_array : !!vars_data && !vars_is_array;
 
   const load = () =>
     void engine_rest.process_instance.variables(state, params.selection_id);
@@ -1331,11 +1319,9 @@ const InstanceVariables = () => {
           </tr>
         </thead>
         <tbody>
-          {selection_exists
+          {vars_ready
             ? !history_mode
-              ? Object.entries(
-                  state.api.process.instance.variables.value.data,
-                ).map(([name, { type, value }]) => (
+              ? Object.entries(vars_data).map(([name, { type, value }]) => (
                   <tr key={name}>
                     <td>{name}</td>
                     <td>{type}</td>
@@ -1362,16 +1348,14 @@ const InstanceVariables = () => {
                     </td>
                   </tr>
                 ))
-              : state.api.process.instance.variables.value.data.map(
-                  ({ name, type, value }) => (
-                    <tr key={name}>
-                      <td>{name}</td>
-                      <td>{type}</td>
-                      <td>{format_variable_value(value)}</td>
-                      <td />
-                    </tr>
-                  ),
-                )
+              : vars_data.map(({ id, name, type, value }) => (
+                  <tr key={id ?? name}>
+                    <td>{name}</td>
+                    <td>{type}</td>
+                    <td>{format_variable_value(value)}</td>
+                    <td />
+                  </tr>
+                ))
             : t("common.loading")}
         </tbody>
       </table>
@@ -2806,9 +2790,5 @@ const process_instance_tabs = [
     Component: InstanceAuditLog,
   },
 ];
-
-// fixme : extract to util file
-const copyToClipboard = (event) =>
-  navigator.clipboard.writeText(event.target.innerText);
 
 export { ProcessesPage };

@@ -147,25 +147,10 @@ export function Header() {
             </menu>
           </nav>
           <div>
-            <nav id="secondary-navigation">
-              <menu>
-                <li>
-                  <a href="/help"> {t("nav.help")}</a>
-                </li>
-                <li>
-                  <a href="/account">{t("nav.account")}</a>
-                </li>
-              </menu>
-            </nav>
-            <button type="button" id="go-to" onClick={showSearch}>
-              {t("nav.go-to")} <kbd>Alt+K</kbd>
-            </button>
             <label id="server-selector">
               {/* <Icons.server />*/}
-              <select
-                aria-label={t("nav.choose-server")}
-                onChange={(e) => swap_server(e, state)}
-              >
+              <span>{t("nav.server")}</span>
+              <select onChange={(e) => swap_server(e, state)}>
                 <option disabled>{t("nav.choose-server")}</option>
                 {servers.map((server) => (
                   <option
@@ -178,9 +163,38 @@ export function Header() {
                 ))}
               </select>
             </label>
-            <button type="button" id="logout" onClick={logout}>
-              {t("nav.logout")}
+            <button type="button" id="go-to" onClick={showSearch}>
+              {t("nav.go-to")} <kbd>Alt+K</kbd>
             </button>
+            <div>
+              <nav id="secondary-navigation">
+                <menu>
+                  <li>
+                    <a
+                      href="/help"
+                      aria-current={
+                        url.startsWith("/help") ? "page" : undefined
+                      }
+                    >
+                      {t("nav.help")}
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="/account"
+                      aria-current={
+                        url.startsWith("/account") ? "page" : undefined
+                      }
+                    >
+                      {t("nav.account")}
+                    </a>
+                  </li>
+                </menu>
+              </nav>
+              <button type="button" id="logout" onClick={logout}>
+                {t("nav.logout")}
+              </button>
+            </div>
           </div>
         </div>
       </header>

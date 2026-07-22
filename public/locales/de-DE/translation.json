@@ -53,6 +53,7 @@
     "main-navigation": "Hauptnavigation",
     "skip-to-content": "Zum Inhalt springen",
     "go-to": "Gehe zu",
+    "server": "Server",
     "choose-server": "Server auswählen",
     "release-warning": "Öffentliche Alpha-Version – Nicht getestet und nicht für den Produktivbetrieb geeignet – Teilen Sie Ihr Feedback in einem",
     "release-warning-issue": "Issue",
@@ -436,9 +437,9 @@
         "finished": "finished"
       },
       "manage_title": "Prozessinstanz-Filter verwalten",
-      "suspend": "Instanz anhalten",
-      "activate": "Instanz aktivieren",
-      "cancel": "Instanz abbrechen",
+      "suspend": "Anhalten",
+      "activate": "Aktivieren",
+      "cancel": "Abbrechen",
       "confirm-cancel": "Diese Prozessinstanz wirklich abbrechen?",
       "keep-running": "Weiterlaufen lassen"
     },

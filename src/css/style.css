@@ -52,6 +52,8 @@
   /* font */
   --base-font-size: 1rem;
   --small-font-size: 0.85rem;
+  /* One step below small — the top header row (server / go-to / account). */
+  --smaller-font-size: 0.75rem;
   --h1-size: 3rem;
   --h2-size: 2rem;
   --h3-size: 1.5rem;
@@ -66,6 +68,10 @@
   --spacing-4: 4rem;
   --spacing-5: 8rem;
   --spacing-6: 16rem;
+
+  /* Height of the instance tab row, which sticks to the top of the scrolling
+     content pane — sticky table headers inside it start below this. */
+  --tertiary-nav-height: 2rem;
 
   --border-radius: 0.3rem;
   --border-radius-2: 0.4rem;
@@ -385,7 +391,8 @@
   #logo {
     display: flex;
     align-items: center;
-    padding: var(--spacing-1) var(--spacing-2) var(--spacing-1) 0;
+    padding: var(--spacing-1) var(--spacing-2) var(--spacing-1)
+      var(--spacing-1);
   }
 
   #logo img {
@@ -411,12 +418,36 @@
     font-size: var(--small-font-size);
   }
 
-  /* Secondary group: top-right. */
+  /* Secondary row: server selector left, go-to centred, the rest right. A step
+     below the primary nav's font size, so it reads as the quieter row. */
   #nav-wrapper>div:last-child {
     display: flex;
     gap: var(--spacing-2);
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
+    font-size: var(--smaller-font-size);
+  }
+
+  /* The controls set their own font-size globally; in this row they follow it. */
+  #nav-wrapper>div:last-child :is(button, select) {
+    font-size: inherit;
+  }
+
+  /* Help / Account / Logout stay together at the right end. */
+  #nav-wrapper>div:last-child>div {
+    display: flex;
+    gap: var(--spacing-2);
+    align-items: center;
+  }
+
+  /* One height for every control in the row: left to themselves a button sizes
+     from its line box plus padding while a select adds the UA's own metrics, so
+     the three pills end up a couple of pixels apart. */
+  #nav-wrapper>div:last-child :is(button, select) {
+    box-sizing: border-box;
+    height: 1.5rem;
+    padding-block: 0;
+    border: none;
   }
 
   #skip-links {
@@ -489,12 +520,18 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-1);
+    /* Matches the nav links' padding below, so "Server" lines up with "Tasks". */
+    padding-left: var(--spacing-1);
   }
 
+  /* Same pill as the go-to button next to it: a borderless button fill, so both
+     read as controls sitting on the header surface. */
   #server-selector select {
-    border: none;
-    background: transparent;
-    padding: 0 var(--spacing-1) 0 0;
+    border-radius: 50em;
+    background: var(--button-background);
+    background-clip: padding-box;
+    font-weight: 600;
+    padding: 0.25em var(--spacing-1);
     letter-spacing: 0.03rem;
     width: 12ch;
     text-overflow: ellipsis;
@@ -1218,6 +1255,7 @@
 
   #logout {
     margin-top: 0;
+    border-radius: 50em;
   }
 
   button.link {
@@ -1390,6 +1428,13 @@
 @layer normalize {
   :root {
     color-scheme: light;
+  }
+
+  /* No rubber-band overscroll: dragging past the end of a scroll pane must not
+     pull empty space into view, and must not chain the scroll to the pane
+     behind it. Only has an effect on elements that actually scroll. */
+  * {
+    overscroll-behavior: none;
   }
 
   body {

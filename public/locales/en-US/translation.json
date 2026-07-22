@@ -53,6 +53,7 @@
     "main-navigation": "Main navigation",
     "skip-to-content": "Skip to content",
     "go-to": "Go To",
+    "server": "Server",
     "choose-server": "Choose a server",
     "release-warning": "Public Alpha Release – Untested and not ready for production – Share your feedback with an",
     "release-warning-issue": "issue",
@@ -436,9 +437,9 @@
         "finished": "finished"
       },
       "manage_title": "Manage process-instance filters",
-      "suspend": "Suspend instance",
-      "activate": "Activate instance",
-      "cancel": "Cancel instance",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "cancel": "Cancel",
       "confirm-cancel": "Really cancel this process instance?",
       "keep-running": "Keep running"
     },
