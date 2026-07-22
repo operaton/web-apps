@@ -2,15 +2,13 @@ import { useState, useContext, useEffect, useRef } from "preact/hooks";
 import { useTranslation } from "react-i18next";
 import { AppState } from "../state.js";
 import engine_rest from "../api/engine_rest.jsx";
-import * as Icons from "../assets/icons.jsx";
 import { useRoute, useLocation } from "preact-iso";
 import { CamundaForm } from "./CamundaForm.jsx";
 import {
   vars_to_form_data,
   form_data_to_vars,
   schema_variable_keys,
-  build_legacy_form_data,
-  parse_html,
+  rendered_form_to_schema,
 } from "./TaskForm_helpers.js";
 
 const TaskForm = () => {
@@ -40,8 +38,10 @@ const TaskForm = () => {
     return <EmbeddedHtmlTaskForm task={selectedTask} formKey={formKey} />;
   }
 
-  // No form configured — render auto-generated form for variables.
-  return <RenderedFallbackForm task={selectedTask} taskId={params.task_id} />;
+  // No form key — the task either has a generated form (camunda:formData) or no
+  // form at all. Render the engine's generated form through the same CamundaForm
+  // renderer so it looks like a form-js form.
+  return <GeneratedTaskForm task={selectedTask} taskId={params.task_id} />;
 };
 
 // ---- Camunda Forms (form-js) ------------------------------------------------
@@ -158,103 +158,105 @@ const EmbeddedHtmlTaskForm = ({ task, formKey }) => {
   );
 };
 
-// ---- Auto-generated fallback (no form configured) ---------------------------
+// ---- Generated task form (camunda:formData, or no form) ---------------------
 
-const RenderedFallbackForm = ({ task, taskId }) => {
+// A generated form has no formKey: the engine renders it from the task's
+// camunda:formData fields. We fetch that rendered HTML only to read the field
+// descriptors, turn them into a form-js schema, and render it with the same
+// CamundaForm component as a deployed form — so both look identical.
+const GeneratedTaskForm = ({ task, taskId }) => {
   const state = useContext(AppState),
+    { route } = useLocation(),
     [t] = useTranslation(),
-    [generated, setGenerated] = useState(""),
-    [error, setError] = useState(null);
+    [error, setError] = useState(null),
+    submit_ref = useRef(null);
 
-  // Fetch in an effect keyed on the task id and reset the generated markup so
-  // switching tasks refetches instead of keeping the previous form (see #102).
   useEffect(() => {
-    setGenerated("");
-    // Wrap in Promise.resolve so this is robust whether the fetch returns a
-    // promise (production) or not (mocked in tests).
-    Promise.resolve(
-      engine_rest.task.get_task_rendered_form(state, task.id),
-    ).then(() => {
-      const rendered_form = state.api.task.rendered_form.value;
-      if (rendered_form?.data) {
-        setGenerated(parse_html(state, rendered_form.data));
-      }
-    });
+    void engine_rest.task.get_task_rendered_form(state, task.id);
+    void engine_rest.task.get_task_form_variables(state, task.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task.id]);
 
+  const rendered = state.api.task.rendered_form.value;
+  const variables = state.api.task.form_variables.value;
+
+  if (rendered?.status === "ERROR") {
+    return (
+      <p class="error" role="alert">
+        {t("tasks.form.fetch-failed")}: {rendered.error?.message}
+      </p>
+    );
+  }
+  if (!rendered?.data || !variables) {
+    return <p class="fade-in-delayed">{t("common.loading")}</p>;
+  }
+
+  const schema = rendered_form_to_schema(rendered.data);
+  const vars = variables.data;
+  const allowed = schema_variable_keys(schema);
+  const initial_data = vars_to_form_data(vars, allowed);
+  const has_fields = schema.components.length > 0;
+
+  const on_submit = ({ data, errors }) => {
+    if (errors && Object.keys(errors).length > 0) {
+      setError(t("tasks.form.validation-error"));
+      return;
+    }
+    setError(null);
+    const payload = form_data_to_vars(data, vars, allowed);
+    engine_rest.task
+      .post_task_form(state, taskId, payload)
+      .then(() => {
+        localStorage.removeItem(`task_form_${taskId}`);
+        route("/tasks");
+      })
+      .catch((e) => setError(e?.message ?? "Submit failed"));
+  };
+
   return (
-    <>
-      <div style="margin-bottom: 8px;">{t("tasks.form.required-field")}</div>
-      <div id="generated-form" class="task-form">
-        <form onSubmit={(e) => submit_legacy_form(e, state, setError, taskId)}>
-          <div
-            class="form-fields"
-            dangerouslySetInnerHTML={{ __html: generated }}
-          />
-          <div class={`error ${error ? "show" : "hidden"}`} role="alert">
-            <span class="icon">
-              <Icons.exclamation_triangle />
-            </span>
-            <span class="error-text">{error}</span>
-          </div>
-          <div class="form-buttons">
-            <button type="submit">{t("tasks.form.complete-task")}</button>
-            <button
-              type="button"
-              class="secondary"
-              onClick={() => store_data(state)}
-            >
-              {t("tasks.form.save-form")}
-            </button>
-            <button
-              type="button"
-              class="secondary"
-              onClick={() => complete_directly(state, setError, taskId)}
-            >
-              {t("tasks.form.complete-directly")}
-            </button>
-          </div>
-        </form>
+    <div class="task-form camunda-task-form">
+      <CamundaForm
+        schema={schema}
+        data={initial_data}
+        on_submit={on_submit}
+        on_ready={(c) => {
+          submit_ref.current = c.submit;
+        }}
+      />
+      {error && (
+        <p class="error" role="alert">
+          {error}
+        </p>
+      )}
+      <div class="form-buttons">
+        {has_fields ? (
+          <button type="button" onClick={() => submit_ref.current?.()}>
+            {t("tasks.form.complete-task")}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => complete_directly(state, setError, taskId, route)}
+          >
+            {t("tasks.form.complete-directly")}
+          </button>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
-const submit_legacy_form = (e, state, setError, taskId) => {
-  e.preventDefault();
-  setError(null);
-  const data = build_legacy_form_data();
-  engine_rest.task
-    .post_task_form(state, taskId, data)
-    .then(() => {
-      localStorage.removeItem(`task_form_${taskId}`);
-      window.location.href = "/tasks";
-    })
-    .catch((error) => {
-      console.error("Submit failed:", error);
-      setError(error?.message || "An unknown error occurred.");
-    });
-};
-
-// Complete a task without submitting the generated variable form, via the
-// dedicated /complete endpoint.
-const complete_directly = (state, setError, taskId) => {
+// Complete a task without submitting a form, via the dedicated /complete
+// endpoint (used when the task has no form fields).
+const complete_directly = (state, setError, taskId, route) => {
   setError(null);
   engine_rest.task
     .complete_task(state, taskId)
     .then(() => {
       localStorage.removeItem(`task_form_${taskId}`);
-      window.location.href = "/tasks";
+      route("/tasks");
     })
     .catch((error) => setError(error?.message || "Complete failed"));
-};
-
-const store_data = (state) => {
-  localStorage.setItem(
-    `task_form_${state.api.task.one.value?.data?.id}`,
-    JSON.stringify(build_legacy_form_data(true)),
-  );
 };
 
 export { TaskForm };

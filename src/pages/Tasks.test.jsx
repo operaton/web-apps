@@ -21,14 +21,18 @@ vi.mock("../api/engine_rest.jsx", async (importOriginal) => {
 
 // Stub the heavy diagram + form-js child components so bpmn-js / feelin never
 // load. TaskForm itself is kept real: with no formKey it takes the
-// RenderedFallbackForm path which only touches DOMPurify, exercising the real
-// post_task_form wiring without pulling in form-js.
+// GeneratedTaskForm path, which turns the engine's rendered form into a schema
+// and submits via post_task_form — exercised here without pulling in form-js.
 vi.mock("../components/BPMNViewer.jsx", () => ({
   BPMNViewer: ({ xml }) => h("div", { "data-testid": "bpmn-viewer" }, xml),
 }));
+// Expose submit() the way the real CamundaForm does (via on_ready), so a
+// parent's "Complete task" button can drive on_submit in these tests.
 vi.mock("../components/CamundaForm.jsx", () => ({
-  CamundaForm: ({ schema }) =>
-    h("div", { "data-testid": "camunda-form" }, JSON.stringify(schema)),
+  CamundaForm: ({ schema, data, on_submit, on_ready }) => {
+    on_ready?.({ submit: () => on_submit?.({ data: data ?? {}, errors: {} }) });
+    return h("div", { "data-testid": "camunda-form" }, JSON.stringify(schema));
+  },
 }));
 // StartProcessList pulls in its own heavy fetch tree; stub to a marker.
 vi.mock("./StartProcessList.jsx", () => ({
@@ -390,17 +394,20 @@ describe("TasksPage", () => {
       expect(engine_rest.task.update_task.mock.lastCall[2]).toBe("t1");
     });
 
-    it("submits the (auto-generated) task form via post_task_form", () => {
-      // No formKey on the task => real TaskForm renders the RenderedFallbackForm
-      // path, which posts via post_task_form on submit.
+    it("submits the generated task form via post_task_form", () => {
+      // No formKey => real TaskForm renders GeneratedTaskForm: it parses the
+      // engine's rendered form into a schema and submits via post_task_form.
       signal_response(state.api.task.one, sample_task());
       signal_response(
         state.api.task.rendered_form,
-        '<form><input class="form-control" name="amount" value="42"/></form>',
+        '<form><label>Amount</label><input cam-variable-name="amount" cam-variable-type="String" value="42"/></form>',
       );
+      signal_response(state.api.task.form_variables, {
+        amount: { value: "42", type: "String" },
+      });
       engine_rest.task.post_task_form.mockResolvedValue(undefined);
       const { getByText } = renderDetail();
-      fireEvent.submit(getByText("tasks.form.complete-task").closest("form"));
+      fireEvent.click(getByText("tasks.form.complete-task"));
       expect(engine_rest.task.post_task_form).toHaveBeenCalled();
       expect(engine_rest.task.post_task_form.mock.lastCall[0]).toBe(state);
       expect(engine_rest.task.post_task_form.mock.lastCall[1]).toBe("t1");

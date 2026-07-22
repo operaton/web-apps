@@ -5,8 +5,6 @@
  * implementation (see TaskForm_helpers.test.js) and reused by the component,
  * rather than re-implemented in tests.
  */
-import DOMPurify from "dompurify";
-
 // ---- Camunda Forms (form-js) variable mapping ------------------------------
 
 /**
@@ -62,101 +60,80 @@ export const form_data_to_vars = (data, originalVars, allowed) => {
   return out;
 };
 
-// ---- Legacy embedded/rendered HTML form ------------------------------------
+// ---- Generated (engine-rendered) task form ---------------------------------
 
-/**
- * Collect data from the rendered legacy form's `.form-control` inputs.
- * Date values are reformatted to dd/mm/yyyy unless `temporary` (a draft save).
- */
-export const build_legacy_form_data = (temporary = false) => {
-  const inputs = document
-    .getElementById("generated-form")
-    .getElementsByClassName("form-control");
-  const data = {};
-  for (let input of inputs) {
-    const name = input.name;
-    if (!name) continue;
-    switch (input.type) {
-      case "checkbox":
-        data[name] = { value: input.checked };
-        break;
-      case "date": {
-        if (input.value) {
-          const val = temporary
-            ? input.value
-            : input.value.split("-").reverse().join("/");
-          data[name] = { value: val };
-        }
-        break;
-      }
-      case "number":
-        if (input.value) data[name] = { value: parseInt(input.value, 10) };
-        break;
-      default:
-        if (input.value) data[name] = { value: input.value };
-    }
-  }
-  return data;
+// The label for a rendered form field: the engine emits a sibling <label>
+// before the control (or wraps it, or groups it in a .form-group). Falls back
+// to the variable name. Trailing "*" (an engine required marker) is stripped —
+// CamundaForm draws its own required mark.
+const field_label = (field, fallback) => {
+  const prev = field.previousElementSibling;
+  let label = prev && prev.tagName === "LABEL" ? prev : field.closest("label");
+  if (!label) label = field.closest(".form-group")?.querySelector("label");
+  const text = label?.textContent?.replace(/\s*\*+\s*$/, "").trim();
+  return text || fallback;
 };
 
+const NUMBER_TYPES = ["Long", "Integer", "Short", "Double", "Float"];
+
 /**
- * Sanitize and normalize an engine-rendered HTML form: coerce input types,
- * disable fields when the current user is not the assignee, mark required
- * fields with a `*`, and restore any locally stored draft values.
+ * Adapt an engine server-rendered form (the HTML from `/task/{id}/rendered-form`,
+ * generated from `camunda:formData` form fields) into a form-js JSON schema, so
+ * a generated task form can be rendered by the same `CamundaForm` component —
+ * and thus looks identical to a deployed form-js form.
+ *
+ * Reads the field descriptors the engine annotates (`cam-variable-name`,
+ * `cam-variable-type`) rather than injecting the raw HTML. Returns
+ * `{ type: 'default', components: [...] }`; components is empty when the task
+ * has no form fields.
  */
-export const parse_html = (state, html) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  const form = doc.getElementsByTagName("form")[0];
-
-  if (!form) return '<p class="info-box">No form available for this task.</p>';
-
-  const disable =
-    state.api.user?.profile?.value?.id !== state.api.task.value?.data.assignee;
-  let storedData = localStorage.getItem(
-    `task_form_${state.api.task.one.value?.data.id}`,
+export const rendered_form_to_schema = (html) => {
+  const doc = new DOMParser().parseFromString(html ?? "", "text/html");
+  const fields = doc.querySelectorAll(
+    "input[cam-variable-name], select[cam-variable-name], textarea[cam-variable-name]",
   );
-  if (storedData) storedData = JSON.parse(storedData);
 
-  const inputs = form.getElementsByTagName("input");
-  const selects = form.getElementsByTagName("select");
+  const components = [];
+  for (const field of fields) {
+    const key = field.getAttribute("cam-variable-name");
+    if (!key) continue;
 
-  for (const field of inputs) {
-    if (!field.getAttribute("name")) field.name = "name";
-    if (field.hasAttribute("uib-datepicker-popup")) field.type = "date";
-    if (field.getAttribute("cam-variable-type") === "Long")
-      field.type = "number";
-    if (disable) field.setAttribute("disabled", "disabled");
-    if (field.hasAttribute("required")) {
-      const prevElement = field.previousElementSibling;
-      const parentLabel = field.closest("label");
-      if (
-        prevElement &&
-        prevElement.tagName === "LABEL" &&
-        !prevElement.textContent.includes("*")
-      ) {
-        prevElement.textContent += "*";
-      } else if (parentLabel && !parentLabel.textContent.includes("*")) {
-        parentLabel.textContent += "*";
-      }
+    const var_type = field.getAttribute("cam-variable-type") ?? "";
+    const tag = field.tagName.toLowerCase();
+    const input_type = (field.getAttribute("type") ?? "").toLowerCase();
+
+    const base = { id: key, key, label: field_label(field, key) };
+    if (field.hasAttribute("required")) base.validate = { required: true };
+    if (field.hasAttribute("disabled") || field.hasAttribute("readonly"))
+      base.disabled = true;
+
+    if (tag === "select") {
+      base.type = "select";
+      base.values = Array.from(field.querySelectorAll("option"))
+        .filter((o) => o.value !== "")
+        .map((o) => ({
+          value: o.value,
+          label: (o.textContent || o.value).trim(),
+        }));
+    } else if (tag === "textarea") {
+      base.type = "textarea";
+    } else if (input_type === "checkbox" || var_type === "Boolean") {
+      base.type = "checkbox";
+    } else if (
+      field.hasAttribute("uib-datepicker-popup") ||
+      var_type === "Date" ||
+      input_type === "date"
+    ) {
+      base.type = "datetime";
+      base.subtype = "date";
+    } else if (input_type === "number" || NUMBER_TYPES.includes(var_type)) {
+      base.type = "number";
+    } else {
+      base.type = "textfield";
     }
-    if (storedData) {
-      if (field.type === "checkbox" && storedData[field.name]?.value)
-        field.checked = true;
-      else if (storedData[field.name])
-        field.value = storedData[field.name].value;
-    }
+
+    components.push(base);
   }
-  for (const field of selects) {
-    if (disable) field.setAttribute("disabled", "disabled");
-    if (storedData?.[field.name]) {
-      for (const option of field.children) {
-        if (option.value === storedData[field.name].value)
-          option.selected = true;
-      }
-    }
-  }
-  return DOMPurify.sanitize(form.innerHTML, {
-    ADD_ATTR: ["cam-variable-type"],
-  });
+
+  return { type: "default", components };
 };
