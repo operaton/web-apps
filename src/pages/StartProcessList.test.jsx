@@ -23,6 +23,12 @@ vi.mock("../components/Breadcrumbs.jsx", () => ({
   Breadcrumbs: () => h("nav", { "data-testid": "breadcrumbs" }),
 }));
 
+// Stub CamundaForm (avoids feelin) and expose the schema it receives.
+vi.mock("../components/CamundaForm.jsx", () => ({
+  CamundaForm: ({ schema }) =>
+    h("div", { "data-testid": "camunda-form" }, JSON.stringify(schema)),
+}));
+
 let mockParams = {};
 vi.mock("preact-iso", () => ({
   useRoute: () => ({ params: mockParams }),
@@ -119,18 +125,36 @@ describe("StartProcessList", () => {
     );
   });
 
-  it("renders the start form when the task form html is available", () => {
+  it("shows the migration notice for a legacy (embedded:app) start form", async () => {
     mockParams = { tab: "p1" };
     signal_response(state.api.process.definition.one, { id: "p1", key: "inv" });
     signal_response(state.api.process.definition.start_form, {
       key: "embedded:app:inv",
     });
     engine_rest.process_definition.start_form.mockResolvedValue(undefined);
-    signal_response(
-      state.api.task.form,
-      '<form><input cam-variable-name="amount" cam-variable-type="String" type="text" /></form>',
-    );
-    const { getByText } = renderPage(state);
-    expect(getByText("tasks.form.form-title")).toBeTruthy();
+    const { findByText } = renderPage(state);
+    expect(await findByText(/legacy-html-unsupported/)).toBeTruthy();
+  });
+
+  it("renders a generated start form (embedded:engine key) through CamundaForm", async () => {
+    mockParams = { tab: "p1" };
+    signal_response(state.api.process.definition.one, { id: "p1", key: "kyc" });
+    signal_response(state.api.process.definition.start_form, {
+      key: "embedded:engine://engine/:engine/process-definition/p1/rendered-form",
+    });
+    engine_rest.process_definition.start_form.mockResolvedValue(undefined);
+    // The dispatch resets rendered_form then fetches it; the mock populates it.
+    engine_rest.process_definition.rendered_start_form.mockImplementation(() => {
+      signal_response(
+        state.api.process.definition.rendered_form,
+        '<form><div class="form-group"><label>Full name</label>' +
+          '<input cam-variable-name="fullName" cam-variable-type="String" type="text" value="Erika" required/>' +
+          "</div></form>",
+      );
+    });
+    const { findByTestId } = renderPage(state);
+    const schema = JSON.parse((await findByTestId("camunda-form")).textContent);
+    expect(schema.components.map((c) => c.key)).toEqual(["fullName"]);
+    expect(schema.components[0].validate.required).toBe(true);
   });
 });

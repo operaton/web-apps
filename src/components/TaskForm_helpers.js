@@ -137,3 +137,35 @@ export const rendered_form_to_schema = (html) => {
 
   return { type: "default", components };
 };
+
+/**
+ * Extract the values (and engine types) the engine embedded in a rendered form
+ * — input `value` / `checked`, the selected `<option>` — in the same
+ * `{ name: { value, type } }` shape as `/form-variables`. Used to pre-fill a
+ * generated start form (which has no instance, so no form-variables endpoint)
+ * from the form field defaults the engine already rendered.
+ */
+export const rendered_form_variables = (html) => {
+  const doc = new DOMParser().parseFromString(html ?? "", "text/html");
+  const out = {};
+  for (const field of doc.querySelectorAll(
+    "input[cam-variable-name], select[cam-variable-name], textarea[cam-variable-name]",
+  )) {
+    const key = field.getAttribute("cam-variable-name");
+    if (!key) continue;
+    const type = field.getAttribute("cam-variable-type") || "String";
+    const input_type = (field.getAttribute("type") ?? "").toLowerCase();
+
+    let value;
+    if (input_type === "checkbox") {
+      value = field.hasAttribute("checked");
+    } else if (field.tagName.toLowerCase() === "select") {
+      value = field.querySelector("option[selected]")?.value;
+    } else {
+      const v = field.getAttribute("value");
+      value = v !== null && v !== "" ? v : undefined;
+    }
+    out[key] = { value, type };
+  }
+  return out;
+};

@@ -1018,8 +1018,12 @@
     padding: var(--spacing-2);
   }
 
+  /* The two columns inside carry their own padding and scroll separately. */
   .start-process-page {
-    padding: var(--spacing-2);
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 0;
   }
 
   .dashboard>div {

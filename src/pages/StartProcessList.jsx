@@ -5,10 +5,25 @@ import { useSignal } from '@preact/signals'
 import engine_rest, { RequestState, RESPONSE_STATE } from '../api/engine_rest.jsx'
 import { useRoute, useLocation } from 'preact-iso'
 import { CamundaForm } from '../components/CamundaForm.jsx'
-import { form_data_to_vars, schema_variable_keys } from '../components/TaskForm_helpers.js'
+import {
+  form_data_to_vars,
+  schema_variable_keys,
+  vars_to_form_data,
+  rendered_form_to_schema,
+  rendered_form_variables,
+} from '../components/TaskForm_helpers.js'
 
 const EMBEDDED_APP_PREFIX = 'embedded:app:'
+const EMBEDDED_DEPLOYMENT_PREFIX = 'embedded:deployment:'
 const FORM_JS_PREFIXES = ['camunda-forms:', 'operaton-forms:']
+
+// A generated start form has no author-set form key: the engine reports it as
+// `embedded:engine://.../rendered-form` (or, rarely, no key). Only the app/
+// deployment embedded keys are the unsupported legacy AngularJS forms.
+const is_legacy_start_key = (key) =>
+  key != null &&
+  (key.startsWith(EMBEDDED_APP_PREFIX) ||
+    key.startsWith(EMBEDDED_DEPLOYMENT_PREFIX))
 const FORM_JS_MIGRATION_DOCS =
   'https://docs.operaton.org/documentation/user-guide/task-forms/'
 
@@ -31,11 +46,15 @@ const StartProcessList = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.tab])
 
-  return <div>
-    <StartableProcessesList />
-    {params.tab != null
-      ? <StartProcessForm />
-      : <p>{t("tasks.start-process.select-definition")}</p>}
+  return <div id="start-task">
+    <div class="definitions">
+      <StartableProcessesList />
+    </div>
+    <div class="start-form">
+      {params.tab != null
+        ? <StartProcessForm />
+        : <p class="empty-state">{t("tasks.start-process.select-definition")}</p>}
+    </div>
   </div>
 }
 
@@ -99,67 +118,24 @@ const StartableProcessesList = () => {
   </div>
 }
 
-// Flatten a server-rendered legacy start form to plain inputs and collect the
-// cam-variable fields. Returns null when the payload is not a <form> (e.g. a
-// form-js schema or an unsupported form type), so the caller can show a notice
-// instead of crashing on `null.querySelectorAll` (see #90).
-const parse_form = (form_html) => {
-  const parser = new DOMParser(),
-    parsed = parser.parseFromString(form_html, 'text/html'),
-    form = parsed.querySelector('form')
-
-  if (!form) return null
-
-  const inputs = form.querySelectorAll('input'),
-    selects = form.querySelectorAll('select'),
-    form_groups = form.querySelectorAll('.form-group')
-
-  const fields = [
-    ...Array.from(inputs, input => ({
-      variable_name: input.getAttribute('cam-variable-name'),
-      type: input.getAttribute('cam-variable-type'),
-      input_type: input.getAttribute('type')
-    })),
-    ...Array.from(selects, select => ({
-      variable_name: select.getAttribute('cam-variable-name'),
-      type: select.getAttribute('cam-variable-type'),
-      input_type: 'select'
-    })),
-  ].filter((f) => f.variable_name)
-
-  form_groups.forEach(form_group => (form.innerHTML += form_group.innerHTML))
-  form.querySelectorAll('.form-group').forEach(el => el.remove())
-  form.querySelectorAll('[cam-variable-name]').forEach(form_element =>
-    form_element.setAttribute('name', form_element.getAttribute('cam-variable-name'))
-  )
-  form.querySelectorAll('select').forEach(select =>
-    select.querySelectorAll('option').forEach(option => (option.value = option.innerText))
-  )
-
-  return { html: form.innerHTML, fields }
-}
-
 const StartProcessForm = () => {
   const
     state = useContext(AppState),
     { params } = useRoute(),
-    { route } = useLocation(),
     [t] = useTranslation(),
-    form_fields = useSignal([]),
-    parsed_html = useSignal(null),
-    // 'loading' | 'rendered' | 'legacy' | 'unsupported'
+    // 'loading' | 'legacy' | 'form-js' | 'generated'
     form_mode = useSignal('loading')
 
   // When the selected definition changes, fetch its start-form metadata and
   // dispatch on the form key:
-  //   - embedded: (legacy AngularJS HTML) → migration notice (see #96)
-  //   - camunda-forms:/operaton-forms: (form-js) → not supported yet (see #95)
-  //   - otherwise → the engine's server-rendered (generated) start form
+  //   - embedded:app: / embedded:deployment: (legacy AngularJS HTML) → notice
+  //   - camunda-forms:/operaton-forms: (form-js) → CamundaForm
+  //   - otherwise (no key, or embedded:engine://…/rendered-form) → the engine's
+  //     generated form, also rendered through CamundaForm
   useEffect(() => {
-    state.api.task.form.value = null
+    state.api.process.definition.rendered_form.value = null
     state.api.process.definition.deployed_start_form.value = null
-    parsed_html.value = null
-    form_fields.value = []
+    state.api.task.form.value = null
     form_mode.value = 'loading'
     if (params.tab == null) return
 
@@ -167,9 +143,9 @@ const StartProcessForm = () => {
       const start_form = state.api.process.definition.start_form.value?.data,
         form_key = start_form?.key
 
-      if (form_key != null && form_key.startsWith('embedded:')) {
+      if (is_legacy_start_key(form_key)) {
         form_mode.value = 'legacy'
-        // Still issue the correct fetch per the ticket (#90/#96).
+        // embedded:app: forms are app-served — fetch the source per #96.
         if (form_key.startsWith(EMBEDDED_APP_PREFIX)) {
           const path = form_key.substring(EMBEDDED_APP_PREFIX.length),
             context_path = start_form.contextPath ?? ''
@@ -185,83 +161,19 @@ const StartProcessForm = () => {
           params.tab
         )
       } else {
-        form_mode.value = 'rendered'
-        void engine_rest.process_definition.rendered_start_form(
-          state,
-          params.tab,
-          state.api.task.form
-        )
+        form_mode.value = 'generated'
+        void engine_rest.process_definition.rendered_start_form(state, params.tab)
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.tab])
 
-  // Parse the server-rendered form once it arrives. A 404 from rendered-form
-  // means the definition simply has no start form, so offer a generic start.
-  const form_value = state.api.task.form.value
-  useEffect(() => {
-    if (form_mode.value !== 'rendered' || form_value == null) return
-    if (form_value.status === RESPONSE_STATE.ERROR) {
-      form_mode.value = 'no-form'
-      return
-    }
-    if (form_value.status !== RESPONSE_STATE.SUCCESS || !form_value.data) return
-    const result = parse_form(form_value.data)
-    if (result == null) {
-      form_mode.value = 'no-form'
-    } else {
-      parsed_html.value = result.html
-      form_fields.value = result.fields
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form_value])
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
-    const
-      form = event.target,
-      form_data = new FormData(form),
-      to_base_64 = (file) => new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-
-    const variables = {}
-    await Promise.all(
-      form_fields.value.map(async ({ variable_name, type, input_type }) => {
-        if (input_type === 'file') {
-          const file = form_data.get(variable_name),
-            data_url = await to_base_64(file)
-          variables[variable_name] = {
-            type,
-            value: data_url.split(',')[1],
-            valueInfo: { filename: file.name, mimeType: file.type }
-          }
-        } else {
-          variables[variable_name] = { type, value: form_data.get(variable_name) }
-        }
-      })
-    )
-
-    const payload = { variables },
-      business_key = form_data.get('business_key')
-    if (business_key != null && business_key !== '') {
-      payload.businessKey = business_key.toString()
-    }
-
-    const result = await engine_rest.process_definition.submit_form(
-      state,
-      params.tab,
-      payload
-    )
-    if (result?.status === RESPONSE_STATE.SUCCESS) route('/tasks')
-  }
+  // The selected definition is fetched by the page above; fall back to the key
+  // and then the id while it is still in flight.
+  const definition = state.api.process.definition.one.value?.data
 
   return <div>
-    <h2>{t("tasks.form.form-title")}</h2>
+    <h2>{definition?.name ?? definition?.key ?? t("tasks.form.form-title")}</h2>
     {form_mode.value === 'legacy'
       ? <p class="info-box">
           {t("tasks.form.legacy-html-unsupported")}{" "}
@@ -271,28 +183,69 @@ const StartProcessForm = () => {
         </p>
       : form_mode.value === 'form-js'
         ? <StartCamundaForm definition_id={params.tab} />
-      : form_mode.value === 'unsupported'
-        ? <p class="info-box">{t("tasks.form.unsupported")}</p>
-        : form_mode.value === 'no-form'
-          ? <form onSubmit={handleSubmit}>
-              <p class="info-box">{t("tasks.start-process.no-form")}</p>
-              <label>
-                {t("tasks.start-process.business-key")}
-                <input type="text" name="business_key" />
-              </label>
-              <div class="button-group">
-                <button type="submit">{t("tasks.start-process.start")}</button>
-              </div>
-            </form>
-          : parsed_html.value != null
-            ? <form onSubmit={handleSubmit}>
-                {/*eslint-disable-next-line react/no-danger*/}
-                <div dangerouslySetInnerHTML={{ __html: parsed_html.value }} />
-                <div class="button-group">
-                  <button type="submit">{t("tasks.start-process.start")}</button>
-                </div>
-              </form>
-            : <p class="fade-in-delayed">{t("common.loading")}</p>}
+        : form_mode.value === 'generated'
+          ? <StartGeneratedForm definition_id={params.tab} />
+          : <p class="fade-in-delayed">{t("common.loading")}</p>}
+  </div>
+}
+
+// Generated (engine-rendered) start form — the start-side twin of the task
+// GeneratedTaskForm. The engine renders it from the start event's
+// camunda:formData; we turn that HTML into a form-js schema (+ its default
+// values) and render it with CamundaForm, so it looks like a form-js form.
+const StartGeneratedForm = ({ definition_id }) => {
+  const
+    state = useContext(AppState),
+    { route } = useLocation(),
+    [t] = useTranslation(),
+    [error, setError] = useState(null),
+    submit_ref = useRef(null)
+
+  const rendered = state.api.process.definition.rendered_form.value
+  // A 404 from rendered-form means the definition has no start form at all.
+  const no_form = rendered?.status === RESPONSE_STATE.ERROR
+  if (!no_form && (rendered?.status !== RESPONSE_STATE.SUCCESS || !rendered?.data)) {
+    return <p class="fade-in-delayed">{t("common.loading")}</p>
+  }
+
+  const schema = no_form
+    ? { type: 'default', components: [] }
+    : rendered_form_to_schema(rendered.data)
+  const vars = no_form ? {} : rendered_form_variables(rendered.data)
+  const allowed = schema_variable_keys(schema)
+  const initial_data = vars_to_form_data(vars, allowed)
+
+  const on_submit = ({ data, errors }) => {
+    if (errors && Object.keys(errors).length > 0) {
+      setError(t("tasks.form.validation-error"))
+      return
+    }
+    setError(null)
+    const variables = form_data_to_vars(data, vars, allowed)
+    engine_rest.process_definition
+      .submit_form(state, definition_id, { variables })
+      .then((result) => {
+        if (result?.status === RESPONSE_STATE.SUCCESS) route('/tasks')
+        else setError(result?.error?.message ?? t("tasks.form.unknown-error"))
+      })
+      .catch((e) => setError(e?.message ?? t("tasks.form.unknown-error")))
+  }
+
+  return <div class="task-form camunda-task-form">
+    {schema.components.length === 0 &&
+      <p class="info-box">{t("tasks.start-process.no-form")}</p>}
+    <CamundaForm
+      schema={schema}
+      data={initial_data}
+      on_submit={on_submit}
+      on_ready={(c) => (submit_ref.current = c.submit)}
+    />
+    {error && <p class="error" role="alert">{error}</p>}
+    <div class="form-buttons">
+      <button type="button" onClick={() => submit_ref.current?.()}>
+        {t("tasks.start-process.start")}
+      </button>
+    </div>
   </div>
 }
 

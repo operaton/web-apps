@@ -1633,22 +1633,51 @@ nav:has(> .breadcrumbs) {
 
 /* StartProcessList */
 
+/* Two columns: the startable definitions on a recessed surface, the selected
+   definition's start form (or the hint to pick one) beside them. Each column
+   scrolls on its own so the page itself never does. */
 #start-task {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
+  flex: 1;
+  min-height: 0;
 
   header {
     padding: var(--spacing-2);
   }
 
-  > .row {
-    padding: var(--spacing-2);
+  /* Title + search above the table (now nested inside the left column). */
+  .row {
+    padding: var(--spacing-2) 0;
     gap: var(--spacing-2);
 
     > div:last-child {
       flex-grow: 1;
     }
+  }
+
+  > .definitions {
+    flex: 1 1 50%;
+    min-width: 0;
+    overflow: auto;
+    padding: 0 var(--spacing-2) var(--spacing-2);
+    background: var(--background-2);
+    border-right: var(--border);
+  }
+
+  > .start-form {
+    flex: 1 1 50%;
+    min-width: 0;
+    overflow-y: auto;
+    padding: var(--spacing-2);
+  }
+
+  /* The list keeps its own inner spacing; the table spans the column. */
+  > .definitions table {
+    width: 100%;
+  }
+
+  > .definitions thead th {
+    background: var(--background-2);
   }
 }
 
