@@ -11,11 +11,11 @@ import {
   vars_to_form_data,
   rendered_form_to_schema,
   rendered_form_variables,
+  form_ref_of,
 } from '../components/TaskForm_helpers.js'
 
 const EMBEDDED_APP_PREFIX = 'embedded:app:'
 const EMBEDDED_DEPLOYMENT_PREFIX = 'embedded:deployment:'
-const FORM_JS_PREFIXES = ['camunda-forms:', 'operaton-forms:']
 
 // A generated start form has no author-set form key: the engine reports it as
 // `embedded:engine://.../rendered-form` (or, rarely, no key). Only the app/
@@ -131,9 +131,9 @@ const StartProcessForm = () => {
     form_mode = useSignal('loading')
 
   // When the selected definition changes, fetch its start-form metadata and
-  // dispatch on the form key:
-  //   - embedded:app: / embedded:deployment: (legacy AngularJS HTML) → notice
-  //   - camunda-forms:/operaton-forms: (form-js) → CamundaForm
+  // dispatch on it:
+  //   - a formRef (form-js, i.e. camunda:formRef on the start event) → CamundaForm
+  //   - embedded:app: / embedded:deployment: key (legacy AngularJS HTML) → notice
   //   - otherwise (no key, or embedded:engine://…/rendered-form) → the engine's
   //     generated form, also rendered through CamundaForm
   useEffect(() => {
@@ -147,7 +147,13 @@ const StartProcessForm = () => {
       const start_form = state.api.process.definition.start_form.value?.data,
         form_key = start_form?.key
 
-      if (is_legacy_start_key(form_key)) {
+      if (form_ref_of(start_form)) {
+        form_mode.value = 'form-js'
+        void engine_rest.process_definition.get_deployed_start_form(
+          state,
+          params.tab
+        )
+      } else if (is_legacy_start_key(form_key)) {
         form_mode.value = 'legacy'
         // embedded:app: forms are app-served — fetch the source per #96.
         if (form_key.startsWith(EMBEDDED_APP_PREFIX)) {
@@ -158,12 +164,6 @@ const StartProcessForm = () => {
             `${context_path}/${path}`.replace(/^\/+/, '')
           )
         }
-      } else if (FORM_JS_PREFIXES.some((p) => form_key?.startsWith(p))) {
-        form_mode.value = 'form-js'
-        void engine_rest.process_definition.get_deployed_start_form(
-          state,
-          params.tab
-        )
       } else {
         form_mode.value = 'generated'
         void engine_rest.process_definition.rendered_start_form(state, params.tab)

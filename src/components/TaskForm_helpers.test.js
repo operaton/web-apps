@@ -4,9 +4,25 @@ import {
   vars_to_form_data,
   form_data_to_vars,
   infer_type,
+  form_ref_of,
 } from "./TaskForm_helpers.js";
 
 describe("TaskForm_helpers", () => {
+  describe("form_ref_of", () => {
+    const ref = { key: "loan-reviewer", binding: "deployment" };
+
+    it("reads camundaFormRef (C7) and operatonFormRef (Operaton)", () => {
+      expect(form_ref_of({ camundaFormRef: ref })).toEqual(ref);
+      expect(form_ref_of({ operatonFormRef: ref })).toEqual(ref);
+    });
+
+    it("is null without a formRef — a formKey is not one", () => {
+      expect(form_ref_of({ formKey: "embedded:app:forms/x.html" })).toBe(null);
+      expect(form_ref_of({})).toBe(null);
+      expect(form_ref_of(undefined)).toBe(null);
+    });
+  });
+
   describe("schema_variable_keys", () => {
     it("collects top-level component keys", () => {
       const schema = {

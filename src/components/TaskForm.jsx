@@ -9,27 +9,23 @@ import {
   form_data_to_vars,
   schema_variable_keys,
   rendered_form_to_schema,
+  form_ref_of,
 } from "./TaskForm_helpers.js";
 
 const TaskForm = () => {
   const state = useContext(AppState),
     { params } = useRoute(),
     [t] = useTranslation(),
-    selectedTask = state.api.task.one.value?.data,
-    refName = state.server.value.c7_mode ? "camundaFormRef" : "operatonFormRef";
+    selectedTask = state.api.task.one.value?.data;
 
   if (!selectedTask)
     return <p class="info-box">{t("tasks.form.no-task-selected")}</p>;
 
   const formKey = selectedTask.formKey ?? "";
-  const has_camunda_form_ref = !!selectedTask[refName];
-  const is_camunda_form_via_key =
-    formKey.startsWith("camunda-forms:") ||
-    formKey.startsWith("operaton-forms:");
   const is_embedded_html_form = formKey.startsWith("embedded:");
 
-  // Camunda Forms (form-js) — either by formRef or by camunda-forms:* formKey.
-  if (has_camunda_form_ref || is_camunda_form_via_key) {
+  // Camunda Forms (form-js) are referenced by formRef, never by formKey.
+  if (form_ref_of(selectedTask)) {
     return <CamundaTaskForm task={selectedTask} taskId={params.task_id} />;
   }
 

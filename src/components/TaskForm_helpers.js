@@ -5,6 +5,20 @@
  * implementation (see TaskForm_helpers.test.js) and reused by the component,
  * rather than re-implemented in tests.
  */
+// ---- Camunda Forms (form-js) -----------------------------------------------
+
+/**
+ * The form-js (Camunda Forms) reference of a task or a start-form DTO, or null.
+ *
+ * A deployed form-js form is referenced from the BPMN with `camunda:formRef` +
+ * `camunda:formRefBinding` and reported by the engine as `camundaFormRef`
+ * (`operatonFormRef` on Operaton) — an object of `{ key, binding, version }`.
+ * `formKey` is the *other*, legacy mechanism (embedded AngularJS HTML forms)
+ * and never points at a form-js form.
+ */
+export const form_ref_of = (entity) =>
+  entity?.camundaFormRef ?? entity?.operatonFormRef ?? null;
+
 // ---- Camunda Forms (form-js) variable mapping ------------------------------
 
 /**
