@@ -91,13 +91,14 @@ export function Header() {
   useHotkeys(
     plugin_hotkeys.map((entry) => entry.hotkey).join(",") || "f13",
     (_event, handler) => {
-      const pressed = (
-        handler?.hotkey ??
-        handler?.keys?.join("+") ??
-        ""
-      ).replaceAll(" ", "");
+      // react-hotkeys-hook 5 lower-cases `handler.hotkey`, so normalise both
+      // sides — a plugin may declare its hotkey in any casing.
+      const normalise = (hotkey) => hotkey.replaceAll(" ", "").toLowerCase();
+      const pressed = normalise(
+        handler?.hotkey ?? handler?.keys?.join("+") ?? "",
+      );
       const hit = plugin_hotkeys.find(
-        (entry) => entry.hotkey.replaceAll(" ", "") === pressed,
+        (entry) => normalise(entry.hotkey) === pressed,
       );
       if (hit) route(hit.href);
     },
