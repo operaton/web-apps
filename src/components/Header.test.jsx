@@ -62,10 +62,9 @@ describe("Header", () => {
     const hrefs = Array.from(nav.querySelectorAll("li > a")).map((a) =>
       a.getAttribute("href"),
     );
-    // Logo (/), tasks, processes, decisions, deployments, batches,
-    // migrations, admin.
+    // The logo link lives outside #primary-navigation now; the menu holds just
+    // the page entries.
     expect(hrefs).toEqual([
-      "/",
       "/tasks",
       "/processes",
       "/decisions",
