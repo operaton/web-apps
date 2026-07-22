@@ -6,6 +6,9 @@ import { AppState } from '../state.js'
 import { useLocation, useRoute } from 'preact-iso'
 import { useTranslation } from 'react-i18next'
 import NavigatedViewer from 'bpmn-js/lib/NavigatedViewer'
+// bpmn-js 18 dropped the outline from the viewer bundle; the diagram is
+// click-interactive here, so add it back to keep the selection feedback.
+import OutlineModule from 'bpmn-js/lib/features/outline'
 import 'bpmn-js/dist/assets/diagram-js.css'
 import 'bpmn-js/dist/assets/bpmn-js.css'
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
@@ -88,6 +91,7 @@ export const BPMNViewer = ({ xml, container, tokens, highlight, mode = 'definiti
       if (!viewerRef.current) {
         viewerRef.current = new NavigatedViewer({
           container: containerEl,
+          additionalModules: [OutlineModule],
         })
       }
       return viewerRef.current

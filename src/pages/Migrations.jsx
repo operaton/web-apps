@@ -5,7 +5,7 @@ import engine_rest, { RequestState } from "../api/engine_rest.jsx";
 import { AppState } from "../state.js";
 import { createContext } from "preact";
 import ReactBpmn from "react-bpmn";
-import BpmnModdle from "bpmn-moddle";
+import { BpmnModdle } from "bpmn-moddle";
 import { useLocation } from "preact-iso/router";
 import { has_data } from "../api/helper.jsx";
 import {
