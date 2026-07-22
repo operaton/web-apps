@@ -47,7 +47,9 @@ const ProfileAccountPage = () => {
     state = useContext(AppState)
 
   useEffect(() => {
-    if (!state.api.user.profile.value) {
+    // The signal starts out holding the login placeholder ({ id }), not a
+    // response, so check for fetched data rather than for any value at all.
+    if (!state.api.user.profile.value?.data) {
       void engine_rest.user.profile.get(state)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

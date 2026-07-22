@@ -65,10 +65,17 @@ const get_task_deployed_form_html = (state, task_id) =>
 const get_task_form_variables = (state, task_id) =>
   GET(`/task/${task_id}/form-variables`, state, state.api.task.form_variables);
 
+// The profile signal holds the login placeholder ({ id }) until a page fetches
+// the profile, after which it holds a response envelope ({ data: { id } }).
+const current_user_id = (state) => {
+  const profile = state.api.user.profile.value;
+  return profile?.data?.id ?? profile?.id;
+};
+
 const claim_task = (state, task_id) =>
   POST(
     `/task/${task_id}/claim`,
-    { userId: state.api.user.profile.value.id },
+    { userId: current_user_id(state) },
     state,
     state.api.task.claim_result,
   );
@@ -76,7 +83,7 @@ const claim_task = (state, task_id) =>
 const unclaim_task = (state, task_id) =>
   POST(
     `/task/${task_id}/unclaim`,
-    { userId: state.api.user.profile.value.id },
+    { userId: current_user_id(state) },
     state,
     state.api.task.unclaim_result,
   );
