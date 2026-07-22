@@ -83,8 +83,12 @@ const StartableProcessesList = () => {
       <thead>
       <tr>
         <th>{t("tasks.start-process.definition-name")}</th>
-        <th>{t("tasks.start-process.version")}</th>
-        <th>{t("tasks.start-process.description")}</th>
+        <th title={t("tasks.start-process.version")}>
+          {t("tasks.start-process.version-abbr")}
+        </th>
+        <th title={t("tasks.start-process.description")}>
+          {t("tasks.start-process.description-abbr")}
+        </th>
         <th>{t("common.key")}</th>
       </tr>
       </thead>
