@@ -135,8 +135,6 @@ const ProfileDetails = () => {
 const AccountAccountPage = () => {
   const
     state = useContext(AppState),
-    // , user_credentials, user_credentials_response, user_unlock_response
-    { api: { user: { credentials, unlock } } } = state,
     [t] = useTranslation(),
     // local state
     old_password = useSignal(''),

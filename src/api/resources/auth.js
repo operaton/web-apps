@@ -1,10 +1,7 @@
 import {
   GET_SERVER_URL,
   POST,
-  POST_SERVER_URL,
-  GET,
   _url_engine_rest,
-  get_auth_header,
   RESPONSE_STATE,
 } from "../helper.jsx";
 import {
@@ -14,7 +11,6 @@ import {
   restore_oauth_session,
   oauth_logout,
 } from "../oauth.js";
-import user from "./user.js";
 
 const cookies = (state) =>
   GET_SERVER_URL("/operaton/app/cockpit/default/", state, state.auth.cookies);
@@ -58,7 +54,7 @@ const login = (
     .then((response) =>
       response.ok ? response.json() : Promise.reject(response),
     )
-    .then((data) => {
+    .then(() => {
       state.auth.credentials.value = { username, password };
       state.auth.logged_in.value = {
         status: RESPONSE_STATE.SUCCESS,
@@ -70,7 +66,7 @@ const login = (
       );
     })
     .catch(
-      (error) =>
+      () =>
         (state.auth.logged_in.value = {
           status: RESPONSE_STATE.ERROR,
           data: "wrong_login",
@@ -139,7 +135,7 @@ const is_authenticated = async (state) => {
       status: RESPONSE_STATE.SUCCESS,
       data: "authenticated",
     });
-  } catch (error) {
+  } catch {
     return (signal.value = {
       status: RESPONSE_STATE.ERROR,
       data: "unauthenticated",

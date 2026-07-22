@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures.js";
+import { test } from "./fixtures.js";
 import { expect_no_a11y_violations } from "./a11y.js";
 
 // Automated WCAG 2.x A/AA scans (axe-core) on each top-level page. The page

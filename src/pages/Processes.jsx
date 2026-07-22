@@ -826,7 +826,7 @@ const DefinitionsEmpty = () => {
       <a
         href="https://docs.operaton.org/manual/latest/installation/full/tomcat/manual/"
         target="_blank"
-        rel="noopener"
+        rel="noreferrer"
       >
         {t("processes.empty.how-to")}
       </a>
@@ -2112,18 +2112,6 @@ const JobDefinitions = () => {
     </div>
   );
 };
-
-const BackToListBtn = ({ url, title, className }) => (
-  <a
-    class={`tabs-back ${className || ""}`}
-    href={url}
-    title={title}
-    aria-label={title}
-  >
-    <Icons.arrow_left />
-    <Icons.list />
-  </a>
-);
 
 const DefinitionsManage = () => {
   const state = useContext(AppState),

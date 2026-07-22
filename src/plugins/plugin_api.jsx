@@ -49,6 +49,9 @@ const request_absolute = async (
   }
 };
 
+/* eslint-disable react-hooks/rules-of-hooks --
+   `use_plugin_api` is a custom hook, but the project names functions in
+   snake_case, which the rule's `useCamelCase` heuristic cannot recognise. */
 export const use_plugin_api = (plugin_id) => {
   const state = useContext(AppState);
   // Default when rendered outside a matched route (e.g. in tests).

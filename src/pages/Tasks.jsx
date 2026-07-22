@@ -12,7 +12,6 @@ import { BPMNViewer } from "../components/BPMNViewer.jsx";
 import { Tabs } from "../components/Tabs.jsx";
 import { ListFilter } from "../components/ListFilter.jsx";
 import { ManageFilters } from "../components/ManageFilters.jsx";
-import * as formatter from "../helper/date_formatter.js";
 import {
   filter_share_link,
   parse_list_query,
@@ -739,11 +738,6 @@ const GroupsList = () => {
 const SetGroupsButton = () => {
   const state = useContext(AppState),
     [t] = useTranslation(),
-    {
-      api: {
-        task: { identity_links },
-      },
-    } = state,
     close = () => document.getElementById("add_groups").close(),
     show = () => document.getElementById("add_groups").showModal(),
     group_state = useSignal(null),
@@ -1291,7 +1285,7 @@ const HistoryTab = () => {
     {
       api: {
         history: { user_operation },
-        task: { one, comment },
+        task: { comment },
       },
     } = state;
 
