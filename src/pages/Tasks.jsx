@@ -503,12 +503,10 @@ const TaskTabs = () => {
   const { params } = useRoute();
   const [t] = useTranslation();
 
-  // Load the task and reset claim/assign result state whenever the active
-  // task changes. Clean stale per-task data on unmount so the next task's
-  // panes don't render against the previous task's signals.
+  // Load the task whenever the active task changes. Clean stale per-task data
+  // on unmount so the next task's panes don't render against the previous
+  // task's signals.
   useEffect(() => {
-    state.task_claim_result.value = null;
-    state.task_assign_result.value = null;
     void load_task_chain(state, params.task_id);
     return () => {
       state.api.task.one.value = null;

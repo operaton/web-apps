@@ -64,44 +64,53 @@ const ProfileAccountPage = () => {
 const ProfileEditPage = () => {
   const
     state = useContext(AppState),
-    { user_profile, user_profile_edit, user_profile_edit_response } = state,
+    { profile, update } = state.api.user,
+    // Ephemeral edit buffer — local UI state, seeded from the fetched profile
+    // (which the parent RequestState guarantees is loaded before we mount).
+    edit = useSignal({ ...profile.value?.data }),
     [t] = useTranslation()
 
+  // Re-seed when the profile refetches; drop any stale update feedback on mount
+  // so a previous session's success/error banner can't flash.
   useEffect(() => {
-    user_profile_edit.value = { ...user_profile.value?.data }
+    edit.value = { ...profile.value?.data }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user_profile.value?.data])
+  }, [profile.value?.data])
+  useEffect(() => {
+    update.value = null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const
-    set_value = (k, v) => user_profile_edit.value = { ...user_profile_edit.peek(), [k]: v.currentTarget.value },
+    set_value = (k, v) => edit.value = { ...edit.peek(), [k]: v.currentTarget.value },
     on_submit = e => {
       e.preventDefault()
-      engine_rest.user.profile.update(state).then(() => engine_rest.user.profile.get(state))
+      engine_rest.user.profile.update(state, null, edit.value).then(() => engine_rest.user.profile.get(state))
     }
 
   return <section>
     <h2>{t("account.edit-profile")}</h2>
     <div aria-live="polite">
-      {user_profile_edit_response.value !== undefined
+      {update.value != null
         ? <RequestState
-            signal={user_profile_edit_response}
+            signal={update}
             on_success={() => <p class="success">{t("account.success-updated")}</p>}
-            on_error={() => <p class="error">{t("common.error")} {user_profile_edit_response.value?.message}</p>} />
+            on_error={() => <p class="error">{t("common.error")} {update.value?.message}</p>} />
         : ''}
     </div>
 
 
     <form onSubmit={on_submit}>
       <label for="first-name">{t("account.first-name")}</label>
-      <input id="first-name" type="text" value={user_profile_edit.value.firstName}
+      <input id="first-name" type="text" value={edit.value.firstName}
              onInput={(e) => set_value('firstName', e)} required />
 
       <label for="last-name">{t("account.last-name")}</label>
-      <input id="last-name" type="text" value={user_profile_edit.value.lastName}
+      <input id="last-name" type="text" value={edit.value.lastName}
              onInput={(e) => set_value('lastName', e)} required />
 
       <label for="email">{t("account.email")}</label>
-      <input id="email" type="email" value={user_profile_edit.value.email}
+      <input id="email" type="email" value={edit.value.email}
              onInput={(e) => set_value('email', e)} required />
 
       <div class="button-group">

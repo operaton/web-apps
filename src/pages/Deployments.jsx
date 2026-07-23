@@ -77,9 +77,8 @@ const load_deployments = (state, query) => {
 
 const DeploymentsPage = () => {
   const state = useContext(AppState),
-    {
-      deployments_page: { selected_resource },
-    } = state,
+    // Ephemeral, single-page selection state — not a fetched resource.
+    selected_resource = useSignal(null),
     {
       params: { deployment_id, resource_name },
       query,

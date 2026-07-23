@@ -24,30 +24,6 @@ export const get_diagram = (state, process_definition_id, signal = state.api.pro
   GET(`/process-definition/${process_definition_id}/xml`, state, signal)
 
 /**
- * Fetches statistics and all details for a single process definition
- * @param {Object} state - Application state
- * @param {string} process_definition_id - Process definition ID
- * @sideeffects Updates state.selected_process_statistics
- */
-// export const get_process_definition_statistics = (state, process_definition_id) =>
-//   get(`/process-definition/${id}`, state, state.api.process.definition.single)
-//
-// {
-//   return fetch(`${_url(state)}/process-definition/statistics`)
-//     .then((res) => res.json())
-//     .then((data) => {
-//       const filteredData = data.filter(
-//         (item) => item.definition.id === process_definition_id
-//       )
-//       state.selected_process_statistics.value = filteredData[0] || null
-//     })
-//     .catch((error) => {
-//       console.error('Error fetching statistics:', error)
-//       state.selected_process_statistics.value = null
-//     })
-// }
-
-/**
  * Fetches the process definition for a deployment resource. The engine returns
  * an *array* (a filtered list), so this lands in its own signal rather than
  * process.definition.one (which holds a single object) — see #94 fallout.

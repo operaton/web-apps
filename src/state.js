@@ -29,17 +29,6 @@ const createAppState = () => {
     logout_response: signal(null),
   };
 
-  const deployments_page = {
-    selected_resource: signal(null),
-    selected_deployment: signal(null),
-    selected_process_statistics: signal(null),
-  };
-  const user_profile = signal(null);
-  const user_profile_edit = signal({});
-  const user_profile_edit_response = signal(undefined);
-  const task_claim_result = signal(null);
-  const task_assign_result = signal(null);
-
   const api = {
     authorization: {
       all: signal(null),
@@ -236,12 +225,6 @@ const createAppState = () => {
     server,
     auth,
     api,
-    deployments_page,
-    user_profile,
-    user_profile_edit,
-    user_profile_edit_response,
-    task_claim_result,
-    task_assign_result,
   };
 };
 
