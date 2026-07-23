@@ -10,7 +10,17 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:a11y:axe": "playwright test a11y",
+    "test:a11y:pa11y": "node e2e/a11y-pa11y.mjs",
+    "test:a11y": "npm run test:a11y:axe && npm run test:a11y:pa11y",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx}": "eslint"
   },
   "dependencies": {
     "@bpmn-io/feelin": "^6.1.0",
@@ -38,8 +48,12 @@
     "@vitest/ui": "^4.0.7",
     "eslint": "^9.39.5",
     "eslint-config-preact": "^2.0.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "happy-dom": "^20.0.10",
     "jsdom": "^29.0.0",
+    "lint-staged": "^17.2.0",
+    "pa11y": "^9.1.1",
+    "simple-git-hooks": "^2.13.1",
     "vite": "^8.0.0",
     "vitest": "^4.0.7"
   }
