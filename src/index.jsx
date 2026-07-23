@@ -154,6 +154,7 @@ const Routing = () => {
           <form onSubmit={login} class="form-horizontal">
             <label for="username">User name*</label>
             <input
+              type="text"
               name="username"
               id="username"
               autocomplete="username"

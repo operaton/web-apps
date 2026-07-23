@@ -340,9 +340,9 @@ const TaskList = () => {
         <table>
           <thead>
             <tr>
-              <th>{t("tasks.task-list.table-headings.task-name")}</th>
-              <th>{t("tasks.task-list.table-headings.assignee")}</th>
-              <th>{t("tasks.task-list.table-headings.due-in")}</th>
+              <th scope="col">{t("tasks.task-list.table-headings.task-name")}</th>
+              <th scope="col">{t("tasks.task-list.table-headings.assignee")}</th>
+              <th scope="col">{t("tasks.task-list.table-headings.due-in")}</th>
             </tr>
           </thead>
           <tbody>
@@ -585,10 +585,10 @@ const SetDueDateButton = () => {
         <h2 id="set-due-date-title">{t("tasks.due-date.title")}</h2>
 
         <form onSubmit={submit}>
-          <label for="date">{t("tasks.due-date.date")}</label>
+          <label for="due-date">{t("tasks.due-date.date")}</label>
           <input
             type="date"
-            id="date"
+            id="due-date"
             value={
               due_date !== null ? due_date?.toISOString().split("T")[0] : null
             }
@@ -599,10 +599,10 @@ const SetDueDateButton = () => {
               })
             }
           />
-          <label for="time">{t("tasks.due-date.time")}</label>
+          <label for="due-time">{t("tasks.due-date.time")}</label>
           <input
             type="time"
-            id="time"
+            id="due-time"
             value={
               due_date !== null
                 ? due_date?.toISOString().split("T")[1].substring(0, 5)
@@ -682,10 +682,10 @@ const SetFollowUpDateButton = () => {
         <h2 id="set-follow-up-date-title">{t("tasks.follow-up.title")}</h2>
 
         <form onSubmit={submit}>
-          <label for="date">{t("tasks.due-date.date")}</label>
+          <label for="follow-up-date">{t("tasks.due-date.date")}</label>
           <input
             type="date"
-            id="date"
+            id="follow-up-date"
             value={
               followUpDate !== null
                 ? followUpDate?.toISOString().split("T")[0]
@@ -698,10 +698,10 @@ const SetFollowUpDateButton = () => {
               })
             }
           />
-          <label for="time">{t("tasks.due-date.time")}</label>
+          <label for="follow-up-time">{t("tasks.due-date.time")}</label>
           <input
             type="time"
-            id="time"
+            id="follow-up-time"
             value={
               followUpDate !== null
                 ? followUpDate?.toISOString().split("T")[1].substring(0, 5)

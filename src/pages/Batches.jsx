@@ -188,15 +188,15 @@ const BatchesList = () => {
             <table>
               <thead>
                 <tr>
-                  <th>{t("batches.id")}</th>
-                  <th>{t("batches.type")}</th>
+                  <th scope="col">{t("batches.id")}</th>
+                  <th scope="col">{t("batches.type")}</th>
                   {history_mode ? (
-                    <th>{t("batches.end-time")}</th>
+                    <th scope="col">{t("batches.end-time")}</th>
                   ) : (
                     <>
-                      <th>{t("batches.progress")}</th>
-                      <th class="num">{t("batches.failed-jobs")}</th>
-                      <th>{t("batches.state")}</th>
+                      <th scope="col">{t("batches.progress")}</th>
+                      <th scope="col" class="num">{t("batches.failed-jobs")}</th>
+                      <th scope="col">{t("batches.state")}</th>
                     </>
                   )}
                 </tr>

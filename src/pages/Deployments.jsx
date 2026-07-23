@@ -209,8 +209,8 @@ const DeploymentsList = () => {
       <table>
         <thead>
           <tr>
-            <th>{t("common.name")}</th>
-            <th>{t("deployments.deployed")}</th>
+            <th scope="col">{t("common.name")}</th>
+            <th scope="col">{t("deployments.deployed")}</th>
           </tr>
         </thead>
         <tbody>
@@ -360,7 +360,7 @@ const ResourcesList = () => {
       <table>
         <thead>
           <tr>
-            <th>{t("deployments.resource")}</th>
+            <th scope="col">{t("deployments.resource")}</th>
           </tr>
         </thead>
         <tbody>
