@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Session start
+
+At the start of a session, run `git status` and check whether `main` has new commits upstream (e.g. `git fetch` then compare with `origin/main`). If the local branch is behind, suggest pulling the changes down before working locally.
+
 ## Project
 
 Operaton BPM Web Apps — the frontend SPA for the [Operaton](https://github.com/operaton/operaton) open-source BPMN process engine. Built with **Preact**, **Vite**, and **Preact Signals**.
