@@ -64,7 +64,7 @@ describe("api/resources/process_definition", () => {
     expect_api_call(GET, {
       url: "/process-definition?deploymentId=dep-1&resourceName=my%20process.bpmn",
       state,
-      signal: state.api.process.definition.one,
+      signal: state.api.deployment.process_definition,
     });
   });
 

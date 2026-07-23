@@ -119,7 +119,7 @@ const DeploymentsPage = () => {
       selected_resource.value = null;
       state.api.deployment.resources.value = null;
       state.api.deployment.resource.value = null;
-      state.api.process.definition.one.value = null;
+      state.api.deployment.process_definition.value = null;
       state.api.process.instance.count.value = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,7 +151,7 @@ const DeploymentsPage = () => {
     return () => {
       selected_resource.value = null;
       state.api.deployment.resource.value = null;
-      state.api.process.definition.one.value = null;
+      state.api.deployment.process_definition.value = null;
       state.api.process.instance.count.value = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -397,10 +397,9 @@ const ResourceDetails = () => {
     {
       api: {
         process: {
-          definition: { one: process_definition },
           instance: { count: instance_count },
         },
-        deployment: { resource },
+        deployment: { resource, process_definition },
       },
     } = state,
     {

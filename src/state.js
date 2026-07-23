@@ -184,6 +184,10 @@ const createAppState = () => {
       all: signal(null),
       resources: signal(null),
       resource: signal(null),
+      // The process definition matching a deployment resource. Its own slot
+      // (not process.definition.one) because the engine returns it as an
+      // *array* here, whereas process.definition.one holds a single object.
+      process_definition: signal(null),
       delete: signal(null),
       create: signal(null),
       saved_filters: signal(null),

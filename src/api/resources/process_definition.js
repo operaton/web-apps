@@ -48,16 +48,15 @@ export const get_diagram = (state, process_definition_id, signal = state.api.pro
 // }
 
 /**
- * Fetches process definition by deployment ID and resource name
+ * Fetches the process definition for a deployment resource. The engine returns
+ * an *array* (a filtered list), so this lands in its own signal rather than
+ * process.definition.one (which holds a single object) — see #94 fallout.
  * @param {Object} state - Application state
  * @param {string} deployment_id - Deployment ID
  * @param {string} resource_name - Resource name
- * @sideeffects Triggers statistics fetch
  */
 export const get_process_definition_by_deployment_id = (state, deployment_id, resource_name) =>
-  GET(`/process-definition?deploymentId=${deployment_id}&resourceName=${encodeURIComponent(resource_name)}`, state, state.api.process.definition.one)
-
-// .then(() => state.api.process.definition.one = state.api.process.definition.one[0])
+  GET(`/process-definition?deploymentId=${deployment_id}&resourceName=${encodeURIComponent(resource_name)}`, state, state.api.deployment.process_definition)
 
 const url_params = () =>
   new URLSearchParams({
