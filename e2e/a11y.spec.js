@@ -15,6 +15,12 @@ import { expect_no_a11y_violations } from "./a11y.js";
 const scan = async (page, path, ready = "main") => {
   await page.goto(path, { waitUntil: "domcontentloaded" });
   await page.locator(ready).first().waitFor({ timeout: 30_000 });
+  // Freeze fade-in animations/transitions to their end state so axe never
+  // samples a mid-animation (reduced-opacity) frame as a false contrast failure.
+  await page.addStyleTag({
+    content:
+      "*,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;transition:none!important}",
+  });
   await expect_no_a11y_violations(page);
 };
 

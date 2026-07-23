@@ -692,11 +692,11 @@ main.processes {
 }
 
 .processes nav.tertiary a:hover {
-  color: var(--color-primary);
+  color: var(--color-link);
 }
 
 .processes nav.tertiary a[aria-current] {
-  color: var(--color-primary);
+  color: var(--color-link);
   border-bottom-color: var(--color-primary);
   font-weight: 600;
 }
@@ -948,7 +948,7 @@ form.camunda-form {
 }
 
 .tabs > .tab-selection > a[aria-selected="true"] {
-  color: var(--color-primary);
+  color: var(--color-link);
   font-weight: bold;
   text-decoration: underline;
   text-decoration-thickness: 0.2em;

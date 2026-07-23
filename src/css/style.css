@@ -5,6 +5,10 @@
   --color-secondary-2: #27f3e044;
 
   --color-primary: #126bbe;
+  /* Darker brand blue for text/links only: #126bbe is 4.2:1 on the #e1e3e6
+     button surface (below WCAG AA). --color-link clears 4.5:1 (5.5:1 there),
+     while fills/borders keep the brighter --color-primary. */
+  --color-link: #0d5aa0;
   --color-primary-transparent: color-mix(in srgb,
       var(--color-primary) 40%,
       transparent);
@@ -88,6 +92,9 @@
   :root {
     color-scheme: dark;
     --color-primary: #5ca2e4;
+    /* On dark surfaces the light-blue primary already clears AA as text, so the
+       link colour tracks it (a darker link would fail against the dark bg). */
+    --color-link: #5ca2e4;
     /* Same hue; here the darkest surface (background-1) carries the most chroma
        and it drops as surfaces lighten. Borders flip to a translucent near-white
        so they lighten whatever they sit on. */
@@ -199,7 +206,7 @@
   }
 
   #mobile-menu nav menu li a[aria-current="page"] {
-    color: var(--color-primary);
+    color: var(--color-link);
     background: var(--background-3);
   }
 
@@ -492,7 +499,7 @@
   }
 
   nav menu li a[aria-current="page"] {
-    color: var(--color-primary);
+    color: var(--color-link);
   }
 
   /* Main pages: normal left-aligned row on the lower row (the reverse is only
@@ -1159,7 +1166,7 @@
   }
 
   .hint {
-    color: var(--color-primary);
+    color: var(--color-link);
   }
 
   .danger {
@@ -1458,7 +1465,7 @@
 
   a,
   a:visited {
-    color: var(--color-primary);
+    color: var(--color-link);
     cursor: pointer;
   }
 
