@@ -289,7 +289,7 @@ describe("ProcessesPage — definition tabs", () => {
 
   it("instances tab renders rows from the instance list signal", () => {
     mockParams = { definition_id: "proc:1", panel: "instances" };
-    signal_response(state.api.process.instance.list, [
+    signal_response(state.api.history.process_instance.list, [
       {
         id: "abcdef1234567890",
         startTime: "2024-01-01T00:00:00Z",
@@ -415,7 +415,7 @@ describe("ProcessesPage — instance details", () => {
       sub_panel: "vars",
     };
     mockQuery = { history: "true" };
-    signal_response(state.api.process.instance.variables, [
+    signal_response(state.api.history.variable_instance.by_process_instance, [
       { name: "amount", type: "Integer", value: 7 },
     ]);
     const { getByText } = renderPage(state);

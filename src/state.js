@@ -200,8 +200,17 @@ const createAppState = () => {
       activity_instance: {
         by_process_instance: signal(null),
       },
+      variable_instance: {
+        by_process_instance: signal(null),
+      },
       process_instance: {
         called: signal(null),
+        // Historic instance detail / list. Separate from the runtime
+        // process.instance.{one,list} because the historic payload has a
+        // different shape (state/startTime/endTime/hasMore); sharing one slot
+        // let a stale runtime shape render in history mode and vice versa.
+        one: signal(null),
+        list: signal(null),
       },
       batch: {
         list: signal(null),

@@ -21,7 +21,7 @@ describe("api/resources/history", () => {
     expect_api_call(PAGINATED_GET, {
       url: "/history/process-instance?sortBy=startTime&sortOrder=asc&processDefinitionId=def-1",
       state,
-      signal: state.api.process.instance.list,
+      signal: state.api.history.process_instance.list,
     });
     expect(PAGINATED_GET.mock.lastCall[3]).toBe(40);
     expect(PAGINATED_GET.mock.lastCall[4]).toBe(20);
@@ -42,7 +42,7 @@ describe("api/resources/history", () => {
     expect_api_call(PAGINATED_GET, {
       url: "/history/process-instance?sortBy=businessKey&sortOrder=desc&processDefinitionId=def-1&businessKeyLike=%25foo%25",
       state,
-      signal: state.api.process.instance.list,
+      signal: state.api.history.process_instance.list,
     });
   });
 
@@ -51,7 +51,7 @@ describe("api/resources/history", () => {
     expect_api_call(GET, {
       url: "/history/process-instance/inst-1",
       state,
-      signal: state.api.process.instance.one,
+      signal: state.api.history.process_instance.one,
     });
   });
 
@@ -60,7 +60,7 @@ describe("api/resources/history", () => {
     expect_api_call(PAGINATED_GET, {
       url: "/history/process-instance?sortBy=startTime&sortOrder=asc&unfinished=true&processDefinitionId=def-1",
       state,
-      signal: state.api.process.instance.list,
+      signal: state.api.history.process_instance.list,
     });
     expect(PAGINATED_GET.mock.lastCall[3]).toBe(60);
     expect(PAGINATED_GET.mock.lastCall[4]).toBe(20);
@@ -89,7 +89,7 @@ describe("api/resources/history", () => {
     expect_api_call(GET, {
       url: "/history/variable-instance?processInstanceId=inst-1&deserializeValues=false",
       state,
-      signal: state.api.process.instance.variables,
+      signal: state.api.history.variable_instance.by_process_instance,
     });
   });
 

@@ -26,7 +26,7 @@ const get_process_instances = (
   PAGINATED_GET(
     `/history/process-instance?${instance_url(definition_id, params)}`,
     state,
-    state.api.process.instance.list,
+    state.api.history.process_instance.list,
     firstResult,
     INSTANCE_PAGE_SIZE,
   );
@@ -40,7 +40,7 @@ const get_process_instances_unfinished = (
   PAGINATED_GET(
     `/history/process-instance?${instance_url(definition_id, params, { unfinished: true })}`,
     state,
-    state.api.process.instance.list,
+    state.api.history.process_instance.list,
     firstResult,
     INSTANCE_PAGE_SIZE,
   );
@@ -49,7 +49,7 @@ const get_process_instance = (state, definition_id) =>
   GET(
     `/history/process-instance/${definition_id}`,
     state,
-    state.api.process.instance.one,
+    state.api.history.process_instance.one,
   );
 
 const get_incidents_by_process_definition = (state, definition_id) =>
@@ -70,7 +70,7 @@ const get_process_instance_variable = (state, instance_id) =>
   GET(
     `/history/variable-instance?processInstanceId=${instance_id}&deserializeValues=false`,
     state,
-    state.api.process.instance.variables,
+    state.api.history.variable_instance.by_process_instance,
   );
 
 const get_historic_tasks_by_instance = (state, instance_id) =>

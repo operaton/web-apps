@@ -250,6 +250,8 @@ const ProcessesPage = () => {
       state.api.process.definition.statistics.value = null;
       state.api.process.instance.list.value = null;
       state.api.process.instance.one.value = null;
+      state.api.history.process_instance.list.value = null;
+      state.api.history.process_instance.one.value = null;
       state.api.process.instance.activity_instances.value = null;
       state.api.history.activity_instance.by_process_instance.value = null;
     };
@@ -908,7 +910,9 @@ const Instances = () => {
     { route } = useLocation(),
     [t] = useTranslation(),
     history_mode = query.history === "true",
-    list = state.api.process.instance.list;
+    // The instance list is fetched from the history endpoint in both modes
+    // (finished vs unfinished), so it always holds the historic shape.
+    list = state.api.history.process_instance.list;
 
   useEffect(() => {
     hydrate_signal(
@@ -1017,7 +1021,7 @@ const Instances = () => {
 };
 
 const InstanceTableRows = () =>
-  useContext(AppState).api.process.instance.list.value?.data?.map(
+  useContext(AppState).api.history.process_instance.list.value?.data?.map(
     (instance) => <ProcessInstance key={instance.id} {...instance} />,
   ) ?? null;
 
@@ -1069,7 +1073,12 @@ const InstanceDetailsDescription = () => {
     history_mode = query.history === "true",
     [t] = useTranslation(),
     confirm_cancel = useSignal(false),
-    data = state.api.process.instance.one.value?.data;
+    // Live and historic instance details live in separate signals; read the one
+    // matching the current mode so a stale shape can't leak across a toggle.
+    data = (history_mode
+      ? state.api.history.process_instance.one
+      : state.api.process.instance.one
+    ).value?.data;
 
   const toggle_suspended = async (suspended) => {
     await engine_rest.process_instance.set_suspended(
@@ -1244,14 +1253,14 @@ const InstanceVariables = () => {
     edit_type = useSignal("String"),
     edit_value = useSignal(""),
     delete_name = useSignal(null),
-    vars_data = state.api.process.instance.variables.value?.data,
-    vars_is_array = Array.isArray(vars_data),
-    // The live endpoint returns an object map; the history one an array — both
-    // land in the same signal. During a mode switch the signal still holds the
-    // previous shape, so gate on the shape matching the current mode. Rendering
-    // the wrong branch (e.g. `.map` on the live object) throws mid-render and
-    // corrupts the tree, so wait for the matching data instead.
-    vars_ready = history_mode ? vars_is_array : !!vars_data && !vars_is_array;
+    // Live and historic variables live in separate signals, each holding a
+    // single shape (live: object map; historic: array). Read the one for the
+    // current mode and render once it has loaded — no cross-shape guard needed.
+    vars_data = (history_mode
+      ? state.api.history.variable_instance.by_process_instance
+      : state.api.process.instance.variables
+    ).value?.data,
+    vars_ready = vars_data != null;
 
   const load = () =>
     void engine_rest.process_instance.variables(state, params.selection_id);
