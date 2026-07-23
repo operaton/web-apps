@@ -69,7 +69,7 @@ describe("StartProcessList", () => {
   });
 
   it("renders the startable process list with links to start each one", () => {
-    signal_response(state.api.process.definition.list, [
+    signal_response(state.api.process.definition.list_startable, [
       { id: "p1", name: "Invoice", version: 1, description: "d", key: "inv" },
       {
         id: "p2",
@@ -87,7 +87,7 @@ describe("StartProcessList", () => {
   });
 
   it("filters the list by the search term", () => {
-    signal_response(state.api.process.definition.list, [
+    signal_response(state.api.process.definition.list_startable, [
       { id: "p1", name: "Invoice", version: 1, description: "d", key: "inv" },
       {
         id: "p2",

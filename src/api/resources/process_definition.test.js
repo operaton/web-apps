@@ -104,7 +104,7 @@ describe("api/resources/process_definition", () => {
     expect_api_call(GET, {
       url: "/process-definition?latest=true&active=true&startableInTasklist=true&startablePermissionCheck=true&firstResult=0&maxResults=15",
       state,
-      signal: state.api.process.definition.list,
+      signal: state.api.process.definition.list_startable,
     });
   });
 

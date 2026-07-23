@@ -70,7 +70,7 @@ const url_params = () =>
   }).toString()
 
 const get_startable_process_definitions = (state) =>
-  GET(`/process-definition?${url_params()}`, state, state.api.process.definition.list)
+  GET(`/process-definition?${url_params()}`, state, state.api.process.definition.list_startable)
 
 const get_deployed_start_form = (state, processId) =>
   GET(`/process-definition/${processId}/deployed-start-form`, state, state.api.process.definition.deployed_start_form)

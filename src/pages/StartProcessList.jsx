@@ -94,10 +94,10 @@ const StartableProcessesList = () => {
       </thead>
       <tbody>
       <RequestState
-        signal={state.api.process.definition.list}
+        signal={state.api.process.definition.list_startable}
         on_success={() =>
           <>
-            {state.api.process.definition.list.value.data
+            {state.api.process.definition.list_startable.value.data
               .filter((process) => {
                 if (search_term.value.length === 0) {
                   return true

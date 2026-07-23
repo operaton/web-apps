@@ -103,6 +103,7 @@ const createAppState = () => {
       definition: {
         one: signal(null),
         list: signal(null),
+        list_startable: signal(null),
         called: signal(null),
         diagram: signal(null),
         statistics: signal(null),
