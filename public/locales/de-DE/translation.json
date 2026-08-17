@@ -900,5 +900,18 @@
     "duplicate_suffix": "(Kopie)",
     "share_link_copied": "Link kopiert",
     "empty": "Noch keine gespeicherten Filter."
+  },
+  "login": {
+    "title": "Anmelden",
+    "backend": "Backend",
+    "backend-hint": "Wählen Sie den Backend-Server für Ihre Anmeldung.",
+    "choose-server": "ℹ️ Wählen Sie einen Server, um Ihre Prozesse abzurufen",
+    "language": "Sprache",
+    "username": "Benutzername*",
+    "password": "Passwort*",
+    "submit": "Anmelden",
+    "sso": "Mit SSO anmelden",
+    "documentation": "Dokumentation",
+    "source": "Quellcode"
   }
 }

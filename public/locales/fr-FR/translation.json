@@ -683,5 +683,18 @@
     "filter": {
       "manage_title": "Gérer les filtres de lots"
     }
+  },
+  "login": {
+    "title": "Connexion",
+    "backend": "Backend",
+    "backend-hint": "Sélectionnez le serveur backend pour votre connexion.",
+    "choose-server": "ℹ️ Choisissez un serveur pour récupérer vos processus",
+    "language": "Langue",
+    "username": "Nom d'utilisateur*",
+    "password": "Mot de passe*",
+    "submit": "Se connecter",
+    "sso": "Se connecter avec SSO",
+    "documentation": "Documentation",
+    "source": "Code source"
   }
 }

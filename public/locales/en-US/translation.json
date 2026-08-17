@@ -900,5 +900,18 @@
     "duplicate_suffix": "(copy)",
     "share_link_copied": "Link copied",
     "empty": "No saved filters yet."
+  },
+  "login": {
+    "title": "Login",
+    "backend": "Backend",
+    "backend-hint": "Select the backend server for your login.",
+    "choose-server": "ℹ️ Choose a server to retrieve your processes",
+    "language": "Language",
+    "username": "User name*",
+    "password": "Password*",
+    "submit": "Login",
+    "sso": "Login with SSO",
+    "documentation": "Documentation",
+    "source": "Source"
   }
 }

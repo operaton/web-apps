@@ -683,5 +683,18 @@
     "filter": {
       "manage_title": "Batchfilters beheren"
     }
+  },
+  "login": {
+    "title": "Inloggen",
+    "backend": "Backend",
+    "backend-hint": "Selecteer de backendserver voor uw aanmelding.",
+    "choose-server": "ℹ️ Kies een server om uw processen op te halen",
+    "language": "Taal",
+    "username": "Gebruikersnaam*",
+    "password": "Wachtwoord*",
+    "submit": "Inloggen",
+    "sso": "Inloggen met SSO",
+    "documentation": "Documentatie",
+    "source": "Broncode"
   }
 }

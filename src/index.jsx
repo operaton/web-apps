@@ -26,6 +26,7 @@ import { useContext } from "preact/hooks";
 import engine_rest from "./api/engine_rest.jsx";
 import { useSignal } from "@preact/signals";
 import { is_oauth } from "./api/oauth.js";
+import { useTranslation } from "react-i18next";
 import { load_plugins } from "./plugins/loader.js";
 import { install_plugin_host } from "./plugins/host.js";
 import { plugins_for } from "./plugins/registry.js";
@@ -45,6 +46,14 @@ export const App = () => {
 
 const servers = JSON.parse(import.meta.env.VITE_BACKEND);
 
+const languages = [
+  { code: "en-US", label: "English" },
+  { code: "de-DE", label: "Deutsch" },
+  { code: "es-ES", label: "Español" },
+  { code: "fr-FR", label: "Français" },
+  { code: "nl-NL", label: "Nederlands" },
+];
+
 const swap_server = (e, state) => {
   const server = servers.find((s) => s.url === e.target.value);
   state.server.value = server;
@@ -52,7 +61,8 @@ const swap_server = (e, state) => {
 };
 
 const Routing = () => {
-  const state = useContext(AppState),
+  const { t, i18n } = useTranslation(),
+    state = useContext(AppState),
     {
       auth: { logged_in },
     } = state,
@@ -117,74 +127,106 @@ const Routing = () => {
   } else if (logged_in.value.data === "unauthenticated") {
     return (
       <section class="login-page">
-        <h1>Operaton Web Apps Login</h1>
-        <span>
-          <a href="https://docs.operaton.org/docs/documentation/webapps/">
-            Documentation
-          </a>
-          &nbsp;-&nbsp;
-          <a href="https://github.com/operaton/web-apps">Source</a>
-        </span>
-        <br />
-        <label>
-          Server Selection <br />
-          <select onChange={(e) => swap_server(e, state)}>
-            <option disabled>
-              ℹ️ Choose a server to retrieve your processes
-            </option>
-            {servers.map((server) => (
-              <option
-                key={server.url}
-                value={server.url}
-                selected={state.server.value?.url === server.url}
+        <img class="login-logo" src="/operaton-logo.svg" alt="Operaton" />
+
+        <div class="login-content">
+          <h1>{t("login.title")}</h1>
+
+          <div class="login-card">
+            {servers.length > 1 && (
+              <>
+                <label>
+                  {t("login.backend")}
+                  <small>{t("login.backend-hint")}</small>
+                  <select onChange={(e) => swap_server(e, state)}>
+                    <option disabled>{t("login.choose-server")}</option>
+                    {servers.map((server) => (
+                      <option
+                        key={server.url}
+                        value={server.url}
+                        selected={state.server.value?.url === server.url}
+                      >
+                        {server.name} {server.c7_mode ? "(C7)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <hr />
+              </>
+            )}
+
+            {is_oauth ? (
+              <button
+                type="button"
+                onClick={() => engine_rest.auth.start_oauth_login()}
               >
-                {server.name} {server.c7_mode ? "(C7)" : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-        {is_oauth ? (
-          <button
-            type="button"
-            onClick={() => engine_rest.auth.start_oauth_login()}
-          >
-            Login with SSO
-          </button>
-        ) : (
-          <form onSubmit={login} class="form-horizontal">
-            <label for="username">User name*</label>
-            <input
-              type="text"
-              name="username"
-              id="username"
-              autocomplete="username"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  username: e.currentTarget.value,
-                })
-              }
-              required
-            />
+                {t("login.sso")}
+              </button>
+            ) : (
+              <form onSubmit={login}>
+                <label for="username">{t("login.username")}</label>
+                <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  autocomplete="username"
+                  onInput={(e) =>
+                    (credentials.value = {
+                      ...credentials.peek(),
+                      username: e.currentTarget.value,
+                    })
+                  }
+                  required
+                />
 
-            <label for="password">Password*</label>
-            <input
-              name="password"
-              type="password"
-              id="password"
-              autocomplete="current-password"
-              onInput={(e) =>
-                (credentials.value = {
-                  ...credentials.peek(),
-                  password: e.currentTarget.value,
-                })
-              }
-              required
-            />
+                <label for="password">{t("login.password")}</label>
+                <input
+                  name="password"
+                  type="password"
+                  id="password"
+                  autocomplete="current-password"
+                  onInput={(e) =>
+                    (credentials.value = {
+                      ...credentials.peek(),
+                      password: e.currentTarget.value,
+                    })
+                  }
+                  required
+                />
 
-            <button type="submit">Login</button>
-          </form>
-        )}
+                <button type="submit">{t("login.submit")}</button>
+              </form>
+            )}
+          </div>
+
+          <label class="login-language">
+            {t("login.language")}
+            <select
+              onChange={(e) => i18n.changeLanguage(e.currentTarget.value)}
+            >
+              {languages.map((lang) => (
+                <option
+                  key={lang.code}
+                  value={lang.code}
+                  selected={i18n.resolvedLanguage === lang.code}
+                >
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <span class="login-links">
+            <a href="https://docs.operaton.org/docs/documentation/webapps/">
+              {t("login.documentation")}
+            </a>
+            &nbsp;-&nbsp;
+            <a href="https://github.com/operaton/web-apps">
+              {t("login.source")}
+            </a>
+          </span>
+        </div>
       </section>
     );
   }

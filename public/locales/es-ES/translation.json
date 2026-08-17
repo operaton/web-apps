@@ -683,5 +683,18 @@
     "filter": {
       "manage_title": "Gestionar filtros de lotes"
     }
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "backend": "Backend",
+    "backend-hint": "Seleccione el servidor backend para su inicio de sesión.",
+    "choose-server": "ℹ️ Elija un servidor para recuperar sus procesos",
+    "language": "Idioma",
+    "username": "Nombre de usuario*",
+    "password": "Contraseña*",
+    "submit": "Iniciar sesión",
+    "sso": "Iniciar sesión con SSO",
+    "documentation": "Documentación",
+    "source": "Código fuente"
   }
 }

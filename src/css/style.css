@@ -361,11 +361,126 @@
 
 @layer pages {
   .login-page {
+    --login-width: 22rem;
+    flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-3);
     padding: var(--spacing-3);
-    align-items: start;
+    /* The page sits one shade behind the white card so the card reads as
+       elevated; in dark mode the pair flips so the card stays the brighter
+       surface (see the media query below). */
+    background: var(--background-2);
+  }
+
+  /* The logo sits at the top of the page; everything else fills the remaining
+     height and centres within it. */
+  .login-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: var(--spacing-2);
+  }
+
+  .login-page h1 {
+    margin: 0;
+    max-width: var(--login-width);
+    text-align: center;
+  }
+
+  .login-logo {
+    height: 5rem;
+    width: auto;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: var(--login-width);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    background: var(--background-1);
+    border-radius: 1rem;
+  }
+
+  .login-card > label,
+  .login-card form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: var(--spacing-1);
+    margin: 0;
+  }
+
+  .login-card label {
+    font-weight: 600;
+  }
+
+  .login-card small {
+    font-weight: normal;
+    color: var(--text-2);
+  }
+
+  .login-card select,
+  .login-card input {
+    width: 100%;
+    box-sizing: border-box;
+    font-weight: normal;
+  }
+
+  .login-card hr {
+    width: 100%;
+    margin: 0;
+    border: none;
+    border-top: var(--border);
+  }
+
+  /* Same font size on all three controls so their em-based padding yields an
+     identical height. */
+  .login-card :is(select, input, button) {
+    font-size: var(--base-font-size);
+  }
+
+  .login-card button {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    margin-top: var(--spacing-1);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-inverted);
+  }
+
+  .login-card button:hover {
+    background: var(--color-link);
+    border-color: var(--color-link);
+  }
+
+  .login-language {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    font-size: var(--small-font-size);
+    color: var(--text-2);
+  }
+
+  .login-links {
+    color: var(--text-2);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .login-page {
+      background: var(--background-1);
+    }
+
+    .login-card {
+      background: var(--background-2);
+    }
   }
 
   #app {
